@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build output
+.next/
+out/
+dist/
+coverage/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# Local files and caches
+.DS_Store
+Thumbs.db
+.turbo/
+*.log
+tmp/
+output/
+
+# Local IDE state
+.vscode/*.local.json
