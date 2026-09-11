@@ -1,8 +1,8 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 11/09/2026  
-**Fase:** Governança concluída e preparação técnica do MVP  
-**Status:** Ambiente local, VS Code, Git, Corepack/pnpm e Codex configurados e validados
+**Última atualização:** 11/09/2026
+**Fase:** MVP-ARCH-01 — Arquitetura técnica do MVP
+**Status:** LES-ARCH-DIG-R01 aprovado; modelagem de dados será a próxima especificação técnica
 
 ## Decisões vigentes
 
@@ -37,7 +37,7 @@ Esses documentos serão incorporados ao diretório `docs/` na próxima etapa de 
 
 ## Próximo marco
 
-Concluir a governança do agente, criar o primeiro commit, configurar o repositório Git remoto privado e iniciar a especificação técnica do MVP antes da implementação.
+Concluir a especificação técnica do MVP antes do início da implementação.
 
 ## Pendências
 - Criar repositório remoto privado no GitHub.
@@ -45,5 +45,3 @@ Concluir a governança do agente, criar o primeiro commit, configurar o reposit�
 - Confirmar conta e credenciais de teste do Mercado Pago.
 - Definir política de reembolso e canal de suporte.
 - Escolher armazenamento privado do PDF e materiais complementares.
-
-
