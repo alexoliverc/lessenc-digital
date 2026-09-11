@@ -2,7 +2,7 @@
 
 **Última atualização:** 11/09/2026
 **Fase:** MVP-ARCH-01 — Arquitetura técnica do MVP
-**Status:** LES-ARCH-DIG-R01 e LES-DATA-DIG-R01 aprovados; fluxos funcionais serão a próxima especificação
+**Status:** LES-ARCH-DIG-R01, LES-DATA-DIG-R01 e LES-FLOW-DIG-R01 aprovados; integração Mercado Pago será a próxima especificação
 
 ## Decisões vigentes
 
