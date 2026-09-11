@@ -2,7 +2,7 @@
 
 **Última atualização:** 11/09/2026
 **Fase:** MVP-ARCH-01 — Arquitetura técnica do MVP
-**Status:** LES-ARCH-DIG-R01, LES-DATA-DIG-R01, LES-FLOW-DIG-R01 e LES-INT-MP-R01 aprovados; segurança será a próxima especificação
+**Status:** Arquitetura geral, dados, fluxos, Mercado Pago e segurança aprovados; painel administrativo será a próxima especificação
 
 ## Decisões vigentes
 
