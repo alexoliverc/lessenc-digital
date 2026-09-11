@@ -1,8 +1,8 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
 **Última atualização:** 11/09/2026
-**Fase:** MVP-ARCH-01 — Arquitetura técnica do MVP
-**Status:** Arquitetura técnica principal do MVP concluída e aprovada; próxima etapa: consolidação arquitetural e readiness para implementação
+**Fase:** MVP-ARCH-01 concluída — aguardando integração da baseline arquitetural à main para iniciar MVP-IMPL-01
+**Status:** Architecture Readiness Gate aprovado; implementação autorizada após integração da baseline arquitetural à main
 
 ## Decisões vigentes
 
