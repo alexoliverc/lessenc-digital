@@ -2,7 +2,7 @@
 
 **Última atualização:** 11/09/2026
 **Fase:** MVP-ARCH-01 — Arquitetura técnica do MVP
-**Status:** Arquitetura geral, dados, fluxos, Mercado Pago, segurança e painel administrativo aprovados; observabilidade será a próxima especificação
+**Status:** Arquitetura geral, dados, fluxos, Mercado Pago, segurança, painel administrativo e observabilidade aprovados; deploy e operação serão a próxima especificação
 
 ## Decisões vigentes
 
