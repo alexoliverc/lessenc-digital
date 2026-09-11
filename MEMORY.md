@@ -2,7 +2,7 @@
 
 **Última atualização:** 11/09/2026
 **Fase:** MVP-ARCH-01 — Arquitetura técnica do MVP
-**Status:** Arquitetura geral, dados, fluxos, Mercado Pago, segurança, painel administrativo e observabilidade aprovados; deploy e operação serão a próxima especificação
+**Status:** Arquitetura técnica principal do MVP concluída e aprovada; próxima etapa: consolidação arquitetural e readiness para implementação
 
 ## Decisões vigentes
 
@@ -40,7 +40,6 @@ Esses documentos serão incorporados ao diretório `docs/` na próxima etapa de 
 Concluir a especificação técnica do MVP antes do início da implementação.
 
 ## Pendências
-- Criar repositório remoto privado no GitHub.
 - Confirmar domínio ou subdomínio da operação digital.
 - Confirmar conta e credenciais de teste do Mercado Pago.
 - Definir política de reembolso e canal de suporte.
