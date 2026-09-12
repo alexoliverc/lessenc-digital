@@ -44,4 +44,4 @@ A validação final da P06 foi concluída com sucesso:
 
 **ChatGPT Technical Review: PASS.**
 
-P06 está tecnicamente COMPLETE. Checkpoint commit/tag permanecem operações protegidas subsequentes; push e merge continuam dependentes de autorização explícita do owner.
+P06 está tecnicamente COMPLETE. O checkpoint `f4bfdfe`, a tag `checkpoint/p06-data-persistence-complete` e a branch da fase foram publicados; a PR #4 foi mergeada em `main` pelo merge commit `694a085`. Nenhum escopo de P07 foi incluído.

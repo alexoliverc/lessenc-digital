@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P06 — Data & Persistence Foundation COMPLETE / ChatGPT Technical Review PASS on branch `phase/p06-data-persistence-foundation`; checkpoint commit/tag pending.
+**Current execution:** P06 — Data & Persistence Foundation COMPLETE / ChatGPT Technical Review PASS / merged into `main` via PR #4 (`694a085`). P07 — Core Domain & Application Layer is not started and requires explicit authorization.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1247,7 +1247,7 @@ Current status:
 
 **P05: COMPLETE / CHATGPT TECHNICAL REVIEW PASS**
 
-P05 is complete and Gate A — FOUNDATION READY received PASS. P06 — Data & Persistence Foundation is now COMPLETE with ChatGPT Technical Review PASS. The implementation remains on `phase/p06-data-persistence-foundation` pending checkpoint commit/tag and explicit authorization for push/merge.
+P05 is complete and Gate A — FOUNDATION READY received PASS. P06 — Data & Persistence Foundation is COMPLETE with ChatGPT Technical Review PASS. Checkpoint `f4bfdfe` is preserved by tag `checkpoint/p06-data-persistence-complete`; branch and tag were published, and PR #4 was merged into `main` as `694a085`. P07 has not started.
 
 ---
 
