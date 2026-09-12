@@ -1,6 +1,6 @@
 # P03 — Máquina de estados de Order
 
-**Status:** especificação COMPLETE; código e testes PENDING.
+**Status:** especificação COMPLETE; transições puras e testes implementados na [P07](p07-core-implementation.md), aguardando revisão técnica. Persistência financeira coordenada permanece adiada.
 
 | Origem | Destino permitido | Condição de autoridade |
 | --- | --- | --- |

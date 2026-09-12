@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P06 — Data & Persistence Foundation COMPLETE / ChatGPT Technical Review PASS / merged into `main` via PR #4 (`694a085`). P07 — Core Domain & Application Layer is not started and requires explicit authorization.
+**Current execution:** P07 — Core Domain & Application Layer received ChatGPT Technical Re-Review PASS and Final Quality Gate PASS from base `e04438c`. P06 COMPLETE / PASS remains integrated through PR #4 (`694a085`) and documentary closeout PR #5 (`e04438c`). P07 checkpoint/merge and P08 progression remain unauthorized.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -387,7 +387,7 @@ Persistence can be recreated and validated from versioned migrations.
 
 ## P07 — Core Domain & Application Layer
 
-**Status:** PENDENTE
+**Status:** IMPLEMENTED — CHATGPT TECHNICAL RE-REVIEW PASS / FINAL QUALITY GATE PASS; awaiting checkpoint and integration; not COMPLETE.
 
 ### Objective
 
@@ -1239,7 +1239,7 @@ The system receives formal authorization or denial for real production transacti
 
 The current execution is:
 
-**P06 — Data & Persistence Foundation**
+**P07 — Core Domain & Application Layer**
 
 Current status:
 
@@ -1247,7 +1247,7 @@ Current status:
 
 **P05: COMPLETE / CHATGPT TECHNICAL REVIEW PASS**
 
-P05 is complete and Gate A — FOUNDATION READY received PASS. P06 — Data & Persistence Foundation is COMPLETE with ChatGPT Technical Review PASS. Checkpoint `f4bfdfe` is preserved by tag `checkpoint/p06-data-persistence-complete`; branch and tag were published, and PR #4 was merged into `main` as `694a085`. P07 has not started.
+P05 and Gate A received PASS. P06 is COMPLETE / ChatGPT Technical Review PASS; checkpoint `f4bfdfe`, merge `694a085` and documentary closeout `e04438c` are preserved. P07 implementation follows its [authorized brief](docs/architecture/p07-phase-execution-brief.md), received ChatGPT Technical Re-Review PASS and Final Quality Gate PASS, and now awaits checkpoint/integration. No commit, tag, push, PR, merge or P08 progression is authorized.
 
 ---
 

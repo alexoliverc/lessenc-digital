@@ -32,6 +32,52 @@ export default defineConfig([
       ...reactHooks.configs.flat.recommended.rules,
     },
   },
+  {
+    files: [
+      "src/shared/**/*.ts",
+      "src/modules/*/domain/**/*.ts",
+      "src/modules/*/application/**/*.ts",
+    ],
+    ignores: ["**/*.test.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "react",
+                "react/*",
+                "react-dom",
+                "react-dom/*",
+                "next",
+                "next/*",
+                "@prisma/*",
+                "*generated/prisma*",
+                "**/generated/**",
+                "**/infrastructure/**",
+                "mercadopago",
+                "mercadopago/*",
+                "node:*",
+              ],
+              message: "Domain/Application must use provider-independent contracts.",
+            },
+          ],
+        },
+      ],
+      "no-restricted-globals": [
+        "error",
+        "window",
+        "document",
+        "localStorage",
+        "sessionStorage",
+        "fetch",
+        "Request",
+        "Response",
+        "XMLHttpRequest",
+      ],
+    },
+  },
   globalIgnores([
     ".next/**",
     "node_modules/**",
