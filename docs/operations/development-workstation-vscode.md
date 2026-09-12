@@ -22,7 +22,7 @@ This document does not redefine application architecture, runtime targets, packa
 
 Runtime and framework versions must not be duplicated here as independent project truth.
 
-The current physical repository continues to use `pnpm` and `pnpm-lock.yaml` until the P04 physical migration is explicitly authorized and reconciled.
+The pre-P04 physical scaffold used `pnpm` and `pnpm-lock.yaml`. The npm lockfile and clean installation passed local validation, with technical review still pending. The workstation remains on Node.js 24.19.0 and npm 11.17.0, below the P04 targets; confirm the current runtime and lockfile in the repository before following the documented workflow.
 
 ## Reference workstation
 

@@ -132,7 +132,7 @@ Em caso de conflito, obedecer esta precedência:
 
 Decisão explícita mais recente do proprietário prevalece sobre esta lista. Se um documento histórico conflitar com a baseline canônica atual: **CURRENT CANONICAL BASELINE WINS**. O Codex nunca deve inferir a arquitetura atual de um documento marcado como histórico ou substituído.
 
-Para fatos sobre o código instalado, conferir arquivos e comandos atuais; especificação documental não comprova implementação física. O scaffold físico usa `pnpm` e `pnpm-lock.yaml`, enquanto a meta P04 aprovada prevê `npm` 11.19.1, `package-lock.json` e `npm ci`. Até a etapa própria de implementação/reconciliação física P04, o Codex não deve migrar o gerenciador automaticamente, executar `npm install` apenas porque npm é o alvo, gerar `package-lock.json` junto ao lockfile pnpm, remover `pnpm-lock.yaml` ou atualizar dependências de framework para corresponder à documentação. A reconciliação exige operação P04 explícita; após a migração, deve restar exatamente um lockfile autoritativo.
+Para fatos sobre o código instalado, conferir arquivos e comandos atuais; especificação documental não comprova implementação física. O scaffold anterior à P04, preservado no checkpoint `71488f1`, usa `pnpm` e `pnpm-lock.yaml`; a meta P04 aprovada prevê Node 24.21.0, `npm` 11.19.1, `package-lock.json` e `npm ci`. O brief do owner de 12/09/2026 autorizou a reconciliação física P04 na branch `phase/p04-physical-reconciliation`, sem Prisma/MySQL e sem commit, tag, push ou merge nesta execução. A árvore de trabalho passou a usar npm e um único lockfile, e os gates locais passaram; o host ainda usa Node 24.19.0/npm 11.17.0 e a revisão técnica do ChatGPT está pendente. Não tratar dois lockfiles como autoritativos, nem atualizar dependências de framework apenas para corresponder a documentação substituída. A versão Node/npm do host e os gates físicos exigem evidência própria; a execução do Codex não substitui a revisão técnica do ChatGPT.
 
 ## 12. Segredos e ambientes
 
@@ -257,4 +257,3 @@ Cada nova fase deverá possuir um `Phase Execution Brief` preparado sob direçã
 - formato do relatório final.
 
 O brief deverá ser específico e revisável. Dúvidas arquiteturais ou blockers deverão retornar ao ChatGPT e ao owner conforme a decisão necessária, antes da execução dependente.
-

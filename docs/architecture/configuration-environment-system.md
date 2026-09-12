@@ -1,6 +1,6 @@
 # P04 — Configuração e ambientes
 
-**Status:** specification COMPLETE; physical configuration foundation PENDING.
+**Status:** specification COMPLETE; physical configuration foundation implementada e validada localmente, com revisão técnica pendente.
 
 ## Canonical application environments
 
@@ -23,6 +23,8 @@ e permanece conceitualmente separado de:
 
 `APP_ENV` representa o ambiente operacional da aplicação.
 
+Na fundação física P04, `APP_ENV` é obrigatório e não recebe default implícito. O schema aceita exatamente os quatro valores acima e rejeita ausência ou valor desconhecido. `.env.example` documenta um valor fictício, mas não é carregado automaticamente pelo runtime; cada ambiente deve fornecer `APP_ENV` explicitamente. O default anterior de `APP_URL` é preservado.
+
 ## P04 responsibility
 
 P04 deve estabelecer a fundação de configuração necessária para:
@@ -35,7 +37,7 @@ P04 deve estabelecer a fundação de configuração necessária para:
 - impedir secrets em Git, logs e bundles;
 - manter `.env.example` somente com valores fictícios.
 
-O scaffold atual possui `src/lib/config/env.ts`, `NODE_ENV` e `APP_URL`, mas ainda não implementa integralmente a política canônica de `APP_ENV`.
+O scaffold auditado antes da P04 possuía `src/lib/config/env.ts`, `NODE_ENV` e `APP_URL`, mas não implementava integralmente a política canônica de `APP_ENV`. A implementação P04 em `src/lib/config/env-schema.ts` exige `APP_ENV` com um dos quatro valores acima, valida e fornece configuração server-side tipada. `NODE_ENV` mantém validação separada e o padrão existente de `APP_URL` foi preservado. Os testes locais da configuração passaram; a revisão técnica da fase permanece pendente.
 
 ## Provider-specific configuration
 

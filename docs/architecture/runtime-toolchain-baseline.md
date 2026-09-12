@@ -1,6 +1,6 @@
 # P04 — Baseline de runtime e toolchain
 
-**Status:** specification COMPLETE; physical implementation PENDING.
+**Status:** specification COMPLETE; migração física npm/`APP_ENV` validada localmente, revisão técnica pendente; Node/npm do host abaixo da meta.
 **Última reconciliação documental:** 12/09/2026.
 
 A P04 define a fundação física de runtime e toolchain da aplicação.
@@ -11,13 +11,13 @@ Banco, ORM, schema, migrations e persistência pertencem à **P06 — Data & Per
 
 **APPROVED TARGET P04 BASELINE ≠ CURRENT INSTALLED SCAFFOLD STACK**
 
-O estado físico atual continua sendo evidência factual até a execução deliberada da reconciliação.
+O estado físico deve ser confirmado no repositório e por comandos; a especificação não comprova a instalação.
 
 Nenhuma versão deve ser alterada apenas para reproduzir uma especificação histórica quando a versão física existente foi revalidada como target atual.
 
-## Current physical scaffold — auditado em 12/09/2026
+## Scaffold anterior à reconciliação — auditado em 12/09/2026
 
-| Item | Estado físico atual |
+| Item | Estado físico antes da P04 |
 | --- | --- |
 | Node.js | 24.19.0 |
 | npm | 11.17.0 |
@@ -37,6 +37,14 @@ Nenhuma versão deve ser alterada apenas para reproduzir uma especificação his
 | Prettier | 3.9.6 |
 | Zod | 4.6.2 |
 | Prisma | NOT INSTALLED |
+
+Esse estado está preservado no commit `71488f1` e na tag `checkpoint/p04-baseline-reconciled`; a árvore de trabalho durante a P04 deve ser inspecionada diretamente. A execução física está autorizada pelo brief do owner de 12/09/2026 na branch `phase/p04-physical-reconciliation`, sem autorização para commit, tag, push ou merge nesta rodada.
+
+## Estado físico da árvore de trabalho após validação local
+
+Na branch `phase/p04-physical-reconciliation`, a reconciliação final validada declara `packageManager: npm@11.19.1`, usa `package-lock.json` como único lockfile autoritativo e executa sob Node.js 24.21.0 LTS e npm 11.19.1.
+
+`npm ci`, Prettier, ESLint, TypeScript, sete testes Vitest, build de produção com `APP_ENV=local` e smoke `GET /api/health` passaram localmente. O host ainda executa Node.js 24.19.0 e npm 11.17.0, abaixo do target; não há evidência de atualização global. A P04 permanece aguardando revisão técnica e decisão sobre esse desvio.
 
 ## Approved target P04 baseline
 
@@ -109,7 +117,7 @@ and remain subject to their own Phase Execution Brief and approval gates.
 
 ## Lockfile rule
 
-Before reconciliation, the existing `pnpm-lock.yaml` remains the factual physical lockfile.
+Before reconciliation, the existing `pnpm-lock.yaml` was the factual physical lockfile at the checkpoint above.
 
 During the authorized migration, package-manager reconciliation must be atomic enough to avoid treating two lockfiles as authoritative.
 
@@ -121,6 +129,27 @@ After P04 physical reconciliation:
 
 ## Approval rule
 
-This document does not authorize the physical migration.
+This document by itself does not authorize the physical migration. The owner supplied the separate P04 execution brief on 12/09/2026.
 
 Dependency changes, package-manager migration and other protected operations continue to require the applicable authorization defined in `AGENTS.md`.
+
+## Final P04 validation
+
+Em 12/09/2026, a reconciliação física atingiu a baseline aprovada:
+
+- Node.js 24.21.0 LTS;
+- npm 11.19.1;
+- npm como package manager autoritativo;
+- `package-lock.json` como único lockfile;
+- `npm ci` PASS;
+- `APP_ENV` com `local`, `test`, `staging` e `production`;
+- lint PASS;
+- typecheck PASS;
+- 7/7 testes PASS;
+- format check PASS;
+- build de produção PASS;
+- `/api/health` smoke test PASS em `127.0.0.1:31271`;
+- `git diff --check` PASS;
+- Prisma/MySQL não introduzidos.
+
+A implementação física P04 está COMPLETE.

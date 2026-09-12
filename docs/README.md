@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P04
 
-**Estado:** documentação P00–P03 completa; P04 specification COMPLETE e physical implementation PENDING. Próxima fase documental P05 — Design System. A documentação atual resulta da missão de consolidação do owner em 11/09/2026; [ROADMAP.md](../ROADMAP.md) informa as fases e [MEMORY.md](../MEMORY.md) distingue projeto físico e baseline documental.
+**Estado:** documentação e implementação física P00–P04 COMPLETE. P05 é a próxima fase candidata e ainda não está autorizada.
 
 ## Precedência e classificação das fontes
 

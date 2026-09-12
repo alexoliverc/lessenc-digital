@@ -1,6 +1,6 @@
 # P04 — Testes e quality gates da fundação
 
-**Status:** specification COMPLETE; physical P04 validation PENDING.
+**Status:** specification COMPLETE; physical P04 validation COMPLETE.
 
 P04 é responsável por garantir que o scaffold e a toolchain tenham quality gates reproduzíveis.
 
@@ -35,6 +35,10 @@ O scaffold anterior já demonstrou historicamente:
 - `/api/health` smoke test PASS.
 
 Essas evidências não substituem a validação após a reconciliação física P04.
+
+## Evidência local da reconciliação P04
+
+`npm ci` instalou 209 pacotes a partir de `package-lock.json` sem depender do `node_modules` anterior; a auditoria reportou 0 vulnerabilidades. Format check, ESLint, typecheck, 7 testes Vitest, build de produção e smoke test HTTP 200 em `/api/health` passaram. O host permaneceu em Node.js 24.19.0 e npm 11.17.0, abaixo do target 24.21.0/11.19.1; a revisão técnica ainda deve avaliar esse desvio antes de classificar P04.
 
 ## Deferred testing concerns
 

@@ -1,6 +1,6 @@
 # L'Essenc Digital — LES-DIG
 
-**Estado:** baseline documental P00–P03 completa; P04 especificada, com implantação física pendente. Próxima fase documental: P05 — Design System. O scaffold já existente em `4507a27` foi construído antes dessa especificação e permanece preservado. Consulte [MEMORY.md](MEMORY.md) para a divergência entre documentação e código.
+**Estado:** P00–P04 COMPLETE. A reconciliação física P04 foi validada com Node.js 24.21.0 LTS, npm 11.19.1, npm como package manager, `package-lock.json`, `APP_ENV` e todos os quality gates. P05 ainda não foi iniciada.
 
 Plataforma inicial de receita digital da L'Essenc para venda de e-books autorais.
 
@@ -29,6 +29,8 @@ Esta operação é uma fase de geração de caixa. Ela deve compartilhar fundame
 
 O projeto será operado preferencialmente pelo terminal PowerShell no Windows. O VS Code será o editor. ChatGPT orienta planejamento e revisão técnica; Codex executa o escopo autorizado no repositório e relata evidências.
 
+`APP_ENV` é obrigatório e aceita `local`, `test`, `staging` ou `production`; `.env.example` é apenas modelo e não é carregado automaticamente. Para validar ou executar localmente em uma sessão PowerShell, defina `$env:APP_ENV = 'local'` antes de `npm run build`, `npm run start` ou `npm run dev`. `NODE_ENV` continua separado e é gerido pelo runtime/framework.
+
 O fluxo oficial é:
 
 1. Abrir o diretório do repositório no VS Code.
@@ -51,4 +53,4 @@ O script cria ou atualiza o diretório `C:\Projetos\lessenc-digital`, inicializa
 
 ## Estado atual
 
-O projeto físico ainda usa pnpm, Next.js 16.3.4, React 19.3.0 e Vitest 5.0.0. A baseline documental P04 prevê npm, outras versões e Prisma; essa migração **não ocorreu**. O primeiro produto aprovado na nova baseline é `Cronograma Capilar Inteligente`, R$ 29,90. Nenhuma credencial real deve ser adicionada ao Git.
+O scaffold anterior usava pnpm. A árvore de trabalho P04 usa npm e `package-lock.json`, mantendo Next.js 16.3.4, React 19.3.0 e Vitest 5.0.0; Prisma e MySQL pertencem à P06. A instalação limpa e os gates locais passaram, mas a revisão técnica e o ajuste do Node/npm do host ainda estão pendentes. O primeiro produto aprovado é `Cronograma Capilar Inteligente`, R$ 29,90. Nenhuma credencial real deve ser adicionada ao Git.

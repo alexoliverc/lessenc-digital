@@ -3,8 +3,8 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution candidate:** P04 — Runtime, Toolchain & Physical Baseline reconciliation
-**P04 physical reconciliation authorized:** NO
+**Current execution candidate:** P05 — Design System & UX Foundation
+**P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
 
@@ -210,17 +210,17 @@ Architecture is sufficiently defined to guide implementation.
 
 ## P04 — Runtime, Toolchain & Physical Baseline
 
-**Status:** ESPECIFICAÇÃO CONCLUÍDA / IMPLEMENTAÇÃO FÍSICA PENDENTE
+**Status:** COMPLETE
 
 ### Objective
 
 Reconcile the physical project runtime and toolchain with the approved target baseline.
 
-### Current physical scaffold
+### Pre-P04 physical scaffold
 
-The current repository state remains factual implementation evidence.
+The checkpoint `71488f1` preserves factual evidence of the scaffold before this execution. The working tree must be inspected for current physical state.
 
-Current package-manager state:
+Pre-P04 package-manager state:
 
 - pnpm;
 - `pnpm-lock.yaml`;
@@ -234,9 +234,9 @@ Current package-manager state:
 
 ### Important rule
 
-The difference between the physical scaffold and the approved P04 target is intentional and unresolved.
+The authorized reconciliation has replaced the pnpm lockfile with a valid npm lockfile in the uncommitted working tree. `npm ci` and local quality gates passed. Node.js/npm host versions remain below target until separately reconciled and verified; P04 is not COMPLETE before ChatGPT technical review.
 
-Until a dedicated P04 physical reconciliation operation is explicitly authorized, Codex or terminal work MUST NOT:
+Before this P04 physical reconciliation was explicitly authorized, Codex or terminal work could not:
 
 - migrate package manager automatically;
 - run `npm install` merely because npm is the target;
@@ -1233,15 +1233,11 @@ The system receives formal authorization or denial for real production transacti
 
 The next execution candidate is:
 
-**P04 — Runtime, Toolchain & Physical Baseline reconciliation**
-
-After P04 physical reconciliation passes its gate, the next macro-phase is:
-
 **P05 — Design System & UX Foundation**
 
 Current status:
 
-**P04 RECONCILIATION: CANDIDATE / NOT AUTHORIZED**
+**P04 RECONCILIATION: COMPLETE / FINAL VALIDATION PASSED**
 
 **P05: NOT STARTED / NOT AUTHORIZED**
 
