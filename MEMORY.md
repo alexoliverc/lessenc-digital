@@ -1,8 +1,8 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
 **Última atualização:** 11/09/2026
-**Fase:** MVP-ARCH-01 concluída — aguardando integração da baseline arquitetural à main para iniciar MVP-IMPL-01
-**Status:** Architecture Readiness Gate aprovado; implementação autorizada após integração da baseline arquitetural à main
+**Fase:** MVP-IMPL-01 — Foundation & Project Scaffold concluída
+**Status:** Foundation Batch 01 implementado e validado; aguardando definição e autorização do próximo lote de implementação
 
 ## Decisões vigentes
 
@@ -37,7 +37,7 @@ Esses documentos serão incorporados ao diretório `docs/` na próxima etapa de 
 
 ## Próximo marco
 
-Concluir a especificação técnica do MVP antes do início da implementação.
+Definir o próximo lote da MVP-IMPL-01. Banco, ORM, schema e migrations permanecem sujeitos a aprovação explícita antes da implementação.
 
 ## Pendências
 - Confirmar domínio ou subdomínio da operação digital.
