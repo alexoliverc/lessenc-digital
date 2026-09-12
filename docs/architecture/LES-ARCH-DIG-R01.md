@@ -1,5 +1,9 @@
 # LES-ARCH-DIG-R01 — Arquitetura Técnica Geral da L'Essenc Digital
 
+**STATUS: HISTORICAL / SUPERSEDED.** Preservado para o histórico do projeto. Este arquivo não é fonte autoritativa da arquitetura, produto, preço ou regras comerciais atuais da L'Essenc Digital; consulte [docs/README.md](../README.md) e os [documentos canônicos P01](../product/README.md).
+
+> **Baseline histórica MVP-ARCH-01:** preservada como registro da arquitetura anterior. Na consolidação posterior LES-DIG P00–P04, o primeiro produto, módulos, ferramentas e fases foram redefinidos; consulte [índice atual](../README.md) e [ROADMAP.md](../../ROADMAP.md). Este arquivo não comprova implementação física da nova especificação.
+
 **Projeto:** L'Essenc Digital
 **Documento:** LES-ARCH-DIG-R01
 **Revisão:** R01

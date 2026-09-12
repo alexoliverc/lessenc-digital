@@ -1,5 +1,9 @@
 # LES-INT-MP-R01 — Integração Mercado Pago da L'Essenc Digital
 
+**STATUS: HISTORICAL / SUPERSEDED.** Preservado para o histórico do projeto; não é fonte normativa de integração, produto, preço ou regras comerciais atuais. Consulte [docs/README.md](../README.md) e os [documentos canônicos P01](../product/README.md).
+
+> **Baseline histórica MVP-ARCH-01:** detalhes sobre Mercado Pago devem ser cotejados com a [baseline atual de integrações](integrations-architecture.md), [estados atuais de pagamento](payment-state-machine.md) e os approval gates. Nenhuma integração física é autorizada por esta nota.
+
 **Projeto:** L'Essenc Digital
 **Documento:** LES-INT-MP-R01
 **Revisão:** R01

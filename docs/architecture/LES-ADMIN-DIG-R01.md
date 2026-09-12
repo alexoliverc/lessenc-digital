@@ -1,5 +1,9 @@
 # LES-ADMIN-DIG-R01 — Arquitetura do Painel Administrativo da L'Essenc Digital
 
+**STATUS: HISTORICAL / SUPERSEDED.** Preservado para o histórico do projeto. Este arquivo não é fonte autoritativa do produto, preço ou regras comerciais atuais da L'Essenc Digital; consulte [docs/README.md](../README.md) e os [documentos canônicos P01](../product/README.md).
+
+> **Baseline histórica MVP-ARCH-01:** os requisitos de segurança administrativa permanecem como referência onde compatíveis; a sequência de fases atual está em [ROADMAP.md](../../ROADMAP.md). Autenticação e painel ainda não foram fisicamente implementados.
+
 **Projeto:** L'Essenc Digital
 **Documento:** LES-ADMIN-DIG-R01
 **Revisão:** R01

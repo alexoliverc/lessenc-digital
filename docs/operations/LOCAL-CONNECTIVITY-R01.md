@@ -1,5 +1,7 @@
 # LOCAL-CONNECTIVITY-R01 — Windows, VS Code, Codex e Git
 
+**STATUS: HISTORICAL / SUPERSEDED.** Este guia registra o bootstrap inicial e não define a baseline operacional atual. Consulte [docs/README.md](../README.md), [AGENTS.md](../../AGENTS.md) e [operações atuais](README.md) antes de usar comandos históricos.
+
 ## Resultado esperado
 
 O VS Code e o Codex devem abrir o mesmo diretório físico:

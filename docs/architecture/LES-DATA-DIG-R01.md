@@ -1,5 +1,9 @@
 # LES-DATA-DIG-R01 — Modelo de Dados e Estados da L'Essenc Digital
 
+**STATUS: HISTORICAL / SUPERSEDED.** Preservado para o histórico do projeto. Este arquivo não é fonte autoritativa do produto, preço ou regras comerciais atuais da L'Essenc Digital; consulte [docs/README.md](../README.md) e os [documentos canônicos P01](../product/README.md).
+
+> **Baseline histórica MVP-ARCH-01:** estados, entidades e opções físicas nesta revisão foram substituídos onde divergirem da especificação LES-DIG P03. Consulte [modelo de domínio atual](domain-model.md), [máquinas de estado](order-state-machine.md) e [restrições relacionais](relational-model-constraints.md). Sem schema físico implantado.
+
 **Projeto:** L'Essenc Digital
 **Documento:** LES-DATA-DIG-R01
 **Revisão:** R01

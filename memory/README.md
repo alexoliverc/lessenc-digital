@@ -1,5 +1,9 @@
 # Política de memória
 
+## Leitura obrigatória em cada sessão
+
+Após `AGENTS.md`, `MEMORY.md` e `ROADMAP.md`, ler esta política, o registro `memory/YYYY-MM-DD.md` mais recente e os documentos pertinentes da fase em `docs/`. Consultar/criar também o registro da data atual. A memória externa da conversa não é pressuposto para executar uma fase.
+
 ## `MEMORY.md`
 
 Mantém apenas decisões e estado consolidado que continuam válidos.

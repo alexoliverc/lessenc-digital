@@ -1,5 +1,9 @@
 # LES-OBS-DIG-R01 — Observabilidade, Logs, Métricas e Alertas da L'Essenc Digital
 
+**STATUS: HISTORICAL / SUPERSEDED.** Preservado para o histórico do projeto; consulte [docs/README.md](../README.md) para as decisões canônicas atuais. Este arquivo não autoriza inferir arquitetura ou implementação presente.
+
+> **Baseline histórica MVP-ARCH-01:** os princípios de separação de logs, auditoria e analytics seguem úteis; a [fundação P04](logging-errors-observability-foundation.md) delimita o que está apenas especificado. Nenhum provedor foi escolhido nesta consolidação.
+
 **Projeto:** L'Essenc Digital
 **Documento:** LES-OBS-DIG-R01
 **Revisão:** R01

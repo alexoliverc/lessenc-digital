@@ -1,5 +1,9 @@
 # LES-DEPLOY-DIG-R01 — Deploy, Ambientes e Operação da L'Essenc Digital
 
+**STATUS: HISTORICAL / SUPERSEDED.** As definições anteriores de ambientes, `pnpm` e lockfile não são autoritativas para a meta P04; consulte [docs/README.md](../README.md), [ambientes P04](configuration-environment-system.md) e [toolchain P04](runtime-toolchain-baseline.md). Os comandos pnpm ainda descrevem o scaffold físico existente até reconciliação autorizada.
+
+> **Baseline histórica MVP-ARCH-01:** as referências a `pnpm` e aos três ambientes correspondem à revisão anterior. A decisão posterior LES-DIG P04 especifica `npm`/`package-lock.json` e LOCAL, TEST, STAGING, PRODUCTION; consulte [implantação atual](deployment-architecture.md) e [toolchain P04](runtime-toolchain-baseline.md). Nenhuma migração física ocorreu.
+
 **Projeto:** L'Essenc Digital
 **Documento:** LES-DEPLOY-DIG-R01
 **Revisão:** R01
