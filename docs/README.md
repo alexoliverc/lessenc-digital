@@ -44,6 +44,10 @@ Os links das seções P00–P04, [segurança](security/README.md), [operações]
 
 [runtime-toolchain-baseline.md](architecture/runtime-toolchain-baseline.md), [source-architecture-module-skeleton.md](architecture/source-architecture-module-skeleton.md), [configuration-environment-system.md](architecture/configuration-environment-system.md), [prisma-database-bootstrap.md](architecture/prisma-database-bootstrap.md), [shared-application-primitives.md](architecture/shared-application-primitives.md), [logging-errors-observability-foundation.md](architecture/logging-errors-observability-foundation.md), [testing-foundation.md](architecture/testing-foundation.md) e [p04-exit-review.md](architecture/p04-exit-review.md). A [baseline de segurança da aplicação](security/application-security-baseline.md) detalha os controles correspondentes. Nenhum desses documentos declara concluída a migração física.
 
+## Operações
+
+O [índice operacional](operations/README.md) reúne procedimentos do ambiente de desenvolvimento. A [baseline da workstation e VS Code](operations/development-workstation-vscode.md) registra Profile, editor, terminal, Git/SCM, extensões, segurança, performance e recuperação sem redefinir a stack ou os ambientes canônicos da aplicação.
+
 ## HISTORICAL / SUPERSEDED DOCUMENTS
 
 Os documentos [architecture/LES-*-R01.md](architecture/README.md), o [roadmap MVP anterior](LES-ROADMAP-DIG-R01.md) e o [guia local antigo](operations/LOCAL-CONNECTIVITY-R01.md) registram a sequência anterior. São **HISTORICAL / SUPERSEDED**: não estabelecem produto, preço, oferta, ambientes, stack ou próximos gates atuais. O [LES-FLOW-DIG-R01.md](architecture/LES-FLOW-DIG-R01.md) também é **INCOMPLETE** e termina truncado; não completar suas regras por inferência. `CURRENT CANONICAL BASELINE WINS` em toda divergência. O histórico permanece legível como evidência temporal. Os diretórios não têm placeholders vazios.

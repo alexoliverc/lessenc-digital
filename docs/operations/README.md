@@ -7,3 +7,9 @@ O [guia local de conectividade](LOCAL-CONNECTIVITY-R01.md) registra o bootstrap 
 Até uma etapa de implementação/reconciliação física P04 explicitamente autorizada, Codex **não deve** migrar automaticamente o gerenciador, rodar `npm install` apenas porque npm é a meta, gerar `package-lock.json` ao lado de `pnpm-lock.yaml`, remover o lockfile pnpm nem atualizar dependências de framework para corresponder ao documento. A reconciliação deve ser uma operação P04 própria; após a migração, exatamente um lockfile autoritativo deve permanecer.
 
 Fornecedores e procedimentos finais de armazenamento privado, email, observabilidade, limite de taxa distribuído, backup/restore e domínio: **OPEN**. O manual antigo pode citar comandos pnpm correspondentes ao scaffold existente; não executar npm/Prisma nele antes da migração autorizada.
+
+## Development workstation
+
+A [baseline canônica da workstation de desenvolvimento e VS Code](development-workstation-vscode.md) documenta o Profile L'Essenc, configuração compartilhada do workspace, extensões, terminal, Git/SCM, segurança, performance, Settings Sync e recuperação.
+
+Esse documento é operacional e não redefine versões da stack, gerenciador de pacotes, ambientes da aplicação nem o estado da implementação P04. Para esses temas, prevalecem as fontes arquiteturais canônicas e a regra **CURRENT CANONICAL BASELINE WINS**.
