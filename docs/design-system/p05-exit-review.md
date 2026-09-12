@@ -25,4 +25,4 @@
 
 Não há teste automatizado de interação React DOM nem auditoria com leitor de tela nesta fase. Os componentes atuais são Server Components sem comportamento de cliente; estados interativos completos devem ser exercitados nas telas que os consumirem. As capturas e a emulação apoiam a revisão técnica, mas não certificam acessibilidade de telas futuras.
 
-O Validation Report e o diário registram o estado final do Git. Não houve commit, tag, push, merge, deploy ou início da P06. Este documento não declara P05 COMPLETE nem Gate A PASS.
+O Validation Report e o diário registram a validação local da implementação. Após revisão técnica do ChatGPT em 12/09/2026, a P05 recebeu PASS e Gate A — FOUNDATION READY recebeu PASS. P06 permanece NOT STARTED / NOT AUTHORIZED até autorização própria.

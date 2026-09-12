@@ -46,7 +46,7 @@ Os links das seções P00–P05, [segurança](security/README.md), [operações]
 
 ## Design System P05 — `docs/design-system/`
 
-O [índice P05](design-system/README.md) liga [tokens](design-system/design-tokens.md), [componentes](design-system/component-foundation.md), [responsividade e acessibilidade](design-system/responsive-accessibility.md) e [exit review](design-system/p05-exit-review.md). A validação local passou; a revisão técnica está pendente e Gate A não foi avaliado.
+O [índice P05](design-system/README.md) liga [tokens](design-system/design-tokens.md), [componentes](design-system/component-foundation.md), [responsividade e acessibilidade](design-system/responsive-accessibility.md) e [exit review](design-system/p05-exit-review.md). A implementação P05 recebeu PASS na revisão técnica do ChatGPT e Gate A — FOUNDATION READY recebeu PASS em 12/09/2026.
 
 
 ## Persistência P06 — planejamento
