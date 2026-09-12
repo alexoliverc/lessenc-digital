@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P07 — Core Domain & Application Layer received ChatGPT Technical Re-Review PASS and Final Quality Gate PASS from base `e04438c`. P06 COMPLETE / PASS remains integrated through PR #4 (`694a085`) and documentary closeout PR #5 (`e04438c`). P07 checkpoint/merge and P08 progression remain unauthorized.
+**Current execution:** None. P07 — Core Domain & Application Layer is COMPLETE. P08 — Public Sales Experience is the next candidate and has not started.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -387,7 +387,7 @@ Persistence can be recreated and validated from versioned migrations.
 
 ## P07 — Core Domain & Application Layer
 
-**Status:** IMPLEMENTED — CHATGPT TECHNICAL RE-REVIEW PASS / FINAL QUALITY GATE PASS; awaiting checkpoint and integration; not COMPLETE.
+**Status:** COMPLETE — CHATGPT TECHNICAL RE-REVIEW PASS / FINAL QUALITY GATE PASS / MERGED.
 
 ### Objective
 
@@ -1237,9 +1237,9 @@ The system receives formal authorization or denial for real production transacti
 
 # 10. Current next candidate
 
-The current execution is:
+The current next candidate is:
 
-**P07 — Core Domain & Application Layer**
+**P08 — Public Sales Experience**
 
 Current status:
 
@@ -1247,10 +1247,17 @@ Current status:
 
 **P05: COMPLETE / CHATGPT TECHNICAL REVIEW PASS**
 
-P05 and Gate A received PASS. P06 is COMPLETE / ChatGPT Technical Review PASS; checkpoint `f4bfdfe`, merge `694a085` and documentary closeout `e04438c` are preserved. P07 implementation follows its [authorized brief](docs/architecture/p07-phase-execution-brief.md), received ChatGPT Technical Re-Review PASS and Final Quality Gate PASS, and now awaits checkpoint/integration. No commit, tag, push, PR, merge or P08 progression is authorized.
+**P06: COMPLETE / CHATGPT TECHNICAL REVIEW PASS**
+
+**P07: COMPLETE / CHATGPT TECHNICAL RE-REVIEW PASS / FINAL QUALITY GATE PASS**
+
+P06 checkpoint `f4bfdfe`, merge `694a085` and documentary closeout `e04438c` are preserved.
+
+P07 was checkpointed at `4c96e7b` with tag `checkpoint/p07-core-domain-application-complete` and merged via PR #6 as `6a19eda`.
+
+P08 — Public Sales Experience has **not started** and requires explicit owner authorization before planning or execution begins.
 
 ---
-
 # 11. Post-MVP horizon
 
 The following are intentionally outside the P00–P20 MVP construction program:

@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P07
 
-**Estado:** P00–P06 COMPLETE, Gate A PASS. P07 recebeu ChatGPT Technical Re-Review PASS e Final Quality Gate PASS; checkpoint/integração pendentes e fase ainda não COMPLETE.
+**Estado:** P00–P07 COMPLETE. Gate A PASS. P07 recebeu ChatGPT Technical Re-Review PASS e Final Quality Gate PASS, checkpoint `4c96e7b` e merge da PR #6 em `6a19eda`. P08 permanece não iniciada.
 
 ## Precedência e classificação das fontes
 
@@ -53,7 +53,7 @@ O [índice P05](design-system/README.md) liga [tokens](design-system/design-toke
 
 O [índice P06](persistence/README.md) liga [modelo físico](persistence/data-model.md), [MySQL local, migrações e testes](persistence/local-mysql-and-testing.md) e [exit review](persistence/p06-exit-review.md). O [bootstrap anterior](architecture/prisma-database-bootstrap.md) permanece como planejamento P04/P06 revalidado; a baseline física P06 foi encerrada com PASS.
 
-## Core Domain & Application P07 — Technical Review PASS / Final Quality Gate PASS
+## Core Domain & Application P07 — COMPLETE
 
 [Brief autorizado](architecture/p07-phase-execution-brief.md), [implementação e limites](architecture/p07-core-implementation.md) e [Validation Report](architecture/p07-validation-report.md). P07 não está COMPLETE e P08 não foi iniciada.
 

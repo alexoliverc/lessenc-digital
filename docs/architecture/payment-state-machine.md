@@ -1,6 +1,6 @@
 # P03 — Máquina de estados de Payment
 
-**Status:** especificação COMPLETE; transições puras e testes implementados na [P07](p07-core-implementation.md), aguardando revisão técnica. Confirmação por provedor e persistência coordenada permanecem adiadas.
+**Status:** especificação COMPLETE; transições puras e testes implementados na [P07](p07-core-implementation.md), agora COMPLETE. Confirmação por provedor e persistência coordenada permanecem adiadas.
 
 | Origem | Destino permitido |
 | --- | --- |

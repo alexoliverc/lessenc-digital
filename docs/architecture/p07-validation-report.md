@@ -1,7 +1,7 @@
 # P07 — Codex Validation Report
 
 **Data:** 2026-09-12. **Resultado final:** CHATGPT TECHNICAL RE-REVIEW PASS / FINAL QUALITY GATE PASS.
-**Estado da fase:** tecnicamente aceita; aguarda checkpoint/integração Git. P07 ainda não está COMPLETE.
+**Estado da fase:** COMPLETE — checkpoint `4c96e7b` preservado pela tag `checkpoint/p07-core-domain-application-complete` e PR #6 merged em `main` pelo merge `6a19eda`.
 
 ## Runtime environment
 
@@ -207,3 +207,24 @@ A tentativa anterior de build sem `APP_ENV` foi uma falha do harness de validaç
 **Final Quality Gate:** PASS.
 
 P07 permanece sem commit/tag/push/PR/merge e ainda não está COMPLETE.
+
+## Post-merge closeout
+
+P07 foi encerrada após o ciclo completo de governança:
+
+- ChatGPT Technical Review inicial: **PASS WITH FIXES**;
+- findings corrigidos e testes de regressão adicionados;
+- ChatGPT Technical Re-Review: **PASS**;
+- Final Quality Gate: **PASS**;
+- checkpoint commit: `4c96e7b8fd9aaeefbcc0848cb50ccb664c8b329a`;
+- tag: `checkpoint/p07-core-domain-application-complete`;
+- branch e tag publicadas e verificadas remotamente;
+- PR #6 criada com head exato `4c96e7b8fd9aaeefbcc0848cb50ccb664c8b329a`;
+- PR #6 validada como MERGEABLE;
+- merge commit: `6a19edab329995af6e061d8685cd2b6c0ddaf3b5`;
+- `main` e `origin/main` sincronizadas em `6a19edab329995af6e061d8685cd2b6c0ddaf3b5`;
+- checkpoint confirmado como ancestral de `main`;
+- branch P07 preservada;
+- P08 não foi iniciada.
+
+**Resultado final: P07 COMPLETE.**
