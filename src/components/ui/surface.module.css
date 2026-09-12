@@ -1,0 +1,15 @@
+.surface {
+  border: var(--border-width) solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  background: var(--color-surface);
+}
+
+.surface[data-padding="spacious"] {
+  padding: clamp(var(--space-5), 4vw, var(--space-7));
+}
+
+.surface[data-elevation="raised"] {
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-soft);
+}

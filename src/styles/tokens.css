@@ -1,0 +1,84 @@
+:root {
+  color-scheme: light;
+
+  /* Semantic color roles */
+  --color-background: #f7f4ef;
+  --color-surface: #fffdfa;
+  --color-surface-raised: #ffffff;
+  --color-surface-muted: #f0eae2;
+  --color-foreground: #241f1a;
+  --color-foreground-muted: #5b554e;
+  --color-border: #81786d;
+  --color-border-soft: #d8d0c6;
+  --color-primary: #3f3029;
+  --color-primary-hover: #2d211c;
+  --color-primary-active: #1e1713;
+  --color-primary-foreground: #fffdfa;
+  --color-secondary: #e9e0d6;
+  --color-secondary-hover: #ded2c5;
+  --color-secondary-foreground: #302720;
+  --color-accent: #865036;
+  --color-focus: #195e83;
+  --color-success: #24583f;
+  --color-success-surface: #e8f4ec;
+  --color-warning: #825019;
+  --color-warning-surface: #fff1dc;
+  --color-danger: #8b3434;
+  --color-danger-hover: #742b2b;
+  --color-danger-active: #632323;
+  --color-danger-surface: #fbeceb;
+  --color-information: #285873;
+  --color-information-surface: #eaf4fa;
+  --color-disabled-surface: #eee8e0;
+  --color-disabled-foreground: #746d65;
+
+  /* Type hierarchy */
+  --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
+  --text-display: clamp(2.75rem, 7vw, 5.5rem);
+  --text-title: clamp(2.1rem, 5vw, 3.5rem);
+  --text-heading: clamp(1.5rem, 3vw, 2.2rem);
+  --text-subheading: 1.25rem;
+  --text-body: 1rem;
+  --text-small: 0.875rem;
+  --text-caption: 0.75rem;
+  --text-label: 0.875rem;
+  --text-action: 0.95rem;
+  --leading-body: 1.65;
+  --leading-heading: 1.15;
+  --tracking-display: -0.035em;
+  --tracking-label: 0.12em;
+
+  /* Spacing and sizing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --content-narrow: 48rem;
+  --content-standard: 72rem;
+  --content-wide: 84rem;
+  --form-width: 36rem;
+  --control-height: 3rem;
+  --control-height-small: 2.5rem;
+  --icon-size: 1.125rem;
+  --page-gutter: clamp(1rem, 4vw, 3rem);
+
+  /* Shape, elevation and interaction */
+  --border-width: 1px;
+  --border-width-strong: 4px;
+  --focus-width: 3px;
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-pill: 999px;
+  --shadow-soft: 0 0.5rem 2rem rgb(36 31 26 / 6%);
+  --shadow-raised: 0 1rem 3rem rgb(36 31 26 / 9%);
+  --duration-fast: 160ms;
+  --duration-normal: 240ms;
+  --ease-standard: ease-out;
+}

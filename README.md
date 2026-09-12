@@ -1,6 +1,6 @@
 # L'Essenc Digital — LES-DIG
 
-**Estado:** P00–P04 COMPLETE. A reconciliação física P04 foi validada com Node.js 24.21.0 LTS, npm 11.19.1, npm como package manager, `package-lock.json`, `APP_ENV` e todos os quality gates. P05 ainda não foi iniciada.
+**Estado:** P00–P05 COMPLETE. Gate A — FOUNDATION READY PASS. P06 é a próxima fase candidata e ainda não está autorizada.
 
 Plataforma inicial de receita digital da L'Essenc para venda de e-books autorais.
 
@@ -53,4 +53,4 @@ O script cria ou atualiza o diretório `C:\Projetos\lessenc-digital`, inicializa
 
 ## Estado atual
 
-O scaffold anterior usava pnpm. A árvore de trabalho P04 usa npm e `package-lock.json`, mantendo Next.js 16.3.4, React 19.3.0 e Vitest 5.0.0; Prisma e MySQL pertencem à P06. A instalação limpa e os gates locais passaram, mas a revisão técnica e o ajuste do Node/npm do host ainda estão pendentes. O primeiro produto aprovado é `Cronograma Capilar Inteligente`, R$ 29,90. Nenhuma credencial real deve ser adicionada ao Git.
+O scaffold anterior usava pnpm; a baseline física aprovada usa npm e `package-lock.json`, mantendo Next.js 16.3.4, React 19.3.0 e Vitest 5.0.0. A fundação visual P05 passou na validação local na branch própria, sem implementar a página de vendas final. Prisma e MySQL pertencem à P06. O primeiro produto aprovado é `Cronograma Capilar Inteligente`, R$ 29,90. Nenhuma credencial real deve ser adicionada ao Git.
