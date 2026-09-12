@@ -1,6 +1,15 @@
-# P04 — Bootstrap Prisma/MySQL planejado
+> **STATUS: DEFERRED TO P06 — DATA & PERSISTENCE FOUNDATION**
+>
+> Este documento contém planejamento de persistência originalmente associado à antiga estrutura P04.
+>
+> Após a reestruturação canônica do `ROADMAP.md`, Prisma, MySQL, schema, migrations e persistência pertencem à **P06**.
+>
+> Este arquivo NÃO autoriza implementação de banco ou ORM durante P04.
+>
+> O conteúdo deverá ser revalidado durante o Phase Execution Brief da P06 antes de qualquer implementação.
+# P06 — Bootstrap Prisma/MySQL planejado
 
-**Status:** specification COMPLETE; instalação, banco, migrations e bootstrap físicos PENDING.
+**Status:** planejamento arquitetural disponível; implementação física P06 PENDING e ainda não autorizada.
 
 Fluxo futuro sob autorização do owner: confirmar stack compatível; instalar dependências aprovadas; criar `prisma/schema.prisma` e `prisma.config.ts`; definir saída explícita do client Prisma 7; criar banco MySQL local/test isolado; validar e gerar client; criar/revisar/testar migrations versionadas; rodar testes de integridade e recuperação. No CI futuro: `npm ci → Prisma validate → Prisma generate` antes de lint/test/build. Códigos de estado, tabelas e índices devem implementar P03 e não copiar cegamente o antigo `LES-DATA-DIG-R01`.
 

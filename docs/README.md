@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P04
 
-**Estado:** documentação P00–P03 completa; P04 specification COMPLETE e physical implementation PENDING. Próxima fase documental P05 — Design System. A documentação atual resulta da missão de consolidação do owner em 11/09/2026; [ROADMAP.md](../ROADMAP.md) informa as fases e [MEMORY.md](../MEMORY.md) distingue projeto físico e baseline documental.
+**Estado:** documentação e implementação física P00–P04 COMPLETE. P05 é a próxima fase candidata e ainda não está autorizada.
 
 ## Precedência e classificação das fontes
 
@@ -42,8 +42,12 @@ Os links das seções P00–P04, [segurança](security/README.md), [operações]
 
 ## Fundação P04 — especificação em `docs/architecture/`
 
-[runtime-toolchain-baseline.md](architecture/runtime-toolchain-baseline.md), [source-architecture-module-skeleton.md](architecture/source-architecture-module-skeleton.md), [configuration-environment-system.md](architecture/configuration-environment-system.md), [prisma-database-bootstrap.md](architecture/prisma-database-bootstrap.md), [shared-application-primitives.md](architecture/shared-application-primitives.md), [logging-errors-observability-foundation.md](architecture/logging-errors-observability-foundation.md), [testing-foundation.md](architecture/testing-foundation.md) e [p04-exit-review.md](architecture/p04-exit-review.md). A [baseline de segurança da aplicação](security/application-security-baseline.md) detalha os controles correspondentes. Nenhum desses documentos declara concluída a migração física.
+[runtime-toolchain-baseline.md](architecture/runtime-toolchain-baseline.md), [source-architecture-module-skeleton.md](architecture/source-architecture-module-skeleton.md), [configuration-environment-system.md](architecture/configuration-environment-system.md), [shared-application-primitives.md](architecture/shared-application-primitives.md), [logging-errors-observability-foundation.md](architecture/logging-errors-observability-foundation.md), [testing-foundation.md](architecture/testing-foundation.md) e [p04-exit-review.md](architecture/p04-exit-review.md). A [baseline de segurança da aplicação](security/application-security-baseline.md) detalha os controles correspondentes. Nenhum desses documentos declara concluída a migração física.
 
+
+## Persistência P06 — planejamento
+
+O [bootstrap Prisma/MySQL](architecture/prisma-database-bootstrap.md) preserva o planejamento arquitetural necessário para a futura **P06 — Data & Persistence Foundation**. Prisma, MySQL, schema, migrations e persistência não fazem parte da execução física da P04 e deverão ser revalidados no Phase Execution Brief da P06 antes de qualquer implementação.
 ## Operações
 
 O [índice operacional](operations/README.md) reúne procedimentos do ambiente de desenvolvimento. A [baseline da workstation e VS Code](operations/development-workstation-vscode.md) registra Profile, editor, terminal, Git/SCM, extensões, segurança, performance e recuperação sem redefinir a stack ou os ambientes canônicos da aplicação.

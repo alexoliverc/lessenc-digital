@@ -1,11 +1,102 @@
-# P04 — Testes e CI especificados
+# P04 — Testes e quality gates da fundação
 
-**Status:** specification COMPLETE; pipeline P04 e testes de domínio/persistência PENDING.
+**Status:** specification COMPLETE; physical P04 validation COMPLETE.
 
-Runner: Vitest, com testes unitários, integração, contrato, HTTP, concorrência/idempotência, segurança e E2E. Integração de persistência usa **MySQL real compatível em ambiente isolado**; doubles não comprovam constraint nem transação. Framework de browser E2E: **OPEN**.
+P04 é responsável por garantir que o scaffold e a toolchain tenham quality gates reproduzíveis.
 
-Invariantes de teste: Payment APPROVED não sofre downgrade; Order PAID não se torna FAILED; timeout de Refund não é falha; reembolso integral confirmado revoga entitlement; falha de email/fulfillment não desfaz pagamento; duplicata de webhook tem um resultado lógico; webhook inválido não muda estado; eventos antigos não anulam a verdade atual. Cobrir também os [cenários concorrentes P03](data-integrity-concurrency-review.md).
+## P04 quality gates
 
-CI documental previsto em **GitHub Actions**: `npm ci → Prisma validate → Prisma generate → format check → lint → typecheck → tests → integration tests → build → security checks`. Scripts npm planejados: `dev`, `build`, `start`, `lint`, `lint:fix`, `format`, `format:check`, `typecheck`, `check`, `test`, `test:watch`, `test:unit`, `test:integration`, `test:coverage`, `db:generate`, `db:format`, `db:validate`, `db:migrate:dev`, `db:migrate:deploy`, `db:migrate:status`, `db:seed`, `db:health`, `env:check`, `doctor`, `clean`. Apenas `db:reset:local`/`db:reset:test` com guards poderão ser avaliados futuramente; nunca `db:reset:production`.
+A implementação física P04 deverá preservar ou estabelecer, conforme aplicável:
 
-O teste inicial de health executado historicamente na stack pnpm não prova pipeline npm/Prisma. Nenhuma configuração de CI ou script executável é alterado agora.
+- formatting check;
+- ESLint;
+- TypeScript typecheck;
+- unit tests existentes;
+- production build;
+- environment configuration validation;
+- runtime/toolchain validation;
+- clean-install reproducibility.
+
+O runner aprovado atualmente é:
+
+**Vitest 5.0.0**
+
+A migração de package manager deve demonstrar que os testes existentes continuam operacionais.
+
+## Current historical executable evidence
+
+O scaffold anterior já demonstrou historicamente:
+
+- Prettier PASS;
+- ESLint PASS;
+- TypeScript PASS;
+- Vitest PASS;
+- Next.js production build PASS;
+- `/api/health` smoke test PASS.
+
+Essas evidências não substituem a validação após a reconciliação física P04.
+
+## Evidência local da reconciliação P04
+
+`npm ci` instalou 209 pacotes a partir de `package-lock.json` sem depender do `node_modules` anterior; a auditoria reportou 0 vulnerabilidades. Format check, ESLint, typecheck, 7 testes Vitest, build de produção e smoke test HTTP 200 em `/api/health` passaram. O host permaneceu em Node.js 24.19.0 e npm 11.17.0, abaixo do target 24.21.0/11.19.1; a revisão técnica ainda deve avaliar esse desvio antes de classificar P04.
+
+## Deferred testing concerns
+
+Os seguintes testes pertencem a fases posteriores:
+
+### P06
+
+- MySQL integration tests;
+- Prisma validation;
+- Prisma generation;
+- schema/migration validation;
+- constraint tests;
+- transaction tests;
+- persistence integration tests.
+
+### P07+
+
+- domain invariants;
+- business state machines;
+- application use cases.
+
+### P10+
+
+- payment integration;
+- webhook;
+- idempotency;
+- reconciliation;
+- concurrency scenarios.
+
+### P17
+
+- full end-to-end business validation.
+
+## CI
+
+GitHub Actions permanece como direção prevista para CI.
+
+A pipeline final poderá evoluir ao longo das fases.
+
+P04 não deve adicionar passos Prisma/MySQL enquanto P06 não tiver sido especificada e autorizada.
+
+Uma pipeline mínima compatível com P04 deve conceitualmente validar:
+
+`npm ci → format check → lint → typecheck → tests → build`
+
+Security checks adicionais devem ser incorporados de acordo com a baseline de segurança e a maturidade das fases.
+
+## Scripts
+
+Scripts de banco planejados em documentação anterior não pertencem à implementação física P04.
+
+Scripts como:
+
+- `db:generate`;
+- `db:validate`;
+- `db:migrate:*`;
+- `db:seed`;
+- `db:health`;
+- `db:reset:*`
+
+somente poderão ser introduzidos na fase responsável pela persistência e mediante os approval gates aplicáveis.
