@@ -43,4 +43,4 @@
 - ChatGPT Technical Review: PASS.
 - Gate A — FOUNDATION READY: PASS.
 - Nenhuma dependência foi adicionada ou removida.
-- P06 foi implementada e validada em 12/09/2026 na branch `phase/p06-data-persistence-foundation`; ChatGPT Technical Review PASS. Checkpoint commit/tag permanece como próxima operação protegida antes da progressão para P07.
+- P06 foi implementada e validada em 12/09/2026 na branch `phase/p06-data-persistence-foundation`; ChatGPT Technical Review PASS. Checkpoint `f4bfdfe` e tag `checkpoint/p06-data-persistence-complete` foram publicados; PR #4 foi mergeada em `main` pelo merge commit `694a085`. P07 permanece não iniciada.

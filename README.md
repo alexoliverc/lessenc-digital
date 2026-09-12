@@ -1,6 +1,6 @@
 # L'Essenc Digital — LES-DIG
 
-**Estado:** P00–P06 COMPLETE. Gate A — FOUNDATION READY PASS. P06 — Data & Persistence Foundation recebeu ChatGPT Technical Review PASS; checkpoint Git pendente.
+**Estado:** P00–P06 COMPLETE. Gate A — FOUNDATION READY PASS. P06 — Data & Persistence Foundation recebeu ChatGPT Technical Review PASS e foi integrada à `main` pela PR #4 (`694a085`). P07 ainda não foi iniciada.
 
 Plataforma inicial de receita digital da L'Essenc para venda de e-books autorais.
 
