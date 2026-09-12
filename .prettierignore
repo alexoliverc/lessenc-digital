@@ -1,0 +1,10 @@
+node_modules
+.next
+coverage
+out
+build
+pnpm-lock.yaml
+docs
+memory
+.vscode
+*.md

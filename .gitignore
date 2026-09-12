@@ -27,3 +27,7 @@ output/
 
 # Local IDE state
 .vscode/*.local.json
+
+# Next.js / TypeScript generated files
+next-env.d.ts
+*.tsbuildinfo

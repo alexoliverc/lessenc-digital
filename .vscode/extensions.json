@@ -2,7 +2,8 @@
   "recommendations": [
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "EditorConfig.EditorConfig",
-    "GitHub.vscode-pull-request-github"
+    "editorconfig.editorconfig",
+    "github.vscode-pull-request-github",
+    "vitest.explorer"
   ]
 }

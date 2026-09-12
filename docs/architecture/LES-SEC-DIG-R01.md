@@ -1,5 +1,9 @@
 # LES-SEC-DIG-R01 — Arquitetura de Segurança da L'Essenc Digital
 
+**STATUS: HISTORICAL / SUPERSEDED.** Preservado para o histórico do projeto; consulte [docs/README.md](../README.md) e a [segurança canônica](../security/README.md). Controles antigos só valem quando compatíveis com a baseline atual.
+
+> **Baseline histórica MVP-ARCH-01:** a arquitetura extensa permanece como referência de controles não conflitantes. A fonte atual de invariantes P00–P04 é o [índice de segurança](../security/README.md); nenhuma implementação é inferida de um requisito documentado.
+
 **Projeto:** L'Essenc Digital
 **Documento:** LES-SEC-DIG-R01
 **Revisão:** R01

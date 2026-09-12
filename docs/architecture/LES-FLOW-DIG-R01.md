@@ -1,5 +1,9 @@
 # LES-FLOW-DIG-R01 — Fluxos Funcionais e Máquinas de Estado da L'Essenc Digital
 
+**STATUS: HISTORICAL / INCOMPLETE.** Este arquivo foi preservado como evidência histórica, está truncado e **MUST NOT** ser usado como fonte autoritativa de regras de negócio atuais ou decisões de implementação. Consulte [docs/README.md](../README.md) e os documentos canônicos P03. Não reconstruir seu conteúdo ausente por suposição.
+
+> **Baseline histórica incompleta:** o arquivo preservado termina no meio da seção 25. Para a baseline aprovada LES-DIG P03, consulte os documentos de máquinas de estado indexados em [docs/README.md](../README.md). O histórico não deve ser usado para inventar regras ausentes.
+
 **Projeto:** L'Essenc Digital
 **Documento:** LES-FLOW-DIG-R01
 **Revisão:** R01

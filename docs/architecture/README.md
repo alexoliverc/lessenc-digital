@@ -1,11 +1,5 @@
-# Arquitetura técnica
+# Arquitetura técnica — LES-DIG P02, P03 e P04
 
-Esta pasta receberá a especificação do MVP antes da implementação.
+Consulte o [índice completo](../README.md). Documentos atuais: arquitetura do [sistema](system-architecture.md), [limites de módulos](module-boundaries.md), [integrações](integrations-architecture.md), [deploy](deployment-architecture.md), [domínio P03](domain-model.md), [revisão P03](p03-exit-review.md), [toolchain P04](runtime-toolchain-baseline.md) e [revisão P04](p04-exit-review.md), com documentos especializados ligados por esses arquivos.
 
-Documentos planejados:
-
-- `LES-ARCH-DIG-R01.md`: arquitetura geral da operação digital.
-- `LES-DATA-DIG-R01.md`: modelo de dados e estados de pedido.
-- `LES-INT-MP-R01.md`: integração Mercado Pago e webhooks.
-- `LES-SEC-DIG-R01.md`: segurança, privacidade e entrega digital.
-- `LES-DEPLOY-DIG-R01.md`: ambientes, Hostinger e rollback.
+`LES-*-R01.md` foram aprovados na sequência MVP anterior e permanecem preservados como evidência histórica. A nova baseline LES-DIG substitui onde divergir: primeiro produto, estados, conjunto de módulos, outbox, `npm`/Prisma e quarto ambiente. A implementação física P04 permanece pendente.

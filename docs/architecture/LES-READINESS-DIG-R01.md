@@ -1,5 +1,9 @@
 # LES-READINESS-DIG-R01 — Architecture Readiness Gate da L'Essenc Digital
 
+**STATUS: HISTORICAL / SUPERSEDED.** O gate registrado aqui pertence à sequência anterior e não aprova as fases ou a stack física P04 atuais. Consulte [docs/README.md](../README.md) e [ROADMAP.md](../../ROADMAP.md).
+
+> **Gate histórico da sequência MVP-ARCH-01 → MVP-IMPL-01.** A sequência atual P00–P26 e o escopo físico pendente de P04 estão em [ROADMAP.md](../../ROADMAP.md). Este parecer anterior não é aprovação da nova implementação P04 nem de sua stack física.
+
 **Projeto:** L'Essenc Digital
 **Documento:** LES-READINESS-DIG-R01
 **Revisão:** R01
