@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P06
+# Índice oficial da baseline documental LES-DIG P00–P07
 
-**Estado:** documentação e implementação P00–P06 COMPLETE. Gate A — FOUNDATION READY PASS. P06 recebeu ChatGPT Technical Review PASS.
+**Estado:** P00–P06 COMPLETE, Gate A PASS. P07 recebeu ChatGPT Technical Re-Review PASS e Final Quality Gate PASS; checkpoint/integração pendentes e fase ainda não COMPLETE.
 
 ## Precedência e classificação das fontes
 
@@ -16,7 +16,7 @@ Decisão explícita mais recente do owner prevalece. Em conflito entre documento
 
 ## CANONICAL CURRENT DOCUMENTS
 
-Os links das seções P00–P06, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
+Os links das seções P00–P07, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
 
 ## Governança P00
 
@@ -51,7 +51,12 @@ O [índice P05](design-system/README.md) liga [tokens](design-system/design-toke
 
 ## Persistência P06 — implementação física concluída
 
-O [índice P06](persistence/README.md) liga [modelo físico](persistence/data-model.md), [MySQL local, migrações e testes](persistence/local-mysql-and-testing.md) e [exit review](persistence/p06-exit-review.md). O [bootstrap anterior](architecture/prisma-database-bootstrap.md) permanece como planejamento P04/P06 revalidado; a baseline física corrente é a P06 documentada aqui, sem declarar a fase COMPLETE.
+O [índice P06](persistence/README.md) liga [modelo físico](persistence/data-model.md), [MySQL local, migrações e testes](persistence/local-mysql-and-testing.md) e [exit review](persistence/p06-exit-review.md). O [bootstrap anterior](architecture/prisma-database-bootstrap.md) permanece como planejamento P04/P06 revalidado; a baseline física P06 foi encerrada com PASS.
+
+## Core Domain & Application P07 — Technical Review PASS / Final Quality Gate PASS
+
+[Brief autorizado](architecture/p07-phase-execution-brief.md), [implementação e limites](architecture/p07-core-implementation.md) e [Validation Report](architecture/p07-validation-report.md). P07 não está COMPLETE e P08 não foi iniciada.
+
 ## Operações
 
 O [índice operacional](operations/README.md) reúne procedimentos do ambiente de desenvolvimento. A [baseline da workstation e VS Code](operations/development-workstation-vscode.md) registra Profile, editor, terminal, Git/SCM, extensões, segurança, performance e recuperação sem redefinir a stack ou os ambientes canônicos da aplicação.
