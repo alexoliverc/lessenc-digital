@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution candidate:** P06 — Data & Persistence Foundation
+**Current execution:** P06 — Data & Persistence Foundation COMPLETE / ChatGPT Technical Review PASS on branch `phase/p06-data-persistence-foundation`; checkpoint commit/tag pending.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -342,7 +342,7 @@ PASS before continuing through the main product construction path.
 
 ## P06 — Data & Persistence Foundation
 
-**Status:** PENDENTE
+**Status:** COMPLETE / CHATGPT TECHNICAL REVIEW PASS
 
 ### Objective
 
@@ -1237,9 +1237,9 @@ The system receives formal authorization or denial for real production transacti
 
 # 10. Current next candidate
 
-The next execution candidate is:
+The current execution is:
 
-**P05 — Design System & UX Foundation**
+**P06 — Data & Persistence Foundation**
 
 Current status:
 
@@ -1247,9 +1247,7 @@ Current status:
 
 **P05: COMPLETE / CHATGPT TECHNICAL REVIEW PASS**
 
-P05 started from the clean, synchronized `main` at `da59530` under the owner's 12/09/2026 Phase Execution Brief. This does not mark P05 COMPLETE or Gate A PASS.
-
-P05 is complete. Gate A — FOUNDATION READY received PASS. P06 is the next candidate and remains NOT STARTED / NOT AUTHORIZED.
+P05 is complete and Gate A — FOUNDATION READY received PASS. P06 — Data & Persistence Foundation is now COMPLETE with ChatGPT Technical Review PASS. The implementation remains on `phase/p06-data-persistence-foundation` pending checkpoint commit/tag and explicit authorization for push/merge.
 
 ---
 
