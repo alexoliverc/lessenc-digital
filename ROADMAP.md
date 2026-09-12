@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P05 — Design System & UX Foundation, branch `phase/p05-design-system-ux-foundation`, review pending
+**Current execution candidate:** P06 — Data & Persistence Foundation
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
