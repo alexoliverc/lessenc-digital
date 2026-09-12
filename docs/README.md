@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P04
+# Índice oficial da baseline documental LES-DIG P00–P05
 
-**Estado:** documentação e implementação física P00–P04 COMPLETE. P05 é a próxima fase candidata e ainda não está autorizada.
+**Estado:** documentação e implementação P00–P05 COMPLETE. Gate A — FOUNDATION READY PASS. P06 ainda não foi iniciada.
 
 ## Precedência e classificação das fontes
 
@@ -16,7 +16,7 @@ Decisão explícita mais recente do owner prevalece. Em conflito entre documento
 
 ## CANONICAL CURRENT DOCUMENTS
 
-Os links das seções P00–P04, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
+Os links das seções P00–P05, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
 
 ## Governança P00
 
@@ -42,7 +42,11 @@ Os links das seções P00–P04, [segurança](security/README.md), [operações]
 
 ## Fundação P04 — especificação em `docs/architecture/`
 
-[runtime-toolchain-baseline.md](architecture/runtime-toolchain-baseline.md), [source-architecture-module-skeleton.md](architecture/source-architecture-module-skeleton.md), [configuration-environment-system.md](architecture/configuration-environment-system.md), [shared-application-primitives.md](architecture/shared-application-primitives.md), [logging-errors-observability-foundation.md](architecture/logging-errors-observability-foundation.md), [testing-foundation.md](architecture/testing-foundation.md) e [p04-exit-review.md](architecture/p04-exit-review.md). A [baseline de segurança da aplicação](security/application-security-baseline.md) detalha os controles correspondentes. Nenhum desses documentos declara concluída a migração física.
+[runtime-toolchain-baseline.md](architecture/runtime-toolchain-baseline.md), [source-architecture-module-skeleton.md](architecture/source-architecture-module-skeleton.md), [configuration-environment-system.md](architecture/configuration-environment-system.md), [shared-application-primitives.md](architecture/shared-application-primitives.md), [logging-errors-observability-foundation.md](architecture/logging-errors-observability-foundation.md), [testing-foundation.md](architecture/testing-foundation.md) e [p04-exit-review.md](architecture/p04-exit-review.md). A [baseline de segurança da aplicação](security/application-security-baseline.md) detalha os controles correspondentes. A implementação física P04 foi validada e integrada em `main` no merge `da59530`.
+
+## Design System P05 — `docs/design-system/`
+
+O [índice P05](design-system/README.md) liga [tokens](design-system/design-tokens.md), [componentes](design-system/component-foundation.md), [responsividade e acessibilidade](design-system/responsive-accessibility.md) e [exit review](design-system/p05-exit-review.md). A implementação P05 recebeu PASS na revisão técnica do ChatGPT e Gate A — FOUNDATION READY recebeu PASS em 12/09/2026.
 
 
 ## Persistência P06 — planejamento

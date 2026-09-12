@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution candidate:** P05 — Design System & UX Foundation
+**Current execution candidate:** P06 — Data & Persistence Foundation
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -234,7 +234,7 @@ Pre-P04 package-manager state:
 
 ### Important rule
 
-The authorized reconciliation has replaced the pnpm lockfile with a valid npm lockfile in the uncommitted working tree. `npm ci` and local quality gates passed. Node.js/npm host versions remain below target until separately reconciled and verified; P04 is not COMPLETE before ChatGPT technical review.
+The P04 reconciliation replaced the pnpm lockfile with a valid npm lockfile. Node.js/npm host versions were reconciled to 24.21.0/11.19.1, `npm ci` and local quality gates passed, and ChatGPT technical review returned PASS. The result was integrated into `main` at `da59530`.
 
 Before this P04 physical reconciliation was explicitly authorized, Codex or terminal work could not:
 
@@ -275,7 +275,7 @@ Physical repository state and approved P04 runtime baseline are reconciled and v
 
 ## P05 — Design System & UX Foundation
 
-**Status:** PRÓXIMA FASE CANDIDATA / NÃO AUTORIZADA
+**Status:** COMPLETE
 
 ### Objective
 
@@ -316,6 +316,8 @@ P04 baseline sufficiently defined.
 
 P05 implementation requires a Phase Execution Brief and owner authorization where protected operations are involved.
 
+The owner's 12/09/2026 brief authorizes only the reusable design-system and UX foundation on the P05 branch. Complete checkout, delivery, authentication and admin surfaces remain in their later phases.
+
 ### Exit criteria
 
 The product has a coherent reusable design foundation.
@@ -323,6 +325,8 @@ The product has a coherent reusable design foundation.
 ---
 
 # GATE A — FOUNDATION READY
+
+**GATE A: PASS — 12/09/2026**
 
 **Position:** after P05.
 
@@ -1199,6 +1203,8 @@ Parallel work must never be inferred automatically from this roadmap.
 
 ## GATE A — FOUNDATION READY
 
+**GATE A: PASS — 12/09/2026**
+
 After P05.
 
 Architecture, runtime and UX foundation are ready for product construction.
@@ -1239,11 +1245,11 @@ Current status:
 
 **P04 RECONCILIATION: COMPLETE / FINAL VALIDATION PASSED**
 
-**P05: NOT STARTED / NOT AUTHORIZED**
+**P05: COMPLETE / CHATGPT TECHNICAL REVIEW PASS**
 
-No P05 implementation has started as a result of this roadmap.
+P05 started from the clean, synchronized `main` at `da59530` under the owner's 12/09/2026 Phase Execution Brief. This does not mark P05 COMPLETE or Gate A PASS.
 
-Before execution, P05 requires its own Phase Execution Brief and applicable review/authorization gates.
+P05 is complete. Gate A — FOUNDATION READY received PASS. P06 is the next candidate and remains NOT STARTED / NOT AUTHORIZED.
 
 ---
 
