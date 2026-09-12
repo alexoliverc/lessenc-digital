@@ -1,6 +1,6 @@
 # L'Essenc Digital — LES-DIG
 
-**Estado:** P00–P05 COMPLETE. Gate A — FOUNDATION READY PASS. P06 é a próxima fase candidata e ainda não está autorizada.
+**Estado:** P00–P06 COMPLETE. Gate A — FOUNDATION READY PASS. P06 — Data & Persistence Foundation recebeu ChatGPT Technical Review PASS; checkpoint Git pendente.
 
 Plataforma inicial de receita digital da L'Essenc para venda de e-books autorais.
 
@@ -53,4 +53,4 @@ O script cria ou atualiza o diretório `C:\Projetos\lessenc-digital`, inicializa
 
 ## Estado atual
 
-O scaffold anterior usava pnpm; a baseline física aprovada usa npm e `package-lock.json`, mantendo Next.js 16.3.4, React 19.3.0 e Vitest 5.0.0. A fundação visual P05 passou na validação local na branch própria, sem implementar a página de vendas final. Prisma e MySQL pertencem à P06. O primeiro produto aprovado é `Cronograma Capilar Inteligente`, R$ 29,90. Nenhuma credencial real deve ser adicionada ao Git.
+O scaffold anterior usava pnpm; a baseline física aprovada usa npm e `package-lock.json`, mantendo Next.js 16.3.4, React 19.3.0 e Vitest 5.0.0. A P05 está COMPLETE. A P06 introduz MySQL 8.4 local isolado e Prisma 7.10.0, sem página de vendas final nem deploy. O primeiro produto aprovado é `Cronograma Capilar Inteligente`, R$ 29,90. Nenhuma credencial real deve ser adicionada ao Git.

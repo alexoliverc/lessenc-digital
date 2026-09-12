@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P05
+# Índice oficial da baseline documental LES-DIG P00–P06
 
-**Estado:** documentação e implementação P00–P05 COMPLETE. Gate A — FOUNDATION READY PASS. P06 ainda não foi iniciada.
+**Estado:** documentação e implementação P00–P06 COMPLETE. Gate A — FOUNDATION READY PASS. P06 recebeu ChatGPT Technical Review PASS.
 
 ## Precedência e classificação das fontes
 
@@ -16,7 +16,7 @@ Decisão explícita mais recente do owner prevalece. Em conflito entre documento
 
 ## CANONICAL CURRENT DOCUMENTS
 
-Os links das seções P00–P05, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
+Os links das seções P00–P06, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
 
 ## Governança P00
 
@@ -49,9 +49,9 @@ Os links das seções P00–P05, [segurança](security/README.md), [operações]
 O [índice P05](design-system/README.md) liga [tokens](design-system/design-tokens.md), [componentes](design-system/component-foundation.md), [responsividade e acessibilidade](design-system/responsive-accessibility.md) e [exit review](design-system/p05-exit-review.md). A implementação P05 recebeu PASS na revisão técnica do ChatGPT e Gate A — FOUNDATION READY recebeu PASS em 12/09/2026.
 
 
-## Persistência P06 — planejamento
+## Persistência P06 — implementação física concluída
 
-O [bootstrap Prisma/MySQL](architecture/prisma-database-bootstrap.md) preserva o planejamento arquitetural necessário para a futura **P06 — Data & Persistence Foundation**. Prisma, MySQL, schema, migrations e persistência não fazem parte da execução física da P04 e deverão ser revalidados no Phase Execution Brief da P06 antes de qualquer implementação.
+O [índice P06](persistence/README.md) liga [modelo físico](persistence/data-model.md), [MySQL local, migrações e testes](persistence/local-mysql-and-testing.md) e [exit review](persistence/p06-exit-review.md). O [bootstrap anterior](architecture/prisma-database-bootstrap.md) permanece como planejamento P04/P06 revalidado; a baseline física corrente é a P06 documentada aqui, sem declarar a fase COMPLETE.
 ## Operações
 
 O [índice operacional](operations/README.md) reúne procedimentos do ambiente de desenvolvimento. A [baseline da workstation e VS Code](operations/development-workstation-vscode.md) registra Profile, editor, terminal, Git/SCM, extensões, segurança, performance e recuperação sem redefinir a stack ou os ambientes canônicos da aplicação.

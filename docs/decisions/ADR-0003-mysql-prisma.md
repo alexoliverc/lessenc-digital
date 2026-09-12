@@ -19,3 +19,7 @@ Após a reorganização canônica do `ROADMAP.md`:
 - este ADR não autoriza instalação de Prisma ou criação de banco durante P04.
 
 A decisão principal deste ADR continua válida; somente o momento de implementação e o pin exato da versão foram desacoplados da P04.
+
+## Amendment — P06 em 12/09/2026
+
+O Phase Execution Brief P06 do owner fixou `prisma`, `@prisma/client` e `@prisma/adapter-mariadb` em **7.10.0**, mantendo MySQL 8.4 LTS. A implementação física e as evidências estão em [docs/persistence](../persistence/README.md), ainda aguardando revisão técnica. A referência original a 7.9.1 permanece como histórico da decisão anterior.
