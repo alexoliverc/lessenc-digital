@@ -1,6 +1,6 @@
 # P04 — Primitivas compartilhadas
 
-**Status:** specification COMPLETE; Money/Currency, Clock/SystemClock, Result/ApplicationError e assertNever implementados na [P07](p07-core-implementation.md), aguardando revisão técnica. CorrelationId e paginação permanecem adiados até uso concreto.
+**Status:** specification COMPLETE; Money/Currency, Clock/SystemClock, Result/ApplicationError e assertNever implementados na [P07](p07-core-implementation.md), agora COMPLETE. CorrelationId e paginação permanecem adiados até uso concreto.
 
 Primitivas previstas: `Money` (inteiro em unidades menores + `Currency`, operações seguras), `Currency`, `Clock`, `SystemClock` (tempo UTC consistente), `Result`, `ApplicationError` (código e contexto seguro), `correlationId`, paginação com limites explícitos e `assertNever` para estados exaustivos. Elas apoiam domínio sem acoplar regras específicas de Payments, Catalog ou Entitlements a `shared/`.
 

@@ -1,6 +1,6 @@
 # P07 — Núcleo de domínio e aplicação
 
-**Estado:** ChatGPT Technical Re-Review PASS e Final Quality Gate PASS; aguarda checkpoint/integração Git e P07 ainda não está COMPLETE.
+**Estado:** COMPLETE — ChatGPT Technical Re-Review PASS / Final Quality Gate PASS / checkpoint `4c96e7b` / PR #6 merged em `main` como `6a19eda`.
 **Base:** `e04438c1e09950d34a48051df6cc3219c580aad7`.
 
 ## Estrutura e contratos

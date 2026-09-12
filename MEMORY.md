@@ -3,7 +3,7 @@
 **Última atualização:** 12/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
 **Estado documental:** P00–P06 COMPLETE. Gate A — FOUNDATION READY PASS. P06 — Data & Persistence Foundation recebeu ChatGPT Technical Review PASS.
-**Execução atual:** P07 — Core Domain & Application Layer recebeu ChatGPT Technical Re-Review PASS e Final Quality Gate PASS na branch `phase/p07-core-domain-application-layer`, base `e04438c`. Aguarda checkpoint e integração Git; P07 ainda não está COMPLETE. Próximo gate formal: Gate B após P11.
+**Estado atual:** P07 — Core Domain & Application Layer COMPLETE. ChatGPT Technical Re-Review PASS, Final Quality Gate PASS, checkpoint `4c96e7b` preservado pela tag `checkpoint/p07-core-domain-application-complete` e PR #6 integrada em `main` pelo merge `6a19eda`. P08 — Public Sales Experience permanece não iniciada e depende de autorização explícita. Próximo gate formal: Gate B após P11.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -44,4 +44,4 @@
 - ChatGPT Technical Review: PASS.
 - Gate A — FOUNDATION READY: PASS.
 - Nenhuma dependência foi adicionada ou removida.
-- P06 foi implementada e validada em 12/09/2026 na branch `phase/p06-data-persistence-foundation`; ChatGPT Technical Review PASS. Checkpoint `f4bfdfe` e tag `checkpoint/p06-data-persistence-complete` foram publicados; PR #4 foi mergeada em `main` pelo merge commit `694a085`, e o fechamento documental pela PR #5 em `e04438c`. P07 recebeu ChatGPT Technical Re-Review PASS e Final Quality Gate PASS; aguarda checkpoint e integração Git e ainda não está COMPLETE.
+- P06 foi implementada e validada em 12/09/2026 na branch `phase/p06-data-persistence-foundation`; ChatGPT Technical Review PASS. Checkpoint `f4bfdfe` e tag `checkpoint/p06-data-persistence-complete` foram publicados; PR #4 foi mergeada em `main` pelo merge commit `694a085`, e o fechamento documental pela PR #5 em `e04438c`. P07 foi encerrada como COMPLETE após checkpoint `4c96e7b`, publicação da tag e merge da PR #6 em `main` como `6a19eda`. P08 permanece não iniciada.
