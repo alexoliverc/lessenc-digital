@@ -11,6 +11,10 @@ const p08CommercialEnvSchema = z.object({
   P08_OFFER_ID: z.string().uuid(),
 });
 
+const p09SubmissionEnvSchema = z.object({
+  P09_SUBMISSION_SECRET: z.string().min(32),
+});
+
 type ServerEnvInput = {
   APP_ENV?: string;
   APP_URL?: string;
@@ -20,6 +24,10 @@ type ServerEnvInput = {
 type P08CommercialEnvInput = {
   P08_PRODUCT_ID?: string | undefined;
   P08_OFFER_ID?: string | undefined;
+};
+
+type P09SubmissionEnvInput = {
+  P09_SUBMISSION_SECRET?: string | undefined;
 };
 
 export function parseServerEnv(input: ServerEnvInput) {
@@ -37,6 +45,16 @@ export function parseP08CommercialEnv(input: P08CommercialEnvInput) {
 
   if (!parsed.success) {
     throw new Error(`Invalid P08 commercial configuration: ${z.prettifyError(parsed.error)}`);
+  }
+
+  return Object.freeze(parsed.data);
+}
+
+export function parseP09SubmissionEnv(input: P09SubmissionEnvInput) {
+  const parsed = p09SubmissionEnvSchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(`Invalid P09 submission configuration: ${z.prettifyError(parsed.error)}`);
   }
 
   return Object.freeze(parsed.data);
