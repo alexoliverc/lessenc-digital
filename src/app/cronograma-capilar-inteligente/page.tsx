@@ -55,14 +55,12 @@ function CommercialState({
           <Stack gap="small">
             <strong>{experience.product.name}</strong>
             <p>
-              Acesso ao conteúdo digital apresentado nesta página. Nenhuma cobrança é iniciada nesta
-              experiência.
+              Acesso ao conteúdo digital apresentado nesta página. O checkout cria um pedido
+              pendente; nenhum pagamento é processado nesta etapa.
             </p>
           </Stack>
 
-          <LinkAction href="#conteudo-do-guia" variant="outline">
-            Ver o conteúdo
-          </LinkAction>
+          <LinkAction href="/checkout">Continuar para o checkout</LinkAction>
         </Stack>
       </Surface>
     );
@@ -431,8 +429,8 @@ export default async function CronogramaCapilarInteligentePage() {
                   estiver disponível.
                 </p>
                 <p>
-                  Nenhuma cobrança, pedido ou pagamento é iniciado nesta página. A experiência de
-                  finalização será tratada separadamente.
+                  Esta página não cria pedidos. Ao continuar para o checkout, um pedido pendente
+                  poderá ser registrado; nenhum pagamento é processado nesta fase.
                 </p>
               </Stack>
             </div>
@@ -472,8 +470,8 @@ export default async function CronogramaCapilarInteligentePage() {
                 <details>
                   <summary>Já posso realizar o pagamento nesta página?</summary>
                   <p>
-                    Não. Esta experiência apresenta o produto e a oferta, mas não inicia pagamento
-                    ou criação de pedido.
+                    Ainda não. O checkout já pode registrar um pedido pendente, mas o processamento
+                    de pagamento será disponibilizado em uma etapa posterior.
                   </p>
                 </details>
               </div>

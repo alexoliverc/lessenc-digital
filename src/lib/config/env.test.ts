@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseP08CommercialEnv, parseServerEnv } from "./env-schema";
+import { parseP08CommercialEnv, parseP09SubmissionEnv, parseServerEnv } from "./env-schema";
 
 describe("parseServerEnv", () => {
   it.each(["local", "test", "staging", "production"] as const)(
@@ -12,6 +12,7 @@ describe("parseServerEnv", () => {
 
   it("rejects a missing or unknown application environment", () => {
     expect(() => parseServerEnv({})).toThrow("Invalid server environment configuration");
+
     expect(() => parseServerEnv({ APP_ENV: "preview" })).toThrow(
       "Invalid server environment configuration",
     );
@@ -53,5 +54,31 @@ describe("parseP08CommercialEnv", () => {
         P08_OFFER_ID: "offer",
       }),
     ).toThrow("Invalid P08 commercial configuration");
+  });
+});
+
+describe("parseP09SubmissionEnv", () => {
+  const SECRET = "p09-test-secret-32-bytes-minimum-value";
+
+  it("accepts a server-only checkout submission secret", () => {
+    expect(
+      parseP09SubmissionEnv({
+        P09_SUBMISSION_SECRET: SECRET,
+      }),
+    ).toEqual({
+      P09_SUBMISSION_SECRET: SECRET,
+    });
+  });
+
+  it("rejects a missing submission secret", () => {
+    expect(() => parseP09SubmissionEnv({})).toThrow("Invalid P09 submission configuration");
+  });
+
+  it("rejects submission secrets shorter than 32 characters", () => {
+    expect(() =>
+      parseP09SubmissionEnv({
+        P09_SUBMISSION_SECRET: "too-short",
+      }),
+    ).toThrow("Invalid P09 submission configuration");
   });
 });

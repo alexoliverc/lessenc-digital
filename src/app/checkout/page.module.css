@@ -1,0 +1,191 @@
+.skipLink {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  padding: 0.75rem 1rem;
+  background: var(--color-foreground);
+  color: var(--color-background);
+  text-decoration: none;
+}
+
+.skipLink:focus {
+  transform: translateY(0);
+}
+
+.header {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-foreground) 12%, transparent);
+  background: var(--color-background);
+}
+
+.headerInner {
+  min-height: 4.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  color: inherit;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.brand small {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+
+.checkoutSection {
+  min-height: calc(100vh - 10rem);
+}
+
+.heading {
+  max-width: 46rem;
+}
+
+.heading h1 {
+  max-width: 14ch;
+  margin-top: 0.45rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  opacity: 0.68;
+}
+
+.lead,
+.description,
+.purchaseLabel,
+.formNote {
+  opacity: 0.74;
+}
+
+.lead {
+  max-width: 42rem;
+  margin-top: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.checkoutGrid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.05fr)
+    minmax(20rem, 0.95fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.summary,
+.formCard {
+  min-width: 0;
+}
+
+.summary h2,
+.formCard h2 {
+  margin-top: 0.45rem;
+}
+
+.description {
+  margin-top: 0.8rem;
+  line-height: 1.7;
+}
+
+.rule {
+  width: 100%;
+  height: 1px;
+  background: color-mix(in srgb, var(--color-foreground) 14%, transparent);
+}
+
+.price {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.purchaseLabel {
+  margin-top: 0.65rem;
+}
+
+.summaryList {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.65rem;
+  line-height: 1.55;
+}
+
+.form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.submit {
+  width: 100%;
+}
+
+.formNote {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.statePanel {
+  max-width: 46rem;
+}
+
+.footer {
+  border-top: 1px solid color-mix(in srgb, var(--color-foreground) 12%, transparent);
+}
+
+.footerInner {
+  min-height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.footerInner a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.footerInner p {
+  opacity: 0.62;
+}
+
+@media (max-width: 48rem) {
+  .headerInner {
+    min-height: 4.25rem;
+  }
+
+  .checkoutGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .footerInner {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: 1.25rem;
+  }
+}
