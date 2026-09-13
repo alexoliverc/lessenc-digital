@@ -134,18 +134,57 @@ model OrderItem {
 }
 
 model Payment {
-  id          String        @id @default(uuid()) @db.Char(36)
-  orderId     String        @map("order_id") @db.Char(36)
-  status      PaymentStatus @default(PENDING)
-  amountMinor Int           @map("amount_minor") @db.UnsignedInt
-  currency    String        @db.Char(3)
-  createdAt   DateTime      @default(now()) @map("created_at") @db.DateTime(3)
-  updatedAt   DateTime      @updatedAt @map("updated_at") @db.DateTime(3)
-  approvedAt  DateTime?     @map("approved_at") @db.DateTime(3)
-  order       Order         @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  id                   String         @id @default(uuid()) @db.Char(36)
+  orderId              String         @map("order_id") @db.Char(36)
+  status               PaymentStatus  @default(PENDING)
+  amountMinor          Int            @map("amount_minor") @db.UnsignedInt
+  currency             String         @db.Char(3)
+  createdAt            DateTime       @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt            DateTime       @updatedAt @map("updated_at") @db.DateTime(3)
+  approvedAt           DateTime?      @map("approved_at") @db.DateTime(3)
+  provider             String?        @db.VarChar(32)
+  providerOrderId      String?        @unique @map("provider_order_id") @db.VarChar(64)
+  providerPaymentId    String?        @unique @map("provider_payment_id") @db.VarChar(64)
+  attemptNumber        Int?           @map("attempt_number") @db.UnsignedInt
+  activeAttemptKey     String?        @unique @map("active_attempt_key") @db.Char(36)
+  paymentMethod        String?        @map("payment_method") @db.VarChar(16)
+  operationFingerprint String?        @map("operation_fingerprint") @db.Char(64)
+  providerStatus       String?        @map("provider_status") @db.VarChar(64)
+  providerStatusDetail String?        @map("provider_status_detail") @db.VarChar(128)
+  submittedAt          DateTime?      @map("submitted_at") @db.DateTime(3)
+  lastProviderSyncAt   DateTime?      @map("last_provider_sync_at") @db.DateTime(3)
+  requiresReview       Boolean        @default(false) @map("requires_review")
+  reviewReason         String?        @map("review_reason") @db.VarChar(96)
+  order                Order          @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  events               PaymentEvent[]
 
+  @@unique([orderId, attemptNumber])
   @@index([orderId])
   @@map("payments")
+}
+
+model PaymentEvent {
+  id                   String    @id @default(uuid()) @db.Char(36)
+  paymentId            String    @map("payment_id") @db.Char(36)
+  source               String    @db.VarChar(24)
+  providerOrderId      String?   @map("provider_order_id") @db.VarChar(64)
+  providerPaymentId    String?   @map("provider_payment_id") @db.VarChar(64)
+  providerEventId      String?   @map("provider_event_id") @db.VarChar(64)
+  providerStatus       String    @map("provider_status") @db.VarChar(64)
+  providerStatusDetail String?   @map("provider_status_detail") @db.VarChar(128)
+  amountMinor          Int?      @map("amount_minor") @db.UnsignedInt
+  currency             String?   @db.Char(3)
+  deduplicationKey     String    @unique @map("deduplication_key") @db.VarChar(160)
+  snapshotHash         String    @map("snapshot_hash") @db.Char(64)
+  applicationResult    String    @map("application_result") @db.VarChar(16)
+  observedAt           DateTime  @default(now()) @map("observed_at") @db.DateTime(3)
+  providerOccurredAt   DateTime? @map("provider_occurred_at") @db.DateTime(3)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.DateTime(3)
+  payment              Payment   @relation(fields: [paymentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([paymentId, observedAt])
+  @@index([providerOrderId])
+  @@map("payment_events")
 }
 
 model Entitlement {

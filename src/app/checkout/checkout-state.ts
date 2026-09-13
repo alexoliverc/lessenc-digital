@@ -13,11 +13,13 @@ export type CheckoutActionState =
       state: "CREATED";
       message: string;
       emailError: null;
+      canContinue?: boolean;
     }>
   | Readonly<{
       state: "EXISTING";
       message: string;
       emailError: null;
+      canContinue?: boolean;
     }>
   | Readonly<{
       state: "UNAVAILABLE";

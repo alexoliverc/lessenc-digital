@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P09
+# Índice oficial da baseline documental LES-DIG P00–P10
 
-**Estado:** P00–P09 COMPLETE. Gate A PASS. P09 e a remediação pós-auditoria A01–A06 estão encerradas e integradas em `main`. P10 — Mercado Pago Integration está OWNER AUTHORIZED / NOT STARTED.
+**Estado:** P00–P09 COMPLETE. Gate A PASS. P10 — Mercado Pago Integration: **TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / READY FOR GIT INTEGRATION**; ainda sem commit/tag/push/PR/merge.
 
 ## Precedência e classificação das fontes
 
@@ -16,7 +16,7 @@ Decisão explícita mais recente do owner prevalece. Em conflito entre documento
 
 ## CANONICAL CURRENT DOCUMENTS
 
-Os links das seções P00–P09, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
+Os links das seções P00–P10, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
 
 ## Governança P00
 
@@ -24,13 +24,13 @@ Os links das seções P00–P09, [segurança](security/README.md), [operações]
 
 ## Produto P01 — `docs/product/`
 
-| Tema | Documento |
-| --- | --- |
-| Requisitos | [product-requirements.md](product/product-requirements.md) |
-| Primeiro produto | [first-product-definition.md](product/first-product-definition.md) |
-| Oferta e regras comerciais | [offer-commercial-rules.md](product/offer-commercial-rules.md) |
-| Jornada | [customer-journey-business-rules.md](product/customer-journey-business-rules.md) |
-| Rastreabilidade | [requirements-matrix.md](product/requirements-matrix.md) |
+| Tema                       | Documento                                                                        |
+| -------------------------- | -------------------------------------------------------------------------------- |
+| Requisitos                 | [product-requirements.md](product/product-requirements.md)                       |
+| Primeiro produto           | [first-product-definition.md](product/first-product-definition.md)               |
+| Oferta e regras comerciais | [offer-commercial-rules.md](product/offer-commercial-rules.md)                   |
+| Jornada                    | [customer-journey-business-rules.md](product/customer-journey-business-rules.md) |
+| Rastreabilidade            | [requirements-matrix.md](product/requirements-matrix.md)                         |
 
 ## Arquitetura P02 — `docs/architecture/`
 
@@ -47,7 +47,6 @@ Os links das seções P00–P09, [segurança](security/README.md), [operações]
 ## Design System P05 — `docs/design-system/`
 
 O [índice P05](design-system/README.md) liga [tokens](design-system/design-tokens.md), [componentes](design-system/component-foundation.md), [responsividade e acessibilidade](design-system/responsive-accessibility.md) e [exit review](design-system/p05-exit-review.md). A implementação P05 recebeu PASS na revisão técnica do ChatGPT e Gate A — FOUNDATION READY recebeu PASS em 12/09/2026.
-
 
 ## Persistência P06 — implementação física concluída
 
@@ -77,7 +76,13 @@ Payment, Mercado Pago, Entitlement e fulfillment permanecem fora da P09.
 
 A auditoria pós-merge A01–A06 foi integralmente remediada. Checkpoint `53bdaafc0f740241807a498b0a64378bab25c683`, tag `checkpoint/p09-post-audit-remediation-complete`, PR #12 e merge `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration está OWNER AUTHORIZED / NOT STARTED. A trava física da remediação P09 foi encerrada; a fase ainda deve começar pelo lifecycle próprio.
+P10 foi executada na branch própria após autorização explícita do owner; revisão técnica independente e Final Quality Gate R2 passaram após remediação A01–A05.
+
+## Mercado Pago Integration P10 — TECHNICAL REVIEW PASS / READY FOR GIT INTEGRATION
+
+[Phase Execution Brief](architecture/p10-phase-execution-brief.md), [Physical Implementation Plan](architecture/p10-implementation-plan.md) e [Validation Report](architecture/p10-validation-report.md).
+
+P10 implementa a fronteira financeira via Checkout Transparente / Orders API, persistência de tentativas e eventos, PIX, cartão de crédito em uma parcela, 3DS, webhook verificado e reconciliação. A auditoria independente A01–A05 foi integralmente remediada e o Final Quality Gate R2 passou. A validação real de provedor TEST e navegador permanece explicitamente limitada no relatório. Entitlement/entrega continuam P11. P10 ainda não é COMPLETE até a integração Git.
 
 ## Operações
 

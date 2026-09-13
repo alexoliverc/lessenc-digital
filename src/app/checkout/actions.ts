@@ -1,11 +1,13 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { cookies } from "next/headers";
 
 import { getDatabaseClient } from "@/infrastructure/database/client";
 import { PrismaCatalogRepository } from "@/infrastructure/database/prisma-catalog-repository";
 import { PrismaCheckoutOrderRepository } from "@/infrastructure/database/prisma-checkout-order-repository";
 import { HmacCheckoutSubmissionTokenService } from "@/infrastructure/security/hmac-checkout-submission-token";
+import { HmacPaymentContinuation } from "@/infrastructure/security/hmac-payment-continuation";
 import { getP08CommercialEnv, getP09SubmissionEnv } from "@/lib/config/env";
 import { ResolvePurchasableOffer } from "@/modules/catalog/application/resolve-purchasable-offer";
 import { CreateCheckoutOrder } from "@/modules/commerce/application/create-checkout-order";
@@ -137,16 +139,59 @@ export async function createCheckoutOrderAction(
 
     switch (result.value.state) {
       case "CREATED":
+        if (process.env.P10_PAYMENT_CONTINUATION_SECRET) {
+          try {
+            const service = new HmacPaymentContinuation(
+              process.env.P10_PAYMENT_CONTINUATION_SECRET,
+            );
+            const token = service.issue(verified.value.submissionId);
+            (await cookies()).set("lessenc_payment_continuation", token, {
+              httpOnly: true,
+              sameSite: "lax",
+              secure: process.env.APP_ENV !== "local",
+              path: "/checkout",
+              maxAge: 24 * 60 * 60,
+            });
+            return Object.freeze({
+              state: "CREATED",
+              message: "Pedido criado. Escolha como pagar.",
+              emailError: null,
+              canContinue: true,
+            });
+          } catch {
+            safeLog("checkout.payment_continuation.unavailable", correlationId);
+          }
+        }
         return Object.freeze({
           state: "CREATED",
-          message: "Pedido criado com sucesso. Nenhum pagamento foi processado nesta etapa.",
+          message: "Pedido criado. O pagamento está indisponível no momento.",
           emailError: null,
         });
 
       case "EXISTING":
+        if (process.env.P10_PAYMENT_CONTINUATION_SECRET) {
+          try {
+            const service = new HmacPaymentContinuation(
+              process.env.P10_PAYMENT_CONTINUATION_SECRET,
+            );
+            const current = service.verify(
+              (await cookies()).get("lessenc_payment_continuation")?.value,
+            );
+            if (current?.orderId === verified.value.submissionId) {
+              return Object.freeze({
+                state: "EXISTING",
+                message: "Pedido já registrado. Continue o pagamento.",
+                emailError: null,
+                canContinue: true,
+              });
+            }
+          } catch {
+            safeLog("checkout.payment_continuation.unavailable", correlationId);
+          }
+        }
         return Object.freeze({
           state: "EXISTING",
-          message: "Seu pedido já havia sido criado. Nenhum pagamento foi processado nesta etapa.",
+          message: "Pedido já registrado. Reinicie o checkout para continuar com segurança.",
           emailError: null,
         });
 

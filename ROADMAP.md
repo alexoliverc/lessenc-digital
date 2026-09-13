@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** None. P09 — Checkout & Order Creation is COMPLETE, including post-audit remediation A01–A06 and merge closeout. P10 — Mercado Pago Integration is OWNER AUTHORIZED / NOT STARTED and is the next executable phase.
+**Current execution:** P10 — Mercado Pago Integration: TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / READY FOR GIT INTEGRATION. P09 remains COMPLETE. P10 is not COMPLETE until protected Git integration and main synchronization are finished.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -508,7 +508,7 @@ A valid order can be created independently of payment confirmation.
 
 ## P10 — Mercado Pago Integration
 
-**Status:** OWNER AUTHORIZED — NOT STARTED
+**Status:** TECHNICAL REVIEW PASS — READY FOR GIT INTEGRATION
 
 ### Objective
 
@@ -1265,7 +1265,7 @@ P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creati
 
 P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration is **OWNER AUTHORIZED / NOT STARTED**. The temporary physical freeze imposed during the P09 post-audit remediation is closed. P10 may begin only through its own governed lifecycle: preflight, Phase Execution Brief / implementation plan, dedicated branch, validation and review.
+P10 — Mercado Pago Integration is **TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / READY FOR GIT INTEGRATION** on `phase/p10-mercado-pago-integration`. The owner authorized execution after P10.1 planning. Independent review findings A01–A05 were remediated and the R2 gate passed. P10 is not COMPLETE until checkpoint, tag, push, PR/merge and `main` synchronization are concluded. Evidence is in [p10-validation-report.md](docs/architecture/p10-validation-report.md).
 
 ---
 # 11. Post-MVP horizon
