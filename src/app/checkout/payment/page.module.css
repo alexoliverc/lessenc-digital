@@ -1,0 +1,54 @@
+.page {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 4rem);
+  min-height: 75vh;
+}
+.page h1 {
+  margin-block: 1.5rem 0.5rem;
+}
+.choice {
+  display: grid;
+  gap: 1.5rem;
+  margin-block: 2rem;
+}
+.methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.methods button,
+.pix button {
+  border: 0;
+  border-radius: 0.5rem;
+  padding: 0.85rem 1.2rem;
+  cursor: pointer;
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+.methods button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pix {
+  display: grid;
+  gap: 1rem;
+  overflow-wrap: anywhere;
+}
+.pix img {
+  max-width: min(100%, 16rem);
+  height: auto;
+}
+.pix code {
+  white-space: pre-wrap;
+  padding: 0.75rem;
+  border: 1px solid currentColor;
+}
+.challenge {
+  width: 100%;
+  min-height: 36rem;
+  border: 0;
+}
+.note {
+  opacity: 0.72;
+}

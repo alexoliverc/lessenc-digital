@@ -44,6 +44,9 @@ function CheckoutFeedback({
       return (
         <Alert tone="success" heading="Pedido criado">
           <p>{state.message}</p>
+          {state.canContinue && (
+            <LinkAction href="/checkout/payment">Escolher pagamento</LinkAction>
+          )}
         </Alert>
       );
 
@@ -51,6 +54,9 @@ function CheckoutFeedback({
       return (
         <Alert tone="information" heading="Pedido já registrado">
           <p>{state.message}</p>
+          {state.canContinue && (
+            <LinkAction href="/checkout/payment">Continuar pagamento</LinkAction>
+          )}
         </Alert>
       );
 

@@ -3,7 +3,7 @@
 **Última atualização:** 13/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
 **Estado documental:** P00–P09 COMPLETE. Gate A — FOUNDATION READY PASS. P09 — Checkout & Order Creation e sua remediação pós-auditoria A01–A06 estão integradas e encerradas.
-**Estado atual:** P09 — Checkout & Order Creation COMPLETE após remediação pós-auditoria. Remediação checkpoint `53bdaafc0f740241807a498b0a64378bab25c683`, tag `checkpoint/p09-post-audit-remediation-complete`, PR #12 e merge `c78ae181be209ff8c91e996e785b42fb77f6edb2`. P10 — Mercado Pago Integration está OWNER AUTHORIZED / NOT STARTED. A trava física criada durante a remediação P09 está encerrada; P10 deve iniciar pelo lifecycle próprio da fase. Próximo gate formal do programa: Gate B após P11.
+**Estado atual:** P09 — Checkout & Order Creation COMPLETE após remediação pós-auditoria. P10 — Mercado Pago Integration recebeu TECHNICAL REVIEW PASS e Final Quality Gate R2 PASS na branch `phase/p10-mercado-pago-integration`; remediação A01–A05 encerrada. A fase está READY FOR GIT INTEGRATION, ainda sem commit/tag/push/PR/merge e ainda não é COMPLETE. Próximo gate formal do programa: Gate B após P11.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -18,15 +18,15 @@
 - O brief do owner de 12/09/2026 autorizou a P06 a partir de `c77ff9c`: MySQL 8.4 LTS local isolado, Prisma CLI/Client/adapter MariaDB exatamente 7.10.0, schema, migrations e testes físicos. Os 6 alertas transitivos iniciais foram corrigidos na P06 pelos overrides de mariadb 3.5.4, mysql2 3.24.4 e deepmerge-ts 8.0.2; auditoria P07 confirmou 0 vulnerabilidades. Não há liberação de produção.
 - Ambientes aprovados na nova baseline: LOCAL, TEST, STAGING e PRODUCTION com `APP_ENV` separado de `NODE_ENV`, sem afirmar que tenham sido provisionados.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
-- Governança e arquitetura estão documentadas; schema/migrations foram implementados na P06. Integração financeira, auth, storage privado e deploy continuam adiados.
+- Governança e arquitetura estão documentadas; schema/migrations foram implementados na P06. Autenticação, storage privado e deploy continuam adiados; a integração financeira P10 está implementada e tecnicamente aprovada, aguardando integração Git.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.
 - Cada execução requer Phase Execution Brief, branch, autorização de operações protegidas por `AGENTS.md`, validação e retorno ao ChatGPT antes da progressão. Repositório é a memória técnica oficial; ler os arquivos na ordem definida em AGENTS.md.
 - O projeto principal de cosméticos físicos continua separado e será retomado com a formação de caixa.
 
 ## Onde encontrar as decisões
 
-- [ROADMAP.md](ROADMAP.md): fases P00–P20, P09 encerrada incluindo remediação pós-auditoria e P10 como próxima fase autorizada ainda não iniciada.
-- [docs/README.md](docs/README.md): índice P00–P09, segurança, operações, ADRs e histórico anterior.
+- [ROADMAP.md](ROADMAP.md): fases P00–P20, P09 encerrada incluindo remediação pós-auditoria e P10 tecnicamente aprovada aguardando integração Git.
+- [docs/README.md](docs/README.md): índice P00–P10, segurança, operações, ADRs e histórico anterior.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
 - [Produto P01](docs/product/first-product-definition.md), [modelo P03](docs/architecture/domain-model.md), [stack P04](docs/architecture/runtime-toolchain-baseline.md) e [P04 exit review](docs/architecture/p04-exit-review.md).
 - [Registro 11/09/2026](memory/2026-09-11.md): scaffold anterior, conflitos reconciliados, validações e histórico.
@@ -36,7 +36,7 @@
 
 **OPEN:** provedor/tecnologia de autenticação; provedor de email; storage privado; provedor de observabilidade; provedor de rate limit distribuído em produção; framework E2E no navegador. Também domínio, política de reembolso/suporte, conteúdo final e detalhamento físico de schema/recovery dependem de decisão antes da implementação correspondente.
 
-**DEFERRED:** entrega P11, autenticação P12, analytics P13 e ambientes de produção até os respectivos gates. P10 está autorizada, porém ainda não iniciada. A sequência `GOV/MVP-*` e os documentos `LES-*-R01` continuam como histórico; a baseline atual P00–P20 prevalece quando divergir.
+**DEFERRED:** entrega P11, autenticação P12, analytics P13 e ambientes de produção até os respectivos gates. P10 está tecnicamente aprovada e aguarda integração Git; não é COMPLETE. A sequência `GOV/MVP-*` e os documentos `LES-*-R01` continuam como histórico; a baseline atual P00–P20 prevalece quando divergir.
 
 ## P05 — fechamento técnico
 
@@ -79,7 +79,7 @@
 - Branch de fase e tag permanecem preservadas.
 - P09 entrega checkout backend-authoritative e criação atômica de Customer + Order.PENDING + OrderItem.
 - P09 não cria Payment, Entitlement ou OutboxEvent e não integra Mercado Pago.
-- P10 — Mercado Pago Integration: OWNER AUTHORIZED / NOT STARTED.
+- P10 — Mercado Pago Integration: TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / READY FOR GIT INTEGRATION. A migration P10 permanece aplicada somente nos bancos P06 local/test; nenhuma chamada financeira real foi feita. O relatório P10 contém a remediação A01–A05 e os limites de browser/TEST.
 
 ## P09 — Post-audit remediation closeout
 
@@ -94,4 +94,4 @@
 - Checkpoint da remediação confirmado como ancestral de `main`.
 - P09 e sua remediação pós-auditoria estão encerradas como COMPLETE.
 - A autorização do owner para P10 permanece vigente. A trava física imposta durante a remediação P09 está encerrada.
-- P10 — Mercado Pago Integration permanece NOT STARTED e deverá iniciar por preflight, documentação de execução e branch próprios.
+- P10 — Mercado Pago Integration foi executada na branch `phase/p10-mercado-pago-integration`; a revisão técnica independente e o Final Quality Gate R2 passaram após remediação A01–A05. A fase está READY FOR GIT INTEGRATION, sem operações Git protegidas executadas.
