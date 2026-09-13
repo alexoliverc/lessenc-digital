@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P09
 
-**Estado:** P00–P09 COMPLETE. Gate A PASS. P09 recebeu ChatGPT Technical Re-Review PASS e Final Quality Gate PASS, checkpoint `62e70eb` e merge da PR #10 em `cda1ae9`. P10 permanece NOT STARTED / NOT AUTHORIZED.
+**Estado:** P00–P09 COMPLETE. Gate A PASS. P09 e a remediação pós-auditoria A01–A06 estão encerradas e integradas em `main`. P10 — Mercado Pago Integration está OWNER AUTHORIZED / NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -75,7 +75,9 @@ A implementação entrega /checkout backend-authoritative, email mínimo do comp
 
 Payment, Mercado Pago, Entitlement e fulfillment permanecem fora da P09.
 
-P10 — Mercado Pago Integration permanece NOT STARTED / NOT AUTHORIZED.
+A auditoria pós-merge A01–A06 foi integralmente remediada. Checkpoint `53bdaafc0f740241807a498b0a64378bab25c683`, tag `checkpoint/p09-post-audit-remediation-complete`, PR #12 e merge `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
+
+P10 — Mercado Pago Integration está OWNER AUTHORIZED / NOT STARTED. A trava física da remediação P09 foi encerrada; a fase ainda deve começar pelo lifecycle próprio.
 
 ## Operações
 

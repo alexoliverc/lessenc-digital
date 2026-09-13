@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** None. P09 — Checkout & Order Creation is COMPLETE. P10 — Mercado Pago Integration is the next candidate and remains NOT STARTED / NOT AUTHORIZED.
+**Current execution:** None. P09 — Checkout & Order Creation is COMPLETE, including post-audit remediation A01–A06 and merge closeout. P10 — Mercado Pago Integration is OWNER AUTHORIZED / NOT STARTED and is the next executable phase.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -508,7 +508,7 @@ A valid order can be created independently of payment confirmation.
 
 ## P10 — Mercado Pago Integration
 
-**Status:** PENDENTE
+**Status:** OWNER AUTHORIZED — NOT STARTED
 
 ### Objective
 
@@ -1263,7 +1263,9 @@ P08 was checkpointed at `f73400a` with tag `checkpoint/p08-public-sales-experien
 
 P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creation-complete` and merged through PR #10 as `cda1ae9`.
 
-P10 — Mercado Pago Integration has **not started** and remains **NOT AUTHORIZED**. A separate owner authorization is required before planning or implementation.
+P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
+
+P10 — Mercado Pago Integration is **OWNER AUTHORIZED / NOT STARTED**. The temporary physical freeze imposed during the P09 post-audit remediation is closed. P10 may begin only through its own governed lifecycle: preflight, Phase Execution Brief / implementation plan, dedicated branch, validation and review.
 
 ---
 # 11. Post-MVP horizon

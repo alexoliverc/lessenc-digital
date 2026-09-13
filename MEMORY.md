@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 12/09/2026
+**Última atualização:** 13/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P09 COMPLETE. Gate A — FOUNDATION READY PASS. P09 — Checkout & Order Creation recebeu ChatGPT Technical Re-Review PASS e Final Quality Gate PASS.
-**Estado atual:** P09 — Checkout & Order Creation COMPLETE. Checkpoint `62e70eb7af955a72d6dff597c82f06d9fcfdd574`, tag `checkpoint/p09-checkout-order-creation-complete`, PR #10 e merge `cda1ae9109b71dcb4dcdbeffdbed4cb6d2f0491f`. P10 — Mercado Pago Integration permanece NOT STARTED / NOT AUTHORIZED. Próximo gate formal: Gate B após P11.
+**Estado documental:** P00–P09 COMPLETE. Gate A — FOUNDATION READY PASS. P09 — Checkout & Order Creation e sua remediação pós-auditoria A01–A06 estão integradas e encerradas.
+**Estado atual:** P09 — Checkout & Order Creation COMPLETE após remediação pós-auditoria. Remediação checkpoint `53bdaafc0f740241807a498b0a64378bab25c683`, tag `checkpoint/p09-post-audit-remediation-complete`, PR #12 e merge `c78ae181be209ff8c91e996e785b42fb77f6edb2`. P10 — Mercado Pago Integration está OWNER AUTHORIZED / NOT STARTED. A trava física criada durante a remediação P09 está encerrada; P10 deve iniciar pelo lifecycle próprio da fase. Próximo gate formal do programa: Gate B após P11.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -25,7 +25,7 @@
 
 ## Onde encontrar as decisões
 
-- [ROADMAP.md](ROADMAP.md): fases P00–P20, P08 encerrada e P09 como próxima candidata.
+- [ROADMAP.md](ROADMAP.md): fases P00–P20, P09 encerrada incluindo remediação pós-auditoria e P10 como próxima fase autorizada ainda não iniciada.
 - [docs/README.md](docs/README.md): índice P00–P09, segurança, operações, ADRs e histórico anterior.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
 - [Produto P01](docs/product/first-product-definition.md), [modelo P03](docs/architecture/domain-model.md), [stack P04](docs/architecture/runtime-toolchain-baseline.md) e [P04 exit review](docs/architecture/p04-exit-review.md).
@@ -36,7 +36,7 @@
 
 **OPEN:** provedor/tecnologia de autenticação; provedor de email; storage privado; provedor de observabilidade; provedor de rate limit distribuído em produção; framework E2E no navegador. Também domínio, política de reembolso/suporte, conteúdo final e detalhamento físico de schema/recovery dependem de decisão antes da implementação correspondente.
 
-**DEFERRED:** fluxos P09+, coordenação financeira persistida/eventos P10, entrega P11, autenticação P12, analytics P13 e ambientes de produção até os respectivos gates. A sequência `GOV/MVP-*` e os documentos `LES-*-R01` continuam como histórico; a baseline atual P00–P20 prevalece quando divergir.
+**DEFERRED:** entrega P11, autenticação P12, analytics P13 e ambientes de produção até os respectivos gates. P10 está autorizada, porém ainda não iniciada. A sequência `GOV/MVP-*` e os documentos `LES-*-R01` continuam como histórico; a baseline atual P00–P20 prevalece quando divergir.
 
 ## P05 — fechamento técnico
 
@@ -79,4 +79,19 @@
 - Branch de fase e tag permanecem preservadas.
 - P09 entrega checkout backend-authoritative e criação atômica de Customer + Order.PENDING + OrderItem.
 - P09 não cria Payment, Entitlement ou OutboxEvent e não integra Mercado Pago.
-- P10 — Mercado Pago Integration permanece NOT STARTED / NOT AUTHORIZED.
+- P10 — Mercado Pago Integration: OWNER AUTHORIZED / NOT STARTED.
+
+## P09 — Post-audit remediation closeout
+
+- Auditoria independente pós-merge identificou A01–A06; todos os findings foram corrigidos e receberam FIXED / PASS.
+- Final Quality Gate da remediação: 209/209 unitários PASS, 19/19 integrações MySQL/TLS PASS, Prisma validate PASS, `npm audit` 0 vulnerabilidades e build de produção PASS.
+- Checkpoint da remediação: `53bdaafc0f740241807a498b0a64378bab25c683`.
+- Tag: `checkpoint/p09-post-audit-remediation-complete`.
+- Branch preservada: `fix/p09-post-audit-remediation`.
+- PR #12 validada como MERGEABLE / CLEAN e mergeada em `main`.
+- Merge da remediação: `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
+- `main` local e `origin/main` sincronizadas nesse merge.
+- Checkpoint da remediação confirmado como ancestral de `main`.
+- P09 e sua remediação pós-auditoria estão encerradas como COMPLETE.
+- A autorização do owner para P10 permanece vigente. A trava física imposta durante a remediação P09 está encerrada.
+- P10 — Mercado Pago Integration permanece NOT STARTED e deverá iniciar por preflight, documentação de execução e branch próprios.
