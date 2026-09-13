@@ -17,7 +17,7 @@
 
 .header {
   border-bottom: var(--border-width) solid var(--color-border-soft);
-  background: rgb(255 253 250 / 92%);
+  background: var(--color-surface);
 }
 
 .headerInner {
@@ -92,10 +92,9 @@
 }
 
 .hero {
-  position: relative;
   overflow: hidden;
   background:
-    radial-gradient(circle at 88% 8%, rgb(233 224 214 / 85%), transparent 34rem),
+    radial-gradient(circle at 88% 8%, rgb(233 224 214 / 90%), transparent 34rem),
     var(--color-background);
 }
 
@@ -105,13 +104,8 @@
   gap: var(--space-8);
 }
 
-.heroCopy {
-  position: relative;
-  z-index: 2;
-}
-
 .heroCopy h1 {
-  max-width: 11ch;
+  max-width: 12ch;
   font-family: var(--font-display);
   font-size: var(--text-display);
   font-weight: 400;
@@ -119,8 +113,7 @@
 }
 
 .eyebrow,
-.cardIndex,
-.editorialLabel {
+.index {
   color: var(--color-accent);
   font-size: var(--text-caption);
   font-weight: 750;
@@ -136,52 +129,51 @@
   line-height: 1.6;
 }
 
-.heroActions {
+.actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-start;
   gap: var(--space-3);
 }
 
-.heroNote {
-  max-width: 52ch;
+.microcopy {
+  max-width: 50ch;
   color: var(--color-foreground-muted);
   font-size: var(--text-small);
 }
 
-.heroVisual {
+.productVisual {
   position: relative;
   display: grid;
-  min-height: 34rem;
+  min-height: 35rem;
   place-items: center;
 }
 
-.visualGlow {
+.visualBackdrop {
   position: absolute;
-  width: min(34rem, 90%);
+  width: min(35rem, 92%);
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--color-secondary);
-  filter: blur(0.25rem);
 }
 
-.editorialCard {
+.book {
   position: relative;
   z-index: 2;
   display: flex;
   width: min(24rem, 78vw);
-  min-height: 31rem;
+  min-height: 32rem;
   flex-direction: column;
   justify-content: space-between;
   border: var(--border-width) solid rgb(129 120 109 / 45%);
   border-radius: var(--radius-sm);
   padding: var(--space-5);
-  background: linear-gradient(145deg, rgb(255 255 255 / 65%), transparent 55%), #ded0c0;
+  background: linear-gradient(145deg, rgb(255 255 255 / 70%), transparent 55%), #ddd0c1;
   box-shadow: var(--shadow-raised);
   transform: rotate(2deg);
 }
 
-.editorialTop,
-.editorialBottom {
+.bookTop {
   display: flex;
   justify-content: space-between;
   gap: var(--space-4);
@@ -191,66 +183,49 @@
   letter-spacing: var(--tracking-label);
 }
 
-.editorialCenter {
+.bookCenter {
   display: grid;
   gap: var(--space-4);
 }
 
-.editorialCenter strong {
+.bookCenter strong {
   max-width: 9ch;
   font-family: var(--font-display);
-  font-size: clamp(2.25rem, 7vw, 4rem);
+  font-size: clamp(2.3rem, 7vw, 4rem);
   font-weight: 400;
   letter-spacing: var(--tracking-display);
   line-height: 0.96;
 }
 
-.editorialCenter p {
-  max-width: 24ch;
+.bookCenter p,
+.bookFooter {
   color: var(--color-foreground-muted);
   font-size: var(--text-small);
 }
 
-.editorialRule {
+.bookRule {
   width: 3.5rem;
   height: var(--border-width);
   background: var(--color-accent);
 }
 
-.visualCaption {
-  position: absolute;
-  z-index: 3;
-  right: 0;
-  bottom: var(--space-3);
-  display: flex;
-  max-width: 15rem;
-  align-items: flex-start;
-  gap: var(--space-3);
-  border-left: var(--border-width) solid var(--color-border);
-  padding-left: var(--space-4);
-  color: var(--color-foreground-muted);
-  font-size: var(--text-small);
-}
-
-.visualCaption span {
-  color: var(--color-accent);
-  font-weight: 750;
-}
-
-.splitSection,
-.methodGrid {
+.split,
+.benefitGrid,
+.offerGrid,
+.productPresentation {
   display: grid;
   gap: var(--space-7);
 }
 
-.sectionIntro,
 .sectionHeading {
   display: grid;
+  max-width: var(--content-narrow);
   gap: var(--space-3);
 }
 
-.sectionIntro h2,
 .sectionHeading h2,
+.offerGrid h2,
+.productPresentation h2,
 .finalContent h2 {
   font-family: var(--font-display);
   font-size: var(--text-title);
@@ -258,67 +233,148 @@
   letter-spacing: var(--tracking-display);
 }
 
-.sectionCopy {
-  max-width: 42rem;
-  color: var(--color-foreground-muted);
-  font-size: var(--text-subheading);
-}
-
-.sectionHeading {
-  max-width: var(--content-narrow);
-}
-
 .sectionHeading > p:last-child,
-.pillarCard p,
-.methodLead,
-.methodStep p,
+.bodyCopy,
+.pillar p,
+.contentCard p,
+.benefit p,
+.step p,
+.offerCard p,
+.statePanel p,
 .finalContent > p {
   color: var(--color-foreground-muted);
 }
 
-.pillarCard {
+.bodyCopy {
+  max-width: 44rem;
+  font-size: var(--text-subheading);
+}
+
+.pillar,
+.contentCard {
   display: grid;
-  min-height: 19rem;
+  min-height: 18rem;
   align-content: space-between;
   gap: var(--space-5);
 }
 
-.pillarCard h3 {
+.pillar h3,
+.contentCard h3 {
   font-family: var(--font-display);
   font-size: var(--text-heading);
   font-weight: 400;
 }
 
-.methodLead {
-  max-width: 34rem;
-  font-size: var(--text-subheading);
-}
-
-.methodSteps {
+.benefitList,
+.steps,
+.faq {
   border-top: var(--border-width) solid var(--color-border-soft);
 }
 
-.methodStep {
+.benefit,
+.step {
   display: grid;
   gap: var(--space-4);
   border-bottom: var(--border-width) solid var(--color-border-soft);
   padding-block: var(--space-5);
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: 2.5rem minmax(0, 1fr);
 }
 
-.methodStep > span {
+.benefit > span,
+.step > span {
   color: var(--color-accent);
   font-size: var(--text-caption);
   font-weight: 750;
   letter-spacing: var(--tracking-label);
 }
 
-.methodStep strong {
+.step strong {
   display: block;
   margin-bottom: var(--space-1);
   font-family: var(--font-display);
   font-size: var(--text-subheading);
   font-weight: 400;
+}
+
+.productPresentation {
+  align-items: center;
+}
+
+.miniBook {
+  display: flex;
+  min-height: 25rem;
+  flex-direction: column;
+  justify-content: space-between;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-6);
+  background: #ddd0c1;
+  box-shadow: var(--shadow-soft);
+}
+
+.miniBook span,
+.miniBook small {
+  color: var(--color-foreground-muted);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.miniBook strong {
+  max-width: 10ch;
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  font-weight: 400;
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+}
+
+.offerGrid {
+  align-items: start;
+}
+
+.offerCard {
+  min-width: 0;
+}
+
+.offerPrice {
+  margin-top: var(--space-2);
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  line-height: 1;
+}
+
+.offerLabel {
+  margin-top: var(--space-2);
+  font-size: var(--text-small);
+}
+
+.offerRule {
+  height: var(--border-width);
+  background: var(--color-border-soft);
+}
+
+.statePanel {
+  align-self: start;
+}
+
+.faq details {
+  border-bottom: var(--border-width) solid var(--color-border-soft);
+  padding-block: var(--space-5);
+}
+
+.faq summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--text-subheading);
+}
+
+.faq details p {
+  max-width: 48rem;
+  padding-top: var(--space-3);
+  color: var(--color-foreground-muted);
 }
 
 .finalSection {
@@ -332,6 +388,10 @@
 .finalContent > p {
   max-width: 42rem;
   font-size: var(--text-subheading);
+}
+
+.finalContent .actions {
+  justify-content: center;
 }
 
 .footer {
@@ -360,10 +420,6 @@
   .nav {
     display: flex;
   }
-
-  .methodStep {
-    grid-template-columns: 3rem minmax(0, 1fr);
-  }
 }
 
 @media (min-width: 64rem) {
@@ -372,13 +428,15 @@
     gap: var(--space-9);
   }
 
-  .splitSection {
+  .split,
+  .benefitGrid,
+  .offerGrid {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
     gap: var(--space-9);
   }
 
-  .methodGrid {
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  .productPresentation {
+    grid-template-columns: minmax(18rem, 0.8fr) minmax(0, 1.2fr);
     gap: var(--space-9);
   }
 }
