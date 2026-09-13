@@ -1418,3 +1418,35 @@ The remediation is cleared for checkpoint and Git integration.
 The historical P09 implementation and post-merge closeout remain preserved above. The corrected post-audit baseline is not considered integrated into `main` until this remediation branch completes its Git checkpoint, review and merge lifecycle.
 
 P10 has separate owner authorization, but physical P10 implementation remains frozen until this P09 remediation is integrated and its post-merge closeout is complete.
+
+---
+
+## 44. Post-Audit Remediation Post-Merge Closeout
+
+Final Git evidence for the P09 post-audit remediation:
+
+- remediation checkpoint: `53bdaafc0f740241807a498b0a64378bab25c683`;
+- tag: `checkpoint/p09-post-audit-remediation-complete`;
+- branch: `fix/p09-post-audit-remediation`;
+- remediation PR: #12;
+- PR base: `main`;
+- approved PR head OID: `53bdaafc0f740241807a498b0a64378bab25c683`;
+- pre-merge state: MERGEABLE / CLEAN;
+- merge commit: `c78ae181be209ff8c91e996e785b42fb77f6edb2`;
+- remediation checkpoint confirmed as ancestor of merged `main`;
+- local `main` synchronized with `origin/main`;
+- remediation branch and checkpoint tag preserved.
+
+All findings A01 through A06 remain FIXED / PASS.
+
+No schema, migration or dependency change was introduced by the remediation.
+
+No Mercado Pago, Payment, Entitlement or OutboxEvent implementation was introduced by the remediation.
+
+**P09 POST-AUDIT REMEDIATION FINAL STATUS: COMPLETE**
+
+The temporary physical freeze applied to P10 while P09 remediation was pending is closed.
+
+P10 — Mercado Pago Integration has separate owner authorization already recorded and is now **OWNER AUTHORIZED / NOT STARTED**.
+
+P10 does not begin automatically: its execution must start through the normal governed phase lifecycle, with its own preflight, execution documentation, branch, validation and technical review.
