@@ -67,13 +67,24 @@ The browser never supplies authoritative:
 
 A raw client-controlled UUID is not accepted as trusted Order identity.
 
-P09 introduces a server-authenticated opaque token containing:
+P09 introduces a server-authenticated, signed, tamper-evident continuation token containing:
 
 - token version;
 - submission/order UUID;
 - issued-at instant.
 
 Integrity mechanism:
+Security property:
+
+- the payload is JSON encoded with base64url and is readable by the client;
+- HMAC-SHA-256 protects integrity and detects tampering;
+- the token does not provide confidentiality or encryption;
+- secrets and sensitive credentials must never be placed in the payload;
+- the token is not an authentication credential;
+- the token is not an authorization credential;
+- the token is not proof of payment;
+- its purpose is limited to preserving checkout continuation data and validating that the signed payload was not modified.
+
 
 - HMAC-SHA-256;
 - Node.js built-in `crypto`;
@@ -521,7 +532,7 @@ They do not mean:
 
 ## 19. Public continuation
 
-The signed submission token may remain the opaque continuation reference after successful Order creation.
+The signed submission token may remain the tamper-evident continuation reference after successful Order creation.
 
 Raw persistent identifiers are not required in the public contract.
 

@@ -13,6 +13,12 @@ export type CheckoutOrderPersistenceResult =
       state: "CONFLICT";
     }>;
 
+export type CheckoutOrderCreationResult =
+  | CheckoutOrderPersistenceResult
+  | Readonly<{
+      state: "PRICE_CHANGED";
+    }>;
+
 export interface CheckoutOrderRepository {
   create(
     input: Readonly<{
@@ -36,6 +42,8 @@ export class CreateCheckoutOrder {
       productId: string;
       offerId: string;
       email: string;
+      presentedAmountMinor: number;
+      presentedCurrency: string;
     }>,
   ) {
     return attemptAsync(async () => {
@@ -50,6 +58,15 @@ export class CreateCheckoutOrder {
 
       if (!prepared.ok) {
         throw prepared.error;
+      }
+
+      if (
+        prepared.value.total.amountMinor !== input.presentedAmountMinor ||
+        prepared.value.total.currency !== input.presentedCurrency
+      ) {
+        return Object.freeze({
+          state: "PRICE_CHANGED" as const,
+        });
       }
 
       return this.checkoutOrders.create({

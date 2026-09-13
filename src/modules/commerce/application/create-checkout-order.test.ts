@@ -72,7 +72,7 @@ class ThrowingCheckoutOrderRepository implements CheckoutOrderRepository {
   }
 }
 
-function catalogOffer(): CatalogOffer {
+function catalogOffer(amountMinor = 2990): CatalogOffer {
   return Object.freeze({
     product: Object.freeze({
       id: productId,
@@ -83,7 +83,7 @@ function catalogOffer(): CatalogOffer {
     offer: Object.freeze({
       id: offerId,
       productId,
-      price: Money.of(2990, "BRL"),
+      price: Money.of(amountMinor, "BRL"),
       isActive: true,
     }),
   });
@@ -104,6 +104,8 @@ function validInput() {
     productId,
     offerId,
     email,
+    presentedAmountMinor: 2990,
+    presentedCurrency: "BRL",
   };
 }
 
@@ -208,6 +210,46 @@ describe("CreateCheckoutOrder", () => {
     expect(persisted.order.items[0]?.unitPrice).toEqual(Money.of(2990, "BRL"));
   });
 
+  it("returns PRICE_CHANGED without persistence when the authoritative amount changed", async () => {
+    const repository = new RecordingCheckoutOrderRepository({
+      state: "CREATED",
+    });
+
+    const useCase = new CreateCheckoutOrder(createPrepareOrder(catalogOffer(3990)), repository);
+
+    const result = await useCase.execute(validInput());
+
+    expect(result).toEqual({
+      ok: true,
+      value: {
+        state: "PRICE_CHANGED",
+      },
+    });
+
+    expect(repository.calls).toHaveLength(0);
+  });
+
+  it("returns PRICE_CHANGED without persistence when the presented currency differs", async () => {
+    const repository = new RecordingCheckoutOrderRepository({
+      state: "CREATED",
+    });
+
+    const useCase = new CreateCheckoutOrder(createPrepareOrder(), repository);
+
+    const result = await useCase.execute({
+      ...validInput(),
+      presentedCurrency: "USD",
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      value: {
+        state: "PRICE_CHANGED",
+      },
+    });
+
+    expect(repository.calls).toHaveLength(0);
+  });
   it("preserves EXISTING from the repository", async () => {
     const repository = new RecordingCheckoutOrderRepository({
       state: "EXISTING",

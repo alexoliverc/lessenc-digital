@@ -1,10 +1,16 @@
 export type CheckoutSubmissionTokenValue = Readonly<{
   submissionId: string;
   issuedAt: string;
+  presentedAmountMinor: number;
+  presentedCurrency: "BRL";
 }>;
 
 export type CheckoutSubmissionTokenIssueError =
-  "INVALID_SECRET" | "INVALID_SUBMISSION_ID" | "INVALID_ISSUED_AT";
+  | "INVALID_SECRET"
+  | "INVALID_SUBMISSION_ID"
+  | "INVALID_ISSUED_AT"
+  | "INVALID_PRESENTED_AMOUNT"
+  | "INVALID_PRESENTED_CURRENCY";
 
 export type CheckoutSubmissionTokenVerifyError =
   | "INVALID_SECRET"
@@ -38,6 +44,8 @@ export interface CheckoutSubmissionTokenService {
     input: Readonly<{
       submissionId: string;
       issuedAt: string;
+      presentedAmountMinor: number;
+      presentedCurrency: string;
     }>,
   ): CheckoutSubmissionTokenIssueResult;
 

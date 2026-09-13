@@ -10,8 +10,21 @@ const submissionId = "123e4567-e89b-12d3-a456-426614174000";
 
 const issuedAt = "2026-09-13T01:00:00.000Z";
 
+const presentedAmountMinor = 2990;
+
+const presentedCurrency = "BRL";
+
 function createService(signingSecret = secret): HmacCheckoutSubmissionTokenService {
   return new HmacCheckoutSubmissionTokenService(signingSecret);
+}
+
+function validTokenInput() {
+  return {
+    submissionId,
+    issuedAt,
+    presentedAmountMinor,
+    presentedCurrency,
+  };
 }
 
 function signPayload(payload: unknown, signingSecret = secret): string {
@@ -28,10 +41,7 @@ describe("HmacCheckoutSubmissionTokenService", () => {
   it("issues and verifies a valid token", () => {
     const service = createService();
 
-    const issued = service.issue({
-      submissionId,
-      issuedAt,
-    });
+    const issued = service.issue(validTokenInput());
 
     expect(issued.ok).toBe(true);
 
@@ -44,6 +54,8 @@ describe("HmacCheckoutSubmissionTokenService", () => {
       value: {
         submissionId,
         issuedAt,
+        presentedAmountMinor,
+        presentedCurrency,
       },
     });
   });
@@ -51,15 +63,9 @@ describe("HmacCheckoutSubmissionTokenService", () => {
   it("is deterministic for the same payload and secret", () => {
     const service = createService();
 
-    const first = service.issue({
-      submissionId,
-      issuedAt,
-    });
+    const first = service.issue(validTokenInput());
 
-    const second = service.issue({
-      submissionId,
-      issuedAt,
-    });
+    const second = service.issue(validTokenInput());
 
     expect(first).toEqual(second);
   });
@@ -67,12 +73,7 @@ describe("HmacCheckoutSubmissionTokenService", () => {
   it("rejects secrets shorter than 32 bytes", () => {
     const service = createService("too-short");
 
-    expect(
-      service.issue({
-        submissionId,
-        issuedAt,
-      }),
-    ).toEqual({
+    expect(service.issue(validTokenInput())).toEqual({
       ok: false,
       reason: "INVALID_SECRET",
     });
@@ -88,8 +89,8 @@ describe("HmacCheckoutSubmissionTokenService", () => {
 
     expect(
       service.issue({
+        ...validTokenInput(),
         submissionId: "not-a-uuid",
-        issuedAt,
       }),
     ).toEqual({
       ok: false,
@@ -102,7 +103,7 @@ describe("HmacCheckoutSubmissionTokenService", () => {
 
     expect(
       service.issue({
-        submissionId,
+        ...validTokenInput(),
         issuedAt: "2026-09-13",
       }),
     ).toEqual({
@@ -111,13 +112,97 @@ describe("HmacCheckoutSubmissionTokenService", () => {
     });
   });
 
+  it("rejects invalid presented amounts at issuance", () => {
+    const service = createService();
+
+    expect(
+      service.issue({
+        ...validTokenInput(),
+        presentedAmountMinor: 0,
+      }),
+    ).toEqual({
+      ok: false,
+      reason: "INVALID_PRESENTED_AMOUNT",
+    });
+  });
+
+  it("rejects unsupported presented currencies at issuance", () => {
+    const service = createService();
+
+    expect(
+      service.issue({
+        ...validTokenInput(),
+        presentedCurrency: "USD",
+      }),
+    ).toEqual({
+      ok: false,
+      reason: "INVALID_PRESENTED_CURRENCY",
+    });
+  });
+
+  it("rejects a tampered presented amount", () => {
+    const service = createService();
+    const issued = service.issue(validTokenInput());
+
+    if (!issued.ok) {
+      throw new Error("token fixture was not issued");
+    }
+
+    const [, signatureSegment] = issued.token.split(".");
+
+    if (!signatureSegment) {
+      throw new Error("issued token fixture is malformed");
+    }
+
+    const modifiedPayload = Buffer.from(
+      JSON.stringify({
+        v: 2,
+        submissionId,
+        issuedAt,
+        presentedAmountMinor: 3990,
+        presentedCurrency,
+      }),
+    ).toString("base64url");
+
+    expect(service.verify(`${modifiedPayload}.${signatureSegment}`)).toEqual({
+      ok: false,
+      reason: "INVALID_SIGNATURE",
+    });
+  });
+
+  it("rejects a tampered presented currency", () => {
+    const service = createService();
+    const issued = service.issue(validTokenInput());
+
+    if (!issued.ok) {
+      throw new Error("token fixture was not issued");
+    }
+
+    const [, signatureSegment] = issued.token.split(".");
+
+    if (!signatureSegment) {
+      throw new Error("issued token fixture is malformed");
+    }
+
+    const modifiedPayload = Buffer.from(
+      JSON.stringify({
+        v: 2,
+        submissionId,
+        issuedAt,
+        presentedAmountMinor,
+        presentedCurrency: "USD",
+      }),
+    ).toString("base64url");
+
+    expect(service.verify(`${modifiedPayload}.${signatureSegment}`)).toEqual({
+      ok: false,
+      reason: "INVALID_SIGNATURE",
+    });
+  });
   it("rejects a modified signature", () => {
     const service = createService();
 
-    const issued = service.issue({
-      submissionId,
-      issuedAt,
-    });
+    const issued = service.issue(validTokenInput());
 
     if (!issued.ok) {
       throw new Error("token fixture was not issued");
@@ -142,10 +227,7 @@ describe("HmacCheckoutSubmissionTokenService", () => {
   it("rejects modified payload content", () => {
     const service = createService();
 
-    const issued = service.issue({
-      submissionId,
-      issuedAt,
-    });
+    const issued = service.issue(validTokenInput());
 
     if (!issued.ok) {
       throw new Error("token fixture was not issued");
@@ -159,9 +241,11 @@ describe("HmacCheckoutSubmissionTokenService", () => {
 
     const modifiedPayload = Buffer.from(
       JSON.stringify({
-        v: 1,
+        v: 2,
         submissionId: "123e4567-e89b-12d3-a456-426614174001",
         issuedAt,
+        presentedAmountMinor,
+        presentedCurrency,
       }),
     ).toString("base64url");
 
@@ -189,7 +273,7 @@ describe("HmacCheckoutSubmissionTokenService", () => {
     const service = createService();
 
     const token = signPayload({
-      v: 2,
+      v: 1,
       submissionId,
       issuedAt,
     });
@@ -204,9 +288,11 @@ describe("HmacCheckoutSubmissionTokenService", () => {
     const service = createService();
 
     const token = signPayload({
-      v: 1,
+      v: 2,
       submissionId: "not-a-uuid",
       issuedAt,
+      presentedAmountMinor,
+      presentedCurrency,
     });
 
     expect(service.verify(token)).toEqual({
@@ -219,9 +305,11 @@ describe("HmacCheckoutSubmissionTokenService", () => {
     const service = createService();
 
     const token = signPayload({
-      v: 1,
+      v: 2,
       submissionId,
       issuedAt: "2026-09-13",
+      presentedAmountMinor,
+      presentedCurrency,
     });
 
     expect(service.verify(token)).toEqual({

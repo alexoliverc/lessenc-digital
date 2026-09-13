@@ -107,6 +107,8 @@ export class PrismaCheckoutOrderRepository implements CheckoutOrderRepository {
   constructor(private readonly database: PrismaClient) {}
 
   async create(input: CreateCheckoutInput): Promise<CheckoutOrderPersistenceResult> {
+    let orderIdConflict = false;
+
     try {
       await this.database.$transaction(async (transaction) => {
         await transaction.customer.create({
@@ -116,9 +118,15 @@ export class PrismaCheckoutOrderRepository implements CheckoutOrderRepository {
           },
         });
 
-        await transaction.order.create({
-          data: orderCreateData(input.order),
-        });
+        try {
+          await transaction.order.create({
+            data: orderCreateData(input.order),
+          });
+        } catch (error) {
+          // Order.id is the only unique constraint on this model.
+          orderIdConflict = isUniqueConstraintError(error);
+          throw error;
+        }
 
         for (const item of input.order.items) {
           await transaction.orderItem.create({
@@ -131,7 +139,7 @@ export class PrismaCheckoutOrderRepository implements CheckoutOrderRepository {
         state: "CREATED" as const,
       });
     } catch (error) {
-      if (!isUniqueConstraintError(error)) {
+      if (!orderIdConflict || !isUniqueConstraintError(error)) {
         throw error;
       }
 
