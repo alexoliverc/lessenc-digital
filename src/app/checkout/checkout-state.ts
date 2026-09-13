@@ -25,6 +25,11 @@ export type CheckoutActionState =
       emailError: null;
     }>
   | Readonly<{
+      state: "PRICE_CHANGED";
+      message: string;
+      emailError: null;
+    }>
+  | Readonly<{
       state: "FAILED";
       message: string;
       emailError: null;

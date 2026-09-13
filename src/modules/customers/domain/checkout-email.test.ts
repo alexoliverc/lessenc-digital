@@ -76,6 +76,22 @@ describe("parseCheckoutEmail", () => {
     });
   });
 
+  it.each([
+    ["leading CR", "\ralex@example.com"],
+    ["trailing CR", "alex@example.com\r"],
+    ["leading LF", "\nalex@example.com"],
+    ["trailing LF", "alex@example.com\n"],
+    ["trailing CRLF", "alex@example.com\r\n"],
+    ["NUL", "alex@example.com\u0000"],
+    ["unit separator", "alex@example.com\u001f"],
+    ["DEL", "alex@example.com\u007f"],
+  ])("rejects raw ASCII control characters: %s", (_case, email) => {
+    expect(parseCheckoutEmail(email)).toEqual({
+      ok: false,
+      reason: "INVALID_FORMAT",
+    });
+  });
+
   it("rejects a local part longer than 64 characters", () => {
     expect(parseCheckoutEmail(`${"a".repeat(65)}@example.com`)).toEqual({
       ok: false,

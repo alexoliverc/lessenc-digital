@@ -112,10 +112,12 @@ function uniqueError(): Prisma.PrismaClientKnownRequestError {
 function fakeDatabase(
   options?: Readonly<{
     transactionError?: unknown;
+    createError?: Partial<Record<Call["model"], unknown>>;
     existing?: ExistingOrder | null;
   }>,
 ) {
   const calls: Call[] = [];
+  const lookups: string[] = [];
 
   const transaction = {
     customer: {
@@ -124,6 +126,10 @@ function fakeDatabase(
           model: "customer",
           data: args.data,
         });
+
+        if (options?.createError?.customer) {
+          throw options.createError.customer;
+        }
 
         return {};
       },
@@ -136,6 +142,10 @@ function fakeDatabase(
           data: args.data,
         });
 
+        if (options?.createError?.order) {
+          throw options.createError.order;
+        }
+
         return {};
       },
     },
@@ -146,6 +156,10 @@ function fakeDatabase(
           model: "orderItem",
           data: args.data,
         });
+
+        if (options?.createError?.orderItem) {
+          throw options.createError.orderItem;
+        }
 
         return {};
       },
@@ -162,13 +176,17 @@ function fakeDatabase(
     },
 
     order: {
-      findUnique: async () => options?.existing ?? null,
+      findUnique: async () => {
+        lookups.push("order");
+        return options?.existing ?? null;
+      },
     },
   } as unknown as PrismaClient;
 
   return {
     database,
     calls,
+    lookups,
   };
 }
 
@@ -234,7 +252,7 @@ describe("PrismaCheckoutOrderRepository", () => {
 
   it("returns EXISTING when P2002 corresponds to the same logical Order", async () => {
     const fixture = fakeDatabase({
-      transactionError: uniqueError(),
+      createError: { order: uniqueError() },
       existing: compatibleExisting(),
     });
 
@@ -249,7 +267,7 @@ describe("PrismaCheckoutOrderRepository", () => {
     const existing = compatibleExisting();
 
     const fixture = fakeDatabase({
-      transactionError: uniqueError(),
+      createError: { order: uniqueError() },
       existing: {
         ...existing,
         customer: {
@@ -274,7 +292,7 @@ describe("PrismaCheckoutOrderRepository", () => {
     }
 
     const fixture = fakeDatabase({
-      transactionError: uniqueError(),
+      createError: { order: uniqueError() },
       existing: {
         ...existing,
         totalMinor: 3990,
@@ -299,7 +317,7 @@ describe("PrismaCheckoutOrderRepository", () => {
     const error = uniqueError();
 
     const fixture = fakeDatabase({
-      transactionError: error,
+      createError: { order: error },
       existing: null,
     });
 
@@ -307,6 +325,37 @@ describe("PrismaCheckoutOrderRepository", () => {
 
     await expect(repository.create(input())).rejects.toBe(error);
   });
+
+  it.each(["customer", "orderItem"] as const)(
+    "does not classify P2002 in %s as a duplicate Order",
+    async (model) => {
+      const error = uniqueError();
+      const fixture = fakeDatabase({
+        createError: { [model]: error },
+        existing: compatibleExisting(),
+      });
+      const repository = new PrismaCheckoutOrderRepository(fixture.database);
+
+      await expect(repository.create(input())).rejects.toBe(error);
+      expect(fixture.lookups).toEqual([]);
+    },
+  );
+
+  it.each(["customer", "orderItem"] as const)(
+    "does not classify P2002 in %s as a conflicting Order",
+    async (model) => {
+      const error = uniqueError();
+      const existing = compatibleExisting();
+      const fixture = fakeDatabase({
+        createError: { [model]: error },
+        existing: { ...existing, customer: { email: "different@example.com" } },
+      });
+      const repository = new PrismaCheckoutOrderRepository(fixture.database);
+
+      await expect(repository.create(input())).rejects.toBe(error);
+      expect(fixture.lookups).toEqual([]);
+    },
+  );
 
   it("does not classify unrelated Prisma failures as idempotency", async () => {
     const error = new Prisma.PrismaClientKnownRequestError("sensitive foreign key details", {

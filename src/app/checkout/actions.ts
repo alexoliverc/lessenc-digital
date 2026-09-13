@@ -114,6 +114,8 @@ export async function createCheckoutOrderAction(
       productId: commercial.P08_PRODUCT_ID,
       offerId: commercial.P08_OFFER_ID,
       email: parsedEmail.value,
+      presentedAmountMinor: verified.value.presentedAmountMinor,
+      presentedCurrency: verified.value.presentedCurrency,
     });
 
     if (!result.ok) {
@@ -145,6 +147,14 @@ export async function createCheckoutOrderAction(
         return Object.freeze({
           state: "EXISTING",
           message: "Seu pedido já havia sido criado. Nenhum pagamento foi processado nesta etapa.",
+          emailError: null,
+        });
+
+      case "PRICE_CHANGED":
+        return Object.freeze({
+          state: "PRICE_CHANGED",
+          message:
+            "O valor da oferta foi atualizado. Recarregue a página para revisar o novo preço antes de continuar.",
           emailError: null,
         });
 

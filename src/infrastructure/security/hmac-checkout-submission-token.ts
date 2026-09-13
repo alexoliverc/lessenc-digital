@@ -9,7 +9,7 @@ import {
 } from "../../modules/commerce/application/checkout-submission-token";
 import { isUtcInstant } from "../../shared/clock";
 
-const TOKEN_VERSION = 1;
+const TOKEN_VERSION = 2;
 const MIN_SECRET_BYTES = 32;
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
@@ -20,6 +20,8 @@ type CheckoutSubmissionPayload = Readonly<{
   v: number;
   submissionId: string;
   issuedAt: string;
+  presentedAmountMinor: number;
+  presentedCurrency: "BRL";
 }>;
 
 function hasValidSecret(secret: string): boolean {
@@ -85,6 +87,8 @@ export class HmacCheckoutSubmissionTokenService implements CheckoutSubmissionTok
     input: Readonly<{
       submissionId: string;
       issuedAt: string;
+      presentedAmountMinor: number;
+      presentedCurrency: string;
     }>,
   ): CheckoutSubmissionTokenIssueResult {
     if (!hasValidSecret(this.secret)) {
@@ -99,10 +103,20 @@ export class HmacCheckoutSubmissionTokenService implements CheckoutSubmissionTok
       return issueFailure("INVALID_ISSUED_AT");
     }
 
+    if (!Number.isSafeInteger(input.presentedAmountMinor) || input.presentedAmountMinor <= 0) {
+      return issueFailure("INVALID_PRESENTED_AMOUNT");
+    }
+
+    if (input.presentedCurrency !== "BRL") {
+      return issueFailure("INVALID_PRESENTED_CURRENCY");
+    }
+
     const payload: CheckoutSubmissionPayload = Object.freeze({
       v: TOKEN_VERSION,
       submissionId: input.submissionId.toLowerCase(),
       issuedAt: input.issuedAt,
+      presentedAmountMinor: input.presentedAmountMinor,
+      presentedCurrency: input.presentedCurrency,
     });
 
     const payloadSegment = encodeBase64Url(JSON.stringify(payload));
@@ -173,7 +187,10 @@ export class HmacCheckoutSubmissionTokenService implements CheckoutSubmissionTok
     if (
       !isUuid(record.submissionId) ||
       typeof record.issuedAt !== "string" ||
-      !isUtcInstant(record.issuedAt)
+      !isUtcInstant(record.issuedAt) ||
+      !Number.isSafeInteger(record.presentedAmountMinor) ||
+      (record.presentedAmountMinor as number) <= 0 ||
+      record.presentedCurrency !== "BRL"
     ) {
       return verifyFailure("INVALID_PAYLOAD");
     }
@@ -183,6 +200,8 @@ export class HmacCheckoutSubmissionTokenService implements CheckoutSubmissionTok
       value: Object.freeze({
         submissionId: record.submissionId.toLowerCase(),
         issuedAt: record.issuedAt,
+        presentedAmountMinor: record.presentedAmountMinor as number,
+        presentedCurrency: "BRL",
       }),
     });
   }

@@ -136,7 +136,7 @@ Validated mechanism:
 
 - HMAC-SHA-256;
 - Node.js built-in `crypto`;
-- opaque server-issued token;
+- server-issued, signed, tamper-evident token;
 - server-generated submission UUID;
 - token version;
 - issued-at instant;
@@ -210,7 +210,7 @@ The browser does not submit authoritative:
 The checkout form contains only:
 
 - buyer email;
-- opaque signed submission token.
+- signed, tamper-evident submission token.
 
 Result: **PASS**
 
@@ -941,7 +941,7 @@ The validated implementation provides:
 
 - server-authoritative checkout;
 - minimum buyer data;
-- signed opaque submission continuation;
+- signed, tamper-evident submission continuation;
 - deterministic email validation;
 - authoritative Product/Offer re-resolution;
 - P07 business-rule reuse;
@@ -1235,3 +1235,186 @@ No Payment, Entitlement, OutboxEvent or Mercado Pago implementation was introduc
 P10 — Mercado Pago Integration remains NOT AUTHORIZED.
 
 **P09 FINAL STATUS: COMPLETE**
+
+---
+
+## 43. Post-Audit Remediation
+
+An independent post-merge audit of P09 identified six findings, A01 through A06.
+
+Remediation was executed on:
+
+- branch: `fix/p09-post-audit-remediation`;
+- base: `3fd06e14fa22cf0cc3403bdecf9eae8f3fc9caec`;
+- no schema change;
+- no migration;
+- no dependency change;
+- no Mercado Pago implementation;
+- no Payment, Entitlement or OutboxEvent creation.
+
+### Finding closure
+
+#### A01 — Prisma P2002 classification
+
+Duplicate recovery is now scoped specifically to the unique-constraint failure produced by `order.create`, the stage where collision of the server-generated Order identity is expected.
+
+Unique-constraint failures from Customer or OrderItem creation are propagated and are not misclassified as checkout retry/idempotency outcomes.
+
+Repository unit tests: **12 / 12 PASS**.
+
+Result: **FIXED / PASS**
+
+#### A02 — Realistic retry validation
+
+Sequential and concurrent integration tests now reuse the same Order identity while generating distinct Customer and OrderItem identities for each attempt.
+
+Validated behavior includes:
+
+- exactly one persisted winning Customer;
+- exactly one Order;
+- exactly one OrderItem;
+- losing Customer and OrderItem attempts rolled back;
+- sequential retry resolves as EXISTING;
+- concurrent retries resolve as CREATED + EXISTING;
+- incompatible reuse resolves as CONFLICT;
+- Payment count remains 0;
+- Entitlement count remains 0;
+- OutboxEvent count remains 0.
+
+Real MySQL/TLS checkout-order integration: **7 / 7 PASS**.
+
+Result: **FIXED / PASS**
+
+#### A03 — Presented-price change protection
+
+The signed checkout submission token was upgraded to version 2 and now binds:
+
+- submission ID;
+- issued-at instant;
+- presented amount in minor units;
+- presented currency.
+
+Before persistence, the authoritative Order total is compared with the signed commercial terms that were actually presented to the buyer.
+
+If those terms differ, checkout returns the typed `PRICE_CHANGED` result and performs no persistence.
+
+Real browser validation proved the sequence:
+
+- checkout presented 2990 BRL;
+- authoritative Offer changed to 3990 BRL without reloading the page;
+- the previously issued token was submitted;
+- `PRICE_CHANGED` was rendered;
+- Customer count remained 0;
+- Order count remained 0;
+- OrderItem count remained 0;
+- browser runtime exceptions remained 0;
+- buyer email and submission secret were absent from server logs.
+
+CreateCheckoutOrder unit tests: **9 / 9 PASS**.
+
+HMAC checkout-token unit tests: **16 / 16 PASS**.
+
+Result: **FIXED / PASS**
+
+#### A04 — Stale checkout after Offer unavailability
+
+The AVAILABLE checkout presentation was moved under the client component that owns the Server Action state.
+
+When a previously available Offer becomes unavailable after page load, the stale commercial presentation is now removed instead of merely disabled.
+
+Final real-browser proof after the Offer was deactivated:
+
+- `UNAVAILABLE` rendered;
+- stale presented price absent;
+- stale form absent;
+- email field absent;
+- submit control absent;
+- browser runtime exceptions remained 0;
+- Customer count remained 0;
+- Order count remained 0;
+- OrderItem count remained 0.
+
+The runtime Offer fixture was restored to 2990 BRL / active after validation, and ports 31209 and 31210 were closed.
+
+Result: **FIXED / PASS**
+
+#### A05 — Submission-token security terminology
+
+P09 documentation no longer describes the checkout submission token as opaque.
+
+The canonical security property is now explicit:
+
+- the payload is JSON encoded with base64url and is readable by the client;
+- HMAC-SHA-256 protects integrity and detects tampering;
+- the token does not provide confidentiality or encryption;
+- secrets and sensitive credentials must not be placed in the payload;
+- the token is not an authentication credential;
+- the token is not an authorization credential;
+- the token is not proof of payment.
+
+P09 documentation search for `opaque` / `opaco`: **NONE**.
+
+Result: **FIXED / PASS**
+
+#### A06 — Raw email control characters
+
+Checkout email validation now rejects ASCII control characters on the raw input before trimming or normalization.
+
+Regression coverage includes:
+
+- leading CR;
+- trailing CR;
+- leading LF;
+- trailing LF;
+- trailing CRLF;
+- NUL;
+- U+001F;
+- DEL.
+
+Surrounding ordinary whitespace retains the previously approved trimming behavior.
+
+Checkout email unit tests: **21 / 21 PASS**.
+
+Result: **FIXED / PASS**
+
+### Post-audit Final Quality Gate
+
+Final validation after all six findings were remediated:
+
+- `npm run check` — PASS;
+- full unit suite — **209 / 209 PASS** across 13 files;
+- Prisma schema validation — PASS;
+- `npm audit` — **0 vulnerabilities**;
+- full real MySQL/TLS integration suite — **19 / 19 PASS** across 3 files;
+- checkout-order real MySQL/TLS suite — **7 / 7 PASS**;
+- MySQL container health — healthy;
+- P06 database target guard — PASS;
+- production build — PASS;
+- `/` — static;
+- `/api/health` — dynamic;
+- `/checkout` — dynamic;
+- `/cronograma-capilar-inteligente` — dynamic;
+- `package.json` — unchanged;
+- `package-lock.json` — unchanged;
+- Prisma schema — unchanged;
+- Prisma config — unchanged;
+- `.env.example` — unchanged;
+- migrations — unchanged;
+- P10 / Mercado Pago changed paths — none;
+- Payment changed paths — none;
+- Entitlement changed paths — none;
+- `git diff --check` — PASS.
+
+### Post-audit conclusion
+
+All independent audit findings A01 through A06 are closed.
+
+No residual blocker was identified inside the approved P09 remediation scope.
+
+**P09 POST-AUDIT REMEDIATION: PASS**
+
+The remediation is cleared for checkpoint and Git integration.
+
+The historical P09 implementation and post-merge closeout remain preserved above. The corrected post-audit baseline is not considered integrated into `main` until this remediation branch completes its Git checkpoint, review and merge lifecycle.
+
+P10 has separate owner authorization, but physical P10 implementation remains frozen until this P09 remediation is integrated and its post-merge closeout is complete.

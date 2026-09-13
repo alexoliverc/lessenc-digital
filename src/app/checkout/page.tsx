@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Container, Section, Stack } from "@/components/layout/layout";
 import { LinkAction } from "@/components/ui/button";
 import { StatePanel } from "@/components/ui/feedback";
-import { Surface } from "@/components/ui/surface";
 
 import { CheckoutForm } from "./checkout-form";
 import { resolveCheckoutPageExperience } from "./checkout.server";
@@ -60,55 +59,11 @@ export default async function CheckoutPage() {
               </div>
 
               {experience.state === "AVAILABLE" ? (
-                <div className={styles.checkoutGrid}>
-                  <Surface elevation="raised" padding="spacious" className={styles.summary}>
-                    <Stack gap="large">
-                      <div>
-                        <p className={styles.eyebrow}>Resumo</p>
-
-                        <h2>{experience.product.name}</h2>
-
-                        {experience.product.description && (
-                          <p className={styles.description}>{experience.product.description}</p>
-                        )}
-                      </div>
-
-                      <div className={styles.rule} aria-hidden="true" />
-
-                      <div>
-                        <p className={styles.price}>{experience.offer.formattedPrice}</p>
-
-                        <p className={styles.purchaseLabel}>{experience.offer.purchaseLabel}</p>
-                      </div>
-
-                      <ul className={styles.summaryList}>
-                        <li>Produto digital da L&apos;Essenc.</li>
-
-                        <li>O valor exibido é resolvido novamente no servidor.</li>
-
-                        <li>Esta fase cria um pedido pendente.</li>
-
-                        <li>Nenhum pagamento é processado nesta etapa.</li>
-                      </ul>
-                    </Stack>
-                  </Surface>
-
-                  <Surface padding="spacious" className={styles.formCard}>
-                    <Stack gap="large">
-                      <div>
-                        <p className={styles.eyebrow}>Dados do pedido</p>
-
-                        <h2>Para continuar</h2>
-
-                        <p className={styles.description}>
-                          Informe um e-mail válido. Você não precisa criar uma conta nesta etapa.
-                        </p>
-                      </div>
-
-                      <CheckoutForm submissionToken={experience.submissionToken} />
-                    </Stack>
-                  </Surface>
-                </div>
+                <CheckoutForm
+                  submissionToken={experience.submissionToken}
+                  product={experience.product}
+                  offer={experience.offer}
+                />
               ) : experience.state === "UNAVAILABLE" ? (
                 <StatePanel
                   kind="empty"

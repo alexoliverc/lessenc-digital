@@ -77,6 +77,8 @@ export async function resolveCheckoutPageExperience(): Promise<CheckoutPageExper
     const token = tokenService.issue({
       submissionId: randomUUID(),
       issuedAt: new Date().toISOString(),
+      presentedAmountMinor: publicExperience.offer.amountMinor,
+      presentedCurrency: publicExperience.offer.currency,
     });
 
     if (!token.ok) {

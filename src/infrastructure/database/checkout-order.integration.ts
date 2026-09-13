@@ -89,6 +89,54 @@ function requireFirstOrderItem(order: Order): Order["items"][number] {
 
   return item;
 }
+
+async function expectSingleRetryPersistence(
+  first: CreateInput,
+  second: CreateInput,
+): Promise<string> {
+  const orderId = first.order.id;
+  const firstItemId = requireFirstOrderItem(first.order).id;
+  const secondItemId = requireFirstOrderItem(second.order).id;
+
+  expect(second.order.id).toBe(orderId);
+  expect(second.order.customerId).not.toBe(first.order.customerId);
+  expect(secondItemId).not.toBe(firstItemId);
+
+  const stored = await database.order.findUniqueOrThrow({
+    where: { id: orderId },
+    include: { customer: true, items: true },
+  });
+  const winner = stored.customerId === first.order.customerId ? first : second;
+  const loser = winner === first ? second : first;
+
+  expect(stored.customerId).toBe(winner.order.customerId);
+  expect(stored.customer.id).toBe(winner.order.customerId);
+  expect(stored.customer.email).toBe(winner.email);
+  expect(stored.items).toHaveLength(1);
+  expect(stored.items[0]?.id).toBe(requireFirstOrderItem(winner.order).id);
+
+  expect(await database.order.count({ where: { id: orderId } })).toBe(1);
+  expect(await database.orderItem.count({ where: { orderId } })).toBe(1);
+  expect(
+    await database.customer.count({
+      where: { id: { in: [first.order.customerId, second.order.customerId] } },
+    }),
+  ).toBe(1);
+  expect(await database.customer.count({ where: { id: loser.order.customerId } })).toBe(0);
+  expect(
+    await database.orderItem.count({ where: { id: requireFirstOrderItem(loser.order).id } }),
+  ).toBe(0);
+  expect(await database.payment.count({ where: { orderId } })).toBe(0);
+  expect(
+    await database.entitlement.count({
+      where: { orderItemId: { in: [firstItemId, secondItemId] } },
+    }),
+  ).toBe(0);
+  expect(await database.outboxEvent.count({ where: { orderId } })).toBe(0);
+
+  return winner.order.customerId;
+}
+
 describe("P09 checkout-order adapter on isolated MySQL", () => {
   beforeAll(async () => {
     execFileSync(process.execPath, ["scripts/p06-db-guard.mjs", "test"], {
@@ -300,71 +348,31 @@ describe("P09 checkout-order adapter on isolated MySQL", () => {
   });
 
   it("returns EXISTING for a sequential retry without duplicating persistence", async () => {
-    const candidate = createInput();
+    const first = createInput();
+    const second = createInput({ orderId: first.order.id });
 
-    await expect(repository.create(candidate)).resolves.toEqual({
+    await expect(repository.create(first)).resolves.toEqual({
       state: "CREATED",
     });
 
-    await expect(repository.create(candidate)).resolves.toEqual({
+    await expect(repository.create(second)).resolves.toEqual({
       state: "EXISTING",
     });
 
-    expect(
-      await database.customer.count({
-        where: {
-          id: candidate.order.customerId,
-        },
-      }),
-    ).toBe(1);
-
-    expect(
-      await database.order.count({
-        where: {
-          id: candidate.order.id,
-        },
-      }),
-    ).toBe(1);
-
-    expect(
-      await database.orderItem.count({
-        where: {
-          orderId: candidate.order.id,
-        },
-      }),
-    ).toBe(1);
+    expect(await expectSingleRetryPersistence(first, second)).toBe(first.order.customerId);
   });
 
-  it("resolves two concurrent identical submissions as CREATED plus EXISTING", async () => {
-    const candidate = createInput();
+  it("resolves two concurrent logical retries as CREATED plus EXISTING", async () => {
+    const first = createInput();
+    const second = createInput({ orderId: first.order.id });
 
-    const results = await Promise.all([repository.create(candidate), repository.create(candidate)]);
+    const results = await Promise.all([repository.create(first), repository.create(second)]);
 
     expect(results.map((result) => result.state).sort()).toEqual(["CREATED", "EXISTING"]);
-
-    expect(
-      await database.customer.count({
-        where: {
-          id: candidate.order.customerId,
-        },
-      }),
-    ).toBe(1);
-
-    expect(
-      await database.order.count({
-        where: {
-          id: candidate.order.id,
-        },
-      }),
-    ).toBe(1);
-
-    expect(
-      await database.orderItem.count({
-        where: {
-          orderId: candidate.order.id,
-        },
-      }),
-    ).toBe(1);
+    const winnerCustomerId = await expectSingleRetryPersistence(first, second);
+    expect(winnerCustomerId).toBe(
+      results[0]?.state === "CREATED" ? first.order.customerId : second.order.customerId,
+    );
   });
 
   it("rolls back Customer and Order when OrderItem persistence fails", async () => {

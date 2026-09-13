@@ -42,6 +42,10 @@ export function parseCheckoutEmail(input: unknown): CheckoutEmailResult {
     return failure("INVALID_TYPE");
   }
 
+  if (containsAsciiControlCharacter(input)) {
+    return failure("INVALID_FORMAT");
+  }
+
   const trimmed = input.trim();
 
   if (!trimmed) {
@@ -52,7 +56,7 @@ export function parseCheckoutEmail(input: unknown): CheckoutEmailResult {
     return failure("TOO_LONG");
   }
 
-  if (INTERNAL_WHITESPACE_PATTERN.test(trimmed) || containsAsciiControlCharacter(trimmed)) {
+  if (INTERNAL_WHITESPACE_PATTERN.test(trimmed)) {
     return failure("INVALID_FORMAT");
   }
 
