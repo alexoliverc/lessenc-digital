@@ -2,8 +2,8 @@
 
 **Última atualização:** 12/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P08 COMPLETE. Gate A — FOUNDATION READY PASS. P08 — Public Sales Experience recebeu ChatGPT Technical Review PASS e Final Quality Gate PASS.
-**Estado atual:** P08 — Public Sales Experience COMPLETE. Checkpoint `f73400a` preservado pela tag `checkpoint/p08-public-sales-experience-complete` e PR #8 integrada em `main` pelo merge `2686e39`. P09 — Checkout & Order Creation permanece NOT STARTED e depende de autorização explícita. Próximo gate formal: Gate B após P11.
+**Estado documental:** P00–P09 COMPLETE. Gate A — FOUNDATION READY PASS. P09 — Checkout & Order Creation recebeu ChatGPT Technical Re-Review PASS e Final Quality Gate PASS.
+**Estado atual:** P09 — Checkout & Order Creation COMPLETE. Checkpoint `62e70eb7af955a72d6dff597c82f06d9fcfdd574`, tag `checkpoint/p09-checkout-order-creation-complete`, PR #10 e merge `cda1ae9109b71dcb4dcdbeffdbed4cb6d2f0491f`. P10 — Mercado Pago Integration permanece NOT STARTED / NOT AUTHORIZED. Próximo gate formal: Gate B após P11.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -26,7 +26,7 @@
 ## Onde encontrar as decisões
 
 - [ROADMAP.md](ROADMAP.md): fases P00–P20, P08 encerrada e P09 como próxima candidata.
-- [docs/README.md](docs/README.md): índice P00–P08, segurança, operações, ADRs e histórico anterior.
+- [docs/README.md](docs/README.md): índice P00–P09, segurança, operações, ADRs e histórico anterior.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
 - [Produto P01](docs/product/first-product-definition.md), [modelo P03](docs/architecture/domain-model.md), [stack P04](docs/architecture/runtime-toolchain-baseline.md) e [P04 exit review](docs/architecture/p04-exit-review.md).
 - [Registro 11/09/2026](memory/2026-09-11.md): scaffold anterior, conflitos reconciliados, validações e histórico.
@@ -60,4 +60,23 @@
 - O checkpoint P08 foi confirmado como ancestral de `main`.
 - A tag anotada permanece associada ao checkpoint P08.
 - P08 não implementa checkout, criação de Order, Mercado Pago, PIX, webhook ou entitlement fulfillment.
-- P09 — Checkout & Order Creation permanece NOT STARTED e exige autorização explícita antes de planejamento ou execução.
+- P09 foi posteriormente autorizada, implementada, validada e integrada em `main`; ver o closeout P09 abaixo.
+## P09 — Post-merge closeout
+
+- P09 — Checkout & Order Creation: COMPLETE.
+- ChatGPT Technical Review inicial: PASS WITH FIXES.
+- ChatGPT Technical Re-Review: PASS.
+- Final Quality Gate: PASS.
+- `npm audit`: 0 vulnerabilidades.
+- Suíte unitária final: 191/191 PASS.
+- Integração P09 MySQL: 7/7 PASS.
+- Suíte completa de integração: 19/19 PASS.
+- Checkpoint final: `62e70eb7af955a72d6dff597c82f06d9fcfdd574`.
+- Tag: `checkpoint/p09-checkout-order-creation-complete`.
+- PR #10 mergeada.
+- Merge da implementação: `cda1ae9109b71dcb4dcdbeffdbed4cb6d2f0491f`.
+- Checkpoint confirmado como ancestral de `main`.
+- Branch de fase e tag permanecem preservadas.
+- P09 entrega checkout backend-authoritative e criação atômica de Customer + Order.PENDING + OrderItem.
+- P09 não cria Payment, Entitlement ou OutboxEvent e não integra Mercado Pago.
+- P10 — Mercado Pago Integration permanece NOT STARTED / NOT AUTHORIZED.
