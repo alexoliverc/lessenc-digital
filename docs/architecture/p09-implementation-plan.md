@@ -1,7 +1,7 @@
 # P09 — Checkout & Order Creation — Physical Implementation Plan
 
 **Phase:** P09 — Checkout & Order Creation
-**Status:** APPROVED — IMPLEMENTATION READY
+**Status:** COMPLETE — IMPLEMENTED / VALIDATED / MERGED
 **Branch:** `phase/p09-checkout-order-creation`
 **Base:** `c6271aa8017a3924fdadf8cb8b36f3a078b2e6d3`
 **Execution Brief:** [p09-phase-execution-brief.md](p09-phase-execution-brief.md)
@@ -883,3 +883,28 @@ Implementation may start at P09.4 only after:
 - no Stop Condition has been triggered.
 
 P09 remains incomplete until the entire validation and integration lifecycle is finished.
+---
+
+## Post-merge closeout
+
+P09 completed the approved implementation lifecycle.
+
+Final integration record:
+
+- ChatGPT Technical Re-Review: PASS;
+- Final Quality Gate: PASS;
+- checkpoint: 62e70eb7af955a72d6dff597c82f06d9fcfdd574;
+- tag: checkpoint/p09-checkout-order-creation-complete;
+- implementation PR: #10;
+- implementation merge commit: cda1ae9109b71dcb4dcdbeffdbed4cb6d2f0491f;
+- checkpoint confirmed as ancestor of main;
+- local main and origin/main synchronized after merge;
+- phase branch and annotated checkpoint tag preserved.
+
+The delivered P09 scope ends with persistent Customer + Order.PENDING + OrderItem creation.
+
+No Payment, Mercado Pago, Entitlement, OutboxEvent or digital-delivery implementation was introduced.
+
+P10 remains NOT AUTHORIZED.
+
+**P09 FINAL STATUS: COMPLETE**

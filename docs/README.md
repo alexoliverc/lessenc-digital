@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P08
+# Índice oficial da baseline documental LES-DIG P00–P09
 
-**Estado:** P00–P08 COMPLETE. Gate A PASS. P08 recebeu ChatGPT Technical Review PASS e Final Quality Gate PASS, checkpoint `f73400a` e merge da PR #8 em `2686e39`. P09 permanece não iniciada.
+**Estado:** P00–P09 COMPLETE. Gate A PASS. P09 recebeu ChatGPT Technical Re-Review PASS e Final Quality Gate PASS, checkpoint `62e70eb` e merge da PR #10 em `cda1ae9`. P10 permanece NOT STARTED / NOT AUTHORIZED.
 
 ## Precedência e classificação das fontes
 
@@ -16,7 +16,7 @@ Decisão explícita mais recente do owner prevalece. Em conflito entre documento
 
 ## CANONICAL CURRENT DOCUMENTS
 
-Os links das seções P00–P08, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
+Os links das seções P00–P09, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
 
 ## Governança P00
 
@@ -64,6 +64,18 @@ O [índice P06](persistence/README.md) liga [modelo físico](persistence/data-mo
 P08 está COMPLETE após ChatGPT Technical Review PASS, Final Quality Gate PASS, checkpoint `f73400a`, tag `checkpoint/p08-public-sales-experience-complete` e merge da PR #8 em `main` como `2686e39`.
 
 A experiência pública entrega `/` estática e `/cronograma-capilar-inteligente` dinâmica e server-authoritative. Checkout, criação de Order, Mercado Pago e fulfillment permanecem fora da P08.
+
+## Checkout & Order Creation P09 — COMPLETE
+
+[Brief autorizado](architecture/p09-phase-execution-brief.md), [plano físico de implementação](architecture/p09-implementation-plan.md) e [Validation Report](architecture/p09-validation-report.md).
+
+P09 está COMPLETE após ChatGPT Technical Re-Review PASS, Final Quality Gate PASS, checkpoint 62e70eb, tag checkpoint/p09-checkout-order-creation-complete e merge da PR #10 em main como cda1ae9.
+
+A implementação entrega /checkout backend-authoritative, email mínimo do comprador, submission token assinado, resolução server-side de Product/Offer, criação atômica de Customer + Order.PENDING + OrderItem e prevenção de duplicidade/idempotência.
+
+Payment, Mercado Pago, Entitlement e fulfillment permanecem fora da P09.
+
+P10 — Mercado Pago Integration permanece NOT STARTED / NOT AUTHORIZED.
 
 ## Operações
 

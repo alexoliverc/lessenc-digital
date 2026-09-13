@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** None. P08 — Public Sales Experience is COMPLETE. P09 — Checkout & Order Creation is the next candidate and has not started.
+**Current execution:** None. P09 — Checkout & Order Creation is COMPLETE. P10 — Mercado Pago Integration is the next candidate and remains NOT STARTED / NOT AUTHORIZED.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -470,7 +470,7 @@ A visitor can understand the offer and proceed safely toward checkout.
 
 ## P09 — Checkout & Order Creation
 
-**Status:** PENDENTE
+**Status:** COMPLETE — CHATGPT TECHNICAL RE-REVIEW PASS / FINAL QUALITY GATE PASS / MERGED.
 
 ### Objective
 
@@ -483,7 +483,7 @@ Implement backend-authoritative checkout and order creation.
 - product selection;
 - backend-authoritative price;
 - order creation;
-- expiration;
+- signed submission continuation;
 - duplicate prevention;
 - correlation IDs;
 - safe error handling.
@@ -1239,7 +1239,7 @@ The system receives formal authorization or denial for real production transacti
 
 The current next candidate is:
 
-**P09 — Checkout & Order Creation**
+**P10 — Mercado Pago Integration**
 
 Current status:
 
@@ -1253,13 +1253,17 @@ Current status:
 
 **P08: COMPLETE / CHATGPT TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / MERGED**
 
+**P09: COMPLETE / CHATGPT TECHNICAL RE-REVIEW PASS / FINAL QUALITY GATE PASS / MERGED**
+
 P06 checkpoint `f4bfdfe`, merge `694a085` and documentary closeout `e04438c` are preserved.
 
 P07 was checkpointed at `4c96e7b` with tag `checkpoint/p07-core-domain-application-complete` and merged via PR #6 as `6a19eda`.
 
 P08 was checkpointed at `f73400a` with tag `checkpoint/p08-public-sales-experience-complete` and merged through PR #8 as `2686e39`.
 
-P09 — Checkout & Order Creation has **not started** and requires explicit owner authorization before planning or execution begins.
+P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creation-complete` and merged through PR #10 as `cda1ae9`.
+
+P10 — Mercado Pago Integration has **not started** and remains **NOT AUTHORIZED**. A separate owner authorization is required before planning or implementation.
 
 ---
 # 11. Post-MVP horizon
