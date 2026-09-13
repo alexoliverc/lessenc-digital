@@ -1,6 +1,6 @@
 # P10 — Mercado Pago Integration — Codex Validation Report
 
-**Data:** 2026-09-13. **Estado:** TECHNICAL REVIEW PASS — READY FOR GIT INTEGRATION; remediação pós-auditoria A01–A05 e Final Quality Gate R2 aprovados. Operações Git protegidas ainda não executadas.
+**Data:** 2026-09-13. **Estado:** COMPLETE — TECHNICAL REVIEW PASS / FINAL QUALITY GATE R2 PASS / MERGED. Checkpoint `28653d1f923c6532037d4f2a9bec22fcac1091ad`; PR #14; merge `6b311624c2e4824d2fc909fbcb994eab2ca9369d`.
 **Branch:** `phase/p10-mercado-pago-integration`. **HEAD/base:** `a932c05013d286bca0ac1357162c721db887a84b`.
 **Escopo:** fronteira financeira P09 Order.PENDING → continuação P10 → tentativa Payment → Orders API → observações verificadas → Payment/Order/PaymentEvent/OutboxEvent. Nenhum Entitlement ou entrega.
 
@@ -84,8 +84,24 @@ Executado após todas as remediações:
 
 As limitações externas permanecem explícitas: chamada real Mercado Pago TEST e validação browser/Brick real não foram executadas por dependência de ambiente/credenciais e bloqueio do runtime automatizado. Nenhuma dessas limitações foi falsamente classificada como PASS.
 
-**Resultado técnico final:** PASS — READY FOR GIT INTEGRATION.
-## Estado Git final
+**Resultado técnico final pré-integração:** PASS — aprovado para integração Git.
+
+## Post-merge integration closeout
+
+- Checkpoint P10: `28653d1f923c6532037d4f2a9bec22fcac1091ad`.
+- Tag anotada: `checkpoint/p10-ready-for-integration`.
+- Pull request: #14 — `P10: integrate Mercado Pago payment boundary`.
+- Merge commit: `6b311624c2e4824d2fc909fbcb994eab2ca9369d`.
+- O checkpoint permanece ancestral do merge em `main`.
+- `main` local e `origin/main` foram sincronizados por fast-forward para o merge acima.
+- A árvore de trabalho permaneceu limpa após a sincronização.
+- A fronteira P10 continua terminando em persistência financeira verificada + transactional outbox; nenhum consumidor P11 foi introduzido.
+- Mercado Pago TEST real e validação browser/Payment Brick real continuam como limitações explicitamente registradas, não como testes executados.
+
+**Estado final da fase:** P10 COMPLETE.
+
+**Próxima fase candidata:** P11 — Entitlement & Delivery. Não autorizada e não iniciada neste closeout.
+## Estado Git pré-integração — registro histórico
 
 `git rev-parse HEAD`: `a932c05013d286bca0ac1357162c721db887a84b`.
 

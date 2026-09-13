@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P10
 
-**Estado:** P00–P09 COMPLETE. Gate A PASS. P10 — Mercado Pago Integration: **TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / READY FOR GIT INTEGRATION**; ainda sem commit/tag/push/PR/merge.
+**Estado:** P00–P10 COMPLETE. Gate A PASS. P10 — Mercado Pago Integration foi tecnicamente aprovada e integrada pelo PR #14 em `main` no merge `6b311624c2e4824d2fc909fbcb994eab2ca9369d`. P11 permanece fora desta fase.
 
 ## Precedência e classificação das fontes
 
@@ -76,13 +76,13 @@ Payment, Mercado Pago, Entitlement e fulfillment permanecem fora da P09.
 
 A auditoria pós-merge A01–A06 foi integralmente remediada. Checkpoint `53bdaafc0f740241807a498b0a64378bab25c683`, tag `checkpoint/p09-post-audit-remediation-complete`, PR #12 e merge `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 foi executada na branch própria após autorização explícita do owner; revisão técnica independente e Final Quality Gate R2 passaram após remediação A01–A05.
+P10 foi executada na branch própria, recebeu revisão técnica PASS após remediação A01–A05 e Final Quality Gate R2 PASS, e foi integrada em `main` pelo PR #14 no merge `6b311624c2e4824d2fc909fbcb994eab2ca9369d`.
 
-## Mercado Pago Integration P10 — TECHNICAL REVIEW PASS / READY FOR GIT INTEGRATION
+## Mercado Pago Integration P10 — COMPLETE
 
 [Phase Execution Brief](architecture/p10-phase-execution-brief.md), [Physical Implementation Plan](architecture/p10-implementation-plan.md) e [Validation Report](architecture/p10-validation-report.md).
 
-P10 implementa a fronteira financeira via Checkout Transparente / Orders API, persistência de tentativas e eventos, PIX, cartão de crédito em uma parcela, 3DS, webhook verificado e reconciliação. A auditoria independente A01–A05 foi integralmente remediada e o Final Quality Gate R2 passou. A validação real de provedor TEST e navegador permanece explicitamente limitada no relatório. Entitlement/entrega continuam P11. P10 ainda não é COMPLETE até a integração Git.
+P10 implementa a fronteira financeira via Checkout Transparente / Orders API, persistência de tentativas e eventos, PIX, cartão de crédito em uma parcela, 3DS, webhook verificado e reconciliação. A auditoria independente A01–A05 foi integralmente remediada, o Final Quality Gate R2 passou e o PR #14 foi integrado em `main` no merge `6b311624c2e4824d2fc909fbcb994eab2ca9369d`. Mercado Pago TEST real e browser/Brick real permanecem limitações de ambiente documentadas. Entitlement/Delivery continuam P11.
 
 ## Operações
 
