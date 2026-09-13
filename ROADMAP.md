@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P10 — Mercado Pago Integration: TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / READY FOR GIT INTEGRATION. P09 remains COMPLETE. P10 is not COMPLETE until protected Git integration and main synchronization are finished.
+**Current execution:** None. P10 — Mercado Pago Integration is COMPLETE after Technical Review PASS, A01–A05 remediation, Final Quality Gate R2 and PR #14 merge. P11 — Entitlement & Delivery is the next candidate and is NOT STARTED / NOT AUTHORIZED.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -508,7 +508,7 @@ A valid order can be created independently of payment confirmation.
 
 ## P10 — Mercado Pago Integration
 
-**Status:** TECHNICAL REVIEW PASS — READY FOR GIT INTEGRATION
+**Status:** COMPLETE — TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / MERGED
 
 ### Objective
 
@@ -1239,7 +1239,7 @@ The system receives formal authorization or denial for real production transacti
 
 The current next candidate is:
 
-**P10 — Mercado Pago Integration**
+**P11 — Entitlement & Delivery**
 
 Current status:
 
@@ -1265,7 +1265,7 @@ P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creati
 
 P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration is **TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / READY FOR GIT INTEGRATION** on `phase/p10-mercado-pago-integration`. The owner authorized execution after P10.1 planning. Independent review findings A01–A05 were remediated and the R2 gate passed. P10 is not COMPLETE until checkpoint, tag, push, PR/merge and `main` synchronization are concluded. Evidence is in [p10-validation-report.md](docs/architecture/p10-validation-report.md).
+P10 — Mercado Pago Integration is **COMPLETE**. Technical Review PASS, findings A01–A05 remediated, Final Quality Gate R2 PASS, checkpoint `28653d1f923c6532037d4f2a9bec22fcac1091ad` tagged as `checkpoint/p10-ready-for-integration`, PR #14 merged into `main` as `6b311624c2e4824d2fc909fbcb994eab2ca9369d`. P11 — Entitlement & Delivery is the next candidate and remains NOT STARTED / NOT AUTHORIZED.
 
 ---
 # 11. Post-MVP horizon

@@ -2,8 +2,8 @@
 
 **Última atualização:** 13/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P09 COMPLETE. Gate A — FOUNDATION READY PASS. P09 — Checkout & Order Creation e sua remediação pós-auditoria A01–A06 estão integradas e encerradas.
-**Estado atual:** P09 — Checkout & Order Creation COMPLETE após remediação pós-auditoria. P10 — Mercado Pago Integration recebeu TECHNICAL REVIEW PASS e Final Quality Gate R2 PASS na branch `phase/p10-mercado-pago-integration`; remediação A01–A05 encerrada. A fase está READY FOR GIT INTEGRATION, ainda sem commit/tag/push/PR/merge e ainda não é COMPLETE. Próximo gate formal do programa: Gate B após P11.
+**Estado documental:** P00–P10 COMPLETE. Gate A — FOUNDATION READY PASS. P10 foi integrada em `main` após Technical Review PASS, remediação A01–A05 e Final Quality Gate R2 PASS.
+**Estado atual:** P10 — Mercado Pago Integration COMPLETE. Checkpoint `28653d1f923c6532037d4f2a9bec22fcac1091ad`, tag `checkpoint/p10-ready-for-integration`, PR #14 e merge `6b311624c2e4824d2fc909fbcb994eab2ca9369d` integrados em `main`. P11 — Entitlement & Delivery é a próxima fase candidata; ainda não está autorizada nem iniciada. Gate B permanece após P11.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -25,7 +25,7 @@
 
 ## Onde encontrar as decisões
 
-- [ROADMAP.md](ROADMAP.md): fases P00–P20, P09 encerrada incluindo remediação pós-auditoria e P10 tecnicamente aprovada aguardando integração Git.
+- [ROADMAP.md](ROADMAP.md): fases P00–P20, P09 encerrada e P10 integrada/COMPLETE; P11 é a próxima fase candidata.
 - [docs/README.md](docs/README.md): índice P00–P10, segurança, operações, ADRs e histórico anterior.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
 - [Produto P01](docs/product/first-product-definition.md), [modelo P03](docs/architecture/domain-model.md), [stack P04](docs/architecture/runtime-toolchain-baseline.md) e [P04 exit review](docs/architecture/p04-exit-review.md).
@@ -36,7 +36,7 @@
 
 **OPEN:** provedor/tecnologia de autenticação; provedor de email; storage privado; provedor de observabilidade; provedor de rate limit distribuído em produção; framework E2E no navegador. Também domínio, política de reembolso/suporte, conteúdo final e detalhamento físico de schema/recovery dependem de decisão antes da implementação correspondente.
 
-**DEFERRED:** entrega P11, autenticação P12, analytics P13 e ambientes de produção até os respectivos gates. P10 está tecnicamente aprovada e aguarda integração Git; não é COMPLETE. A sequência `GOV/MVP-*` e os documentos `LES-*-R01` continuam como histórico; a baseline atual P00–P20 prevalece quando divergir.
+**DEFERRED:** entrega P11, autenticação P12, analytics P13 e ambientes de produção até os respectivos gates. P10 está COMPLETE e não inclui Entitlement/Delivery. A sequência `GOV/MVP-*` e os documentos `LES-*-R01` continuam como histórico; a baseline atual P00–P20 prevalece quando divergir.
 
 ## P05 — fechamento técnico
 
@@ -79,7 +79,7 @@
 - Branch de fase e tag permanecem preservadas.
 - P09 entrega checkout backend-authoritative e criação atômica de Customer + Order.PENDING + OrderItem.
 - P09 não cria Payment, Entitlement ou OutboxEvent e não integra Mercado Pago.
-- P10 — Mercado Pago Integration: TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / READY FOR GIT INTEGRATION. A migration P10 permanece aplicada somente nos bancos P06 local/test; nenhuma chamada financeira real foi feita. O relatório P10 contém a remediação A01–A05 e os limites de browser/TEST.
+- P10 — Mercado Pago Integration: COMPLETE. Technical Review PASS, remediação A01–A05 PASS, Final Quality Gate R2 PASS, checkpoint `28653d1f923c6532037d4f2a9bec22fcac1091ad`, PR #14 e merge `6b311624c2e4824d2fc909fbcb994eab2ca9369d` em `main`. Mercado Pago TEST real e browser/Brick real permanecem limitações de ambiente documentadas.
 
 ## P09 — Post-audit remediation closeout
 
@@ -94,4 +94,4 @@
 - Checkpoint da remediação confirmado como ancestral de `main`.
 - P09 e sua remediação pós-auditoria estão encerradas como COMPLETE.
 - A autorização do owner para P10 permanece vigente. A trava física imposta durante a remediação P09 está encerrada.
-- P10 — Mercado Pago Integration foi executada na branch `phase/p10-mercado-pago-integration`; a revisão técnica independente e o Final Quality Gate R2 passaram após remediação A01–A05. A fase está READY FOR GIT INTEGRATION, sem operações Git protegidas executadas.
+- P10 — Mercado Pago Integration foi executada em `phase/p10-mercado-pago-integration`, recebeu PASS técnico, foi integrada pelo PR #14 e está COMPLETE em `main` no merge `6b311624c2e4824d2fc909fbcb994eab2ca9369d`.
