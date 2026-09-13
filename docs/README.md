@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P07
+# Índice oficial da baseline documental LES-DIG P00–P08
 
-**Estado:** P00–P07 COMPLETE. Gate A PASS. P07 recebeu ChatGPT Technical Re-Review PASS e Final Quality Gate PASS, checkpoint `4c96e7b` e merge da PR #6 em `6a19eda`. P08 permanece não iniciada.
+**Estado:** P00–P08 COMPLETE. Gate A PASS. P08 recebeu ChatGPT Technical Review PASS e Final Quality Gate PASS, checkpoint `f73400a` e merge da PR #8 em `2686e39`. P09 permanece não iniciada.
 
 ## Precedência e classificação das fontes
 
@@ -16,7 +16,7 @@ Decisão explícita mais recente do owner prevalece. Em conflito entre documento
 
 ## CANONICAL CURRENT DOCUMENTS
 
-Os links das seções P00–P07, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
+Os links das seções P00–P08, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
 
 ## Governança P00
 
@@ -55,7 +55,15 @@ O [índice P06](persistence/README.md) liga [modelo físico](persistence/data-mo
 
 ## Core Domain & Application P07 — COMPLETE
 
-[Brief autorizado](architecture/p07-phase-execution-brief.md), [implementação e limites](architecture/p07-core-implementation.md) e [Validation Report](architecture/p07-validation-report.md). P07 não está COMPLETE e P08 não foi iniciada.
+[Brief autorizado](architecture/p07-phase-execution-brief.md), [implementação e limites](architecture/p07-core-implementation.md) e [Validation Report](architecture/p07-validation-report.md). P07 está COMPLETE após checkpoint `4c96e7b` e merge da PR #6 em `6a19eda`.
+
+## Public Sales Experience P08 — COMPLETE
+
+[Brief autorizado](architecture/p08-phase-execution-brief.md), [plano físico de implementação](architecture/p08-implementation-plan.md) e [Validation Report](architecture/p08-validation-report.md).
+
+P08 está COMPLETE após ChatGPT Technical Review PASS, Final Quality Gate PASS, checkpoint `f73400a`, tag `checkpoint/p08-public-sales-experience-complete` e merge da PR #8 em `main` como `2686e39`.
+
+A experiência pública entrega `/` estática e `/cronograma-capilar-inteligente` dinâmica e server-authoritative. Checkout, criação de Order, Mercado Pago e fulfillment permanecem fora da P08.
 
 ## Operações
 

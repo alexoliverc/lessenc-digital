@@ -2,7 +2,7 @@
 
 **Phase:** P08 — Public Sales Experience
 **Branch:** `phase/p08-public-sales-experience`
-**Status:** VALIDATION COMPLETE
+**Status:** COMPLETE — MERGED
 **Final Quality Gate:** PASS
 **Stop Conditions:** NONE
 **P09:** NOT STARTED
@@ -520,6 +520,27 @@ P08 passed ChatGPT Technical Review and is technically ready for Final Phase Clo
 - P08.9 Final Quality Gate — PASS
 - Validation Report — COMPLETE
 - Technical Review — PASS
-- Checkpoint — PENDING
-- Integration — PENDING
+- Checkpoint — COMPLETE (`f73400a`)
+- Integration — COMPLETE (PR #8 / merge `2686e39`)
 - P09 — NOT STARTED
+
+---
+
+## 23. Post-merge Closeout
+
+P08 completed the full governance lifecycle.
+
+- ChatGPT Technical Review: **PASS**.
+- Final Quality Gate: **PASS**.
+- Checkpoint commit: `f73400af5a0570d379bb700f752e8cb73639899b`.
+- Checkpoint tag: `checkpoint/p08-public-sales-experience-complete`.
+- Branch published: `phase/p08-public-sales-experience`.
+- Pull Request: **#8**.
+- PR mergeability before integration: **MERGEABLE / CLEAN**.
+- Merge commit: `2686e39776cb9601dbbb643a87855923f6421d3e`.
+- `main` and `origin/main` synchronized on the P08 merge.
+- Checkpoint confirmed as an ancestor of `main`.
+- Working tree confirmed clean after merge.
+- P09 remains **NOT STARTED**.
+
+**Final phase result: P08 COMPLETE.**

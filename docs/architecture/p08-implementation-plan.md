@@ -1,6 +1,6 @@
 # P08 — Physical Implementation Plan
 
-**Status:** APPROVED — IMPLEMENTATION READY
+**Status:** COMPLETE — CHATGPT TECHNICAL REVIEW PASS / FINAL QUALITY GATE PASS / MERGED
 **Phase:** P08 — Public Sales Experience
 **Brief:** P08 Phase Execution Brief R0.3
 **Branch:** `phase/p08-public-sales-experience`
@@ -392,3 +392,14 @@ Implementation may begin because:
 **Implementation:** READY
 **Stop Conditions:** NONE
 **P09:** NOT STARTED
+
+## Post-merge closeout
+
+- Implementation checkpoint: `f73400af5a0570d379bb700f752e8cb73639899b`.
+- Checkpoint tag: `checkpoint/p08-public-sales-experience-complete`.
+- Pull Request: #8.
+- Merge commit: `2686e39776cb9601dbbb643a87855923f6421d3e`.
+- ChatGPT Technical Review: PASS.
+- Final Quality Gate: PASS.
+- P08 status: COMPLETE.
+- P09 remains NOT STARTED.
