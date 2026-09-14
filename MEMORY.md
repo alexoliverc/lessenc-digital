@@ -2,8 +2,8 @@
 
 **Última atualização:** 13/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P11 COMPLETE. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está concluída no worktree controlado atual; a publicação Git desse conjunto permanece NOT AUTHORIZED / NOT PERFORMED.
-**Estado atual:** Gate B — Commerce Core Ready está PASS / DOCUMENTED / FROZEN na branch `phase/p11-entitlement-digital-delivery`. O commerce core P09 -> P10 -> P11 foi validado por cenário canônico Order -> Payment -> Entitlement -> protected Delivery, regressão total e C7 refund -> revoke -> deny. P12 — Identity / Authentication / Administrative Access é o próximo candidato, mas sua implementação NÃO está autorizada. Nenhuma publicação Git foi autorizada.
+**Estado documental:** P00–P11 COMPLETE. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED em `main` através da PR #16 e do merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`; o checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` permanece preservado pela tag anotada `checkpoint/p11-entitlement-digital-delivery-complete`.
+**Estado atual:** P11 está integrada em `main` através da PR #16. Gate B — Commerce Core Ready está PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN. O commerce core P09 -> P10 -> P11 foi validado pelo cenário canônico Order -> Payment -> Entitlement -> protected Delivery, regressão total e C7 refund -> revoke -> deny. P12 — Identity / Authentication / Administrative Access é o próximo candidato, mas sua implementação NÃO está autorizada. Deploy de produção NÃO foi realizado.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -1280,9 +1280,9 @@ P11 final result:
 
 `P11 = COMPLETE / PASS / DOCUMENTED / FROZEN`
 
-Git publication remains NOT AUTHORIZED.
+At the P11-C7 technical closeout checkpoint, Git publication remained NOT AUTHORIZED.
 
-No commit, push, tag, PR, merge, or deploy was authorized or performed.
+At that P11-C7 checkpoint, no commit, push, tag, PR, merge, or deploy had yet been authorized or performed.
 
 Next macro-checkpoint:
 
@@ -1332,6 +1332,20 @@ Next candidate:
 
 P12 is NOT AUTHORIZED by this closeout.
 
-Git publication remains NOT AUTHORIZED.
+At the Gate B documentary closeout checkpoint, Git publication remained NOT AUTHORIZED.
 
-No commit, push, tag, PR, merge or deploy was authorized or performed.
+At that Gate B checkpoint, no commit, push, tag, PR, merge or deploy had yet been authorized or performed.
+
+<!-- P11-POST-MERGE-CLOSEOUT -->
+
+## P11 Post-Merge Integration Closeout — COMPLETE / PASS
+
+PR #16 integrou formalmente a P11 em `main`.
+
+- reviewed checkpoint: `d27e05961ab601b6d6b889549ef8962892d111f2`;
+- merge commit / `main`: `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`;
+- annotated checkpoint tag: `checkpoint/p11-entitlement-digital-delivery-complete`;
+- P11 = COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED;
+- Gate B = PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN;
+- P12 = NEXT CANDIDATE / NOT AUTHORIZED;
+- deploy = NOT PERFORMED.

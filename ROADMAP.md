@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** None. P11 — Entitlement & Secure Digital Delivery is COMPLETE / PASS / DOCUMENTED / FROZEN on the current controlled worktree. Gate B — Commerce Core Ready is PASS / DOCUMENTED / FROZEN. P12 — Identity, Authentication & Admin is the next candidate and is NOT AUTHORIZED. Git publication of the current P11 / Gate B worktree remains NOT AUTHORIZED / NOT PERFORMED.
+**Current execution:** None. P11 — Entitlement & Secure Digital Delivery is COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. Gate B — Commerce Core Ready is PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN. P12 — Identity, Authentication & Admin is the next candidate and remains NOT AUTHORIZED. Deploy remains NOT PERFORMED.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1312,7 +1312,19 @@ P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creati
 
 P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN** on the current controlled worktree. Gate B — Commerce Core Ready is **PASS / DOCUMENTED / FROZEN**. P12 — Identity, Authentication & Admin is the next candidate and remains **NOT AUTHORIZED**. Git publication of the current P11 / Gate B worktree remains separately controlled.
+P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 — Identity, Authentication & Admin is the next candidate and remains **NOT AUTHORIZED**. Deploy remains **NOT PERFORMED**.
+
+<!-- P11-POST-MERGE-CLOSEOUT -->
+### P11 — Git Integration Closeout
+
+- PR #16: **MERGED** into `main`.
+- Reviewed checkpoint: `d27e05961ab601b6d6b889549ef8962892d111f2`.
+- Merge commit / integrated `main`: `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`.
+- Annotated checkpoint tag: `checkpoint/p11-entitlement-digital-delivery-complete`.
+- P11: **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED**.
+- Gate B: **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**.
+- P12: **NEXT CANDIDATE / NOT AUTHORIZED**.
+- Deploy: **NOT PERFORMED**.
 
 ---
 # 11. Post-MVP horizon
