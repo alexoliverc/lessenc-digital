@@ -21,6 +21,10 @@ const p11BuyerSessionEnvSchema = z.object({
   P11_BUYER_SESSION_SECRET: z.string().min(32),
 });
 
+const p12AdminAuthEnvSchema = z.object({
+  P12_ADMIN_AUTH_SECRET: z.string().min(32),
+});
+
 const p11PrivateStorageEnvSchema = z.object({
   PRIVATE_FILE_STORAGE_PATH: z
     .string()
@@ -45,6 +49,10 @@ type P09SubmissionEnvInput = {
 
 type P11BuyerSessionEnvInput = {
   P11_BUYER_SESSION_SECRET?: string | undefined;
+};
+
+type P12AdminAuthEnvInput = {
+  P12_ADMIN_AUTH_SECRET?: string | undefined;
 };
 
 type P11PrivateStorageEnvInput = {
@@ -89,6 +97,17 @@ export function parseP11BuyerSessionEnv(input: P11BuyerSessionEnvInput) {
 
   return Object.freeze(parsed.data);
 }
+
+export function parseP12AdminAuthEnv(input: P12AdminAuthEnvInput) {
+  const parsed = p12AdminAuthEnvSchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(`Invalid P12 admin auth configuration: ${z.prettifyError(parsed.error)}`);
+  }
+
+  return Object.freeze(parsed.data);
+}
+
 export function parseP11PrivateStorageEnv(input: P11PrivateStorageEnvInput) {
   const parsed = p11PrivateStorageEnvSchema.safeParse(input);
 
