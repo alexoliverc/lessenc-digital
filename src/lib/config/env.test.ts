@@ -1,6 +1,14 @@
+import { resolve } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
-import { parseP08CommercialEnv, parseP09SubmissionEnv, parseServerEnv } from "./env-schema";
+import {
+  parseP08CommercialEnv,
+  parseP09SubmissionEnv,
+  parseP11BuyerSessionEnv,
+  parseP11PrivateStorageEnv,
+  parseServerEnv,
+} from "./env-schema";
 
 describe("parseServerEnv", () => {
   it.each(["local", "test", "staging", "production"] as const)(
@@ -80,5 +88,57 @@ describe("parseP09SubmissionEnv", () => {
         P09_SUBMISSION_SECRET: "too-short",
       }),
     ).toThrow("Invalid P09 submission configuration");
+  });
+});
+describe("parseP11BuyerSessionEnv", () => {
+  const SECRET = "p11-buyer-session-secret-32-bytes-minimum-value";
+
+  it("accepts a dedicated buyer session secret", () => {
+    expect(
+      parseP11BuyerSessionEnv({
+        P11_BUYER_SESSION_SECRET: SECRET,
+      }),
+    ).toEqual({
+      P11_BUYER_SESSION_SECRET: SECRET,
+    });
+  });
+
+  it("rejects a missing buyer session secret", () => {
+    expect(() => parseP11BuyerSessionEnv({})).toThrow("Invalid P11 buyer session configuration");
+  });
+
+  it("rejects buyer session secrets shorter than 32 characters", () => {
+    expect(() =>
+      parseP11BuyerSessionEnv({
+        P11_BUYER_SESSION_SECRET: "too-short",
+      }),
+    ).toThrow("Invalid P11 buyer session configuration");
+  });
+});
+describe("parseP11PrivateStorageEnv", () => {
+  const STORAGE_ROOT = resolve("tmp", "p11-private-storage-test");
+
+  it("accepts an absolute private storage root", () => {
+    expect(
+      parseP11PrivateStorageEnv({
+        PRIVATE_FILE_STORAGE_PATH: STORAGE_ROOT,
+      }),
+    ).toEqual({
+      PRIVATE_FILE_STORAGE_PATH: STORAGE_ROOT,
+    });
+  });
+
+  it("rejects a missing private storage root", () => {
+    expect(() => parseP11PrivateStorageEnv({})).toThrow(
+      "Invalid P11 private storage configuration",
+    );
+  });
+
+  it("rejects a relative private storage root", () => {
+    expect(() =>
+      parseP11PrivateStorageEnv({
+        PRIVATE_FILE_STORAGE_PATH: "private/resources",
+      }),
+    ).toThrow("Invalid P11 private storage configuration");
   });
 });

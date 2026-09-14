@@ -10,6 +10,8 @@
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
+    "ops:p11:rate-limit-cleanup": "node --experimental-strip-types scripts/p11-c66-rate-limit-cleanup.mjs",
+    "ops:p11:operational-health": "node --experimental-strip-types scripts/p11-c66-operational-health.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",

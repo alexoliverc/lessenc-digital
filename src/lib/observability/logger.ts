@@ -1,28 +1,115 @@
-type LogLevel = "info" | "warn" | "error";
+export type LogLevel = "info" | "warn" | "error";
 
-type LogContext = Readonly<Record<string, unknown>>;
+export type LogContext = Readonly<Record<string, unknown>>;
 
 const REDACTED_KEYS = new Set([
   "password",
   "authorization",
   "cookie",
-  "set-cookie",
-  "access_token",
-  "accessToken",
+  "setcookie",
+  "accesstoken",
   "secret",
   "token",
+  "databaseurl",
+  "dbruntimeurl",
+  "testdatabaseurl",
+  "privatefilestoragepath",
+  "mysqlrootpassword",
+  "p11buyersessionsecret",
+  "mercadopagoaccesstoken",
+  "email",
+  "customeremail",
 ]);
 
-function redact(context: LogContext): LogContext {
-  return Object.fromEntries(
-    Object.entries(context).map(([key, value]) => [
-      key,
-      REDACTED_KEYS.has(key) ? "[REDACTED]" : value,
-    ]),
-  );
+function normalizeKey(key: string): string {
+  return key
+    .toLowerCase()
+    .replace(/[^a-z0-9]/gu, "");
 }
 
-function write(level: LogLevel, event: string, context: LogContext = {}): void {
+function shouldRedactKey(key: string): boolean {
+  return REDACTED_KEYS.has(normalizeKey(key));
+}
+
+function sanitizeValue(
+  value: unknown,
+  seen: WeakSet<object>,
+): unknown {
+  if (
+    value === null ||
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return value;
+  }
+
+  if (typeof value === "bigint") {
+    return value.toString();
+  }
+
+  if (
+    typeof value === "undefined" ||
+    typeof value === "function" ||
+    typeof value === "symbol"
+  ) {
+    return "[UNSUPPORTED]";
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (value instanceof Error) {
+    return Object.freeze({
+      name: value.name,
+    });
+  }
+
+  if (typeof value !== "object") {
+    return "[UNSUPPORTED]";
+  }
+
+  if (seen.has(value)) {
+    return "[CIRCULAR]";
+  }
+
+  seen.add(value);
+
+  try {
+    if (Array.isArray(value)) {
+      return value.map((entry) =>
+        sanitizeValue(entry, seen),
+      );
+    }
+
+    const sanitized: Record<string, unknown> = {};
+
+    for (const [key, entry] of Object.entries(value)) {
+      sanitized[key] =
+        shouldRedactKey(key)
+          ? "[REDACTED]"
+          : sanitizeValue(entry, seen);
+    }
+
+    return sanitized;
+  } finally {
+    seen.delete(value);
+  }
+}
+
+function redact(context: LogContext): LogContext {
+  return sanitizeValue(
+    context,
+    new WeakSet<object>(),
+  ) as LogContext;
+}
+
+function write(
+  level: LogLevel,
+  event: string,
+  context: LogContext = {},
+): void {
   const record = {
     timestamp: new Date().toISOString(),
     level,

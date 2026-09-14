@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** None. P10 — Mercado Pago Integration is COMPLETE after Technical Review PASS, A01–A05 remediation, Final Quality Gate R2 and PR #14 merge. P11 — Entitlement & Delivery is the next candidate and is NOT STARTED / NOT AUTHORIZED.
+**Current execution:** None. P11 — Entitlement & Secure Digital Delivery is COMPLETE / PASS / DOCUMENTED / FROZEN on the current controlled worktree. Gate B — Commerce Core Ready is PASS / DOCUMENTED / FROZEN. P12 — Identity, Authentication & Admin is the next candidate and is NOT AUTHORIZED. Git publication of the current P11 / Gate B worktree remains NOT AUTHORIZED / NOT PERFORMED.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -553,7 +553,11 @@ Payment status can be trusted and reconciled server-side.
 
 ## P11 — Entitlement & Secure Digital Delivery
 
-**Status:** PENDENTE
+**Status:** COMPLETE / PASS / DOCUMENTED / FROZEN
+
+**Closed:** 2026-09-13
+
+**Canonical final review:** `docs/operations/p11-final-gate.md`
 
 ### Objective
 
@@ -591,6 +595,12 @@ An approved payment reliably produces authorized access.
 
 # GATE B — COMMERCE CORE READY
 
+<!-- GATE-B-CLOSEOUT -->
+
+**Status:** PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN
+
+**Closed:** 2026-09-13
+
 **Position:** after P11.
 
 ### Question
@@ -601,11 +611,42 @@ Can a customer create an order, pay and receive access safely, reliably and audi
 
 PASS before commerce is considered technically viable.
 
+### Final result
+
+**PASS — COMMERCE CORE READY**
+
+Acceptance matrix: **20/20 PASS**.
+
+Canonical positive chain:
+
+`Order -> Payment -> Entitlement -> protected Delivery`
+
+Canonical adversarial chain:
+
+`Full refund -> REFUND_COMPLETED v1 -> Entitlement REVOKED -> authorization denied -> protected download 404 -> zero protected resource bytes`
+
+Final evidence:
+
+- canonical commerce-core scenario: 1/1 PASS;
+- full MySQL: 12 files / 126 tests PASS;
+- full unit: 37 files / 417 tests PASS;
+- typecheck: PASS;
+- lint: PASS;
+- production build: PASS.
+
+Canonical closeout:
+
+`docs/operations/gate-b-commerce-core-ready.md`
+
+**Next candidate:** P12 — Identity, Authentication & Admin.
+
+**Authorization:** P12 is NEXT CANDIDATE / NOT AUTHORIZED.
+
 ---
 
 ## P12 — Identity, Authentication & Admin
 
-**Status:** PENDENTE
+**Status:** NEXT CANDIDATE / NOT AUTHORIZED
 
 ### Objective
 
@@ -1213,6 +1254,8 @@ Architecture, runtime and UX foundation are ready for product construction.
 
 After P11.
 
+**Status:** PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN.
+
 Order → Payment → Entitlement → Delivery works safely and reliably.
 
 ## GATE C — OPERATIONS READY
@@ -1239,7 +1282,11 @@ The system receives formal authorization or denial for real production transacti
 
 The current next candidate is:
 
-**P11 — Entitlement & Delivery**
+**P12 — Identity, Authentication & Admin**
+
+Authorization state:
+
+**NEXT CANDIDATE / NOT AUTHORIZED**
 
 Current status:
 
@@ -1265,7 +1312,7 @@ P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creati
 
 P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration is **COMPLETE**. Technical Review PASS, findings A01–A05 remediated, Final Quality Gate R2 PASS, checkpoint `28653d1f923c6532037d4f2a9bec22fcac1091ad` tagged as `checkpoint/p10-ready-for-integration`, PR #14 merged into `main` as `6b311624c2e4824d2fc909fbcb994eab2ca9369d`. P11 — Entitlement & Delivery is the next candidate and remains NOT STARTED / NOT AUTHORIZED.
+P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN** on the current controlled worktree. Gate B — Commerce Core Ready is **PASS / DOCUMENTED / FROZEN**. P12 — Identity, Authentication & Admin is the next candidate and remains **NOT AUTHORIZED**. Git publication of the current P11 / Gate B worktree remains separately controlled.
 
 ---
 # 11. Post-MVP horizon
