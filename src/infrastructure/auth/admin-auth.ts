@@ -10,13 +10,29 @@ const serverEnv = parseServerEnv(process.env);
 const adminEnv = parseP12AdminAuthEnv({
   P12_ADMIN_AUTH_SECRET: process.env.P12_ADMIN_AUTH_SECRET,
 });
+const hosted = serverEnv.APP_ENV === "staging" || serverEnv.APP_ENV === "production";
 
-// P12-B defines persistence only. No Next.js handler is mounted here.
 export function createAdminAuth(database: PrismaClient) {
   return betterAuth({
     database: prismaAdapter(database, { provider: "mysql" }),
     secret: adminEnv.P12_ADMIN_AUTH_SECRET,
     baseURL: serverEnv.APP_URL,
+    basePath: "/api/admin/auth",
+    trustedOrigins: [new URL(serverEnv.APP_URL).origin],
+    advanced: {
+      // The explicit __Host- name must not receive Better Auth's additional __Secure- prefix.
+      useSecureCookies: false,
+      cookiePrefix: "lessenc_admin",
+      cookies: {
+        session_token: { name: hosted ? "__Host-lessenc_admin" : "lessenc_admin" },
+      },
+      defaultCookieAttributes: {
+        httpOnly: true,
+        secure: hosted,
+        sameSite: "lax",
+        path: "/",
+      },
+    },
     emailAndPassword: {
       enabled: true,
       disableSignUp: true,
@@ -44,6 +60,7 @@ export function createAdminAuth(database: PrismaClient) {
         skipVerificationOnEnable: false,
         allowPasswordless: false,
         backupCodeOptions: { storeBackupCodes: "encrypted" },
+        accountLockout: { enabled: true, maxFailedAttempts: 10, durationSeconds: 15 * 60 },
       }),
     ],
     telemetry: { enabled: false },
