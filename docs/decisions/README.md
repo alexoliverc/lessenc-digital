@@ -14,3 +14,8 @@ O owner declarou `ADR-0001` a `ADR-0010` como **ACCEPTED** na missão de consoli
 | [0008](ADR-0008-strong-admin-auth-mfa.md) | Autenticação forte e MFA no admin |
 | [0009](ADR-0009-environment-isolation.md) | Isolamento de ambientes |
 | [0010](ADR-0010-github-source-repository.md) | GitHub como repositório de origem |
+## P12 candidate decision — awaiting owner freeze
+
+| ADR | Decision | Status |
+| --- | --- | --- |
+| [0011](ADR-0011-better-auth-admin-identity.md) | Better Auth for isolated administrative identity | ACCEPTED / FROZEN — P12-A owner-approved baseline |
