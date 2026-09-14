@@ -1,3 +1,5 @@
+import { isAbsolute } from "node:path";
+
 import { z } from "zod";
 
 const serverEnvSchema = z.object({
@@ -15,6 +17,17 @@ const p09SubmissionEnvSchema = z.object({
   P09_SUBMISSION_SECRET: z.string().min(32),
 });
 
+const p11BuyerSessionEnvSchema = z.object({
+  P11_BUYER_SESSION_SECRET: z.string().min(32),
+});
+
+const p11PrivateStorageEnvSchema = z.object({
+  PRIVATE_FILE_STORAGE_PATH: z
+    .string()
+    .min(1)
+    .refine((value) => isAbsolute(value), "PRIVATE_FILE_STORAGE_PATH must be absolute"),
+});
+
 type ServerEnvInput = {
   APP_ENV?: string;
   APP_URL?: string;
@@ -28,6 +41,14 @@ type P08CommercialEnvInput = {
 
 type P09SubmissionEnvInput = {
   P09_SUBMISSION_SECRET?: string | undefined;
+};
+
+type P11BuyerSessionEnvInput = {
+  P11_BUYER_SESSION_SECRET?: string | undefined;
+};
+
+type P11PrivateStorageEnvInput = {
+  PRIVATE_FILE_STORAGE_PATH?: string | undefined;
 };
 
 export function parseServerEnv(input: ServerEnvInput) {
@@ -55,6 +76,24 @@ export function parseP09SubmissionEnv(input: P09SubmissionEnvInput) {
 
   if (!parsed.success) {
     throw new Error(`Invalid P09 submission configuration: ${z.prettifyError(parsed.error)}`);
+  }
+
+  return Object.freeze(parsed.data);
+}
+export function parseP11BuyerSessionEnv(input: P11BuyerSessionEnvInput) {
+  const parsed = p11BuyerSessionEnvSchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(`Invalid P11 buyer session configuration: ${z.prettifyError(parsed.error)}`);
+  }
+
+  return Object.freeze(parsed.data);
+}
+export function parseP11PrivateStorageEnv(input: P11PrivateStorageEnvInput) {
+  const parsed = p11PrivateStorageEnvSchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(`Invalid P11 private storage configuration: ${z.prettifyError(parsed.error)}`);
   }
 
   return Object.freeze(parsed.data);

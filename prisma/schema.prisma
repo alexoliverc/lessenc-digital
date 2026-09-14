@@ -38,6 +38,21 @@ enum EntitlementStatus {
   EXPIRED
 }
 
+enum BuyerAccessCredentialStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum DigitalResourceStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum DigitalDeliveryOutcome {
+  SUCCEEDED
+  FAILED
+}
+
 enum OutboxEventStatus {
   PENDING
   PROCESSING
@@ -54,14 +69,15 @@ enum OutboxEventType {
 }
 
 model Product {
-  id          String        @id @default(uuid()) @db.Char(36)
-  name        String        @db.VarChar(160)
-  description String?       @db.Text
-  status      ProductStatus @default(DRAFT)
-  createdAt   DateTime      @default(now()) @map("created_at") @db.DateTime(3)
-  updatedAt   DateTime      @updatedAt @map("updated_at") @db.DateTime(3)
-  offers      Offer[]
-  items       OrderItem[]
+  id               String                   @id @default(uuid()) @db.Char(36)
+  name             String                   @db.VarChar(160)
+  description      String?                  @db.Text
+  status           ProductStatus            @default(DRAFT)
+  createdAt        DateTime                 @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt        DateTime                 @updatedAt @map("updated_at") @db.DateTime(3)
+  offers           Offer[]
+  items            OrderItem[]
+  digitalResources ProductDigitalResource[]
 
   @@map("products")
 }
@@ -93,18 +109,19 @@ model Customer {
 }
 
 model Order {
-  id         String        @id @default(uuid()) @db.Char(36)
-  customerId String        @map("customer_id") @db.Char(36)
-  status     OrderStatus   @default(PENDING)
-  totalMinor Int           @map("total_minor") @db.UnsignedInt
-  currency   String        @db.Char(3)
-  createdAt  DateTime      @default(now()) @map("created_at") @db.DateTime(3)
-  updatedAt  DateTime      @updatedAt @map("updated_at") @db.DateTime(3)
-  paidAt     DateTime?     @map("paid_at") @db.DateTime(3)
-  customer   Customer      @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  items      OrderItem[]
-  payments   Payment[]
-  outbox     OutboxEvent[]
+  id                     String                  @id @default(uuid()) @db.Char(36)
+  customerId             String                  @map("customer_id") @db.Char(36)
+  status                 OrderStatus             @default(PENDING)
+  totalMinor             Int                     @map("total_minor") @db.UnsignedInt
+  currency               String                  @db.Char(3)
+  createdAt              DateTime                @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt              DateTime                @updatedAt @map("updated_at") @db.DateTime(3)
+  paidAt                 DateTime?               @map("paid_at") @db.DateTime(3)
+  customer               Customer                @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  items                  OrderItem[]
+  payments               Payment[]
+  outbox                 OutboxEvent[]
+  buyerAccessCredentials BuyerAccessCredential[]
 
   @@index([customerId, createdAt])
   @@map("orders")
@@ -188,28 +205,123 @@ model PaymentEvent {
 }
 
 model Entitlement {
-  id          String            @id @default(uuid()) @db.Char(36)
-  orderItemId String            @unique @map("order_item_id") @db.Char(36)
-  status      EntitlementStatus @default(PENDING)
-  createdAt   DateTime          @default(now()) @map("created_at") @db.DateTime(3)
-  updatedAt   DateTime          @updatedAt @map("updated_at") @db.DateTime(3)
-  activatedAt DateTime?         @map("activated_at") @db.DateTime(3)
-  revokedAt   DateTime?         @map("revoked_at") @db.DateTime(3)
-  orderItem   OrderItem         @relation(fields: [orderItemId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  id                  String                       @id @default(uuid()) @db.Char(36)
+  orderItemId         String                       @unique @map("order_item_id") @db.Char(36)
+  sourceOutboxEventId String?                      @map("source_outbox_event_id") @db.Char(36)
+  status              EntitlementStatus            @default(PENDING)
+  createdAt           DateTime                     @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt           DateTime                     @updatedAt @map("updated_at") @db.DateTime(3)
+  activatedAt         DateTime?                    @map("activated_at") @db.DateTime(3)
+  revokedAt           DateTime?                    @map("revoked_at") @db.DateTime(3)
+  orderItem           OrderItem                    @relation(fields: [orderItemId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  sourceOutboxEvent   OutboxEvent?                 @relation(fields: [sourceOutboxEventId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  resources           EntitlementDigitalResource[]
 
+  @@index([sourceOutboxEventId])
   @@map("entitlements")
 }
 
+model BuyerAccessCredential {
+  id             String                      @id @default(uuid()) @db.Char(36)
+  orderId        String                      @map("order_id") @db.Char(36)
+  secretHash     String                      @unique @map("secret_hash") @db.Char(64)
+  status         BuyerAccessCredentialStatus @default(ACTIVE)
+  activeOrderKey String?                     @unique @map("active_order_key") @db.Char(36)
+  createdAt      DateTime                    @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt      DateTime                    @updatedAt @map("updated_at") @db.DateTime(3)
+  lastUsedAt     DateTime?                   @map("last_used_at") @db.DateTime(3)
+  revokedAt      DateTime?                   @map("revoked_at") @db.DateTime(3)
+  order          Order                       @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  deliveryEvents DigitalDeliveryEvent[]
+
+  @@index([orderId, createdAt])
+  @@map("buyer_access_credentials")
+}
+
+model DigitalResource {
+  id           String                       @id @default(uuid()) @db.Char(36)
+  logicalKey   String                       @map("logical_key") @db.VarChar(160)
+  version      Int                          @default(1) @db.UnsignedInt
+  storageKey   String                       @unique @map("storage_key") @db.VarChar(512)
+  filename     String                       @db.VarChar(255)
+  mediaType    String                       @map("media_type") @db.VarChar(127)
+  status       DigitalResourceStatus        @default(ACTIVE)
+  createdAt    DateTime                     @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt    DateTime                     @updatedAt @map("updated_at") @db.DateTime(3)
+  products     ProductDigitalResource[]
+  entitlements EntitlementDigitalResource[]
+
+  @@unique([logicalKey, version])
+  @@map("digital_resources")
+}
+
+model ProductDigitalResource {
+  productId  String          @map("product_id") @db.Char(36)
+  resourceId String          @map("resource_id") @db.Char(36)
+  createdAt  DateTime        @default(now()) @map("created_at") @db.DateTime(3)
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  resource   DigitalResource @relation(fields: [resourceId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([productId, resourceId])
+  @@index([resourceId])
+  @@map("product_digital_resources")
+}
+
+model EntitlementDigitalResource {
+  entitlementId String                 @map("entitlement_id") @db.Char(36)
+  resourceId    String                 @map("resource_id") @db.Char(36)
+  grantedAt     DateTime               @default(now()) @map("granted_at") @db.DateTime(3)
+  entitlement   Entitlement            @relation(fields: [entitlementId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  resource      DigitalResource        @relation(fields: [resourceId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  deliveries    DigitalDeliveryEvent[]
+
+  @@id([entitlementId, resourceId])
+  @@index([resourceId])
+  @@map("entitlement_digital_resources")
+}
+
+model DigitalDeliveryEvent {
+  id                      String                     @id @default(uuid()) @db.Char(36)
+  entitlementId           String                     @map("entitlement_id") @db.Char(36)
+  resourceId              String                     @map("resource_id") @db.Char(36)
+  buyerAccessCredentialId String                     @map("buyer_access_credential_id") @db.Char(36)
+  outcome                 DigitalDeliveryOutcome
+  failureCode             String?                    @map("failure_code") @db.VarChar(64)
+  createdAt               DateTime                   @default(now()) @map("created_at") @db.DateTime(3)
+  entitlementResource     EntitlementDigitalResource @relation(fields: [entitlementId, resourceId], references: [entitlementId, resourceId], onDelete: Restrict, onUpdate: Restrict)
+  buyerAccessCredential   BuyerAccessCredential      @relation(fields: [buyerAccessCredentialId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([entitlementId, resourceId])
+  @@index([entitlementId, createdAt])
+  @@index([resourceId, createdAt])
+  @@index([buyerAccessCredentialId, createdAt])
+  @@map("digital_delivery_events")
+}
+
+model BuyerAccessRateLimitBucket {
+  scope        String   @db.VarChar(32)
+  bucketHash   String   @map("bucket_hash") @db.Char(64)
+  windowStart  DateTime @map("window_start") @db.DateTime(3)
+  requestCount Int      @default(0) @map("request_count") @db.UnsignedInt
+  createdAt    DateTime @default(now()) @map("created_at") @db.DateTime(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.DateTime(3)
+
+  @@id([scope, bucketHash, windowStart])
+  @@index([windowStart])
+  @@map("buyer_access_rate_limit_buckets")
+}
+
 model OutboxEvent {
-  id               String            @id @default(uuid()) @db.Char(36)
-  orderId          String            @map("order_id") @db.Char(36)
-  type             OutboxEventType
-  status           OutboxEventStatus @default(PENDING)
-  deduplicationKey String            @unique @map("deduplication_key") @db.VarChar(160)
-  payload          Json
-  createdAt        DateTime          @default(now()) @map("created_at") @db.DateTime(3)
-  processedAt      DateTime?         @map("processed_at") @db.DateTime(3)
-  order            Order             @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  id                    String            @id @default(uuid()) @db.Char(36)
+  orderId               String            @map("order_id") @db.Char(36)
+  type                  OutboxEventType
+  status                OutboxEventStatus @default(PENDING)
+  deduplicationKey      String            @unique @map("deduplication_key") @db.VarChar(160)
+  payload               Json
+  createdAt             DateTime          @default(now()) @map("created_at") @db.DateTime(3)
+  processedAt           DateTime?         @map("processed_at") @db.DateTime(3)
+  order                 Order             @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  activatedEntitlements Entitlement[]
 
   @@index([orderId])
   @@index([status, createdAt])

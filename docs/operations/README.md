@@ -13,3 +13,35 @@ Fornecedores e procedimentos finais de armazenamento privado, email, observabili
 A [baseline canônica da workstation de desenvolvimento e VS Code](development-workstation-vscode.md) documenta o Profile L'Essenc, configuração compartilhada do workspace, extensões, terminal, Git/SCM, segurança, performance, Settings Sync e recuperação.
 
 Esse documento é operacional e não redefine versões da stack, gerenciador de pacotes, ambientes da aplicação nem o estado da implementação P04. Para esses temas, prevalecem as fontes arquiteturais canônicas e a regra **CURRENT CANONICAL BASELINE WINS**.
+
+<!-- P11-C6.5-BACKUP-RESTORE-RUNBOOK -->
+
+## P11 security and recovery runbooks
+
+- [P11 Backup and Restore Runbook](./p11-backup-restore-runbook.md) — frozen C6.5 backup, integrity verification, disposable restore drill, semantic restore equivalence, and post-restore application validation.
+
+<!-- P11-C6.6-OBSERVABILITY-RUNBOOK-INDEX -->
+
+## P11 observability and alerting
+
+- [P11 Observability and Alerting Runbook](./p11-observability-alerting-runbook.md) — structured events, privacy and low-cardinality rules, immediate alert signals, deferred recurrence thresholds, operational health, 24-hour rate-limit retention and cleanup, and backup/restore validation observability.
+- Public `/api/health` remains liveness-only; deep operational health is available only through the explicit operational command.
+- External observability provider, five-minute aggregation, and production scheduling remain OPEN / DEFERRED.
+
+<!-- P11-C6.7-SECURITY-RECOVERY-INDEX -->
+
+## P11 final security and recovery review
+
+- [P11 C6 Final Security and Recovery Review](./p11-security-recovery-review.md) — consolidated C6.1–C6.7 security invariants, adversarial evidence, recovery boundaries, open production decisions, and the explicit separation between C6 closeout and the mandatory C7 Final Gate.
+
+<!-- P11-C7-FINAL-GATE -->
+
+## P11 final gate
+
+- [P11 Final Gate](./p11-final-gate.md) — final C1–C7 closeout, canonical refund-to-revocation-to-download-denial proof, regression evidence, frozen security boundaries, remaining production decisions, and Git publication boundary.
+
+<!-- GATE-B-OPERATIONS-INDEX -->
+
+## Gate B — Commerce Core Ready
+
+- [Gate B — Commerce Core Ready](./gate-b-commerce-core-ready.md) — final cross-phase validation of P09 -> P10 -> P11, positive protected delivery, refund/revocation denial, regression evidence and P12 authorization boundary.

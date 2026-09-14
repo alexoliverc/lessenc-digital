@@ -1,4 +1,10 @@
-import { parseP08CommercialEnv, parseP09SubmissionEnv, parseServerEnv } from "./env-schema";
+import {
+  parseP08CommercialEnv,
+  parseP09SubmissionEnv,
+  parseP11BuyerSessionEnv,
+  parseP11PrivateStorageEnv,
+  parseServerEnv,
+} from "./env-schema";
 
 export const serverEnv = parseServerEnv(process.env);
 
@@ -20,5 +26,23 @@ export function getP09SubmissionEnv() {
 
   return parseP09SubmissionEnv({
     P09_SUBMISSION_SECRET: process.env.P09_SUBMISSION_SECRET,
+  });
+}
+export function getP11BuyerSessionEnv() {
+  if (typeof window !== "undefined") {
+    throw new Error("P11 buyer session configuration is server-only");
+  }
+
+  return parseP11BuyerSessionEnv({
+    P11_BUYER_SESSION_SECRET: process.env.P11_BUYER_SESSION_SECRET,
+  });
+}
+export function getP11PrivateStorageEnv() {
+  if (typeof window !== "undefined") {
+    throw new Error("P11 private storage configuration is server-only");
+  }
+
+  return parseP11PrivateStorageEnv({
+    PRIVATE_FILE_STORAGE_PATH: process.env.PRIVATE_FILE_STORAGE_PATH,
   });
 }
