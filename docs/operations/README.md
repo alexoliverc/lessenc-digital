@@ -45,3 +45,9 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
 ## Gate B — Commerce Core Ready
 
 - [Gate B — Commerce Core Ready](./gate-b-commerce-core-ready.md) — final cross-phase validation of P09 -> P10 -> P11, positive protected delivery, refund/revocation denial, regression evidence and P12 authorization boundary.
+
+<!-- P12-FINAL-GATE -->
+
+## P12 final gate
+
+- [P12 Final Gate](./p12-final-gate.md) — final P12-A through P12-H closeout, isolated administrative identity, mandatory MFA, session policy, RBAC, backoffice boundaries, administrative audit, regression evidence, safe delivery-recovery defer and Git progression boundary.

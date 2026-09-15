@@ -1,6 +1,6 @@
-# Decisões aceitas LES-DIG P00–P04
+# Decisões aceitas LES-DIG P00–P12
 
-O owner declarou `ADR-0001` a `ADR-0010` como **ACCEPTED** na missão de consolidação. Essas decisões descrevem a baseline documental atual e não provam implementação física. A arquitetura extensa anterior `LES-*-R01` é preservada como histórico; em divergências, a decisão mais recente e a precedência de [AGENTS.md](../../AGENTS.md) prevalecem.
+O owner declarou `ADR-0001` a `ADR-0010` como **ACCEPTED** na missão de consolidação e congelou a `ADR-0011` como a decisão arquitetural P12-A. Essas decisões descrevem a baseline documental atual; a implementação física correspondente deve ser comprovada pelos checkpoints e Final Gates de cada fase. A arquitetura extensa anterior `LES-*-R01` é preservada como histórico; em divergências, a decisão mais recente e a precedência de [AGENTS.md](../../AGENTS.md) prevalecem.
 
 | ADR | Decisão |
 | --- | --- |
@@ -14,7 +14,8 @@ O owner declarou `ADR-0001` a `ADR-0010` como **ACCEPTED** na missão de consoli
 | [0008](ADR-0008-strong-admin-auth-mfa.md) | Autenticação forte e MFA no admin |
 | [0009](ADR-0009-environment-isolation.md) | Isolamento de ambientes |
 | [0010](ADR-0010-github-source-repository.md) | GitHub como repositório de origem |
-## P12 candidate decision — awaiting owner freeze
+
+## P12 accepted decision
 
 | ADR | Decision | Status |
 | --- | --- | --- |

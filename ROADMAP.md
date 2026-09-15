@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** None. P11 — Entitlement & Secure Digital Delivery is COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. Gate B — Commerce Core Ready is PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN. P12 — Identity, Authentication & Admin is the next candidate and remains NOT AUTHORIZED. Deploy remains NOT PERFORMED.
+**Current execution:** P12 documentation closeout only. P12-A–G are COMPLETE, P12-H Technical Gate is PASS and the P12 code baseline is `3041dd949a84b6b7f2b7ddbac5eec979b74828e8`. The current uncommitted documentation delta records P12 as COMPLETE / DOCUMENTED / READY FOR FINAL GIT CLOSEOUT. P13 — Analytics is the next phase after that closeout and remains PENDING / NOT AUTHORIZED. Deploy remains NOT PERFORMED.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -638,15 +638,21 @@ Canonical closeout:
 
 `docs/operations/gate-b-commerce-core-ready.md`
 
-**Next candidate:** P12 — Identity, Authentication & Admin.
+**Next phase at the Gate B closeout:** P12 — Identity, Authentication & Admin.
 
-**Authorization:** P12 is NEXT CANDIDATE / NOT AUTHORIZED.
+**Authorization at the Gate B closeout:** P12 was NEXT CANDIDATE / NOT AUTHORIZED. Its later owner-authorized implementation and P12-H closeout are recorded in the P12 section below.
 
 ---
 
 ## P12 — Identity, Authentication & Admin
 
-**Status:** NEXT CANDIDATE / NOT AUTHORIZED
+**Status:** COMPLETE / DOCUMENTED / READY FOR FINAL GIT CLOSEOUT
+
+**Technical gate:** P12-H Gate 1 PASS — 2026-09-14
+
+**Code baseline:** `3041dd949a84b6b7f2b7ddbac5eec979b74828e8`
+
+**Canonical final review:** `docs/operations/p12-final-gate.md`
 
 ### Objective
 
@@ -686,6 +692,20 @@ Authentication and authorization implementation require explicit owner approval.
 ### Exit criteria
 
 The business can be operated without direct database manipulation.
+
+### Final result
+
+P12-A through P12-G are COMPLETE. P12-H Technical Gate is PASS.
+
+The isolated administrative identity boundary, email/password authentication, mandatory TOTP and backup-code MFA, database-backed session policy, OWNER/ADMIN/SUPPORT RBAC, server-side authorization, administrative audit and operational backoffice are implemented.
+
+The backoffice provides bounded operational data; controlled, audited `Product.status` mutation; and read-only views for orders, payments, customers, entitlements, deliveries and audit. It does not expose manual payment approval, financial-state rewriting, entitlement fabrication or manual entitlement activation.
+
+Administrative delivery recovery remains intentionally deferred because no proven atomic boundary combines the P11 one-time credential reissue transaction with P12 mandatory fail-closed administrative audit without altering the frozen P11 contract. This defer does not fail the P12 gate.
+
+Final evidence: MySQL 16 files / 149 tests PASS; unit 42 files / 435 tests PASS; typecheck PASS; lint PASS; `npm audit` 0 vulnerabilities; production build PASS; P12 migration immutability PASS; P10 financial truth and P11 entitlement truth PRESERVED.
+
+The first OWNER bootstrap was not executed and no real administrative account was created. The documentation closeout remains uncommitted for ChatGPT review. No push, tag, pull request, merge or deploy occurred, and P13 implementation has not started.
 
 ---
 
@@ -1278,15 +1298,15 @@ The system receives formal authorization or denial for real production transacti
 
 ---
 
-# 10. Current next candidate
+# 10. Current transition
 
-The current next candidate is:
+The next phase after final P12 Git closeout is:
 
-**P12 — Identity, Authentication & Admin**
+**P13 — Analytics, Attribution & Growth Infrastructure**
 
 Authorization state:
 
-**NEXT CANDIDATE / NOT AUTHORIZED**
+**PENDING / NOT AUTHORIZED / NOT STARTED**
 
 Current status:
 
@@ -1312,7 +1332,7 @@ P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creati
 
 P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 — Identity, Authentication & Admin is the next candidate and remains **NOT AUTHORIZED**. Deploy remains **NOT PERFORMED**.
+P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / DOCUMENTED / READY FOR FINAL GIT CLOSEOUT** on code baseline `3041dd949a84b6b7f2b7ddbac5eec979b74828e8`; its documentation delta remains uncommitted for ChatGPT review. P13 is **PENDING / NOT AUTHORIZED / NOT STARTED**. Deploy remains **NOT PERFORMED**.
 
 <!-- P11-POST-MERGE-CLOSEOUT -->
 ### P11 — Git Integration Closeout
@@ -1323,8 +1343,23 @@ P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` throug
 - Annotated checkpoint tag: `checkpoint/p11-entitlement-digital-delivery-complete`.
 - P11: **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED**.
 - Gate B: **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**.
-- P12: **NEXT CANDIDATE / NOT AUTHORIZED**.
+- P12 state at the P11 post-merge checkpoint: **NEXT CANDIDATE / NOT AUTHORIZED**; superseded by the current P12 closeout above.
 - Deploy: **NOT PERFORMED**.
+
+<!-- P12-DOCUMENTATION-CLOSEOUT -->
+
+### P12 — Documentation closeout
+
+- P12-A–G: **COMPLETE**.
+- P12-H Technical Gate: **PASS**.
+- Code baseline: `3041dd949a84b6b7f2b7ddbac5eec979b74828e8`.
+- Canonical final review: `docs/operations/p12-final-gate.md`.
+- Final regression: MySQL 149/149; unit 435/435; typecheck/lint/build PASS; `npm audit` 0 vulnerabilities.
+- First OWNER bootstrap: **NOT EXECUTED**.
+- Real administrative account: **NOT CREATED**.
+- Documentation closeout: uncommitted and ready for ChatGPT review.
+- Git publication/merge/deploy: **NOT PERFORMED**.
+- P13 implementation: **NOT STARTED**.
 
 ---
 # 11. Post-MVP horizon

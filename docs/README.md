@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P10
+# Índice oficial da baseline documental LES-DIG P00–P12
 
-**Estado:** P00–P10 COMPLETE. Gate A PASS. P10 — Mercado Pago Integration foi tecnicamente aprovada e integrada pelo PR #14 em `main` no merge `6b311624c2e4824d2fc909fbcb994eab2ca9369d`. P11 permanece fora desta fase.
+**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12-A–G estão COMPLETE, P12-H Technical Gate PASS e o fechamento documental P12 permanece neste delta não commitado, pronto para revisão do ChatGPT e Git closeout final.
 
 ## Precedência e classificação das fontes
 
@@ -16,7 +16,7 @@ Decisão explícita mais recente do owner prevalece. Em conflito entre documento
 
 ## CANONICAL CURRENT DOCUMENTS
 
-Os links das seções P00–P10, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado.
+Os links das seções P00–P12, [segurança](security/README.md), [operações](operations/README.md) e [ADRs aceitos](decisions/README.md) constituem o índice canônico atual. Documentar um alvo não significa que foi instalado; os checkpoints e Final Gates identificam a implementação fisicamente validada.
 
 ## Governança P00
 
@@ -34,7 +34,7 @@ Os links das seções P00–P10, [segurança](security/README.md), [operações]
 
 ## Arquitetura P02 — `docs/architecture/`
 
-[system-architecture.md](architecture/system-architecture.md), [module-boundaries.md](architecture/module-boundaries.md), [integrations-architecture.md](architecture/integrations-architecture.md) e [deployment-architecture.md](architecture/deployment-architecture.md). Os [10 ADRs aceitos](decisions/README.md) formalizam decisões transversais; [segurança](security/README.md) consolida invariantes e controles.
+[system-architecture.md](architecture/system-architecture.md), [module-boundaries.md](architecture/module-boundaries.md), [integrations-architecture.md](architecture/integrations-architecture.md) e [deployment-architecture.md](architecture/deployment-architecture.md). Os [11 ADRs aceitos](decisions/README.md) formalizam decisões transversais; [segurança](security/README.md) consolida invariantes e controles.
 
 ## Dados e domínio P03 — `docs/architecture/`
 
@@ -83,6 +83,16 @@ P10 foi executada na branch própria, recebeu revisão técnica PASS após remed
 [Phase Execution Brief](architecture/p10-phase-execution-brief.md), [Physical Implementation Plan](architecture/p10-implementation-plan.md) e [Validation Report](architecture/p10-validation-report.md).
 
 P10 implementa a fronteira financeira via Checkout Transparente / Orders API, persistência de tentativas e eventos, PIX, cartão de crédito em uma parcela, 3DS, webhook verificado e reconciliação. A auditoria independente A01–A05 foi integralmente remediada, o Final Quality Gate R2 passou e o PR #14 foi integrado em `main` no merge `6b311624c2e4824d2fc909fbcb994eab2ca9369d`. Mercado Pago TEST real e browser/Brick real permanecem limitações de ambiente documentadas. Entitlement/Delivery continuam P11.
+
+## Entitlement & Secure Digital Delivery P11 — COMPLETE
+
+O [P11 Final Gate](operations/p11-final-gate.md) e o [Gate B — Commerce Core Ready](operations/gate-b-commerce-core-ready.md) registram o fechamento da entrega digital segura, o cenário canônico de refund/revogação/negação e a integração em `main` através da PR #16.
+
+## Identity, Authentication & Admin P12 — COMPLETE / DOCUMENTED / READY FOR FINAL GIT CLOSEOUT
+
+A [ADR-0011](decisions/ADR-0011-better-auth-admin-identity.md) congela a decisão de identidade administrativa isolada; o [Phase Execution Brief](architecture/p12-identity-auth-admin-phase-execution-brief.md) preserva a especificação P12-A e seu resultado de implementação; o [P12 Final Gate](operations/p12-final-gate.md) consolida P12-A–H, arquitetura final, rotas, backoffice, RBAC, auditoria, evidências e limites.
+
+P12-H Technical Gate é PASS. A documentação de closeout permanece não commitada e pronta para revisão do ChatGPT. O primeiro OWNER não foi inicializado, nenhuma conta administrativa real foi criada e P13 não foi iniciada.
 
 ## Operações
 
