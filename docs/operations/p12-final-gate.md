@@ -1,6 +1,6 @@
 # P12 Final Gate
 
-**Status:** P12 = COMPLETE / DOCUMENTED / READY FOR FINAL GIT CLOSEOUT.
+**Status:** P12 = COMPLETE / PASS / DOCUMENTED / INTEGRATED.
 
 **Date:** 2026-09-14
 
@@ -19,9 +19,9 @@ P12 — Identity, Authentication & Admin completed its implementation blocks:
 - P12-E — RBAC, Authorization and Administrative Audit: COMPLETE;
 - P12-F — Admin Shell, Dashboard and Own Account: COMPLETE;
 - P12-G — Operational Administrative Backoffice: COMPLETE;
-- P12-H — Technical Gate: PASS; documentation closeout is represented by this uncommitted delta.
+- P12-H — Technical Gate: PASS; its documentation closeout was subsequently committed as `ea3295cf1703466763c9cd333d98e59fe6535f8e` and integrated through PR #18.
 
-The final P12 documentation is ready for ChatGPT review. Commit, push, tag, pull request, merge and deployment remain separate owner-controlled operations and have not occurred in this closeout.
+At the P12-H documentation-closeout checkpoint, the final documentation was ready for ChatGPT review and Git publication had not yet occurred. That historical checkpoint was later committed as `ea3295cf1703466763c9cd333d98e59fe6535f8e` and integrated into main through PR #18 and merge commit 482e095e9c515c163dd4b057f07baf06f3450f95.
 
 ## Canonical implementation chain
 
@@ -35,7 +35,7 @@ The verified linear P12 history is:
 | P12-C/D/E | `dbb2280e175be005d3afc020fa5c6651ab1c801e` | `feat: complete P12 admin authentication MFA and RBAC` |
 | P12-F/G | `3041dd949a84b6b7f2b7ddbac5eec979b74828e8` | `feat: complete P12 administrative backoffice` |
 
-There is no P12-H commit at this documentation checkpoint.
+At the original documentation checkpoint there was not yet a P12-H commit. The finalized P12-H documentation closeout was later committed as `ea3295cf1703466763c9cd333d98e59fe6535f8e`.
 
 ## Identity and authentication architecture
 
@@ -203,16 +203,33 @@ No staging or production access occurred. This did not block P12. The eager runt
 
 ## Git and progression boundary
 
-P12 documentation closeout is an uncommitted delta on code baseline `3041dd949a84b6b7f2b7ddbac5eec979b74828e8` and is ready for ChatGPT review.
+At the original P12-H documentation-closeout checkpoint, Git publication had not yet occurred. That statement is historical and is superseded by the integration record below.
 
-The next phase after final P12 Git closeout is P13 — Analytics. P13 remains pending and its implementation is not authorized or started by this document.
+## Post-merge integration closeout
 
-At this checkpoint:
+P12 was integrated into main through PR #18.
 
-- commit: NOT PERFORMED;
-- push: NOT PERFORMED;
-- tag: NOT CREATED;
-- pull request: NOT CREATED;
-- merge: NOT PERFORMED;
-- deploy: NOT PERFORMED;
-- P13 implementation: NOT STARTED.
+Canonical integration evidence:
+
+- P12 final branch checkpoint / authorized PR head: `ea3295cf1703466763c9cd333d98e59fe6535f8e`;
+- PR: #18;
+- PR base: main;
+- previous main / P11 baseline: `e2da708b577af75b13afb71c3b6d01a1b915f367`;
+- merge commit: 482e095e9c515c163dd4b057f07baf06f3450f95;
+- merge parent 1: `e2da708b577af75b13afb71c3b6d01a1b915f367`;
+- merge parent 2: `ea3295cf1703466763c9cd333d98e59fe6535f8e`;
+- origin/main after merge: 482e095e9c515c163dd4b057f07baf06f3450f95;
+- post-merge main audit R1: COMPLETE / PASS;
+- P12 = COMPLETE / PASS / DOCUMENTED / INTEGRATED.
+
+Operational boundaries remain:
+
+- FIRST OWNER BOOTSTRAP = NOT EXECUTED;
+- REAL ADMIN ACCOUNT = NOT CREATED;
+- delivery recovery = SAFE DEFER;
+- known build/runtime configuration coupling remains documented for later P14/P18 review;
+- P12 checkpoint tag = NOT CREATED;
+- deploy = NOT PERFORMED;
+- P13 = PENDING / NOT AUTHORIZED / NOT STARTED.
+
+This post-merge documentation reconciliation is being prepared on phase/p12-post-merge-closeout. It does not itself authorize commit, push, PR, merge, tag, deployment or P13.

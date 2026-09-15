@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P12
 
-**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12-A–G estão COMPLETE, P12-H Technical Gate PASS e o fechamento documental P12 permanece neste delta não commitado, pronto para revisão do ChatGPT e Git closeout final.
+**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED em `main` através da PR #18 e do merge commit `482e095e9c515c163dd4b057f07baf06f3450f95`. A tag final P12 ainda não foi criada; P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -88,11 +88,11 @@ P10 implementa a fronteira financeira via Checkout Transparente / Orders API, pe
 
 O [P11 Final Gate](operations/p11-final-gate.md) e o [Gate B — Commerce Core Ready](operations/gate-b-commerce-core-ready.md) registram o fechamento da entrega digital segura, o cenário canônico de refund/revogação/negação e a integração em `main` através da PR #16.
 
-## Identity, Authentication & Admin P12 — COMPLETE / DOCUMENTED / READY FOR FINAL GIT CLOSEOUT
+## Identity, Authentication & Admin P12 — COMPLETE / PASS / DOCUMENTED / INTEGRATED
 
 A [ADR-0011](decisions/ADR-0011-better-auth-admin-identity.md) congela a decisão de identidade administrativa isolada; o [Phase Execution Brief](architecture/p12-identity-auth-admin-phase-execution-brief.md) preserva a especificação P12-A e seu resultado de implementação; o [P12 Final Gate](operations/p12-final-gate.md) consolida P12-A–H, arquitetura final, rotas, backoffice, RBAC, auditoria, evidências e limites.
 
-P12-H Technical Gate é PASS. A documentação de closeout permanece não commitada e pronta para revisão do ChatGPT. O primeiro OWNER não foi inicializado, nenhuma conta administrativa real foi criada e P13 não foi iniciada.
+P12-H Technical Gate é PASS. A PR #18 integrou o checkpoint final P12 `ea3295cf1703466763c9cd333d98e59fe6535f8e` em main através do merge 482e095e9c515c163dd4b057f07baf06f3450f95; o post-merge main audit R1 passou. O primeiro OWNER não foi inicializado, nenhuma conta administrativa real foi criada, a tag final P12 ainda não foi criada, deploy não foi realizado e P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED.
 
 ## Operações
 
