@@ -2,8 +2,8 @@
 
 **Última atualização:** 14/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P12 implementadas. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED em `main` através da PR #18 e do merge commit `482e095e9c515c163dd4b057f07baf06f3450f95`; P12-H Technical Gate permanece PASS.
-**Estado atual:** `origin/main` está em `482e095e9c515c163dd4b057f07baf06f3450f95`, merge da PR #18 a partir do checkpoint final P12 `ea3295cf1703466763c9cd333d98e59fe6535f8e`. O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Delivery recovery permanece SAFE DEFER. A tag final P12 ainda não foi criada e deploy não foi realizado. P13 — Analytics permanece PENDING / NOT AUTHORIZED / NOT STARTED.
+**Estado documental:** P00–P12 implementadas. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED: a implementação foi integrada pela PR #18 no merge `482e095e9c515c163dd4b057f07baf06f3450f95` e o post-merge documentation closeout foi integrado pela PR #19 no merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P12-H Technical Gate permanece PASS.
+**Estado atual:** a linhagem canônica da P12 registra o checkpoint final de implementação `ea3295cf1703466763c9cd333d98e59fe6535f8e`, sua integração pela PR #18 (`482e095e9c515c163dd4b057f07baf06f3450f95`) e o documentation closeout pela PR #19 (`f29487c67621eb3151fa45f1337c0a9e6dd19ca5`). O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Delivery recovery permanece SAFE DEFER. Checkpoint/tagging é uma operação Git separada e controlada pelo owner; produção permanece fora do escopo da P12. P13 — Analytics permanece PENDING / NOT AUTHORIZED / NOT STARTED.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -18,14 +18,14 @@
 - O brief do owner de 12/09/2026 autorizou a P06 a partir de `c77ff9c`: MySQL 8.4 LTS local isolado, Prisma CLI/Client/adapter MariaDB exatamente 7.10.0, schema, migrations e testes físicos. Os 6 alertas transitivos iniciais foram corrigidos na P06 pelos overrides de mariadb 3.5.4, mysql2 3.24.4 e deepmerge-ts 8.0.2; auditoria P07 confirmou 0 vulnerabilidades. Não há liberação de produção.
 - Ambientes aprovados na nova baseline: LOCAL, TEST, STAGING e PRODUCTION com `APP_ENV` separado de `NODE_ENV`, sem afirmar que tenham sido provisionados.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
-- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11 e identidade/autenticação/administração P12 estão documentadas e implementadas nas respectivas baselines. P12 foi integrada em `main` pela PR #18 no merge `482e095e9c515c163dd4b057f07baf06f3450f95`. A tag final P12 ainda não foi criada. P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED. Deploy de produção continua fora do estado autorizado atual.
+- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11 e identidade/autenticação/administração P12 estão documentadas e implementadas nas respectivas baselines. A implementação P12 foi integrada pela PR #18 no merge `482e095e9c515c163dd4b057f07baf06f3450f95`; o documentation closeout pós-merge foi integrado pela PR #19 no merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. Checkpoint/tagging permanece uma operação Git separada do estado técnico da fase. P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED. Produção continua fora do escopo autorizado da P12.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.
 - Cada execução requer Phase Execution Brief, branch, autorização de operações protegidas por `AGENTS.md`, validação e retorno ao ChatGPT antes da progressão. Repositório é a memória técnica oficial; ler os arquivos na ordem definida em AGENTS.md.
 - O projeto principal de cosméticos físicos continua separado e será retomado com a formação de caixa.
 
 ## Onde encontrar as decisões
 
-- [ROADMAP.md](ROADMAP.md): fases P00–P20; P12 COMPLETE / PASS / DOCUMENTED / INTEGRATED via PR #18; P13 PENDING / NOT AUTHORIZED / NOT STARTED.
+- [ROADMAP.md](ROADMAP.md): fases P00–P20; P12 COMPLETE / PASS / DOCUMENTED / INTEGRATED, com implementação integrada pela PR #18 e documentation closeout integrado pela PR #19; P13 PENDING / NOT AUTHORIZED / NOT STARTED.
 - [docs/README.md](docs/README.md): índice P00–P12, segurança, operações, ADRs e histórico anterior.
 - [P12 Final Gate](docs/operations/p12-final-gate.md): arquitetura final, backoffice, RBAC, auditoria, evidências, defer de recovery e limites Git.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
@@ -45,7 +45,7 @@
 - ChatGPT Technical Review: PASS.
 - Gate A — FOUNDATION READY: PASS.
 - Nenhuma dependência foi adicionada ou removida.
-- P06 foi implementada e validada em 12/09/2026 na branch `phase/p06-data-persistence-foundation`; ChatGPT Technical Review PASS. Checkpoint `f4bfdfe` e tag `checkpoint/p06-data-persistence-complete` foram publicados; PR #4 foi mergeada em `main` pelo merge commit `694a085`, e o fechamento documental pela PR #5 em `e04438c`. P07 foi encerrada como COMPLETE após checkpoint `4c96e7b`, publicação da tag e merge da PR #6 em `main` como `6a19eda`. P08 foi posteriormente implementada, validada e encerrada como COMPLETE pelo checkpoint 73400a e merge 2686e39.
+- P06 foi implementada e validada em 12/09/2026 na branch `phase/p06-data-persistence-foundation`; ChatGPT Technical Review PASS. Checkpoint `f4bfdfe` e tag `checkpoint/p06-data-persistence-complete` foram publicados; PR #4 foi mergeada em `main` pelo merge commit `694a085`, e o fechamento documental pela PR #5 em `e04438c`. P07 foi encerrada como COMPLETE após checkpoint `4c96e7b`, publicação da tag e merge da PR #6 em `main` como `6a19eda`. P08 foi posteriormente implementada, validada e encerrada como COMPLETE pelo checkpoint `f73400a` e merge 2686e39.
 
 ## P08 — Post-merge closeout
 
@@ -1450,6 +1450,21 @@ PR #18 formally integrated P12 into `main`.
 - REAL ADMIN ACCOUNT = NOT CREATED;
 - delivery recovery = SAFE DEFER;
 - known build/runtime technical debt remains documented for P14/P18;
-- checkpoint tag = NOT CREATED;
+- at that PR #18 integration checkpoint, checkpoint tag = NOT CREATED;
 - deploy = NOT PERFORMED;
+- P13 = PENDING / NOT AUTHORIZED / NOT STARTED.
+
+<!-- P12-FINAL-DOCUMENTATION-STABILITY -->
+
+## P12 Final Documentation Stability
+
+The durable P12 integration record separates implementation integration from documentation integration and does not depend on the mutable tip of main.
+
+- final implementation checkpoint: `ea3295cf1703466763c9cd333d98e59fe6535f8e;
+- implementation integration: PR #18 / merge 482e095e9c515c163dd4b057f07baf06f3450f95;
+- documentation closeout checkpoint: 8d7a64430532b42019ba346fd8591087e2a7cc3a;
+- documentation closeout integration: PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`;
+- P12 = COMPLETE / PASS / DOCUMENTED / INTEGRATED;
+- checkpoint/tagging = separate owner-controlled Git operation;
+- production deployment = outside P12 scope;
 - P13 = PENDING / NOT AUTHORIZED / NOT STARTED.

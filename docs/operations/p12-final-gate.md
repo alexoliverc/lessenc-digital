@@ -203,33 +203,38 @@ No staging or production access occurred. This did not block P12. The eager runt
 
 ## Git and progression boundary
 
-At the original P12-H documentation-closeout checkpoint, Git publication had not yet occurred. That statement is historical and is superseded by the integration record below.
+The original P12-H documentation checkpoint preceded Git publication. That state is historical. The durable integration record below separates implementation integration from documentation integration and intentionally does not depend on the mutable tip of main.
 
-## Post-merge integration closeout
+## P12 implementation integration
 
-P12 was integrated into main through PR #18.
-
-Canonical integration evidence:
-
-- P12 final branch checkpoint / authorized PR head: `ea3295cf1703466763c9cd333d98e59fe6535f8e`;
+- final implementation checkpoint / authorized PR head: `ea3295cf1703466763c9cd333d98e59fe6535f8e;
 - PR: #18;
-- PR base: main;
-- previous main / P11 baseline: `e2da708b577af75b13afb71c3b6d01a1b915f367`;
-- merge commit: 482e095e9c515c163dd4b057f07baf06f3450f95;
-- merge parent 1: `e2da708b577af75b13afb71c3b6d01a1b915f367`;
-- merge parent 2: `ea3295cf1703466763c9cd333d98e59fe6535f8e`;
-- origin/main after merge: 482e095e9c515c163dd4b057f07baf06f3450f95;
-- post-merge main audit R1: COMPLETE / PASS;
-- P12 = COMPLETE / PASS / DOCUMENTED / INTEGRATED.
+- previous P11 baseline: `e2da708b577af75b13afb71c3b6d01a1b915f367;
+- implementation merge: 482e095e9c515c163dd4b057f07baf06f3450f95;
+- merge parent 1: `e2da708b577af75b13afb71c3b6d01a1b915f367;
+- merge parent 2: `ea3295cf1703466763c9cd333d98e59fe6535f8e;
+- implementation post-merge audit: COMPLETE / PASS.
 
-Operational boundaries remain:
+## P12 documentation closeout integration
 
+- audited documentation checkpoint / authorized PR head: 8d7a64430532b42019ba346fd8591087e2a7cc3a;
+- PR: #19;
+- documentation-closeout base: 482e095e9c515c163dd4b057f07baf06f3450f95;
+- documentation-closeout merge: `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`;
+- merge parent 1: 482e095e9c515c163dd4b057f07baf06f3450f95;
+- merge parent 2: 8d7a64430532b42019ba346fd8591087e2a7cc3a;
+- changed scope: six documentation files only;
+- semantic/control-character audit: PASS;
+- committed-content audit: FINAL PASS;
+- remote PR audit: FINAL PASS.
+
+## Durable P12 boundary
+
+- P12 = COMPLETE / PASS / DOCUMENTED / INTEGRATED;
 - FIRST OWNER BOOTSTRAP = NOT EXECUTED;
 - REAL ADMIN ACCOUNT = NOT CREATED;
 - delivery recovery = SAFE DEFER;
-- known build/runtime configuration coupling remains documented for later P14/P18 review;
-- P12 checkpoint tag = NOT CREATED;
-- deploy = NOT PERFORMED;
+- known build/runtime configuration coupling remains documented for P14/P18 review;
+- checkpoint/tagging is a separate owner-controlled Git operation and does not redefine P12 technical completion;
+- production deployment is outside P12 and remains governed by later roadmap gates;
 - P13 = PENDING / NOT AUTHORIZED / NOT STARTED.
-
-This post-merge documentation reconciliation is being prepared on phase/p12-post-merge-closeout. It does not itself authorize commit, push, PR, merge, tag, deployment or P13.

@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P12
 
-**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED em `main` através da PR #18 e do merge commit `482e095e9c515c163dd4b057f07baf06f3450f95`. A tag final P12 ainda não foi criada; P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED.
+**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED: implementação integrada pela PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95` e documentation closeout integrado pela PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. Checkpoint/tagging é uma operação Git separada e controlada pelo owner; P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -92,7 +92,7 @@ O [P11 Final Gate](operations/p11-final-gate.md) e o [Gate B — Commerce Core R
 
 A [ADR-0011](decisions/ADR-0011-better-auth-admin-identity.md) congela a decisão de identidade administrativa isolada; o [Phase Execution Brief](architecture/p12-identity-auth-admin-phase-execution-brief.md) preserva a especificação P12-A e seu resultado de implementação; o [P12 Final Gate](operations/p12-final-gate.md) consolida P12-A–H, arquitetura final, rotas, backoffice, RBAC, auditoria, evidências e limites.
 
-P12-H Technical Gate é PASS. A PR #18 integrou o checkpoint final P12 `ea3295cf1703466763c9cd333d98e59fe6535f8e` em main através do merge 482e095e9c515c163dd4b057f07baf06f3450f95; o post-merge main audit R1 passou. O primeiro OWNER não foi inicializado, nenhuma conta administrativa real foi criada, a tag final P12 ainda não foi criada, deploy não foi realizado e P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED.
+P12-H Technical Gate é PASS. A PR #18 integrou o checkpoint final de implementação P12 `ea3295cf1703466763c9cd333d98e59fe6535f8e` através do merge `482e095e9c515c163dd4b057f07baf06f3450f95`; a PR #19 integrou o documentation closeout auditado `8d7a64430532b42019ba346fd8591087e2a7cc3a` através do merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Checkpoint/tagging permanece separado, produção está fora da P12 e P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED.
 
 ## Operações
 

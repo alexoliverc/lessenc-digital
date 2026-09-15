@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED in `main` through PR #18 and merge commit `482e095e9c515c163dd4b057f07baf06f3450f95`. P12-H Technical Gate remains PASS. The final P12 checkpoint tag has not yet been created. P13 — Analytics is the next candidate and remains PENDING / NOT AUTHORIZED / NOT STARTED. Deploy remains NOT PERFORMED.
+**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED. Implementation integration is recorded by PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`; post-merge documentation integration is recorded by PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P12-H Technical Gate remains PASS. Checkpoint/tagging is a separate owner-controlled Git operation. P13 — Analytics is the next candidate and remains PENDING / NOT AUTHORIZED / NOT STARTED. Production deployment remains outside P12.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -658,7 +658,13 @@ Canonical closeout:
 
 **Final P12 branch checkpoint:** `ea3295cf1703466763c9cd333d98e59fe6535f8e`
 
-**Integrated main / merge commit:** `482e095e9c515c163dd4b057f07baf06f3450f95`
+**Implementation integration / merge commit:** `482e095e9c515c163dd4b057f07baf06f3450f95`
+
+**Documentation closeout PR:** #19
+
+**Documentation closeout checkpoint:** `8d7a64430532b42019ba346fd8591087e2a7cc3a`
+
+**Documentation closeout integration / merge commit:** `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`
 
 ### Objective
 
@@ -711,7 +717,7 @@ Administrative delivery recovery remains intentionally deferred because no prove
 
 Final evidence: MySQL 16 files / 149 tests PASS; unit 42 files / 435 tests PASS; typecheck PASS; lint PASS; `npm audit` 0 vulnerabilities; production build PASS; P12 migration immutability PASS; P10 financial truth and P11 entitlement truth PRESERVED.
 
-The first OWNER bootstrap was not executed and no real administrative account was created. PR #18 integrated P12 into main through merge commit 482e095e9c515c163dd4b057f07baf06f3450f95; post-merge main audit R1 passed. The final P12 checkpoint tag has not yet been created, deploy was not performed, and P13 remains PENDING / NOT AUTHORIZED / NOT STARTED.
+The first OWNER bootstrap was not executed and no real administrative account was created. PR #18 integrated the P12 implementation through merge commit `482e095e9c515c163dd4b057f07baf06f3450f95`; PR #19 integrated the audited post-merge documentation closeout through merge commit `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. Checkpoint/tagging remains a separate owner-controlled Git operation, production deployment remains outside P12, and P13 remains PENDING / NOT AUTHORIZED / NOT STARTED.
 
 ---
 
@@ -1338,7 +1344,7 @@ P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creati
 
 P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED** in `main` through PR #18 and merge commit `482e095e9c515c163dd4b057f07baf06f3450f95`; the final P12 branch checkpoint is `ea3295cf1703466763c9cd333d98e59fe6535f8e`. P13 is **PENDING / NOT AUTHORIZED / NOT STARTED**. Deploy remains **NOT PERFORMED**.
+P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED**: final implementation checkpoint `ea3295cf1703466763c9cd333d98e59fe6535f8e`, implementation PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`, and documentation closeout PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P13 is **PENDING / NOT AUTHORIZED / NOT STARTED**. Production deployment remains outside the completed P12 scope.
 
 <!-- P11-POST-MERGE-CLOSEOUT -->
 ### P11 — Git Integration Closeout
@@ -1354,7 +1360,9 @@ P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` throug
 
 <!-- P12-DOCUMENTATION-CLOSEOUT -->
 
-### P12 — Documentation closeout
+### P12 — Documentation closeout checkpoint (historical)
+
+This subsection preserves the P12-H state before its later Git integrations.
 
 - P12-A–G: **COMPLETE**.
 - P12-H Technical Gate: **PASS**.
@@ -1363,8 +1371,8 @@ P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` throug
 - Final regression: MySQL 149/149; unit 435/435; typecheck/lint/build PASS; `npm audit` 0 vulnerabilities.
 - First OWNER bootstrap: **NOT EXECUTED**.
 - Real administrative account: **NOT CREATED**.
-- Documentation closeout: uncommitted and ready for ChatGPT review.
-- At the P12-H documentation checkpoint, Git publication/merge/deploy was **NOT PERFORMED**; that historical state was later superseded by PR #18 integration. Deploy remains **NOT PERFORMED**.
+- At this historical P12-H checkpoint, documentation closeout was uncommitted and ready for ChatGPT review.
+- At the P12-H documentation checkpoint, Git publication/merge/deploy was **NOT PERFORMED**; that historical state was later superseded by PR #18 implementation integration and PR #19 documentation-closeout integration. Production deployment remains outside P12 and is governed by later phases.
 - P13 implementation: **NOT STARTED**.
 
 ---
