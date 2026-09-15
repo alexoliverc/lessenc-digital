@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 13/09/2026
+**Última atualização:** 14/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P11 COMPLETE. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED em `main` através da PR #16 e do merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`; o checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` permanece preservado pela tag anotada `checkpoint/p11-entitlement-digital-delivery-complete`.
-**Estado atual:** P11 está integrada em `main` através da PR #16. Gate B — Commerce Core Ready está PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN. O commerce core P09 -> P10 -> P11 foi validado pelo cenário canônico Order -> Payment -> Entitlement -> protected Delivery, regressão total e C7 refund -> revoke -> deny. P12 — Identity / Authentication / Administrative Access é o próximo candidato, mas sua implementação NÃO está autorizada. Deploy de produção NÃO foi realizado.
+**Estado documental:** P00–P12 implementadas. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12-A–G estão COMPLETE, P12-H Technical Gate está PASS e o fechamento documental P12 está neste delta não commitado, pronto para revisão do ChatGPT e Git closeout final.
+**Estado atual:** O code baseline P12 é `3041dd949a84b6b7f2b7ddbac5eec979b74828e8`. P12 está COMPLETE / DOCUMENTED / READY FOR FINAL GIT CLOSEOUT. O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Não houve push, tag, PR, merge ou deploy de P12. P13 — Analytics é a próxima fase após o Git closeout final de P12 e permanece PENDING / NOT AUTHORIZED / NOT STARTED.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -18,15 +18,16 @@
 - O brief do owner de 12/09/2026 autorizou a P06 a partir de `c77ff9c`: MySQL 8.4 LTS local isolado, Prisma CLI/Client/adapter MariaDB exatamente 7.10.0, schema, migrations e testes físicos. Os 6 alertas transitivos iniciais foram corrigidos na P06 pelos overrides de mariadb 3.5.4, mysql2 3.24.4 e deepmerge-ts 8.0.2; auditoria P07 confirmou 0 vulnerabilidades. Não há liberação de produção.
 - Ambientes aprovados na nova baseline: LOCAL, TEST, STAGING e PRODUCTION com `APP_ENV` separado de `NODE_ENV`, sem afirmar que tenham sido provisionados.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
-- Governança, arquitetura, persistência P06, integração financeira P10 e entrega digital segura P11 estão documentadas e implementadas nas respectivas baselines. P12 permanece responsável pela identidade/autenticação administrativa e é somente NEXT CANDIDATE / NOT AUTHORIZED. Deploy de produção continua fora do estado autorizado atual.
+- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11 e identidade/autenticação/administração P12 estão documentadas e implementadas nas respectivas baselines. P12 aguarda revisão do delta documental e Git closeout final. P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED. Deploy de produção continua fora do estado autorizado atual.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.
 - Cada execução requer Phase Execution Brief, branch, autorização de operações protegidas por `AGENTS.md`, validação e retorno ao ChatGPT antes da progressão. Repositório é a memória técnica oficial; ler os arquivos na ordem definida em AGENTS.md.
 - O projeto principal de cosméticos físicos continua separado e será retomado com a formação de caixa.
 
 ## Onde encontrar as decisões
 
-- [ROADMAP.md](ROADMAP.md): fases P00–P20; P11 COMPLETE / PASS / DOCUMENTED / FROZEN; Gate B PASS / COMMERCE CORE READY; P12 é o próximo candidato e permanece NOT AUTHORIZED.
-- [docs/README.md](docs/README.md): índice P00–P10, segurança, operações, ADRs e histórico anterior.
+- [ROADMAP.md](ROADMAP.md): fases P00–P20; P12 COMPLETE / DOCUMENTED / READY FOR FINAL GIT CLOSEOUT; P13 PENDING / NOT AUTHORIZED / NOT STARTED.
+- [docs/README.md](docs/README.md): índice P00–P12, segurança, operações, ADRs e histórico anterior.
+- [P12 Final Gate](docs/operations/p12-final-gate.md): arquitetura final, backoffice, RBAC, auditoria, evidências, defer de recovery e limites Git.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
 - [Produto P01](docs/product/first-product-definition.md), [modelo P03](docs/architecture/domain-model.md), [stack P04](docs/architecture/runtime-toolchain-baseline.md) e [P04 exit review](docs/architecture/p04-exit-review.md).
 - [Registro 11/09/2026](memory/2026-09-11.md): scaffold anterior, conflitos reconciliados, validações e histórico.
@@ -34,9 +35,9 @@
 
 ## Decisões OPEN / DEFERRED
 
-**OPEN:** provedor/tecnologia de autenticação; provedor de email; storage privado; provedor de observabilidade; provedor de rate limit distribuído em produção; framework E2E no navegador. Também domínio, política de reembolso/suporte, conteúdo final e detalhamento físico de schema/recovery dependem de decisão antes da implementação correspondente.
+**OPEN:** provedor de email; storage privado de produção; provedor de observabilidade; provedor de rate limit distribuído em produção; framework E2E no navegador. Também domínio, política de reembolso/suporte, conteúdo final e decisões de produção/recovery dependem das fases correspondentes.
 
-**DEFERRED:** entrega P11, autenticação P12, analytics P13 e ambientes de produção até os respectivos gates. P10 está COMPLETE e não inclui Entitlement/Delivery. A sequência `GOV/MVP-*` e os documentos `LES-*-R01` continuam como histórico; a baseline atual P00–P20 prevalece quando divergir.
+**DEFERRED:** analytics P13 e ambientes de produção até os respectivos gates. A recuperação administrativa de entrega P12 também está deferida até existir desenho explícito que combine atomicamente o reissue de credencial one-time P11 com `AdminAuditEvent` obrigatório e fail-closed, sem alterar o contrato congelado P11. A sequência `GOV/MVP-*` e os documentos `LES-*-R01` continuam como histórico; a baseline atual P00–P20 prevalece quando divergir.
 
 ## P05 — fechamento técnico
 
@@ -1349,3 +1350,83 @@ PR #16 integrou formalmente a P11 em `main`.
 - Gate B = PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN;
 - P12 = NEXT CANDIDATE / NOT AUTHORIZED;
 - deploy = NOT PERFORMED.
+
+<!-- P12-DOCUMENTATION-CLOSEOUT -->
+
+## P12 — COMPLETE / DOCUMENTED / READY FOR FINAL GIT CLOSEOUT
+
+Date: 2026-09-14
+
+P12-A through P12-G are COMPLETE. P12-H Technical Gate 1 is PASS.
+
+Canonical code chain:
+
+- P11 final baseline: `e2da708b577af75b13afb71c3b6d01a1b915f367`;
+- P12-A: `fc4a56e2c84d3f32bbae0a5ce69065b4a9e88801`;
+- P12-B: `8ad2d700fd7678fe7a1a12ff107b07b88250c780`;
+- P12-C/D/E: `dbb2280e175be005d3afc020fa5c6651ab1c801e`;
+- P12-F/G and current code baseline: `3041dd949a84b6b7f2b7ddbac5eec979b74828e8`.
+
+Frozen administrative architecture:
+
+- Better Auth exactly `1.7.4` owns isolated administrative identity, database-backed session and MFA mechanics;
+- L'Essenc owns server-side RBAC, business authorization, audit and application rules;
+- `Customer != AdminUser`, buyer session is not admin session and buyer credential is not admin credential;
+- email/password primary authentication, no public signup and mandatory TOTP/backup-code MFA for OWNER, ADMIN and SUPPORT;
+- cookie cache disabled, 8-hour absolute session lifetime, 30-minute application-owned idle timeout, 5-minute fresh-auth window and immediate server-side revocation;
+- centralized server-owned permission vocabulary; client-supplied actor, role or permission is never authoritative;
+- `AdminAuditEvent` is append-only from the operational UI perspective and mandatory audit failure rolls back critical administrative mutation;
+- P10 financial truth and P11 entitlement truth remain preserved.
+
+Operational backoffice:
+
+- bounded real dashboard;
+- safe own-account/session/MFA view, logout and backup-code regeneration through strong auth;
+- controlled and audited `Product.status` mutation through `catalog.write`;
+- read-only orders, payments, customers, entitlements, deliveries and administrative audit;
+- no mark-paid, forced approval, financial-state rewrite, manual entitlement activation or entitlement fabrication;
+- no general administrator-management/role-management UI in P12-F/G.
+
+Delivery recovery safe defer:
+
+- `delivery.read` is implemented and `delivery.recover` is defined;
+- no administrative recovery UI/action is exposed;
+- the P11 one-time credential reissue owns its transaction, while P12 requires mandatory fail-closed audit;
+- no proven atomic boundary combines both without changing the frozen P11 contract;
+- direct table updates are not acceptable.
+
+Persistence and migration immutability:
+
+- administrative models: `AdminUser`, `AdminSession`, `AdminAccount`, `AdminVerification`, `AdminTwoFactor`, `AdminAuthRateLimitBucket`, `AdminAuditEvent`;
+- `20260914035939_p12_admin_auth_persistence_foundation`: `8FD91AECE9EB3B81DEC7375E65ACF77B43E4057A01213408DF7758E261CC893C`;
+- `20260914092012_p12_admin_session_rbac_audit`: `8854B8B0611D213A5ED385EBB99E8C2E484D868796C216BB859F4D9FE4C65268`.
+
+P12-H Gate 1 final evidence:
+
+- Prisma validate: PASS;
+- targeted Auth HTTP, RBAC and Admin UI security: PASS;
+- real admin auth flow/MySQL, admin session/security/MySQL and backoffice/MySQL: PASS;
+- full MySQL: 16 files / 149 tests PASS;
+- full unit: 42 files / 435 tests PASS;
+- typecheck: PASS;
+- lint: PASS;
+- `npm audit`: 0 vulnerabilities;
+- production build: PASS;
+- migration immutability: PASS.
+
+Known technical debt:
+
+- the admin auth route evaluates runtime configuration during production build/module evaluation;
+- build validation used valid local P06 DB/TLS configuration and a synthetic `P12_ADMIN_AUTH_SECRET`;
+- no staging or production access occurred;
+- revisit during later security/production-readiness review, especially P14/P18.
+
+Operational and Git state:
+
+- FIRST OWNER BOOTSTRAP = NOT EXECUTED;
+- REAL ADMIN ACCOUNT = NOT CREATED BY P12 DEVELOPMENT/CLOSEOUT;
+- documentation closeout is the current uncommitted delta;
+- canonical final review: `docs/operations/p12-final-gate.md`;
+- commit, push, tag, PR, merge and deploy: NOT PERFORMED;
+- next after final P12 Git closeout: P13 — Analytics;
+- P13 implementation: NOT AUTHORIZED / NOT STARTED.

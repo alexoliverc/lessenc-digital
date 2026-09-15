@@ -6,6 +6,7 @@ import {
   parseP08CommercialEnv,
   parseP09SubmissionEnv,
   parseP11BuyerSessionEnv,
+  parseP12AdminAuthEnv,
   parseP11PrivateStorageEnv,
   parseServerEnv,
 } from "./env-schema";
@@ -32,6 +33,23 @@ describe("parseServerEnv", () => {
       APP_URL: "http://localhost:3000",
       NODE_ENV: "production",
     });
+  });
+});
+
+describe("parseP12AdminAuthEnv", () => {
+  const SECRET = "p12-admin-auth-secret-32-bytes-minimum-value";
+
+  it("accepts a dedicated server-only admin auth secret", () => {
+    expect(parseP12AdminAuthEnv({ P12_ADMIN_AUTH_SECRET: SECRET })).toEqual({
+      P12_ADMIN_AUTH_SECRET: SECRET,
+    });
+  });
+
+  it("rejects missing or weak admin auth secrets", () => {
+    expect(() => parseP12AdminAuthEnv({})).toThrow("Invalid P12 admin auth configuration");
+    expect(() => parseP12AdminAuthEnv({ P12_ADMIN_AUTH_SECRET: "too-short" })).toThrow(
+      "Invalid P12 admin auth configuration",
+    );
   });
 });
 
