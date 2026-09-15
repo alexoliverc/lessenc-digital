@@ -50,4 +50,4 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
 
 ## P12 final gate
 
-- [P12 Final Gate](./p12-final-gate.md) — final P12-A through P12-H closeout, isolated administrative identity, mandatory MFA, session policy, RBAC, backoffice boundaries, administrative audit, regression evidence, safe delivery-recovery defer and Git progression boundary.
+- [P12 Final Gate](./p12-final-gate.md) — canonical P12-A through P12-H closeout and post-merge integration record, including isolated administrative identity, mandatory MFA, session policy, RBAC, backoffice boundaries, administrative audit, regression evidence, safe delivery-recovery defer, PR #18, merge 482e095e9c515c163dd4b057f07baf06f3450f95 and post-merge audit.
