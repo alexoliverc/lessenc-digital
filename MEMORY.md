@@ -1460,7 +1460,7 @@ PR #18 formally integrated P12 into `main`.
 
 The durable P12 integration record separates implementation integration from documentation integration and does not depend on the mutable tip of main.
 
-- final implementation checkpoint: `ea3295cf1703466763c9cd333d98e59fe6535f8e;
+- final implementation checkpoint: `ea3295cf1703466763c9cd333d98e59fe6535f8e`;
 - implementation integration: PR #18 / merge 482e095e9c515c163dd4b057f07baf06f3450f95;
 - documentation closeout checkpoint: 8d7a64430532b42019ba346fd8591087e2a7cc3a;
 - documentation closeout integration: PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`;

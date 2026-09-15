@@ -207,12 +207,12 @@ The original P12-H documentation checkpoint preceded Git publication. That state
 
 ## P12 implementation integration
 
-- final implementation checkpoint / authorized PR head: `ea3295cf1703466763c9cd333d98e59fe6535f8e;
+- final implementation checkpoint / authorized PR head: `ea3295cf1703466763c9cd333d98e59fe6535f8e`;
 - PR: #18;
-- previous P11 baseline: `e2da708b577af75b13afb71c3b6d01a1b915f367;
+- previous P11 baseline: `e2da708b577af75b13afb71c3b6d01a1b915f367`;
 - implementation merge: 482e095e9c515c163dd4b057f07baf06f3450f95;
-- merge parent 1: `e2da708b577af75b13afb71c3b6d01a1b915f367;
-- merge parent 2: `ea3295cf1703466763c9cd333d98e59fe6535f8e;
+- merge parent 1: `e2da708b577af75b13afb71c3b6d01a1b915f367`;
+- merge parent 2: `ea3295cf1703466763c9cd333d98e59fe6535f8e`;
 - implementation post-merge audit: COMPLETE / PASS.
 
 ## P12 documentation closeout integration
