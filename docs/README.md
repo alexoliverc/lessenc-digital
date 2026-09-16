@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P12
+# Índice oficial da baseline documental LES-DIG P00–P12 + P13-A
 
-**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED: implementação integrada pela PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95` e documentation closeout integrado pela PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. Checkpoint/tagging é uma operação Git separada e controlada pelo owner; P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED.
+**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A — Architecture, Privacy & Measurement Contract está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED; P13 runtime implementation ainda não iniciou e P13-B — Attribution Persistence Foundation permanece NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -92,10 +92,68 @@ O [P11 Final Gate](operations/p11-final-gate.md) e o [Gate B — Commerce Core R
 
 A [ADR-0011](decisions/ADR-0011-better-auth-admin-identity.md) congela a decisão de identidade administrativa isolada; o [Phase Execution Brief](architecture/p12-identity-auth-admin-phase-execution-brief.md) preserva a especificação P12-A e seu resultado de implementação; o [P12 Final Gate](operations/p12-final-gate.md) consolida P12-A–H, arquitetura final, rotas, backoffice, RBAC, auditoria, evidências e limites.
 
-P12-H Technical Gate é PASS. A PR #18 integrou o checkpoint final de implementação P12 `ea3295cf1703466763c9cd333d98e59fe6535f8e` através do merge `482e095e9c515c163dd4b057f07baf06f3450f95`; a PR #19 integrou o documentation closeout auditado `8d7a64430532b42019ba346fd8591087e2a7cc3a` através do merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Checkpoint/tagging permanece separado, produção está fora da P12 e P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED.
+P12-H Technical Gate é PASS. A PR #18 integrou o checkpoint final de implementação P12 `ea3295cf1703466763c9cd333d98e59fe6535f8e` através do merge `482e095e9c515c163dd4b057f07baf06f3450f95`; a PR #19 integrou o documentation closeout auditado `8d7a64430532b42019ba346fd8591087e2a7cc3a` através do merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Checkpoint/tagging permanece separado, produção está fora da P12 e P13 está IN PROGRESS; P13-A está COMPLETE / ARCHITECTURE FROZEN R2 e P13-B permanece NOT STARTED.
+
+<!-- P13-A-CANONICAL-DOCUMENTS -->
+## P13 — Analytics, Attribution & Growth Infrastructure
+
+P13 está **IN PROGRESS**.
+
+P13-A — Architecture, Privacy & Measurement Contract está **COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED**.
+
+P13 runtime implementation ainda está **NOT STARTED**.
+
+P13-B — Attribution Persistence Foundation é o próximo bloco de implementação e permanece **NOT STARTED**.
+
+### Documentos canônicos
+
+- [P13 Analytics, Attribution & Growth Contract](architecture/p13-analytics-attribution-growth-contract.md) — contrato de arquitetura, privacidade, consentimento, atribuição, canonical measurement, Purchase authority, GTM, GA4, Google Ads, Meta e stop conditions;
+- [P13 Phase Execution Brief](architecture/p13-phase-execution-brief.md) — sequência operacional P13-A–H e responsabilidades dos blocos.
+
+### Arquitetura de measurement aprovada
+
+Canonical internal measurement:
+
+- `AnalyticsEvent`.
+
+Client-side orchestration:
+
+- Google Tag Manager.
+
+External analytics destination:
+
+- Google Analytics 4.
+
+External advertising destinations:
+
+- Google Ads;
+- Meta.
+
+Initial delivery boundaries:
+
+- GA4 through GTM;
+- Google Ads conversion measurement through GTM;
+- Meta Pixel through GTM;
+- Meta Conversions API server-side.
+
+Commerce e Payments permanecem autoridade financeira.
+
+GTM, GA4, Google Ads e Meta não são autoridade comercial, financeira ou de entitlement.
+
+### P13-F
+
+P13-F foi redefinida como **Measurement & Advertising Adapters**:
+
+- P13-F1 — Google Tag Manager Foundation;
+- P13-F2 — Google Analytics 4;
+- P13-F3 — Google Ads;
+- P13-F4 — Meta Pixel;
+- P13-F5 — Meta Conversions API;
+- P13-F6 — Provider Deduplication, Consent & Failure Isolation.
+
+Google Enhanced Conversions e Meta Advanced Matching permanecem fora do P13 MVP inicial.
 
 ## Operações
-
 O [índice operacional](operations/README.md) reúne procedimentos do ambiente de desenvolvimento. A [baseline da workstation e VS Code](operations/development-workstation-vscode.md) registra Profile, editor, terminal, Git/SCM, extensões, segurança, performance e recuperação sem redefinir a stack ou os ambientes canônicos da aplicação.
 
 ## HISTORICAL / SUPERSEDED DOCUMENTS

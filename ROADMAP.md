@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED. Implementation integration is recorded by PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`; post-merge documentation integration is recorded by PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P12-H Technical Gate remains PASS. Checkpoint/tagging is a separate owner-controlled Git operation. P13 — Analytics is the next candidate and remains PENDING / NOT AUTHORIZED / NOT STARTED. Production deployment remains outside P12.
+**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 — Analytics, Attribution & Growth Infrastructure is IN PROGRESS. P13-A — Architecture, Privacy & Measurement Contract is COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED. P13 runtime implementation has NOT STARTED. P13-B — Attribution Persistence Foundation is the next implementation block and remains NOT STARTED. Production deployment remains outside the current P13 scope.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -723,7 +723,7 @@ The first OWNER bootstrap was not executed and no real administrative account wa
 
 ## P13 — Analytics, Attribution & Growth Infrastructure
 
-**Status:** PENDING / NOT AUTHORIZED / NOT STARTED
+**Status:** IN PROGRESS / P13-A COMPLETE / ARCHITECTURE FROZEN R2 / P13-B NOT STARTED
 
 ### Objective
 
@@ -731,20 +731,36 @@ Create measurement infrastructure for acquisition and conversion.
 
 ### Scope
 
-- internal events;
-- Meta Pixel;
-- Meta CAPI;
-- UTM capture;
-- attribution;
+- provider-neutral internal analytics events;
+- AcquisitionJourney;
+- AttributionTouch;
+- immutable OrderAttribution;
+- UTM capture and sanitation;
+- First Touch and Last Touch attribution;
+- 30-day attribution lookback;
+- 30-day journey attribution lifetime;
+- ViewContent / VIEW_CONTENT;
+- InitiateCheckout / INITIATE_CHECKOUT;
+- canonical Purchase / PURCHASE;
+- maximum one canonical PURCHASE per Order;
+- Purchase reconciliation;
+- AnalyticsDispatch;
 - event deduplication;
-- ViewContent;
-- InitiateCheckout;
-- Purchase;
-- campaign source.
+- Google Tag Manager;
+- Google Analytics 4;
+- Google Ads;
+- Google Consent Mode;
+- Meta Pixel;
+- Meta Conversions API;
+- provider-specific failure isolation;
+- consent-aware provider dispatch;
+- campaign source / medium / campaign reporting;
+- attributed and unattributed revenue;
+- Admin Analytics.
 
 ### Main deliverables
 
-Reliable marketing measurement layer.
+Provider-neutral internal measurement and attribution infrastructure with controlled multi-provider delivery to Google Analytics 4, Google Ads and Meta through the approved GTM/browser and server-side adapter boundaries.
 
 ### Dependencies
 
@@ -752,14 +768,149 @@ P08, P09, P10 and relevant privacy rules.
 
 ### Approval gates
 
-External analytics integrations follow security and privacy requirements.
+External analytics and advertising integrations follow security, privacy and consent requirements.
+
+Canonical internal measurement must remain provider-neutral.
+
+GTM, GA4, Google Ads and Meta must never become commercial or financial authority.
+
+PURCHASE requires persisted `Order.status = PAID` and `Payment.status = APPROVED`.
+
+The current P10/P11 Outbox must not be silently converted into multi-consumer analytics infrastructure.
+
+Provider failure must remain isolated from Commerce.
+
+Google Enhanced Conversions and Meta Advanced Matching remain outside the initial P13 MVP unless separately approved.
 
 ### Exit criteria
 
 A completed sale can be attributed to its acquisition journey when data is available.
 
----
 
+<!-- P13-CANONICAL-EXECUTION-R2 -->
+
+### P13 execution blocks
+
+- P13-A — Architecture, Privacy & Measurement Contract: **COMPLETE / FROZEN R2**;
+- P13-B — Attribution Persistence Foundation: **NOT STARTED**;
+- P13-C — Acquisition Journey & Order Attribution: **NOT STARTED**;
+- P13-D — Internal Measurement Producers & Consent Boundary: **NOT STARTED**;
+- P13-E — Canonical Purchase & Financial Reconciliation: **NOT STARTED**;
+- P13-F — Measurement & Advertising Adapters: **NOT STARTED**;
+- P13-G — Admin Analytics: **NOT STARTED**;
+- P13-H — Technical Gate: **NOT STARTED**.
+
+### Canonical measurement authority
+
+Internal `AnalyticsEvent` is the canonical L'Essenc measurement record.
+
+Financial truth remains owned by the existing Commerce and Payments boundaries.
+
+Canonical PURCHASE requires persisted:
+
+- `Order.status = PAID`;
+- `Payment.status = APPROVED`.
+
+There may be at most one canonical PURCHASE per Order.
+
+Analytics failure must never invalidate Commerce.
+
+### Attribution architecture
+
+P13 uses:
+
+- AcquisitionJourney;
+- AttributionTouch;
+- immutable OrderAttribution;
+- First Touch;
+- Last Touch;
+- 30-day attribution lookback;
+- 30-day journey attribution lifetime.
+
+Direct or internal navigation must not erase a valid external Last Touch.
+
+### External measurement architecture
+
+Approved client-side orchestration:
+
+- Google Tag Manager.
+
+Approved initial external destinations:
+
+- Google Analytics 4;
+- Google Ads;
+- Meta.
+
+Approved initial external delivery boundaries:
+
+- GA4 through Google Tag Manager;
+- Google Ads conversion measurement through Google Tag Manager;
+- Meta Pixel through Google Tag Manager;
+- Meta Conversions API through a server-side adapter;
+- Google Ads server-side/API integration only when separately validated and approved.
+
+GTM, GA4, Google Ads and Meta are external adapters or destinations.
+
+They are not canonical commercial, payment, revenue or entitlement authority.
+
+### P13-F canonical sub-scope
+
+- P13-F1 — Google Tag Manager Foundation;
+- P13-F2 — Google Analytics 4;
+- P13-F3 — Google Ads;
+- P13-F4 — Meta Pixel;
+- P13-F5 — Meta Conversions API;
+- P13-F6 — Provider Deduplication, Consent & Failure Isolation.
+
+### Provider-specific identifiers
+
+Google provider context may include:
+
+- `gclid`;
+- `gbraid`;
+- `wbraid`.
+
+Meta provider context may include:
+
+- `fbclid`;
+- `fbc`;
+- `fbp`.
+
+These identifiers are not commercial authority.
+
+### Consent
+
+Canonical internal privacy preference remains authoritative.
+
+Google Consent Mode is a provider projection.
+
+Relevant Google provider signals include:
+
+- `analytics_storage`;
+- `ad_storage`;
+- `ad_user_data`;
+- `ad_personalization`.
+
+UNKNOWN must not silently become GRANTED.
+
+### Initial exclusions
+
+The initial P13 MVP does not require:
+
+- Google Enhanced Conversions;
+- Meta Advanced Matching;
+- PII-based advertising matching;
+- authoritative advertising-spend ingestion;
+- ROAS;
+- mandatory refund analytics semantics;
+- redesign of the current P10/P11 Outbox into generic multi-consumer infrastructure.
+
+### Canonical documents
+
+- `docs/architecture/p13-analytics-attribution-growth-contract.md`;
+- `docs/architecture/p13-phase-execution-brief.md`.
+
+---
 ## P14 — Security Hardening
 
 **Status:** PENDENTE
@@ -1316,9 +1467,9 @@ The next phase after P12 integration closeout is:
 
 **P13 — Analytics, Attribution & Growth Infrastructure**
 
-Authorization state:
+Current execution state:
 
-**PENDING / NOT AUTHORIZED / NOT STARTED**
+**IN PROGRESS / P13-A COMPLETE / ARCHITECTURE FROZEN R2 / P13-B NOT STARTED**
 
 Current status:
 
@@ -1344,7 +1495,7 @@ P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creati
 
 P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED**: final implementation checkpoint `ea3295cf1703466763c9cd333d98e59fe6535f8e`, implementation PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`, and documentation closeout PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P13 is **PENDING / NOT AUTHORIZED / NOT STARTED**. Production deployment remains outside the completed P12 scope.
+P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED**: final implementation checkpoint `ea3295cf1703466763c9cd333d98e59fe6535f8e`, implementation PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`, and documentation closeout PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P13 is **IN PROGRESS / P13-A COMPLETE / ARCHITECTURE FROZEN R2 / P13-B NOT STARTED**. Production deployment remains outside the completed P12 scope.
 
 <!-- P11-POST-MERGE-CLOSEOUT -->
 ### P11 — Git Integration Closeout
