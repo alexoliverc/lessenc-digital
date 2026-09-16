@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 14/09/2026
+**Última atualização:** 15/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P12 implementadas. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED: a implementação foi integrada pela PR #18 no merge `482e095e9c515c163dd4b057f07baf06f3450f95` e o post-merge documentation closeout foi integrado pela PR #19 no merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P12-H Technical Gate permanece PASS.
-**Estado atual:** a linhagem canônica da P12 registra o checkpoint final de implementação `ea3295cf1703466763c9cd333d98e59fe6535f8e`, sua integração pela PR #18 (`482e095e9c515c163dd4b057f07baf06f3450f95`) e o documentation closeout pela PR #19 (`f29487c67621eb3151fa45f1337c0a9e6dd19ca5`). O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Delivery recovery permanece SAFE DEFER. Checkpoint/tagging é uma operação Git separada e controlada pelo owner; produção permanece fora do escopo da P12. P13 — Analytics permanece PENDING / NOT AUTHORIZED / NOT STARTED.
+**Estado documental:** P00–P12 implementadas. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A — Architecture, Privacy & Measurement Contract está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED. P13 runtime implementation ainda não iniciou; P13-B — Attribution Persistence Foundation permanece NOT STARTED.
+**Estado atual:** P13 está sendo executada na branch `phase/p13-analytics-attribution-growth`, criada a partir da baseline P12 `a8f2f8efd9f59a80218e25cea364fec5b09c316c`. P13-A foi concluída documentalmente com Architecture Freeze R2. O contrato canônico define `AnalyticsEvent` provider-neutral, First Touch + Last Touch, AcquisitionJourney, AttributionTouch, immutable OrderAttribution, canonical PURCHASE derivado exclusivamente de `Order.PAID + Payment.APPROVED`, Purchase reconciliation e arquitetura multi-provider com Google Tag Manager, Google Analytics 4, Google Ads, Meta Pixel e Meta Conversions API. P13-B é o próximo bloco e permanece NOT STARTED. Nenhum runtime P13 foi implementado neste checkpoint.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -18,15 +18,15 @@
 - O brief do owner de 12/09/2026 autorizou a P06 a partir de `c77ff9c`: MySQL 8.4 LTS local isolado, Prisma CLI/Client/adapter MariaDB exatamente 7.10.0, schema, migrations e testes físicos. Os 6 alertas transitivos iniciais foram corrigidos na P06 pelos overrides de mariadb 3.5.4, mysql2 3.24.4 e deepmerge-ts 8.0.2; auditoria P07 confirmou 0 vulnerabilidades. Não há liberação de produção.
 - Ambientes aprovados na nova baseline: LOCAL, TEST, STAGING e PRODUCTION com `APP_ENV` separado de `NODE_ENV`, sem afirmar que tenham sido provisionados.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
-- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11 e identidade/autenticação/administração P12 estão documentadas e implementadas nas respectivas baselines. A implementação P12 foi integrada pela PR #18 no merge `482e095e9c515c163dd4b057f07baf06f3450f95`; o documentation closeout pós-merge foi integrado pela PR #19 no merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. Checkpoint/tagging permanece uma operação Git separada do estado técnico da fase. P13 permanece PENDING / NOT AUTHORIZED / NOT STARTED. Produção continua fora do escopo autorizado da P12.
+- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11 e identidade/autenticação/administração P12 permanecem nas respectivas baselines. P13 está IN PROGRESS; P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED. A arquitetura P13 é provider-neutral internamente e multi-provider externamente com GTM, GA4, Google Ads e Meta. P13 runtime implementation ainda não iniciou; P13-B permanece NOT STARTED. Produção continua fora do escopo atual.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.
 - Cada execução requer Phase Execution Brief, branch, autorização de operações protegidas por `AGENTS.md`, validação e retorno ao ChatGPT antes da progressão. Repositório é a memória técnica oficial; ler os arquivos na ordem definida em AGENTS.md.
 - O projeto principal de cosméticos físicos continua separado e será retomado com a formação de caixa.
 
 ## Onde encontrar as decisões
 
-- [ROADMAP.md](ROADMAP.md): fases P00–P20; P12 COMPLETE / PASS / DOCUMENTED / INTEGRATED, com implementação integrada pela PR #18 e documentation closeout integrado pela PR #19; P13 PENDING / NOT AUTHORIZED / NOT STARTED.
-- [docs/README.md](docs/README.md): índice P00–P12, segurança, operações, ADRs e histórico anterior.
+- [ROADMAP.md](ROADMAP.md): fases P00–P20; P12 COMPLETE / PASS / DOCUMENTED / INTEGRATED; P13 IN PROGRESS; P13-A COMPLETE / ARCHITECTURE FROZEN R2; P13-B NOT STARTED.
+- [docs/README.md](docs/README.md): índice canônico P00–P12 + P13-A, incluindo o contrato arquitetural P13 e o Phase Execution Brief.
 - [P12 Final Gate](docs/operations/p12-final-gate.md): arquitetura final, backoffice, RBAC, auditoria, evidências, defer de recovery e limites Git.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
 - [Produto P01](docs/product/first-product-definition.md), [modelo P03](docs/architecture/domain-model.md), [stack P04](docs/architecture/runtime-toolchain-baseline.md) e [P04 exit review](docs/architecture/p04-exit-review.md).
@@ -37,7 +37,7 @@
 
 **OPEN:** provedor de email; storage privado de produção; provedor de observabilidade; provedor de rate limit distribuído em produção; framework E2E no navegador. Também domínio, política de reembolso/suporte, conteúdo final e decisões de produção/recovery dependem das fases correspondentes.
 
-**DEFERRED:** analytics P13 e ambientes de produção até os respectivos gates. A recuperação administrativa de entrega P12 também está deferida até existir desenho explícito que combine atomicamente o reissue de credencial one-time P11 com `AdminAuditEvent` obrigatório e fail-closed, sem alterar o contrato congelado P11. A sequência `GOV/MVP-*` e os documentos `LES-*-R01` continuam como histórico; a baseline atual P00–P20 prevalece quando divergir.
+**DEFERRED:** ambientes de produção até os respectivos gates; Google Enhanced Conversions e Meta Advanced Matching ficam fora do P13 MVP inicial; ROAS permanece não suportado até existir fonte autoritativa de advertising spend; refund analytics semantics permanecem fora do conjunto obrigatório inicial de eventos P13. A recuperação administrativa de entrega P12 continua deferida até existir desenho explícito que combine atomicamente o reissue de credencial one-time P11 com `AdminAuditEvent` obrigatório e fail-closed, sem alterar o contrato congelado P11. A sequência `GOV/MVP-*` e os documentos `LES-*-R01` continuam como histórico; a baseline atual prevalece quando divergir.
 
 ## P05 — fechamento técnico
 
@@ -1468,3 +1468,149 @@ The durable P12 integration record separates implementation integration from doc
 - checkpoint/tagging = separate owner-controlled Git operation;
 - production deployment = outside P12 scope;
 - P13 = PENDING / NOT AUTHORIZED / NOT STARTED.
+
+<!-- P13-A-ARCHITECTURE-FREEZE-R2 -->
+
+## P13-A — Architecture Freeze R2 — COMPLETE
+
+Date: 2026-09-15
+
+Branch:
+
+- `phase/p13-analytics-attribution-growth`
+
+Branch creation baseline:
+
+- `a8f2f8efd9f59a80218e25cea364fec5b09c316c`
+
+Canonical P13-A documents:
+
+- `docs/architecture/p13-analytics-attribution-growth-contract.md`;
+- `docs/architecture/p13-phase-execution-brief.md`.
+
+P13-A state:
+
+- Architecture Freeze R1: SUPERSEDED by controlled amendment;
+- Architecture Freeze R2: FROZEN / COMPLETE;
+- documentation: COMPLETE;
+- runtime implementation: NOT STARTED;
+- P13-B: NOT STARTED.
+
+Attribution architecture:
+
+- AcquisitionJourney;
+- AttributionTouch;
+- OrderAttribution;
+- AnalyticsEvent;
+- AnalyticsDispatch;
+- First Touch + Last Touch;
+- attribution lookback: 30 days;
+- journey attribution lifetime: 30 days.
+
+Initial canonical events:
+
+- VIEW_CONTENT;
+- INITIATE_CHECKOUT;
+- PURCHASE.
+
+Canonical PURCHASE authority:
+
+- persisted `Order.status = PAID`;
+- persisted `Payment.status = APPROVED`;
+- maximum one canonical PURCHASE per Order;
+- browser/provider state cannot create financial truth;
+- reconciliation repairs missing analytics projection without changing Order or Payment.
+
+P10/P11 Outbox constraint:
+
+- the current PAYMENT_APPROVED OutboxEvent uses global processing state;
+- P13 must not silently reuse the same row as an independent second analytics subscriber;
+- P13 uses an independent idempotent Purchase projection and reconciliation boundary unless a future Outbox redesign is separately approved.
+
+External measurement architecture:
+
+- Google Tag Manager = client-side orchestration;
+- Google Analytics 4 = external analytics destination;
+- Google Ads = external advertising conversion/attribution destination;
+- Meta Pixel = browser-side advertising destination;
+- Meta Conversions API = server-side advertising destination.
+
+Authority boundaries:
+
+- AnalyticsEvent = canonical internal measurement;
+- Commerce + Payments = financial truth;
+- GTM / GA4 / Google Ads / Meta = adapters or external destinations;
+- provider failure cannot invalidate Commerce.
+
+Google provider context may include:
+
+- gclid;
+- gbraid;
+- wbraid.
+
+Meta provider context may include:
+
+- fbclid;
+- fbc;
+- fbp.
+
+Provider identifiers are not commercial authority.
+
+Consent:
+
+- analytics and advertising consent remain separate;
+- states include UNKNOWN / GRANTED / DENIED;
+- UNKNOWN must not silently become GRANTED;
+- Google Consent Mode is provider-specific projection;
+- Google Consent Mode is not the canonical consent store;
+- relevant signals include analytics_storage, ad_storage, ad_user_data and ad_personalization.
+
+P13-F canonical scope:
+
+- P13-F1 — Google Tag Manager Foundation;
+- P13-F2 — Google Analytics 4;
+- P13-F3 — Google Ads;
+- P13-F4 — Meta Pixel;
+- P13-F5 — Meta Conversions API;
+- P13-F6 — Provider Deduplication, Consent & Failure Isolation.
+
+Initial exclusions:
+
+- Google Enhanced Conversions;
+- Meta Advanced Matching;
+- PII-based advertising matching;
+- authoritative ad-spend ingestion;
+- ROAS;
+- mandatory refund analytics semantics;
+- silent P10/P11 Outbox multi-consumer redesign.
+
+Admin Analytics future boundary:
+
+- route: `/admin/analytics`;
+- permission: `analytics.read`;
+- read-only over financial truth;
+- no mark-paid;
+- no Payment approval;
+- no manual canonical PURCHASE;
+- no revenue rewrite;
+- no Entitlement fabrication;
+- no historical attribution rewrite.
+
+P13-A evidence:
+
+- structural audit: PASS;
+- 40 architecture sections present;
+- semantic audit: PASS;
+- multi-provider audit: PASS;
+- Purchase authority audit: PASS;
+- Architecture Freeze R2 closeout: PASS;
+- P13 execution brief audit: PASS.
+
+Git lifecycle at this checkpoint:
+
+- commit: NOT PERFORMED;
+- push: NOT PERFORMED;
+- tag: NOT PERFORMED;
+- PR: NOT PERFORMED;
+- merge: NOT PERFORMED;
+- deploy: NOT PERFORMED.
