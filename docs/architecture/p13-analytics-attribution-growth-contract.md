@@ -4,7 +4,7 @@
 
 **Block:** P13-A — Architecture, Privacy & Measurement Contract
 **Status:** OWNER APPROVED / ARCHITECTURE FROZEN R2 / DOCUMENTATION COMPLETE
-**Runtime implementation:** NOT STARTED
+**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C–P13-H NOT STARTED
 
 ## 1. Core Principle
 
@@ -431,8 +431,8 @@ Dependent implementation must stop if:
 - P13-A Architecture Freeze R1: SUPERSEDED BY CONTROLLED AMENDMENT
 - P13-A Architecture Freeze R2: FROZEN / COMPLETE
 - P13-A Documentation: COMPLETE
-- P13 Runtime Implementation: NOT STARTED
-- P13-B: NOT STARTED
+- P13 Runtime Implementation: IN PROGRESS / P13-B COMPLETE
+- P13-B: COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING
 
 ## 27. Controlled Architecture Amendment
 
@@ -724,3 +724,25 @@ Canonical L'Essenc measurement truth remains AnalyticsEvent.
 Canonical financial truth remains outside Analytics and continues to belong to the authoritative Commerce and Payments boundaries.
 
 Architecture Freeze R2 is the current canonical P13-A architecture baseline.
+
+<!-- P13-B-IMPLEMENTATION-STATUS -->
+## 41. Implementation Status — P13-A Lifecycle and P13-B
+
+This section records implementation and Git lifecycle state only. It does not amend or reopen Architecture Freeze R2.
+
+P13-A lifecycle:
+
+- documentary commit: `86fb0d1d6b09c5375ac386f45baf47f61a63111b`;
+- PR #21: MERGED;
+- canonical merge: `328de43bedfb400d2b5bb0cd5f2a1014375ac2d8`;
+- checkpoint: `checkpoint/p13-a-architecture-freeze-r2`.
+
+P13-B — Attribution Persistence Foundation:
+
+**COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING**
+
+The physical/provider-neutral persistence foundation now exists for AcquisitionJourney, AttributionTouch, immutable OrderAttribution, AnalyticsEvent and AnalyticsDispatch.
+
+This status update does not change any frozen P13-A architecture decision.
+
+P13-C through P13-H remain NOT STARTED.

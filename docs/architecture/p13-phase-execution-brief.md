@@ -4,8 +4,9 @@
 
 **Architecture baseline:** P13-A Architecture Freeze R2
 **P13-A:** COMPLETE
-**P13-B through P13-H:** NOT STARTED
-**Runtime implementation:** NOT STARTED
+**P13-B:** COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING
+**P13-C through P13-H:** NOT STARTED
+**Runtime implementation:** IN PROGRESS / P13-B COMPLETE
 
 ## 1. Objective
 
@@ -129,7 +130,7 @@ Canonical document:
 
 ## 7. P13-B — Attribution Persistence Foundation
 
-Status: NOT STARTED
+Status: COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING
 
 Objective:
 
@@ -158,6 +159,52 @@ Critical constraints:
 - one canonical PURCHASE per Order
 - one logical dispatch per AnalyticsEvent + provider + channel
 - no weakening of existing P08-P12 schema authority
+
+<!-- P13-B-IMPLEMENTATION-EVIDENCE -->
+### P13-B implementation evidence
+
+Branch:
+
+`phase/p13-b-attribution-persistence`
+
+Starting baseline:
+
+`328de43bedfb400d2b5bb0cd5f2a1014375ac2d8`
+
+Migration:
+
+`20260917002445_p13_attribution_persistence_foundation`
+
+SHA-256:
+
+`FC996BFE634DACF41C98C9C989F482EC580420EAE0D74D2CE787D5C0384DB33B`
+
+Delivered:
+
+- physical persistence for AcquisitionJourney, AttributionTouch, OrderAttribution, AnalyticsEvent and AnalyticsDispatch;
+- provider-neutral application repository ports;
+- Prisma repository adapters;
+- one-per-Order attribution snapshot foundation;
+- PURCHASE deduplication foundation;
+- dispatch uniqueness foundation;
+- isolated MySQL validation;
+- no P10/P11 Outbox redesign;
+- no P13-C/D/E/F behavior.
+
+Final evidence:
+
+- 435/435 unit tests PASS;
+- production build PASS;
+- 6/6 targeted P13-B MySQL tests PASS;
+- 155/155 full MySQL integration tests PASS;
+- dev/test migrations CURRENT;
+- Prisma validation PASS;
+- typecheck PASS;
+- lint PASS;
+- git diff --check PASS;
+- scoped P13-B Prettier PASS.
+
+P13-B Git lifecycle remains pending.
 
 ## 8. P13-C — Acquisition Journey & Order Attribution
 
@@ -449,11 +496,11 @@ These operational capabilities are not implemented by P13 unless explicitly brou
 - P00-P12: COMPLETE
 - P13-A: COMPLETE
 - P13-A Architecture Freeze R2: CURRENT CANONICAL BASELINE
-- P13-B: NOT STARTED
+- P13-B: COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING
 - P13-C: NOT STARTED
 - P13-D: NOT STARTED
 - P13-E: NOT STARTED
 - P13-F: NOT STARTED
 - P13-G: NOT STARTED
 - P13-H: NOT STARTED
-- P13 runtime implementation: NOT STARTED
+- P13 runtime implementation: IN PROGRESS / P13-B COMPLETE
