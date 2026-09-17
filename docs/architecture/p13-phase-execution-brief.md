@@ -4,7 +4,7 @@
 
 **Architecture baseline:** P13-A Architecture Freeze R2
 **P13-A:** COMPLETE
-**P13-B:** COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING
+**P13-B:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 **P13-C through P13-H:** NOT STARTED
 **Runtime implementation:** IN PROGRESS / P13-B COMPLETE
 
@@ -130,7 +130,7 @@ Canonical document:
 
 ## 7. P13-B — Attribution Persistence Foundation
 
-Status: COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING
+Status: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 
 Objective:
 
@@ -204,7 +204,26 @@ Final evidence:
 - git diff --check PASS;
 - scoped P13-B Prettier PASS.
 
-P13-B Git lifecycle remains pending.
+P13-B Git lifecycle is COMPLETE: implementation commit `78d20ad0c4afec4cb3a9f9c8ea11e7b880ef0663`, PR #22 MERGED, canonical implementation merge `d5e829fbff763431bcb434fc5f694054247926d1`, and checkpoint `checkpoint/p13-b-attribution-persistence-complete`.
+
+<!-- P13-B-GIT-INTEGRATION-CLOSEOUT -->
+### P13-B Git Integration Closeout
+
+Canonical implementation lifecycle:
+
+- implementation commit: `78d20ad0c4afec4cb3a9f9c8ea11e7b880ef0663`;
+- PR #22: MERGED;
+- implementation merge: `d5e829fbff763431bcb434fc5f694054247926d1`;
+- checkpoint: `checkpoint/p13-b-attribution-persistence-complete`;
+- checkpoint target: `d5e829fbff763431bcb434fc5f694054247926d1`;
+- implementation branch: removed locally and remotely;
+- deploy: NOT PERFORMED.
+
+P13-B is now:
+
+**COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**
+
+P13-C remains NOT STARTED.
 
 ## 8. P13-C — Acquisition Journey & Order Attribution
 
@@ -496,7 +515,7 @@ These operational capabilities are not implemented by P13 unless explicitly brou
 - P00-P12: COMPLETE
 - P13-A: COMPLETE
 - P13-A Architecture Freeze R2: CURRENT CANONICAL BASELINE
-- P13-B: COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING
+- P13-B: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 - P13-C: NOT STARTED
 - P13-D: NOT STARTED
 - P13-E: NOT STARTED
