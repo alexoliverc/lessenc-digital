@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P12 + P13-A
 
-**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B — Attribution Persistence Foundation está COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING; P13-C permanece NOT STARTED.
+**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B — Attribution Persistence Foundation está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C permanece NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -92,7 +92,7 @@ O [P11 Final Gate](operations/p11-final-gate.md) e o [Gate B — Commerce Core R
 
 A [ADR-0011](decisions/ADR-0011-better-auth-admin-identity.md) congela a decisão de identidade administrativa isolada; o [Phase Execution Brief](architecture/p12-identity-auth-admin-phase-execution-brief.md) preserva a especificação P12-A e seu resultado de implementação; o [P12 Final Gate](operations/p12-final-gate.md) consolida P12-A–H, arquitetura final, rotas, backoffice, RBAC, auditoria, evidências e limites.
 
-P12-H Technical Gate é PASS. A PR #18 integrou o checkpoint final de implementação P12 `ea3295cf1703466763c9cd333d98e59fe6535f8e` através do merge `482e095e9c515c163dd4b057f07baf06f3450f95`; a PR #19 integrou o documentation closeout auditado `8d7a64430532b42019ba346fd8591087e2a7cc3a` através do merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Checkpoint/tagging permanece separado, produção está fora da P12 e P13 está IN PROGRESS; P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING e P13-C permanece NOT STARTED.
+P12-H Technical Gate é PASS. A PR #18 integrou o checkpoint final de implementação P12 `ea3295cf1703466763c9cd333d98e59fe6535f8e` através do merge `482e095e9c515c163dd4b057f07baf06f3450f95`; a PR #19 integrou o documentation closeout auditado `8d7a64430532b42019ba346fd8591087e2a7cc3a` através do merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Checkpoint/tagging permanece separado, produção está fora da P12 e P13 está IN PROGRESS; P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED e P13-C permanece NOT STARTED.
 
 <!-- P13-A-CANONICAL-DOCUMENTS -->
 ## P13 — Analytics, Attribution & Growth Infrastructure
@@ -103,12 +103,12 @@ P13-A — Architecture, Privacy & Measurement Contract está **COMPLETE / ARCHIT
 
 P13 runtime implementation está **IN PROGRESS**: P13-B está concluída e P13-C–P13-H permanecem não iniciadas.
 
-P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING**. P13-C — Acquisition Journey & Order Attribution é o próximo bloco e permanece **NOT STARTED**.
+P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-C — Acquisition Journey & Order Attribution é o próximo bloco e permanece **NOT STARTED**.
 
 <!-- P13-B-CANONICAL-CLOSEOUT -->
 ### P13-B — Attribution Persistence Foundation
 
-P13-B está **COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING**.
+P13-B está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 
 O [P13-B Final Gate](operations/p13-b-final-gate.md) registra a migration física, modelos, repositories provider-neutral, provas MySQL, deduplicação, isolamento do Outbox P10/P11, regressões e a exceção documentada do débito global de Prettier.
 
@@ -119,7 +119,26 @@ P13-A final Git lifecycle:
 - merge `328de43bedfb400d2b5bb0cd5f2a1014375ac2d8`;
 - checkpoint `checkpoint/p13-a-architecture-freeze-r2`.
 
-P13-B Git publication/integration has not yet occurred.
+P13-B Git publication/integration is complete: implementation commit `78d20ad0c4afec4cb3a9f9c8ea11e7b880ef0663`, PR #22 MERGED, implementation merge `d5e829fbff763431bcb434fc5f694054247926d1`, and checkpoint `checkpoint/p13-b-attribution-persistence-complete`.
+
+<!-- P13-B-POST-MERGE-CLOSEOUT -->
+### P13-B Git Integration Closeout
+
+P13-B está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
+
+Lifecycle canônico da implementação:
+
+- commit: `78d20ad0c4afec4cb3a9f9c8ea11e7b880ef0663`;
+- PR: #22 — MERGED;
+- merge: `d5e829fbff763431bcb434fc5f694054247926d1`;
+- checkpoint: `checkpoint/p13-b-attribution-persistence-complete`;
+- checkpoint target: `d5e829fbff763431bcb434fc5f694054247926d1`;
+- branch de implementação local/remota: removida;
+- deploy: não executado.
+
+O checkpoint congela o merge da implementação e não é movido por este closeout documental.
+
+P13-C permanece NOT STARTED.
 
 ### Documentos canônicos
 

@@ -3,7 +3,7 @@
 **Project:** L'Essenc Digital\
 **Phase:** P13-B — Attribution Persistence Foundation\
 **Date:** 2026-09-16\
-**Status:** COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING\
+**Status:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED\
 **Branch:** `phase/p13-b-attribution-persistence`\
 **Starting baseline:** `328de43bedfb400d2b5bb0cd5f2a1014375ac2d8`
 
@@ -124,15 +124,21 @@ Final audit proved:
 
 ## 8. Final status
 
-`P13-B = COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING`
+P13-B implementation, technical validation, documentation and Git integration are complete.
 
-Not yet performed:
+`P13-B = COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED`
 
-- commit;
-- push;
-- checkpoint/tag;
-- PR;
-- merge;
-- deployment.
+Canonical Git evidence:
+
+- implementation commit: `78d20ad0c4afec4cb3a9f9c8ea11e7b880ef0663`;
+- PR: #22 — MERGED;
+- canonical implementation merge: `d5e829fbff763431bcb434fc5f694054247926d1`;
+- checkpoint: `checkpoint/p13-b-attribution-persistence-complete`;
+- checkpoint target: `d5e829fbff763431bcb434fc5f694054247926d1`;
+- local implementation branch: DELETED;
+- remote implementation branch: DELETED;
+- deployment: NOT PERFORMED.
+
+The P13-B checkpoint intentionally remains attached to the implementation merge and is not moved by documentation-only closeout work.
 
 P13-C remains NOT STARTED.

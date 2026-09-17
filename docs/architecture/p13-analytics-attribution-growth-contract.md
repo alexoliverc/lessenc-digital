@@ -432,7 +432,7 @@ Dependent implementation must stop if:
 - P13-A Architecture Freeze R2: FROZEN / COMPLETE
 - P13-A Documentation: COMPLETE
 - P13 Runtime Implementation: IN PROGRESS / P13-B COMPLETE
-- P13-B: COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING
+- P13-B: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 
 ## 27. Controlled Architecture Amendment
 
@@ -739,10 +739,29 @@ P13-A lifecycle:
 
 P13-B — Attribution Persistence Foundation:
 
-**COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING**
+**COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**
 
 The physical/provider-neutral persistence foundation now exists for AcquisitionJourney, AttributionTouch, immutable OrderAttribution, AnalyticsEvent and AnalyticsDispatch.
 
 This status update does not change any frozen P13-A architecture decision.
+
+P13-C through P13-H remain NOT STARTED.
+
+<!-- P13-B-GIT-CLOSEOUT-STATUS -->
+### P13-B Git Lifecycle Closeout
+
+This subsection records implementation lifecycle state only. It does not amend, supersede, or reopen Architecture Freeze R2.
+
+P13-B implementation lifecycle:
+
+- implementation commit: `78d20ad0c4afec4cb3a9f9c8ea11e7b880ef0663`;
+- PR #22: MERGED;
+- implementation merge: `d5e829fbff763431bcb434fc5f694054247926d1`;
+- checkpoint: `checkpoint/p13-b-attribution-persistence-complete`;
+- checkpoint target: `d5e829fbff763431bcb434fc5f694054247926d1`;
+- implementation branch cleanup: COMPLETE;
+- deploy: NOT PERFORMED.
+
+P13-B = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 
 P13-C through P13-H remain NOT STARTED.
