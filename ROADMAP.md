@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 — Analytics, Attribution & Growth Infrastructure is IN PROGRESS. P13-A — Architecture, Privacy & Measurement Contract is COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED. P13 runtime implementation has NOT STARTED. P13-B — Attribution Persistence Foundation is the next implementation block and remains NOT STARTED. Production deployment remains outside the current P13 scope.
+**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 — Analytics, Attribution & Growth Infrastructure is IN PROGRESS. P13-A — Architecture, Privacy & Measurement Contract is COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED. P13-B — Attribution Persistence Foundation is COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING. P13-C — Acquisition Journey & Order Attribution remains NOT STARTED. Production deployment remains outside the current P13 scope.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -723,7 +723,7 @@ The first OWNER bootstrap was not executed and no real administrative account wa
 
 ## P13 — Analytics, Attribution & Growth Infrastructure
 
-**Status:** IN PROGRESS / P13-A COMPLETE / ARCHITECTURE FROZEN R2 / P13-B NOT STARTED
+**Status:** IN PROGRESS / P13-A COMPLETE / P13-B COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING / P13-C NOT STARTED
 
 ### Objective
 
@@ -792,13 +792,72 @@ A completed sale can be attributed to its acquisition journey when data is avail
 ### P13 execution blocks
 
 - P13-A — Architecture, Privacy & Measurement Contract: **COMPLETE / FROZEN R2**;
-- P13-B — Attribution Persistence Foundation: **NOT STARTED**;
+- P13-B — Attribution Persistence Foundation: **COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING**;
 - P13-C — Acquisition Journey & Order Attribution: **NOT STARTED**;
 - P13-D — Internal Measurement Producers & Consent Boundary: **NOT STARTED**;
 - P13-E — Canonical Purchase & Financial Reconciliation: **NOT STARTED**;
 - P13-F — Measurement & Advertising Adapters: **NOT STARTED**;
 - P13-G — Admin Analytics: **NOT STARTED**;
 - P13-H — Technical Gate: **NOT STARTED**.
+
+<!-- P13-B-ATTRIBUTION-PERSISTENCE-CLOSEOUT -->
+### P13-A Git lifecycle and P13-B implementation closeout
+
+P13-A final Git lifecycle:
+
+- documentary implementation commit: `86fb0d1d6b09c5375ac386f45baf47f61a63111b`;
+- PR #21: **MERGED** into `main`;
+- merge / canonical P13-A baseline: `328de43bedfb400d2b5bb0cd5f2a1014375ac2d8`;
+- annotated checkpoint: `checkpoint/p13-a-architecture-freeze-r2`;
+- checkpoint dereference: `328de43bedfb400d2b5bb0cd5f2a1014375ac2d8`;
+- P13-A: **COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED**.
+
+P13-B — Attribution Persistence Foundation is technically complete.
+
+Implemented:
+
+- AcquisitionJourney;
+- AttributionTouch;
+- immutable OrderAttribution snapshot;
+- provider-neutral AnalyticsEvent;
+- provider-neutral AnalyticsDispatch;
+- application persistence ports;
+- Prisma repository adapters;
+- canonical PURCHASE deduplication foundation;
+- dispatch `(event, provider, channel)` uniqueness;
+- P10/P11 Outbox remains unchanged and isolated.
+
+Migration:
+
+`20260917002445_p13_attribution_persistence_foundation`
+
+SHA-256:
+
+`FC996BFE634DACF41C98C9C989F482EC580420EAE0D74D2CE787D5C0384DB33B`
+
+Final evidence:
+
+- unit suite: **435/435 PASS**;
+- production build: **PASS**;
+- targeted P13-B MySQL: **6/6 PASS**;
+- full MySQL regression: **155/155 PASS**;
+- `lessenc_dev`: CURRENT;
+- `lessenc_test`: CURRENT;
+- Prisma validate: **PASS**;
+- typecheck: **PASS**;
+- ESLint: **PASS**;
+- `git diff --check`: **PASS**;
+- scoped P13-B Prettier: **PASS**.
+
+Repository-wide Prettier has 36 pre-existing unchanged files outside P13-B. No unrelated formatting rewrite was performed.
+
+P13-B:
+
+**COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING**
+
+P13-B commit, push, tag, PR, merge and deployment have not yet been performed.
+
+P13-C remains **NOT STARTED**.
 
 ### Canonical measurement authority
 
@@ -1469,7 +1528,7 @@ The next phase after P12 integration closeout is:
 
 Current execution state:
 
-**IN PROGRESS / P13-A COMPLETE / ARCHITECTURE FROZEN R2 / P13-B NOT STARTED**
+**IN PROGRESS / P13-A COMPLETE / P13-B COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING / P13-C NOT STARTED**
 
 Current status:
 
@@ -1495,7 +1554,7 @@ P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creati
 
 P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED**: final implementation checkpoint `ea3295cf1703466763c9cd333d98e59fe6535f8e`, implementation PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`, and documentation closeout PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P13 is **IN PROGRESS / P13-A COMPLETE / ARCHITECTURE FROZEN R2 / P13-B NOT STARTED**. Production deployment remains outside the completed P12 scope.
+P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED**: final implementation checkpoint `ea3295cf1703466763c9cd333d98e59fe6535f8e`, implementation PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`, and documentation closeout PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P13 is **IN PROGRESS / P13-A COMPLETE / P13-B COMPLETE / PASS / DOCUMENTED / GIT CLOSEOUT PENDING / P13-C NOT STARTED**. Production deployment remains outside the completed P12 scope.
 
 <!-- P11-POST-MERGE-CLOSEOUT -->
 ### P11 — Git Integration Closeout

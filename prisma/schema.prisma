@@ -134,6 +134,7 @@ model Order {
   payments               Payment[]
   outbox                 OutboxEvent[]
   buyerAccessCredentials BuyerAccessCredential[]
+  attribution            OrderAttribution?
 
   @@index([customerId, createdAt])
   @@map("orders")
@@ -447,4 +448,149 @@ model AdminAuditEvent {
   @@index([action, createdAt])
   @@index([correlationId])
   @@map("admin_audit_events")
+}
+
+// =============================================================================
+// P13-B - Attribution Persistence Foundation
+// =============================================================================
+
+enum AnalyticsConsentState {
+  UNKNOWN
+  GRANTED
+  DENIED
+}
+
+enum AttributionTouchType {
+  CAMPAIGN
+  REFERRAL
+  DIRECT
+}
+
+enum AnalyticsEventType {
+  VIEW_CONTENT
+  INITIATE_CHECKOUT
+  PURCHASE
+}
+
+enum AnalyticsDispatchStatus {
+  PENDING
+  PROCESSING
+  RETRYABLE
+  SUCCEEDED
+  FAILED
+  SUPPRESSED
+}
+
+model AcquisitionJourney {
+  id                      String                @id @default(uuid()) @db.Char(36)
+  createdAt               DateTime              @default(now()) @map("created_at") @db.DateTime(3)
+  lastSeenAt              DateTime              @default(now()) @map("last_seen_at") @db.DateTime(3)
+  expiresAt               DateTime              @map("expires_at") @db.DateTime(3)
+  firstTouchId            String?               @map("first_touch_id") @db.Char(36)
+  lastTouchId             String?               @map("last_touch_id") @db.Char(36)
+  analyticsConsentState   AnalyticsConsentState @default(UNKNOWN) @map("analytics_consent_state")
+  advertisingConsentState AnalyticsConsentState @default(UNKNOWN) @map("advertising_consent_state")
+  policyVersion           String                @map("policy_version") @db.VarChar(64)
+  touches                 AttributionTouch[]
+
+  @@index([lastSeenAt])
+  @@index([expiresAt])
+  @@index([firstTouchId])
+  @@index([lastTouchId])
+  @@map("acquisition_journeys")
+}
+
+model AttributionTouch {
+  id           String               @id @default(uuid()) @db.Char(36)
+  journeyId    String               @map("journey_id") @db.Char(36)
+  occurredAt   DateTime             @default(now()) @map("occurred_at") @db.DateTime(3)
+  source       String?              @db.VarChar(96)
+  medium       String?              @db.VarChar(96)
+  campaign     String?              @db.VarChar(191)
+  content      String?              @db.VarChar(191)
+  term         String?              @db.VarChar(191)
+  referrerHost String?              @map("referrer_host") @db.VarChar(253)
+  landingPath  String?              @map("landing_path") @db.VarChar(1024)
+  touchType    AttributionTouchType @map("touch_type")
+  journey      AcquisitionJourney   @relation(fields: [journeyId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([journeyId, occurredAt])
+  @@index([touchType, occurredAt])
+  @@index([source, medium, campaign])
+  @@map("attribution_touches")
+}
+
+model OrderAttribution {
+  id            String   @id @default(uuid()) @db.Char(36)
+  orderId       String   @unique @map("order_id") @db.Char(36)
+  journeyId     String?  @map("journey_id") @db.Char(36)
+  firstTouchId  String?  @map("first_touch_id") @db.Char(36)
+  lastTouchId   String?  @map("last_touch_id") @db.Char(36)
+  firstSource   String?  @map("first_source") @db.VarChar(96)
+  firstMedium   String?  @map("first_medium") @db.VarChar(96)
+  firstCampaign String?  @map("first_campaign") @db.VarChar(191)
+  firstContent  String?  @map("first_content") @db.VarChar(191)
+  firstTerm     String?  @map("first_term") @db.VarChar(191)
+  lastSource    String?  @map("last_source") @db.VarChar(96)
+  lastMedium    String?  @map("last_medium") @db.VarChar(96)
+  lastCampaign  String?  @map("last_campaign") @db.VarChar(191)
+  lastContent   String?  @map("last_content") @db.VarChar(191)
+  lastTerm      String?  @map("last_term") @db.VarChar(191)
+  capturedAt    DateTime @default(now()) @map("captured_at") @db.DateTime(3)
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([journeyId])
+  @@index([firstTouchId])
+  @@index([lastTouchId])
+  @@index([capturedAt])
+  @@index([firstSource, firstMedium])
+  @@index([lastSource, lastMedium])
+  @@map("order_attributions")
+}
+
+model AnalyticsEvent {
+  id               String              @id @default(uuid()) @db.Char(36)
+  type             AnalyticsEventType
+  occurredAt       DateTime            @map("occurred_at") @db.DateTime(3)
+  journeyId        String?             @map("journey_id") @db.Char(36)
+  productId        String?             @map("product_id") @db.Char(36)
+  offerId          String?             @map("offer_id") @db.Char(36)
+  orderId          String?             @map("order_id") @db.Char(36)
+  amountMinor      Int?                @map("amount_minor") @db.UnsignedInt
+  currency         String?             @db.Char(3)
+  attributionState String              @map("attribution_state") @db.VarChar(32)
+  consentSnapshot  Json                @map("consent_snapshot")
+  schemaVersion    Int                 @default(1) @map("schema_version") @db.UnsignedInt
+  purchaseOrderKey String?             @unique @map("purchase_order_key") @db.Char(36)
+  createdAt        DateTime            @default(now()) @map("created_at") @db.DateTime(3)
+  dispatches       AnalyticsDispatch[]
+
+  @@index([type, occurredAt])
+  @@index([journeyId, occurredAt])
+  @@index([orderId])
+  @@index([productId])
+  @@index([offerId])
+  @@map("analytics_events")
+}
+
+model AnalyticsDispatch {
+  id               String                  @id @default(uuid()) @db.Char(36)
+  analyticsEventId String                  @map("analytics_event_id") @db.Char(36)
+  provider         String                  @db.VarChar(32)
+  channel          String                  @db.VarChar(32)
+  status           AnalyticsDispatchStatus @default(PENDING)
+  attemptCount     Int                     @default(0) @map("attempt_count") @db.UnsignedInt
+  nextAttemptAt    DateTime?               @map("next_attempt_at") @db.DateTime(3)
+  lastAttemptAt    DateTime?               @map("last_attempt_at") @db.DateTime(3)
+  providerEventId  String?                 @map("provider_event_id") @db.VarChar(128)
+  lastErrorCode    String?                 @map("last_error_code") @db.VarChar(64)
+  lastErrorClass   String?                 @map("last_error_class") @db.VarChar(64)
+  createdAt        DateTime                @default(now()) @map("created_at") @db.DateTime(3)
+  completedAt      DateTime?               @map("completed_at") @db.DateTime(3)
+  analyticsEvent   AnalyticsEvent          @relation(fields: [analyticsEventId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([analyticsEventId, provider, channel])
+  @@index([status, nextAttemptAt])
+  @@index([provider, status, nextAttemptAt])
+  @@map("analytics_dispatches")
 }
