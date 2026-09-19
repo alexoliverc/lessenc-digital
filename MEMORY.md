@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 17/09/2026
+**Última atualização:** 19/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P12 implementadas. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED; P13-D–P13-H permanecem NOT STARTED.
-**Estado atual:** P13-C — Acquisition Journey & Order Attribution foi implementada e validada na branch `phase/p13-c-acquisition-order-attribution` sobre a baseline `8f501575078a589a6712a3685f92548e6e89def3`. AcquisitionJourney, First/Last Touch, UTM sanitation, HTTP first-party boundary, prefetch exclusion e immutable OrderAttribution atômico com Order estão validados. Final regression: 498/498 unit/application e 165/165 MySQL PASS; production build PASS. Git integration/checkpoint/deploy ainda não foram realizados.
+**Estado documental:** P00–P12 implementadas. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D–P13-H permanecem NOT STARTED.
+**Estado atual:** P13-C — Acquisition Journey & Order Attribution está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `e7b99cb18c655465845ef91f968dc588b78c0575`, PR #24 MERGED, canonical implementation merge `52ae12416abbdb1931f0b8798de3fb6866695d98` e checkpoint `checkpoint/p13-c-acquisition-order-attribution-complete` apontando para o merge. AcquisitionJourney, First/Last Touch, UTM sanitation, HTTP first-party boundary, prefetch exclusion e immutable OrderAttribution atômico com Order permanecem validados. Final regression: 498/498 unit/application e 165/165 MySQL PASS; production build PASS. P13-D–P13-H permanecem NOT STARTED e deploy permanece NOT PERFORMED.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -18,14 +18,14 @@
 - O brief do owner de 12/09/2026 autorizou a P06 a partir de `c77ff9c`: MySQL 8.4 LTS local isolado, Prisma CLI/Client/adapter MariaDB exatamente 7.10.0, schema, migrations e testes físicos. Os 6 alertas transitivos iniciais foram corrigidos na P06 pelos overrides de mariadb 3.5.4, mysql2 3.24.4 e deepmerge-ts 8.0.2; auditoria P07 confirmou 0 vulnerabilidades. Não há liberação de produção.
 - Ambientes aprovados na nova baseline: LOCAL, TEST, STAGING e PRODUCTION com `APP_ENV` separado de `NODE_ENV`, sem afirmar que tenham sido provisionados.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
-- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11 e identidade/autenticação/administração P12 permanecem nas respectivas baselines. P13 está IN PROGRESS; P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED. P13-D–P13-H permanecem NOT STARTED. Produção continua fora do escopo atual.
+- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11 e identidade/autenticação/administração P12 permanecem nas respectivas baselines. P13 está IN PROGRESS; P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-D–P13-H permanecem NOT STARTED. Produção continua fora do escopo atual.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.
 - Cada execução requer Phase Execution Brief, branch, autorização de operações protegidas por `AGENTS.md`, validação e retorno ao ChatGPT antes da progressão. Repositório é a memória técnica oficial; ler os arquivos na ordem definida em AGENTS.md.
 - O projeto principal de cosméticos físicos continua separado e será retomado com a formação de caixa.
 
 ## Onde encontrar as decisões
 
-- [ROADMAP.md](ROADMAP.md): fases P00–P20; P13 IN PROGRESS; P13-A COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED; P13-D–H NOT STARTED.
+- [ROADMAP.md](ROADMAP.md): fases P00–P20; P13 IN PROGRESS; P13-A COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D–H NOT STARTED.
 - [docs/README.md](docs/README.md): índice canônico P00–P13, incluindo o contrato arquitetural P13, Phase Execution Brief e P13-C Final Gate.
 - [P12 Final Gate](docs/operations/p12-final-gate.md): arquitetura final, backoffice, RBAC, auditoria, evidências, defer de recovery e limites Git.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
@@ -1770,5 +1770,31 @@ Git state:
 - merge: NOT PERFORMED;
 - checkpoint/tag: NOT CREATED;
 - deploy: NOT PERFORMED.
+
+P13-D through P13-H remain NOT STARTED.
+<!-- P13-C-POST-MERGE-INTEGRATION -->
+
+## P13-C Post-Merge Integration Closeout — COMPLETE / PASS
+
+Date: 2026-09-19
+
+P13-C implementation Git lifecycle is complete.
+
+Canonical lifecycle:
+
+- implementation commit: `e7b99cb18c655465845ef91f968dc588b78c0575`;
+- implementation PR: #24 — MERGED;
+- canonical implementation merge: `52ae12416abbdb1931f0b8798de3fb6866695d98`;
+- checkpoint: `checkpoint/p13-c-acquisition-order-attribution-complete`;
+- checkpoint target: `52ae12416abbdb1931f0b8798de3fb6866695d98`;
+- deployment: NOT PERFORMED.
+
+P13-C:
+
+`COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED`
+
+The checkpoint is frozen at the implementation merge and must not be moved, recreated or retargeted by later documentation-only work.
+
+The earlier P13-C implementation-closeout section remains historical evidence of the state before Git integration.
 
 P13-D through P13-H remain NOT STARTED.

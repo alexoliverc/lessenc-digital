@@ -773,7 +773,7 @@ This section records implementation state only. It does not amend, supersede or 
 
 P13-C — Acquisition Journey & Order Attribution:
 
-**IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED**
+**COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**
 
 Implemented behavior now includes:
 
@@ -801,5 +801,25 @@ Canonical validation record:
 - `docs/operations/p13-c-final-gate.md`
 
 Git integration, checkpointing and deployment have not yet been performed.
+
+The sentence above is retained as historical P13-C implementation-closeout evidence.
+
+<!-- P13-C-GIT-CLOSEOUT-STATUS -->
+### P13-C Git Lifecycle Closeout
+
+This subsection records lifecycle state only. It does not amend, supersede or reopen Architecture Freeze R2.
+
+P13-C implementation lifecycle:
+
+- implementation commit: `e7b99cb18c655465845ef91f968dc588b78c0575`;
+- PR #24: MERGED;
+- implementation merge: `52ae12416abbdb1931f0b8798de3fb6866695d98`;
+- checkpoint: `checkpoint/p13-c-acquisition-order-attribution-complete`;
+- checkpoint target: `52ae12416abbdb1931f0b8798de3fb6866695d98`;
+- deployment: NOT PERFORMED.
+
+P13-C = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
+
+The checkpoint remains fixed at the implementation merge and must not be moved by later documentation-only work.
 
 P13-D through P13-H remain NOT STARTED.
