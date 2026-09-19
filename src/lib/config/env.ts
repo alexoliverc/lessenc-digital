@@ -3,11 +3,21 @@ import {
   parseP09SubmissionEnv,
   parseP11BuyerSessionEnv,
   parseP11PrivateStorageEnv,
+  parseP13GoogleTagEnv,
   parseServerEnv,
 } from "./env-schema";
 
 export const serverEnv = parseServerEnv(process.env);
 
+export function getP13GoogleTagEnv() {
+  if (typeof window !== "undefined") {
+    throw new Error("P13 Google Tag configuration is server-only");
+  }
+
+  return parseP13GoogleTagEnv({
+    GTM_CONTAINER_ID: process.env.GTM_CONTAINER_ID,
+  });
+}
 export function getP08CommercialEnv() {
   if (typeof window !== "undefined") {
     throw new Error("P08 commercial configuration is server-only");

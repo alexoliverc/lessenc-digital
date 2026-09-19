@@ -4,46 +4,98 @@ import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import Image from "next/image";
 
+import type { GoogleAdsConversionDataLayerEvent } from "@/modules/analytics/application/google-ads-conversion";
+import type { MetaPixelPurchaseDataLayerEvent } from "@/modules/analytics/application/meta-pixel";
+import type { Ga4DataLayerEvent } from "@/modules/analytics/application/google-analytics-4";
+
 import styles from "./page.module.css";
+import {
+  deliverCanonicalGoogleAdsConversionToBrowser,
+  parseCanonicalGoogleAdsConversion,
+} from "./advertising-conversion-browser";
+import {
+  deliverCanonicalMetaPixelPurchaseToBrowser,
+  parseCanonicalMetaPixelPurchase,
+} from "./meta-pixel-browser";
+import {
+  deliverCanonicalGa4PurchaseToBrowser,
+  parseCanonicalGa4Purchase,
+} from "./purchase-analytics-browser";
 
 type Presentation =
   | { kind: "PIX"; qrCode?: string; qrCodeBase64?: string; ticketUrl?: string }
   | { kind: "CHALLENGE"; url: string }
   | null;
-type Result = { state: string; presentation: Presentation };
+type Result = {
+  state: string;
+  presentation: Presentation;
+  analyticsPurchase: Ga4DataLayerEvent | null;
+  advertisingConversion: GoogleAdsConversionDataLayerEvent | null;
+  metaPixelPurchase: MetaPixelPurchaseDataLayerEvent | null;
+};
 type Brick = { unmount(): void };
 type MpSdk = { bricks(): { create(name: string, id: string, settings: object): Promise<Brick> } };
 
 async function post(path: string, body: unknown): Promise<Result> {
   const response = await fetch(path, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     credentials: "same-origin",
     cache: "no-store",
     body: JSON.stringify(body),
   });
-  if (!response.ok) return { state: "unknown", presentation: null };
+
+  if (!response.ok) {
+    return {
+      state: "unknown",
+      presentation: null,
+      analyticsPurchase: null,
+      advertisingConversion: null,
+      metaPixelPurchase: null,
+    };
+  }
+
   const result: unknown = await response.json();
-  if (!result || typeof result !== "object" || Array.isArray(result))
-    return { state: "unknown", presentation: null };
+
+  if (!result || typeof result !== "object" || Array.isArray(result)) {
+    return {
+      state: "unknown",
+      presentation: null,
+      analyticsPurchase: null,
+      advertisingConversion: null,
+      metaPixelPurchase: null,
+    };
+  }
+
   const value = result as Record<string, unknown>;
+
   return {
     state: typeof value.state === "string" ? value.state : "unknown",
+
     presentation:
       value.presentation && typeof value.presentation === "object"
         ? (value.presentation as Presentation)
         : null,
+
+    analyticsPurchase: parseCanonicalGa4Purchase(value.analyticsPurchase),
+
+    advertisingConversion: parseCanonicalGoogleAdsConversion(value.advertisingConversion),
+
+    metaPixelPurchase: parseCanonicalMetaPixelPurchase(value.metaPixelPurchase),
   };
 }
-
 export function PaymentChoice({
   initialState,
   amount,
   publicKey,
+  gtmContainerId,
 }: Readonly<{
   initialState: string;
   amount: number;
   publicKey: string;
+  gtmContainerId: string | null;
 }>) {
   const [mode, setMode] = useState<"PIX" | "CREDIT_CARD" | null>(null);
   const [state, setState] = useState(initialState);
@@ -53,7 +105,10 @@ export function PaymentChoice({
   const [error, setError] = useState("");
   const iframe = useRef<HTMLIFrameElement>(null);
   const pollCount = useRef(0);
+  const deliveredAnalyticsPurchases = useRef(new Set<string>());
 
+  const deliveredAdvertisingConversions = useRef(new Set<string>());
+  const deliveredMetaPixelPurchases = useRef(new Set<string>());
   async function startPix() {
     if (busy) return;
     setBusy(true);
@@ -210,6 +265,83 @@ export function PaymentChoice({
     return () => window.removeEventListener("message", listener);
   }, [presentation]);
 
+  useEffect(() => {
+    if (state !== "approved") {
+      return;
+    }
+
+    let disposed = false;
+
+    void post("/checkout/payment/status", {})
+      .then(async (result) => {
+        if (disposed || result.state !== "approved") {
+          return;
+        }
+
+        if (result.analyticsPurchase !== null) {
+          try {
+            await deliverCanonicalGa4PurchaseToBrowser({
+              purchase: result.analyticsPurchase,
+              gtmContainerId,
+              deliveredKeys: deliveredAnalyticsPurchases.current,
+            });
+          } catch {
+            /*
+             * GA4 failure is isolated from financial truth
+             * and all other provider projections.
+             */
+          }
+        }
+
+        if (disposed) {
+          return;
+        }
+
+        if (result.advertisingConversion !== null) {
+          try {
+            await deliverCanonicalGoogleAdsConversionToBrowser({
+              conversion: result.advertisingConversion,
+              gtmContainerId,
+              deliveredKeys: deliveredAdvertisingConversions.current,
+            });
+          } catch {
+            /*
+             * Google Ads failure is isolated from financial
+             * truth and every other provider projection.
+             */
+          }
+        }
+
+        if (disposed) {
+          return;
+        }
+
+        if (result.metaPixelPurchase !== null) {
+          try {
+            await deliverCanonicalMetaPixelPurchaseToBrowser({
+              purchase: result.metaPixelPurchase,
+              gtmContainerId,
+              deliveredKeys: deliveredMetaPixelPurchases.current,
+            });
+          } catch {
+            /*
+             * Meta Pixel delivery is best-effort and cannot
+             * mutate payment, GA4, or Google Ads truth.
+             */
+          }
+        }
+      })
+      .catch(() => {
+        /*
+         * Provider delivery is best-effort and must never
+         * mutate, roll back, or reinterpret financial truth.
+         */
+      });
+
+    return () => {
+      disposed = true;
+    };
+  }, [state, gtmContainerId]);
   const terminal = ["approved", "refunded", "review_required"].includes(state);
   return (
     <section className={styles.choice} aria-live="polite">

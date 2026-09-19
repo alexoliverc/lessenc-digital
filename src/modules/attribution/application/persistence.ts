@@ -226,9 +226,55 @@ export type CreateAnalyticsDispatch = Readonly<{
 export interface AnalyticsDispatchRepository {
   create(input: CreateAnalyticsDispatch): Promise<AnalyticsDispatchRecord>;
 
+  createIdempotent(input: CreateAnalyticsDispatch): Promise<AnalyticsDispatchRecord>;
+
   findByEventProviderChannel(
     analyticsEventId: string,
     provider: string,
     channel: string,
   ): Promise<AnalyticsDispatchRecord | null>;
+
+  findUndispatchedEvents(input: {
+    provider: string;
+    channel: string;
+    limit: number;
+  }): Promise<readonly AnalyticsEventRecord[]>;
+
+  claimDue(input: { provider: string; channel: string; attemptedAt: Date }): Promise<Readonly<{
+    dispatch: AnalyticsDispatchRecord;
+    event: AnalyticsEventRecord;
+  }> | null>;
+
+  recoverStaleProcessing(input: {
+    provider: string;
+    channel: string;
+    staleBefore: Date;
+    recoveredAt: Date;
+    limit: number;
+  }): Promise<number>;
+  markSuppressed(input: {
+    dispatchId: string;
+    completedAt: Date;
+    errorCode?: string;
+    errorClass?: string;
+  }): Promise<AnalyticsDispatchRecord>;
+  markSucceeded(input: {
+    dispatchId: string;
+    providerEventId: string;
+    completedAt: Date;
+  }): Promise<AnalyticsDispatchRecord>;
+
+  markRetryable(input: {
+    dispatchId: string;
+    nextAttemptAt: Date;
+    errorCode: string;
+    errorClass: string;
+  }): Promise<AnalyticsDispatchRecord>;
+
+  markFailed(input: {
+    dispatchId: string;
+    errorCode: string;
+    errorClass: string;
+    completedAt: Date;
+  }): Promise<AnalyticsDispatchRecord>;
 }

@@ -708,6 +708,824 @@ describe("P13-B analytics persistence foundation on isolated MySQL", () => {
     expect(loaded?.id).toBe(dispatchId);
   });
 
+  it("creates a provider dispatch idempotently for the same event, provider and channel", async () => {
+    const eventId = randomUUID();
+    cleanup.events.add(eventId);
+
+    await events.create({
+      id: eventId,
+      type: "VIEW_CONTENT",
+      occurredAt: new Date(),
+      journeyId: null,
+      productId: null,
+      offerId: null,
+      orderId: null,
+      amountMinor: null,
+      currency: null,
+      attributionState: "UNATTRIBUTED",
+      consentSnapshot: {
+        analytics: "GRANTED",
+        advertising: "GRANTED",
+        policyVersion: "p13-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: null,
+    });
+
+    const provider = `p13f-idem-${randomUUID().slice(0, 8)}`;
+    const firstId = randomUUID();
+    const replayId = randomUUID();
+
+    cleanup.dispatches.add(firstId);
+    cleanup.dispatches.add(replayId);
+
+    const input = {
+      id: firstId,
+      analyticsEventId: eventId,
+      provider,
+      channel: "server",
+      status: "PENDING" as const,
+      attemptCount: 0,
+      nextAttemptAt: null,
+      lastAttemptAt: null,
+      providerEventId: null,
+      lastErrorCode: null,
+      lastErrorClass: null,
+      completedAt: null,
+    };
+
+    const created = await dispatches.createIdempotent(input);
+
+    const replay = await dispatches.createIdempotent({
+      ...input,
+      id: replayId,
+    });
+
+    expect(created).toMatchObject({
+      id: firstId,
+      analyticsEventId: eventId,
+      provider,
+      channel: "server",
+      status: "PENDING",
+      attemptCount: 0,
+    });
+
+    expect(replay.id).toBe(firstId);
+
+    expect(
+      await db.analyticsDispatch.count({
+        where: {
+          analyticsEventId: eventId,
+          provider,
+          channel: "server",
+        },
+      }),
+    ).toBe(1);
+  });
+
+  it("discovers events that do not yet have a dispatch for the requested provider and channel", async () => {
+    const firstEventId = randomUUID();
+    const secondEventId = randomUUID();
+
+    cleanup.events.add(firstEventId);
+    cleanup.events.add(secondEventId);
+
+    const firstOccurredAt = new Date(Date.now() - 1_000);
+    const secondOccurredAt = new Date();
+
+    for (const [eventId, occurredAt] of [
+      [firstEventId, firstOccurredAt],
+      [secondEventId, secondOccurredAt],
+    ] as const) {
+      await events.create({
+        id: eventId,
+        type: "VIEW_CONTENT",
+        occurredAt,
+        journeyId: null,
+        productId: null,
+        offerId: null,
+        orderId: null,
+        amountMinor: null,
+        currency: null,
+        attributionState: "UNATTRIBUTED",
+        consentSnapshot: {
+          analytics: "GRANTED",
+          advertising: "GRANTED",
+          policyVersion: "p13-r2",
+        },
+        schemaVersion: 1,
+        purchaseOrderKey: null,
+      });
+    }
+
+    const provider = `p13f-scan-${randomUUID().slice(0, 8)}`;
+
+    const dispatchId = randomUUID();
+    cleanup.dispatches.add(dispatchId);
+
+    await dispatches.create({
+      id: dispatchId,
+      analyticsEventId: firstEventId,
+      provider,
+      channel: "server",
+      status: "PENDING",
+      attemptCount: 0,
+      nextAttemptAt: null,
+      lastAttemptAt: null,
+      providerEventId: null,
+      lastErrorCode: null,
+      lastErrorClass: null,
+      completedAt: null,
+    });
+
+    const undispatched = await dispatches.findUndispatchedEvents({
+      provider,
+      channel: "server",
+      limit: 1000,
+    });
+
+    const ids = undispatched.map((event) => event.id);
+
+    expect(ids).not.toContain(firstEventId);
+    expect(ids).toContain(secondEventId);
+  });
+
+  it("claims one due dispatch only once under concurrent workers", async () => {
+    const eventId = randomUUID();
+    cleanup.events.add(eventId);
+
+    await events.create({
+      id: eventId,
+      type: "INITIATE_CHECKOUT",
+      occurredAt: new Date(),
+      journeyId: null,
+      productId: null,
+      offerId: null,
+      orderId: null,
+      amountMinor: null,
+      currency: null,
+      attributionState: "UNATTRIBUTED",
+      consentSnapshot: {
+        analytics: "GRANTED",
+        advertising: "GRANTED",
+        policyVersion: "p13-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: null,
+    });
+
+    const provider = `p13f-claim-${randomUUID().slice(0, 8)}`;
+
+    const dispatchId = randomUUID();
+    cleanup.dispatches.add(dispatchId);
+
+    await dispatches.create({
+      id: dispatchId,
+      analyticsEventId: eventId,
+      provider,
+      channel: "server",
+      status: "PENDING",
+      attemptCount: 0,
+      nextAttemptAt: null,
+      lastAttemptAt: null,
+      providerEventId: null,
+      lastErrorCode: null,
+      lastErrorClass: null,
+      completedAt: null,
+    });
+
+    const attemptedAt = new Date();
+
+    const results = await Promise.all([
+      dispatches.claimDue({
+        provider,
+        channel: "server",
+        attemptedAt,
+      }),
+      dispatches.claimDue({
+        provider,
+        channel: "server",
+        attemptedAt,
+      }),
+    ]);
+
+    const claimed = results.filter((result) => result !== null);
+
+    expect(claimed).toHaveLength(1);
+    expect(results.filter((result) => result === null)).toHaveLength(1);
+
+    expect(claimed[0]?.dispatch).toMatchObject({
+      id: dispatchId,
+      analyticsEventId: eventId,
+      provider,
+      channel: "server",
+      status: "PROCESSING",
+      attemptCount: 1,
+    });
+
+    expect(claimed[0]?.event.id).toBe(eventId);
+
+    const persisted = await db.analyticsDispatch.findUniqueOrThrow({
+      where: {
+        id: dispatchId,
+      },
+    });
+
+    expect(persisted.status).toBe("PROCESSING");
+    expect(persisted.attemptCount).toBe(1);
+    expect(persisted.lastAttemptAt?.getTime()).toBe(attemptedAt.getTime());
+  });
+
+  it("honors retry backoff, reclaims when due and completes successfully", async () => {
+    const eventId = randomUUID();
+    cleanup.events.add(eventId);
+
+    await events.create({
+      id: eventId,
+      type: "PURCHASE",
+      occurredAt: new Date(),
+      journeyId: null,
+      productId: null,
+      offerId: null,
+      orderId: randomUUID(),
+      amountMinor: 12990,
+      currency: "BRL",
+      attributionState: "UNATTRIBUTED",
+      consentSnapshot: {
+        analytics: "GRANTED",
+        advertising: "GRANTED",
+        policyVersion: "p13-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: null,
+    });
+
+    const provider = `p13f-retry-${randomUUID().slice(0, 8)}`;
+
+    const dispatchId = randomUUID();
+    cleanup.dispatches.add(dispatchId);
+
+    await dispatches.create({
+      id: dispatchId,
+      analyticsEventId: eventId,
+      provider,
+      channel: "server",
+      status: "PENDING",
+      attemptCount: 0,
+      nextAttemptAt: null,
+      lastAttemptAt: null,
+      providerEventId: null,
+      lastErrorCode: null,
+      lastErrorClass: null,
+      completedAt: null,
+    });
+
+    const firstAttemptAt = new Date();
+
+    const firstClaim = await dispatches.claimDue({
+      provider,
+      channel: "server",
+      attemptedAt: firstAttemptAt,
+    });
+
+    expect(firstClaim?.dispatch.status).toBe("PROCESSING");
+    expect(firstClaim?.dispatch.attemptCount).toBe(1);
+
+    const nextAttemptAt = new Date(firstAttemptAt.getTime() + 60_000);
+
+    const retryable = await dispatches.markRetryable({
+      dispatchId,
+      nextAttemptAt,
+      errorCode: "PROVIDER_TEMPORARY_FAILURE",
+      errorClass: "RETRYABLE",
+    });
+
+    expect(retryable).toMatchObject({
+      id: dispatchId,
+      status: "RETRYABLE",
+      attemptCount: 1,
+      lastErrorCode: "PROVIDER_TEMPORARY_FAILURE",
+      lastErrorClass: "RETRYABLE",
+      completedAt: null,
+    });
+
+    expect(retryable.nextAttemptAt?.getTime()).toBe(nextAttemptAt.getTime());
+
+    await expect(
+      dispatches.claimDue({
+        provider,
+        channel: "server",
+        attemptedAt: new Date(nextAttemptAt.getTime() - 1),
+      }),
+    ).resolves.toBeNull();
+
+    const secondClaim = await dispatches.claimDue({
+      provider,
+      channel: "server",
+      attemptedAt: nextAttemptAt,
+    });
+
+    expect(secondClaim?.dispatch).toMatchObject({
+      id: dispatchId,
+      status: "PROCESSING",
+      attemptCount: 2,
+      lastErrorCode: null,
+      lastErrorClass: null,
+    });
+
+    const completedAt = new Date(nextAttemptAt.getTime() + 1_000);
+
+    const providerEventId = `provider-${randomUUID()}`;
+
+    const succeeded = await dispatches.markSucceeded({
+      dispatchId,
+      providerEventId,
+      completedAt,
+    });
+
+    expect(succeeded).toMatchObject({
+      id: dispatchId,
+      status: "SUCCEEDED",
+      attemptCount: 2,
+      providerEventId,
+      nextAttemptAt: null,
+      lastErrorCode: null,
+      lastErrorClass: null,
+    });
+
+    expect(succeeded.completedAt?.getTime()).toBe(completedAt.getTime());
+
+    await expect(
+      dispatches.claimDue({
+        provider,
+        channel: "server",
+        attemptedAt: new Date(completedAt.getTime() + 1_000),
+      }),
+    ).resolves.toBeNull();
+  });
+
+  it("recovers a stale PROCESSING dispatch without reclaiming an active worker", async () => {
+    const eventId = randomUUID();
+    cleanup.events.add(eventId);
+
+    await events.create({
+      id: eventId,
+      type: "VIEW_CONTENT",
+      occurredAt: new Date(),
+      journeyId: null,
+      productId: null,
+      offerId: null,
+      orderId: null,
+      amountMinor: null,
+      currency: null,
+      attributionState: "UNATTRIBUTED",
+      consentSnapshot: {
+        analytics: "GRANTED",
+        advertising: "GRANTED",
+        policyVersion: "p13-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: null,
+    });
+
+    const provider = `p13f-stale-${randomUUID().slice(0, 8)}`;
+
+    const dispatchId = randomUUID();
+
+    cleanup.dispatches.add(dispatchId);
+
+    await dispatches.create({
+      id: dispatchId,
+      analyticsEventId: eventId,
+      provider,
+      channel: "server",
+      status: "PENDING",
+      attemptCount: 0,
+      nextAttemptAt: null,
+      lastAttemptAt: null,
+      providerEventId: null,
+      lastErrorCode: null,
+      lastErrorClass: null,
+      completedAt: null,
+    });
+
+    const firstAttemptAt = new Date("2026-09-19T15:00:00.000Z");
+
+    const firstClaim = await dispatches.claimDue({
+      provider,
+      channel: "server",
+      attemptedAt: firstAttemptAt,
+    });
+
+    expect(firstClaim?.dispatch).toMatchObject({
+      id: dispatchId,
+      status: "PROCESSING",
+      attemptCount: 1,
+    });
+
+    const activeRecovery = await dispatches.recoverStaleProcessing({
+      provider,
+      channel: "server",
+      staleBefore: new Date(firstAttemptAt.getTime() - 1),
+      recoveredAt: new Date(firstAttemptAt.getTime() + 60_000),
+      limit: 10,
+    });
+
+    expect(activeRecovery).toBe(0);
+
+    const stillProcessing = await db.analyticsDispatch.findUniqueOrThrow({
+      where: {
+        id: dispatchId,
+      },
+    });
+
+    expect(stillProcessing.status).toBe("PROCESSING");
+
+    const recoveredAt = new Date(firstAttemptAt.getTime() + 10 * 60_000);
+
+    const recovered = await dispatches.recoverStaleProcessing({
+      provider,
+      channel: "server",
+      staleBefore: new Date(firstAttemptAt.getTime() + 5 * 60_000),
+      recoveredAt,
+      limit: 10,
+    });
+
+    expect(recovered).toBe(1);
+
+    const retryable = await db.analyticsDispatch.findUniqueOrThrow({
+      where: {
+        id: dispatchId,
+      },
+    });
+
+    expect(retryable).toMatchObject({
+      status: "RETRYABLE",
+      attemptCount: 1,
+      lastErrorCode: "WORKER_LEASE_EXPIRED",
+      lastErrorClass: "RETRYABLE",
+      completedAt: null,
+    });
+
+    expect(retryable.nextAttemptAt?.getTime()).toBe(recoveredAt.getTime());
+
+    const secondClaim = await dispatches.claimDue({
+      provider,
+      channel: "server",
+      attemptedAt: recoveredAt,
+    });
+
+    expect(secondClaim?.dispatch).toMatchObject({
+      id: dispatchId,
+      status: "PROCESSING",
+      attemptCount: 2,
+    });
+
+    const completedAt = new Date(recoveredAt.getTime() + 1_000);
+
+    const succeeded = await dispatches.markSucceeded({
+      dispatchId,
+      providerEventId: `provider-${randomUUID()}`,
+      completedAt,
+    });
+
+    expect(succeeded).toMatchObject({
+      id: dispatchId,
+      status: "SUCCEEDED",
+      attemptCount: 2,
+      lastErrorCode: null,
+      lastErrorClass: null,
+    });
+
+    expect(succeeded.completedAt?.getTime()).toBe(completedAt.getTime());
+  });
+  it("suppresses a PROCESSING dispatch terminally and prevents later delivery", async () => {
+    const eventId = randomUUID();
+    cleanup.events.add(eventId);
+
+    await events.create({
+      id: eventId,
+      type: "VIEW_CONTENT",
+      occurredAt: new Date(),
+      journeyId: null,
+      productId: null,
+      offerId: null,
+      orderId: null,
+      amountMinor: null,
+      currency: null,
+      attributionState: "UNATTRIBUTED",
+      consentSnapshot: {
+        analytics: "DENIED",
+        advertising: "DENIED",
+        policyVersion: "p13-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: null,
+    });
+
+    const provider = `p13f-suppress-${randomUUID().slice(0, 8)}`;
+
+    const dispatchId = randomUUID();
+    cleanup.dispatches.add(dispatchId);
+
+    await dispatches.create({
+      id: dispatchId,
+      analyticsEventId: eventId,
+      provider,
+      channel: "server",
+      status: "PENDING",
+      attemptCount: 0,
+      nextAttemptAt: null,
+      lastAttemptAt: null,
+      providerEventId: null,
+      lastErrorCode: null,
+      lastErrorClass: null,
+      completedAt: null,
+    });
+
+    const completedAt = new Date("2026-09-19T16:00:00.000Z");
+
+    await expect(
+      dispatches.markSuppressed({
+        dispatchId,
+        completedAt,
+      }),
+    ).rejects.toThrow("ANALYTICS_DISPATCH_TRANSITION_CONFLICT");
+
+    const claimed = await dispatches.claimDue({
+      provider,
+      channel: "server",
+      attemptedAt: completedAt,
+    });
+
+    expect(claimed?.dispatch).toMatchObject({
+      id: dispatchId,
+      status: "PROCESSING",
+      attemptCount: 1,
+    });
+
+    const suppressed = await dispatches.markSuppressed({
+      dispatchId,
+      completedAt,
+    });
+
+    expect(suppressed).toMatchObject({
+      id: dispatchId,
+      status: "SUPPRESSED",
+      attemptCount: 1,
+      nextAttemptAt: null,
+      lastErrorCode: "CONSENT_NOT_GRANTED",
+      lastErrorClass: "CONSENT_POLICY",
+    });
+
+    expect(suppressed.completedAt?.getTime()).toBe(completedAt.getTime());
+
+    await expect(
+      dispatches.claimDue({
+        provider,
+        channel: "server",
+        attemptedAt: new Date(completedAt.getTime() + 1_000),
+      }),
+    ).resolves.toBeNull();
+
+    await expect(
+      dispatches.markSucceeded({
+        dispatchId,
+        providerEventId: randomUUID(),
+        completedAt: new Date(completedAt.getTime() + 2_000),
+      }),
+    ).rejects.toThrow("ANALYTICS_DISPATCH_TRANSITION_CONFLICT");
+  });
+  it("persists a custom provider-policy suppression reason terminally for Meta CAPI", async () => {
+    const eventId = randomUUID();
+    const orderId = randomUUID();
+    const dispatchId = randomUUID();
+
+    cleanup.events.add(eventId);
+    cleanup.dispatches.add(dispatchId);
+
+    await events.create({
+      id: eventId,
+      type: "PURCHASE",
+      occurredAt: new Date("2026-09-19T19:20:00.000Z"),
+      journeyId: null,
+      productId: null,
+      offerId: null,
+      orderId,
+      amountMinor: 13990,
+      currency: "BRL",
+      attributionState: "ATTRIBUTED",
+      consentSnapshot: {
+        analytics: "GRANTED",
+        advertising: "GRANTED",
+        policyVersion: "p13-architecture-freeze-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: orderId,
+    });
+
+    await dispatches.create({
+      id: dispatchId,
+      analyticsEventId: eventId,
+      provider: "meta",
+      channel: "capi",
+      status: "PENDING",
+      attemptCount: 0,
+      nextAttemptAt: null,
+      lastAttemptAt: null,
+      providerEventId: null,
+      lastErrorCode: null,
+      lastErrorClass: null,
+      completedAt: null,
+    });
+
+    const attemptedAt = new Date("2026-09-19T19:21:00.000Z");
+
+    const claimed = await dispatches.claimDue({
+      provider: "meta",
+      channel: "capi",
+      attemptedAt,
+    });
+
+    expect(claimed?.dispatch).toMatchObject({
+      id: dispatchId,
+      analyticsEventId: eventId,
+      provider: "meta",
+      channel: "capi",
+      status: "PROCESSING",
+      attemptCount: 1,
+      nextAttemptAt: null,
+      lastErrorCode: null,
+      lastErrorClass: null,
+      completedAt: null,
+    });
+
+    expect(claimed?.event.id).toBe(eventId);
+
+    const completedAt = new Date("2026-09-19T19:21:01.000Z");
+
+    const suppressed = await dispatches.markSuppressed({
+      dispatchId,
+      completedAt,
+      errorCode: "MATCHING_DATA_POLICY_NOT_AUTHORIZED",
+      errorClass: "PRIVACY_POLICY",
+    });
+
+    expect(suppressed).toMatchObject({
+      id: dispatchId,
+      analyticsEventId: eventId,
+      provider: "meta",
+      channel: "capi",
+      status: "SUPPRESSED",
+      attemptCount: 1,
+      nextAttemptAt: null,
+      providerEventId: null,
+      lastErrorCode: "MATCHING_DATA_POLICY_NOT_AUTHORIZED",
+      lastErrorClass: "PRIVACY_POLICY",
+    });
+
+    expect(suppressed.completedAt?.getTime()).toBe(completedAt.getTime());
+
+    const persisted = await db.analyticsDispatch.findUniqueOrThrow({
+      where: {
+        id: dispatchId,
+      },
+    });
+
+    expect(persisted).toMatchObject({
+      id: dispatchId,
+      analyticsEventId: eventId,
+      provider: "meta",
+      channel: "capi",
+      status: "SUPPRESSED",
+      attemptCount: 1,
+      nextAttemptAt: null,
+      providerEventId: null,
+      lastErrorCode: "MATCHING_DATA_POLICY_NOT_AUTHORIZED",
+      lastErrorClass: "PRIVACY_POLICY",
+    });
+
+    expect(persisted.completedAt?.getTime()).toBe(completedAt.getTime());
+
+    await expect(
+      dispatches.claimDue({
+        provider: "meta",
+        channel: "capi",
+        attemptedAt: new Date(completedAt.getTime() + 60_000),
+      }),
+    ).resolves.toBeNull();
+
+    await expect(
+      dispatches.markSucceeded({
+        dispatchId,
+        providerEventId: `meta-${randomUUID()}`,
+        completedAt: new Date(completedAt.getTime() + 120_000),
+      }),
+    ).rejects.toThrow("ANALYTICS_DISPATCH_TRANSITION_CONFLICT");
+
+    const terminal = await db.analyticsDispatch.findUniqueOrThrow({
+      where: {
+        id: dispatchId,
+      },
+    });
+
+    expect(terminal).toMatchObject({
+      status: "SUPPRESSED",
+      attemptCount: 1,
+      nextAttemptAt: null,
+      lastErrorCode: "MATCHING_DATA_POLICY_NOT_AUTHORIZED",
+      lastErrorClass: "PRIVACY_POLICY",
+    });
+  });
+  it("requires PROCESSING before a terminal failure transition and prevents a second terminal transition", async () => {
+    const eventId = randomUUID();
+    cleanup.events.add(eventId);
+
+    await events.create({
+      id: eventId,
+      type: "VIEW_CONTENT",
+      occurredAt: new Date(),
+      journeyId: null,
+      productId: null,
+      offerId: null,
+      orderId: null,
+      amountMinor: null,
+      currency: null,
+      attributionState: "UNATTRIBUTED",
+      consentSnapshot: {
+        analytics: "GRANTED",
+        advertising: "GRANTED",
+        policyVersion: "p13-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: null,
+    });
+
+    const provider = `p13f-fail-${randomUUID().slice(0, 8)}`;
+
+    const dispatchId = randomUUID();
+    cleanup.dispatches.add(dispatchId);
+
+    await dispatches.create({
+      id: dispatchId,
+      analyticsEventId: eventId,
+      provider,
+      channel: "server",
+      status: "PENDING",
+      attemptCount: 0,
+      nextAttemptAt: null,
+      lastAttemptAt: null,
+      providerEventId: null,
+      lastErrorCode: null,
+      lastErrorClass: null,
+      completedAt: null,
+    });
+
+    const completedAt = new Date();
+
+    await expect(
+      dispatches.markFailed({
+        dispatchId,
+        errorCode: "PERMANENT_PROVIDER_FAILURE",
+        errorClass: "PERMANENT",
+        completedAt,
+      }),
+    ).rejects.toThrow("ANALYTICS_DISPATCH_TRANSITION_CONFLICT");
+
+    await expect(
+      dispatches.claimDue({
+        provider,
+        channel: "server",
+        attemptedAt: completedAt,
+      }),
+    ).resolves.not.toBeNull();
+
+    const failed = await dispatches.markFailed({
+      dispatchId,
+      errorCode: "PERMANENT_PROVIDER_FAILURE",
+      errorClass: "PERMANENT",
+      completedAt,
+    });
+
+    expect(failed).toMatchObject({
+      id: dispatchId,
+      status: "FAILED",
+      attemptCount: 1,
+      lastErrorCode: "PERMANENT_PROVIDER_FAILURE",
+      lastErrorClass: "PERMANENT",
+      nextAttemptAt: null,
+    });
+
+    expect(failed.completedAt?.getTime()).toBe(completedAt.getTime());
+
+    await expect(
+      dispatches.markSucceeded({
+        dispatchId,
+        providerEventId: randomUUID(),
+        completedAt: new Date(completedAt.getTime() + 1_000),
+      }),
+    ).rejects.toThrow("ANALYTICS_DISPATCH_TRANSITION_CONFLICT");
+  });
   it("rejects an AnalyticsDispatch for an unknown AnalyticsEvent", async () => {
     const dispatchId = randomUUID();
 
