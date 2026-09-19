@@ -14,6 +14,7 @@ export const ADMIN_PERMISSIONS = [
   "delivery.read",
   "delivery.recover",
   "audit.read",
+  "analytics.read",
   "security.self",
 ] as const;
 
@@ -34,6 +35,7 @@ const ADMIN = [
   "catalog.read",
   "catalog.write",
   "audit.read",
+  "analytics.read",
 ] as const satisfies readonly AdminPermission[];
 
 export const ADMIN_ROLE_PERMISSIONS: Readonly<Record<AdminRole, ReadonlySet<AdminPermission>>> =
