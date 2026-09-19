@@ -3,7 +3,8 @@
 **Project:** L'Essenc Digital
 **Phase:** P13-E — Canonical Purchase & Financial Reconciliation
 **Date:** 2026-09-19
-**Status:** COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION
+**Git closeout:** 2026-09-19
+**Status:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 **Branch:** `phase/p13-e-canonical-purchase-reconciliation`
 **Starting baseline:** `90b49e755e0d3afe2fc8aa6f9ab816f7a3689766`
 **Deploy:** NOT PERFORMED
@@ -170,13 +171,15 @@ P13-E does not:
 
 ## 9. Git and progression state
 
-At this implementation gate:
+The implementation gate above preceded the authorized Git lifecycle. The durable closeout is:
 
-- implementation commit: NOT YET CREATED;
-- push: NOT YET PERFORMED;
-- PR: NOT YET CREATED;
-- merge: NOT YET PERFORMED;
-- checkpoint: NOT YET CREATED;
+- implementation commit: `61165d7a86007cfc3cdf6e363f28c922b2b555b0`;
+- implementation push: COMPLETE;
+- PR #28: MERGED;
+- canonical implementation merge: `e3481c684bde052bc699e434f045be48fd404085`;
+- checkpoint: `checkpoint/p13-e-canonical-purchase-reconciliation-complete`;
+- checkpoint target: `e3481c684bde052bc699e434f045be48fd404085`;
+- implementation branch local/remote cleanup: COMPLETE;
 - deploy: NOT PERFORMED.
 
-P13-E is technically complete and may proceed through its authorized Git lifecycle. P13-F remains the next execution block after P13-E integration and checkpointing.
+P13-E is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-F is the next execution block.
