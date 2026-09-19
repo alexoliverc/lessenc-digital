@@ -21,6 +21,8 @@ describe("administrative page gate", () => {
     expect(adminPageDecision(base, "order.read")).toBe("ALLOWED");
     expect(adminPageDecision(base, "catalog.read")).toBe("FORBIDDEN");
     expect(adminPageDecision(base, "audit.read")).toBe("FORBIDDEN");
+    expect(adminPageDecision(base, "analytics.read")).toBe("FORBIDDEN");
+    expect(adminPageDecision({ ...base, role: "ADMIN" }, "analytics.read")).toBe("ALLOWED");
     expect(adminPageDecision({ ...base, role: "ADMIN" }, "admin.role.manage")).toBe("FORBIDDEN");
   });
 });

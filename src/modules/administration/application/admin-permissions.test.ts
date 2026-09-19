@@ -21,7 +21,13 @@ describe("server-owned administrative permissions", () => {
   });
 
   it("allows ADMIN operations without role management or financial fabrication", () => {
-    for (const permission of ["catalog.read", "catalog.write", "audit.read", "delivery.recover"]) {
+    for (const permission of [
+      "catalog.read",
+      "catalog.write",
+      "audit.read",
+      "analytics.read",
+      "delivery.recover",
+    ]) {
       expect(hasAdminPermission("ADMIN", permission)).toBe(true);
     }
     for (const permission of ["admin.role.manage", "payment.approve", "entitlement.activate"]) {
@@ -33,7 +39,12 @@ describe("server-owned administrative permissions", () => {
     for (const permission of ["order.read", "payment.read", "delivery.recover", "security.self"]) {
       expect(hasAdminPermission("SUPPORT", permission)).toBe(true);
     }
-    for (const permission of ["catalog.write", "admin.identity.manage", "admin.role.manage"]) {
+    for (const permission of [
+      "catalog.write",
+      "analytics.read",
+      "admin.identity.manage",
+      "admin.role.manage",
+    ]) {
       expect(hasAdminPermission("SUPPORT", permission)).toBe(false);
     }
   });

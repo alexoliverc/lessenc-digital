@@ -12,6 +12,7 @@ export const ADMIN_NAVIGATION = [
   ["Entitlements", "/admin/entitlements", "entitlement.read"],
   ["Entregas", "/admin/deliveries", "delivery.read"],
   ["Auditoria", "/admin/audit", "audit.read"],
+  ["Analytics", "/admin/analytics", "analytics.read"],
   ["Conta e segurança", "/admin/account", "security.self"],
 ] as const;
 
