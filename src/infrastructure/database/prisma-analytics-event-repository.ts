@@ -1,6 +1,7 @@
-import type { PrismaClient } from "../../generated/prisma/client";
+import { Prisma, type PrismaClient } from "../../generated/prisma/client";
 import type {
   AnalyticsConsentSnapshot,
+  AnalyticsEventCreateResult,
   AnalyticsEventRecord,
   AnalyticsEventRepository,
   CreateAnalyticsEvent,
@@ -66,6 +67,58 @@ function toRecord(
   });
 }
 
+function isUniqueConstraintError(error: unknown): error is Prisma.PrismaClientKnownRequestError {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+}
+
+function sameConsentSnapshot(
+  left: AnalyticsConsentSnapshot,
+  right: AnalyticsConsentSnapshot,
+): boolean {
+  const leftKeys = Object.keys(left).sort();
+  const rightKeys = Object.keys(right).sort();
+
+  if (leftKeys.length !== rightKeys.length) {
+    return false;
+  }
+
+  for (let index = 0; index < leftKeys.length; index += 1) {
+    const leftKey = leftKeys[index];
+    const rightKey = rightKeys[index];
+
+    if (leftKey === undefined || rightKey === undefined || leftKey !== rightKey) {
+      return false;
+    }
+
+    if (left[leftKey] !== right[rightKey]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function isCompatibleExistingEvent(
+  existing: AnalyticsEventRecord,
+  input: CreateAnalyticsEvent,
+): boolean {
+  return (
+    existing.id === input.id &&
+    existing.type === input.type &&
+    existing.occurredAt.getTime() === input.occurredAt.getTime() &&
+    existing.journeyId === input.journeyId &&
+    existing.productId === input.productId &&
+    existing.offerId === input.offerId &&
+    existing.orderId === input.orderId &&
+    existing.amountMinor === input.amountMinor &&
+    existing.currency === input.currency &&
+    existing.attributionState === input.attributionState &&
+    sameConsentSnapshot(existing.consentSnapshot, input.consentSnapshot) &&
+    existing.schemaVersion === input.schemaVersion &&
+    existing.purchaseOrderKey === input.purchaseOrderKey
+  );
+}
+
 export class PrismaAnalyticsEventRepository implements AnalyticsEventRepository {
   constructor(private readonly db: PrismaClient) {}
 
@@ -91,6 +144,44 @@ export class PrismaAnalyticsEventRepository implements AnalyticsEventRepository 
     });
 
     return toRecord(row);
+  }
+
+  async createIdempotent(input: CreateAnalyticsEvent): Promise<AnalyticsEventCreateResult> {
+    try {
+      const event = await this.create(input);
+
+      return Object.freeze({
+        state: "CREATED" as const,
+        event,
+      });
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) {
+        throw error;
+      }
+
+      /*
+       * P13-D technical deduplication is based on the canonical
+       * AnalyticsEvent identity supplied by the producer.
+       *
+       * A different unique-key conflict, including the future
+       * PURCHASE order key, is not silently converted into a
+       * technical replay.
+       */
+      const existing = await this.findById(input.id);
+
+      if (existing === null) {
+        throw error;
+      }
+
+      if (!isCompatibleExistingEvent(existing, input)) {
+        throw new Error("ANALYTICS_EVENT_ID_CONFLICT", { cause: error });
+      }
+
+      return Object.freeze({
+        state: "EXISTING" as const,
+        event: existing,
+      });
+    }
   }
 
   async findById(eventId: string): Promise<AnalyticsEventRecord | null> {

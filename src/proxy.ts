@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { VIEW_CONTENT_EVENT_REQUEST_HEADER } from "./modules/analytics/application/measurement-http-boundary";
 import {
   ACQUISITION_JOURNEY_COOKIE_NAME,
   ACQUISITION_JOURNEY_REQUEST_HEADER,
@@ -29,6 +30,8 @@ export function proxy(request: NextRequest) {
   requestHeaders.set(ACQUISITION_JOURNEY_REQUEST_HEADER, resolved.journeyId);
 
   requestHeaders.set(ACQUISITION_OBSERVED_AT_REQUEST_HEADER, observedAt.toISOString());
+
+  requestHeaders.set(VIEW_CONTENT_EVENT_REQUEST_HEADER, randomUUID());
 
   const response = NextResponse.next({
     request: {

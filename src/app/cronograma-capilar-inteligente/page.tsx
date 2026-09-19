@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AnalyticsConsentBoundary } from "@/components/analytics/analytics-consent-boundary";
 import { Container, Grid, Section, Stack } from "@/components/layout/layout";
 import { LinkAction } from "@/components/ui/button";
 import { StatePanel } from "@/components/ui/feedback";
@@ -8,8 +9,9 @@ import { Surface } from "@/components/ui/surface";
 import type { PublicSalesExperience } from "@/modules/sales/application/public-sales-experience";
 
 import { capturePublicSalesAcquisition } from "./acquisition.server";
-import { resolvePublicSalesExperience } from "./public-sales.server";
+import { resolvePublicSalesResolution } from "./public-sales.server";
 import styles from "./page.module.css";
+import { schedulePublicSalesViewContent } from "./view-content.server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -101,13 +103,25 @@ export default async function CronogramaCapilarInteligentePage({
 }: CronogramaCapilarInteligentePageProps) {
   const resolvedSearchParams = await searchParams;
 
-  const [experience] = await Promise.all([
-    resolvePublicSalesExperience(),
+  const [sales, journey] = await Promise.all([
+    resolvePublicSalesResolution(),
     capturePublicSalesAcquisition(resolvedSearchParams),
   ]);
 
+  const { experience, measurement } = sales;
+
+  const browserMeasurement =
+    measurement === null
+      ? null
+      : await schedulePublicSalesViewContent({
+          journey,
+          measurement,
+        });
+
   return (
     <>
+      <AnalyticsConsentBoundary boundary={browserMeasurement} />
+
       <a href="#conteudo" className={styles.skipLink}>
         Pular para o conteúdo
       </a>

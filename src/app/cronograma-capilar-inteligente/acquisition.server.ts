@@ -17,10 +17,11 @@ import {
   toCanonicalUtmSearchParams,
 } from "@/modules/attribution/application/acquisition-http-boundary";
 import { CaptureAcquisitionJourney } from "@/modules/attribution/application/acquisition-journey";
+import type { AcquisitionJourneyRecord } from "@/modules/attribution/application/persistence";
 
 export async function capturePublicSalesAcquisition(
   searchParams: PublicAcquisitionSearchParams,
-): Promise<void> {
+): Promise<AcquisitionJourneyRecord | null> {
   const requestHeaders = await headers();
 
   const journeyId = normalizeAcquisitionJourneyId(
@@ -36,7 +37,7 @@ export async function capturePublicSalesAcquisition(
    * deliberately carry no acquisition boundary headers.
    */
   if (journeyId === null || observedAt === null) {
-    return;
+    return null;
   }
 
   try {
@@ -47,7 +48,7 @@ export async function capturePublicSalesAcquisition(
       randomUUID,
     );
 
-    await capture.execute({
+    const result = await capture.execute({
       journeyId,
       occurredAt: observedAt,
       searchParams: toCanonicalUtmSearchParams(searchParams),
@@ -55,6 +56,8 @@ export async function capturePublicSalesAcquisition(
       referrer: requestHeaders.get("referer"),
       canonicalAppUrl: serverEnv.APP_URL,
     });
+
+    return result.journey;
   } catch {
     /*
      * Attribution is operational telemetry and must never
@@ -62,5 +65,7 @@ export async function capturePublicSalesAcquisition(
      * No raw URL, referrer or customer data is logged.
      */
     console.error("P13_PUBLIC_SALES_ACQUISITION_CAPTURE_FAILED");
+
+    return null;
   }
 }

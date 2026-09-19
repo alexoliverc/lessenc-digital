@@ -412,6 +412,226 @@ describe("P13-B analytics persistence foundation on isolated MySQL", () => {
     expect(loaded?.id).toBe(eventId);
   });
 
+  it("creates a canonical AnalyticsEvent idempotently and replays it as EXISTING", async () => {
+    const eventId = randomUUID();
+    cleanup.events.add(eventId);
+
+    const occurredAt = new Date();
+
+    const input = {
+      id: eventId,
+      type: "VIEW_CONTENT" as const,
+      occurredAt,
+      journeyId: null,
+      productId: randomUUID(),
+      offerId: randomUUID(),
+      orderId: null,
+      amountMinor: 2990,
+      currency: "BRL",
+      attributionState: "UNATTRIBUTED",
+      consentSnapshot: {
+        analytics: "UNKNOWN",
+        advertising: "UNKNOWN",
+        policyVersion: "p13-architecture-freeze-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: null,
+    };
+
+    const created = await events.createIdempotent(input);
+
+    expect(created.state).toBe("CREATED");
+    expect(created.event).toMatchObject({
+      id: eventId,
+      type: "VIEW_CONTENT",
+      productId: input.productId,
+      offerId: input.offerId,
+      attributionState: "UNATTRIBUTED",
+      schemaVersion: 1,
+    });
+
+    const replay = await events.createIdempotent(input);
+
+    expect(replay.state).toBe("EXISTING");
+    expect(replay.event.id).toBe(eventId);
+
+    expect(
+      await db.analyticsEvent.count({
+        where: {
+          id: eventId,
+        },
+      }),
+    ).toBe(1);
+  });
+
+  it("serializes concurrent identical AnalyticsEvent creation into CREATED plus EXISTING", async () => {
+    const eventId = randomUUID();
+    cleanup.events.add(eventId);
+
+    const input = {
+      id: eventId,
+      type: "INITIATE_CHECKOUT" as const,
+      occurredAt: new Date(),
+      journeyId: null,
+      productId: randomUUID(),
+      offerId: randomUUID(),
+      orderId: null,
+      amountMinor: 2990,
+      currency: "BRL",
+      attributionState: "UNATTRIBUTED",
+      consentSnapshot: {
+        analytics: "UNKNOWN",
+        advertising: "UNKNOWN",
+        policyVersion: "p13-architecture-freeze-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: null,
+    };
+
+    const [first, second] = await Promise.all([
+      events.createIdempotent(input),
+      events.createIdempotent(input),
+    ]);
+
+    const states = [first.state, second.state].sort();
+
+    expect(states).toEqual(["CREATED", "EXISTING"]);
+
+    expect(
+      await db.analyticsEvent.count({
+        where: {
+          id: eventId,
+        },
+      }),
+    ).toBe(1);
+  });
+
+  it("rejects the same AnalyticsEvent id when the replay payload is incompatible", async () => {
+    const eventId = randomUUID();
+    cleanup.events.add(eventId);
+
+    const original = {
+      id: eventId,
+      type: "VIEW_CONTENT" as const,
+      occurredAt: new Date(),
+      journeyId: null,
+      productId: randomUUID(),
+      offerId: randomUUID(),
+      orderId: null,
+      amountMinor: 2990,
+      currency: "BRL",
+      attributionState: "UNATTRIBUTED",
+      consentSnapshot: {
+        analytics: "UNKNOWN",
+        advertising: "UNKNOWN",
+        policyVersion: "p13-architecture-freeze-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: null,
+    };
+
+    await expect(events.createIdempotent(original)).resolves.toMatchObject({
+      state: "CREATED",
+    });
+
+    let captured: unknown;
+
+    try {
+      await events.createIdempotent({
+        ...original,
+        amountMinor: 3990,
+      });
+    } catch (error) {
+      captured = error;
+    }
+
+    expect(captured).toBeInstanceOf(Error);
+    expect((captured as Error).message).toBe("ANALYTICS_EVENT_ID_CONFLICT");
+
+    const cause = (captured as Error & { cause?: unknown }).cause;
+
+    expect(cause).toMatchObject({
+      code: "P2002",
+    });
+
+    const persisted = await events.findById(eventId);
+
+    expect(persisted).toMatchObject({
+      id: eventId,
+      amountMinor: 2990,
+    });
+
+    expect(
+      await db.analyticsEvent.count({
+        where: {
+          id: eventId,
+        },
+      }),
+    ).toBe(1);
+  });
+
+  it("does not misclassify a different unique-key conflict as an event-id replay", async () => {
+    const orderKey = randomUUID();
+
+    const firstId = randomUUID();
+    const secondId = randomUUID();
+
+    cleanup.events.add(firstId);
+    cleanup.events.add(secondId);
+
+    await events.createIdempotent({
+      id: firstId,
+      type: "PURCHASE",
+      occurredAt: new Date(),
+      journeyId: null,
+      productId: null,
+      offerId: null,
+      orderId: orderKey,
+      amountMinor: 12990,
+      currency: "BRL",
+      attributionState: "ATTRIBUTED",
+      consentSnapshot: {
+        analytics: "GRANTED",
+        advertising: "DENIED",
+        policyVersion: "p13-r2",
+      },
+      schemaVersion: 1,
+      purchaseOrderKey: orderKey,
+    });
+
+    await expect(
+      events.createIdempotent({
+        id: secondId,
+        type: "PURCHASE",
+        occurredAt: new Date(),
+        journeyId: null,
+        productId: null,
+        offerId: null,
+        orderId: orderKey,
+        amountMinor: 12990,
+        currency: "BRL",
+        attributionState: "ATTRIBUTED",
+        consentSnapshot: {
+          analytics: "GRANTED",
+          advertising: "DENIED",
+          policyVersion: "p13-r2",
+        },
+        schemaVersion: 1,
+        purchaseOrderKey: orderKey,
+      }),
+    ).rejects.toHaveProperty("code", "P2002");
+
+    expect(await events.findById(secondId)).toBeNull();
+
+    expect(
+      await db.analyticsEvent.count({
+        where: {
+          purchaseOrderKey: orderKey,
+        },
+      }),
+    ).toBe(1);
+  });
+
   it("enforces one dispatch per event, provider and channel", async () => {
     const eventId = randomUUID();
     cleanup.events.add(eventId);
@@ -509,5 +729,65 @@ describe("P13-B analytics persistence foundation on isolated MySQL", () => {
         completedAt: null,
       }),
     ).rejects.toHaveProperty("code", "P2003");
+  });
+
+  it("persists explicit consent, supports withdrawal and rejects an expired Journey", async () => {
+    const journeyId = randomUUID();
+    const grantedAt = new Date(Date.now() + 60_000);
+    const expiresAt = new Date(grantedAt.getTime() + 24 * 60 * 60 * 1_000);
+    cleanup.journeys.add(journeyId);
+
+    await journeys.createJourney({
+      id: journeyId,
+      expiresAt,
+      analyticsConsentState: "UNKNOWN",
+      advertisingConsentState: "UNKNOWN",
+      policyVersion: "p13-architecture-freeze-r2",
+    });
+
+    await expect(
+      journeys.updateConsent({
+        journeyId,
+        analyticsConsentState: "GRANTED",
+        advertisingConsentState: "GRANTED",
+        policyVersion: "p13-architecture-freeze-r2",
+        observedAt: grantedAt,
+      }),
+    ).resolves.toMatchObject({
+      id: journeyId,
+      analyticsConsentState: "GRANTED",
+      advertisingConsentState: "GRANTED",
+      lastSeenAt: grantedAt,
+    });
+
+    const withdrawn = await journeys.updateConsent({
+      journeyId,
+      analyticsConsentState: "DENIED",
+      advertisingConsentState: "DENIED",
+      policyVersion: "p13-architecture-freeze-r2",
+      observedAt: new Date(grantedAt.getTime() - 1_000),
+    });
+
+    expect(withdrawn).toMatchObject({
+      analyticsConsentState: "DENIED",
+      advertisingConsentState: "DENIED",
+      lastSeenAt: grantedAt,
+    });
+
+    await expect(
+      journeys.updateConsent({
+        journeyId,
+        analyticsConsentState: "GRANTED",
+        advertisingConsentState: "DENIED",
+        policyVersion: "p13-architecture-freeze-r2",
+        observedAt: expiresAt,
+      }),
+    ).resolves.toBeNull();
+
+    await expect(journeys.findJourney(journeyId)).resolves.toMatchObject({
+      analyticsConsentState: "DENIED",
+      advertisingConsentState: "DENIED",
+      lastSeenAt: grantedAt,
+    });
   });
 });

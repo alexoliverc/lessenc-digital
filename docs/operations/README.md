@@ -51,3 +51,9 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
 ## P12 final gate
 
 - [P12 Final Gate](./p12-final-gate.md) — canonical P12-A through P12-H closeout and durable integration record, including isolated administrative identity, mandatory MFA, session policy, RBAC, backoffice boundaries, administrative audit, regression evidence, safe delivery-recovery defer, implementation PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`, and documentation-closeout PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`.
+
+## P13 measurement gates
+
+- [P13-B Final Gate](./p13-b-final-gate.md) — provider-neutral attribution and analytics persistence foundation.
+- [P13-C Final Gate](./p13-c-final-gate.md) — AcquisitionJourney, First/Last Touch and immutable OrderAttribution.
+- [P13-D Final Gate](./p13-d-final-gate.md) — canonical VIEW_CONTENT and INITIATE_CHECKOUT producers, runtime consent, browser-safe projection and exact HTTP + MySQL temporal proof.
