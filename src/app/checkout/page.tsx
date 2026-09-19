@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AnalyticsConsentBoundary } from "@/components/analytics/analytics-consent-boundary";
 import { Container, Section, Stack } from "@/components/layout/layout";
 import { LinkAction } from "@/components/ui/button";
 import { StatePanel } from "@/components/ui/feedback";
 
 import { CheckoutForm } from "./checkout-form";
-import { resolveCheckoutPageExperience } from "./checkout.server";
+import { resolveCheckoutPageResolution } from "./checkout.server";
+import { scheduleCheckoutInitiation } from "./initiate-checkout.server";
 import styles from "./page.module.css";
 
 export const runtime = "nodejs";
@@ -23,10 +25,17 @@ export const metadata: Metadata = {
 };
 
 export default async function CheckoutPage() {
-  const experience = await resolveCheckoutPageExperience();
+  const resolved = await resolveCheckoutPageResolution();
+
+  const { experience, measurement } = resolved;
+
+  const browserMeasurement =
+    measurement === null ? null : await scheduleCheckoutInitiation(measurement);
 
   return (
     <>
+      <AnalyticsConsentBoundary boundary={browserMeasurement} />
+
       <a href="#checkout" className={styles.skipLink}>
         Pular para o checkout
       </a>

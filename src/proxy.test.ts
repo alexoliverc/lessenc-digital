@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 
+import { VIEW_CONTENT_EVENT_REQUEST_HEADER } from "./modules/analytics/application/measurement-http-boundary";
 import {
   ACQUISITION_JOURNEY_COOKIE_NAME,
   ACQUISITION_JOURNEY_REQUEST_HEADER,
@@ -48,6 +49,32 @@ describe("P13-C Next.js acquisition proxy", () => {
     expect(setCookie).toContain("Secure");
 
     expect(setCookie).toContain("Path=/");
+  });
+
+  it("issues a fresh private VIEW_CONTENT event identity for each eligible request", () => {
+    const first = proxy(new NextRequest("https://lessenc.example/cronograma-capilar-inteligente"));
+
+    const second = proxy(new NextRequest("https://lessenc.example/cronograma-capilar-inteligente"));
+
+    const middlewareHeader = `x-middleware-request-${VIEW_CONTENT_EVENT_REQUEST_HEADER}`;
+
+    const firstEventId = first.headers.get(middlewareHeader);
+
+    const secondEventId = second.headers.get(middlewareHeader);
+
+    expect(first.headers.has(VIEW_CONTENT_EVENT_REQUEST_HEADER)).toBe(false);
+
+    expect(second.headers.has(VIEW_CONTENT_EVENT_REQUEST_HEADER)).toBe(false);
+
+    expect(firstEventId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+
+    expect(secondEventId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+
+    expect(secondEventId).not.toBe(firstEventId);
+
+    const firstOverrides = first.headers.get("x-middleware-override-headers") ?? "";
+
+    expect(firstOverrides).toContain(VIEW_CONTENT_EVENT_REQUEST_HEADER);
   });
 
   it("does not refresh an already valid journey cookie", () => {

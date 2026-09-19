@@ -4,7 +4,7 @@
 
 **Block:** P13-A — Architecture, Privacy & Measurement Contract
 **Status:** OWNER APPROVED / ARCHITECTURE FROZEN R2 / DOCUMENTATION COMPLETE
-**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C IMPLEMENTATION COMPLETE / P13-D–P13-H NOT STARTED
+**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION / P13-E–P13-H NOT STARTED
 
 ## 1. Core Principle
 
@@ -822,4 +822,35 @@ P13-C = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 
 The checkpoint remains fixed at the implementation merge and must not be moved by later documentation-only work.
 
-P13-D through P13-H remain NOT STARTED.
+At the P13-C checkpoint, P13-D through P13-H remained NOT STARTED.
+
+<!-- P13-D-IMPLEMENTATION-STATUS -->
+## 43. Implementation Status — P13-D
+
+This section records implementation state only. It does not amend, supersede or reopen Architecture Freeze R2.
+
+P13-D — Internal Measurement Producers & Consent Boundary:
+
+**COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION**
+
+Implemented behavior now includes:
+
+- provider-neutral `VIEW_CONTENT` and `INITIATE_CHECKOUT` production;
+- authoritative Product and Offer context;
+- canonical schema version, timestamp and event identity;
+- Journey association, attribution state and consent snapshot;
+- idempotent event persistence without masking other unique-key conflicts;
+- Proxy prefetch exclusion;
+- post-response failure isolation from public sales and checkout;
+- explicit persisted analytics and advertising consent;
+- same-origin consent mutation and withdrawal;
+- browser-safe provider-neutral dataLayer projection;
+- exact checkout token `issuedAt` and analytics `occurredAt` equality.
+
+Canonical validation record:
+
+- `docs/operations/p13-d-final-gate.md`
+
+Git integration, checkpointing and deployment have not yet been performed.
+
+P13-E through P13-H remain NOT STARTED.

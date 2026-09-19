@@ -83,6 +83,18 @@ export interface AttributionJourneyCaptureRepository extends AttributionJourneyR
   ): Promise<RecordAttributionObservationResult>;
 }
 
+export type UpdateAcquisitionConsent = Readonly<{
+  journeyId: string;
+  analyticsConsentState: Exclude<AnalyticsConsentState, "UNKNOWN">;
+  advertisingConsentState: Exclude<AnalyticsConsentState, "UNKNOWN">;
+  policyVersion: string;
+  observedAt: Date;
+}>;
+
+export interface AttributionConsentRepository {
+  updateConsent(input: UpdateAcquisitionConsent): Promise<AcquisitionJourneyRecord | null>;
+}
+
 export type OrderAttributionRecord = Readonly<{
   id: string;
   orderId: string;
@@ -160,8 +172,20 @@ export type CreateAnalyticsEvent = Readonly<{
   purchaseOrderKey: string | null;
 }>;
 
+export type AnalyticsEventCreateResult =
+  | Readonly<{
+      state: "CREATED";
+      event: AnalyticsEventRecord;
+    }>
+  | Readonly<{
+      state: "EXISTING";
+      event: AnalyticsEventRecord;
+    }>;
+
 export interface AnalyticsEventRepository {
   create(input: CreateAnalyticsEvent): Promise<AnalyticsEventRecord>;
+
+  createIdempotent(input: CreateAnalyticsEvent): Promise<AnalyticsEventCreateResult>;
 
   findById(eventId: string): Promise<AnalyticsEventRecord | null>;
 

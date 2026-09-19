@@ -10,6 +10,15 @@ import {
   type PublicSalesExperience,
 } from "@/modules/sales/application/public-sales-experience";
 
+export type CheckoutInitiationMeasurementContext = Readonly<{
+  eventId: string;
+  occurredAt: Date;
+  productId: string;
+  offerId: string;
+  amountMinor: number;
+  currency: "BRL";
+}>;
+
 export type CheckoutPageExperience =
   | Readonly<{
       state: "AVAILABLE";
@@ -34,6 +43,11 @@ export type CheckoutPageExperience =
       description: string;
     }>;
 
+export type CheckoutPageResolution = Readonly<{
+  experience: CheckoutPageExperience;
+  measurement: CheckoutInitiationMeasurementContext | null;
+}>;
+
 function failedCheckoutExperience(): CheckoutPageExperience {
   return Object.freeze({
     state: "FAILED",
@@ -52,7 +66,14 @@ function copyNonAvailableExperience(
   });
 }
 
-export async function resolveCheckoutPageExperience(): Promise<CheckoutPageExperience> {
+function failedCheckoutResolution(): CheckoutPageResolution {
+  return Object.freeze({
+    experience: failedCheckoutExperience(),
+    measurement: null,
+  });
+}
+
+export async function resolveCheckoutPageResolution(): Promise<CheckoutPageResolution> {
   try {
     const commercial = getP08CommercialEnv();
     const submission = getP09SubmissionEnv();
@@ -68,38 +89,70 @@ export async function resolveCheckoutPageExperience(): Promise<CheckoutPageExper
 
     const publicExperience = createPublicSalesExperience(resolved);
 
+    if (!resolved.ok) {
+      if (publicExperience.state === "AVAILABLE") {
+        return failedCheckoutResolution();
+      }
+
+      return Object.freeze({
+        experience: copyNonAvailableExperience(publicExperience),
+        measurement: null,
+      });
+    }
+
     if (publicExperience.state !== "AVAILABLE") {
-      return copyNonAvailableExperience(publicExperience);
+      return failedCheckoutResolution();
     }
 
     const tokenService = new HmacCheckoutSubmissionTokenService(submission.P09_SUBMISSION_SECRET);
 
+    const occurredAt = new Date();
+    const submissionId = randomUUID();
+    const eventId = randomUUID();
+
     const token = tokenService.issue({
-      submissionId: randomUUID(),
-      issuedAt: new Date().toISOString(),
+      submissionId,
+      issuedAt: occurredAt.toISOString(),
       presentedAmountMinor: publicExperience.offer.amountMinor,
       presentedCurrency: publicExperience.offer.currency,
     });
 
     if (!token.ok) {
       console.error("P09_CHECKOUT_TOKEN_ISSUE_FAILED");
-      return failedCheckoutExperience();
+      return failedCheckoutResolution();
     }
 
     return Object.freeze({
-      state: "AVAILABLE",
-      product: Object.freeze({
-        name: publicExperience.product.name,
-        description: publicExperience.product.description,
+      experience: Object.freeze({
+        state: "AVAILABLE",
+        product: Object.freeze({
+          name: publicExperience.product.name,
+          description: publicExperience.product.description,
+        }),
+        offer: Object.freeze({
+          formattedPrice: publicExperience.offer.formattedPrice,
+          purchaseLabel: publicExperience.offer.purchaseLabel,
+        }),
+        submissionToken: token.token,
       }),
-      offer: Object.freeze({
-        formattedPrice: publicExperience.offer.formattedPrice,
-        purchaseLabel: publicExperience.offer.purchaseLabel,
+      measurement: Object.freeze({
+        eventId,
+        occurredAt: new Date(occurredAt.getTime()),
+        productId: resolved.value.product.id,
+        offerId: resolved.value.offer.id,
+        amountMinor: resolved.value.offer.price.amountMinor,
+        currency: resolved.value.offer.price.currency,
       }),
-      submissionToken: token.token,
     });
   } catch {
     console.error("P09_CHECKOUT_PAGE_RESOLUTION_FAILED");
-    return failedCheckoutExperience();
+
+    return failedCheckoutResolution();
   }
+}
+
+export async function resolveCheckoutPageExperience(): Promise<CheckoutPageExperience> {
+  const resolved = await resolveCheckoutPageResolution();
+
+  return resolved.experience;
 }

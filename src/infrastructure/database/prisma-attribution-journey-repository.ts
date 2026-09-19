@@ -1,12 +1,14 @@
 import { Prisma, type PrismaClient } from "../../generated/prisma/client";
 import type {
   AcquisitionJourneyRecord,
+  AttributionConsentRepository,
   AttributionJourneyCaptureRepository,
   AttributionTouchRecord,
   CreateAcquisitionJourney,
   CreateAttributionTouch,
   RecordAttributionObservation,
   RecordAttributionObservationResult,
+  UpdateAcquisitionConsent,
 } from "../../modules/attribution/application/persistence";
 
 function isUniqueConstraintError(error: unknown): error is Prisma.PrismaClientKnownRequestError {
@@ -85,7 +87,9 @@ function touchCreateData(input: CreateAttributionTouch) {
   };
 }
 
-export class PrismaAttributionJourneyRepository implements AttributionJourneyCaptureRepository {
+export class PrismaAttributionJourneyRepository
+  implements AttributionJourneyCaptureRepository, AttributionConsentRepository
+{
   constructor(private readonly db: PrismaClient) {}
 
   async createJourney(input: CreateAcquisitionJourney): Promise<AcquisitionJourneyRecord> {
@@ -231,6 +235,52 @@ export class PrismaAttributionJourneyRepository implements AttributionJourneyCap
         journey: toJourneyRecord(journeyRow),
         touch: touchRow === null ? null : toTouchRecord(touchRow),
       });
+    });
+  }
+
+  async updateConsent(input: UpdateAcquisitionConsent): Promise<AcquisitionJourneyRecord | null> {
+    return this.db.$transaction(async (transaction) => {
+      const lockedRows = await transaction.$queryRaw<Array<{ id: string }>>(
+        Prisma.sql`
+          SELECT id
+          FROM acquisition_journeys
+          WHERE id = ${input.journeyId}
+          FOR UPDATE
+        `,
+      );
+
+      if (lockedRows.length !== 1) {
+        return null;
+      }
+
+      const current = await transaction.acquisitionJourney.findUnique({
+        where: {
+          id: input.journeyId,
+        },
+      });
+
+      if (!current || current.expiresAt.getTime() <= input.observedAt.getTime()) {
+        return null;
+      }
+
+      const lastSeenAt =
+        current.lastSeenAt.getTime() >= input.observedAt.getTime()
+          ? current.lastSeenAt
+          : input.observedAt;
+
+      const updated = await transaction.acquisitionJourney.update({
+        where: {
+          id: current.id,
+        },
+        data: {
+          analyticsConsentState: input.analyticsConsentState,
+          advertisingConsentState: input.advertisingConsentState,
+          policyVersion: input.policyVersion,
+          lastSeenAt,
+        },
+      });
+
+      return toJourneyRecord(updated);
     });
   }
 }
