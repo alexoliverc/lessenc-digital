@@ -36,3 +36,15 @@ No live external-provider receipt validation was performed; it requires provider
 ## Final state
 
 P13 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. The next canonical phase is P14 — Security Hardening, which is not started by this gate.
+
+## Git lifecycle
+
+- technical-gate commit: `3faa923d55b006d56f27b0f11abee273f946f9c1`;
+- technical-gate PR: #34 — MERGED;
+- canonical technical-gate merge: `2a094f1b62970bb84da8fc1199ddc4413a4164a6`;
+- permanent checkpoint: `checkpoint/p13-h-technical-gate-complete`;
+- checkpoint target: `2a094f1b62970bb84da8fc1199ddc4413a4164a6`;
+- technical-gate branch local/remote: removed;
+- deploy: NOT PERFORMED.
+
+This documentation closeout is separate from the checkpoint and must not retarget it.
