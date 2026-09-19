@@ -6,6 +6,7 @@ import { Container, Grid, Section, Stack } from "@/components/layout/layout";
 import { LinkAction } from "@/components/ui/button";
 import { StatePanel } from "@/components/ui/feedback";
 import { Surface } from "@/components/ui/surface";
+import { getP13GoogleTagEnv } from "@/lib/config/env";
 import type { PublicSalesExperience } from "@/modules/sales/application/public-sales-experience";
 
 import { capturePublicSalesAcquisition } from "./acquisition.server";
@@ -118,9 +119,11 @@ export default async function CronogramaCapilarInteligentePage({
           measurement,
         });
 
+  const { GTM_CONTAINER_ID: gtmContainerId } = getP13GoogleTagEnv();
+
   return (
     <>
-      <AnalyticsConsentBoundary boundary={browserMeasurement} />
+      <AnalyticsConsentBoundary boundary={browserMeasurement} gtmContainerId={gtmContainerId} />
 
       <a href="#conteudo" className={styles.skipLink}>
         Pular para o conteúdo

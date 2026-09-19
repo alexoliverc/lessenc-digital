@@ -5,6 +5,7 @@ import { AnalyticsConsentBoundary } from "@/components/analytics/analytics-conse
 import { Container, Section, Stack } from "@/components/layout/layout";
 import { LinkAction } from "@/components/ui/button";
 import { StatePanel } from "@/components/ui/feedback";
+import { getP13GoogleTagEnv } from "@/lib/config/env";
 
 import { CheckoutForm } from "./checkout-form";
 import { resolveCheckoutPageResolution } from "./checkout.server";
@@ -32,9 +33,11 @@ export default async function CheckoutPage() {
   const browserMeasurement =
     measurement === null ? null : await scheduleCheckoutInitiation(measurement);
 
+  const { GTM_CONTAINER_ID: gtmContainerId } = getP13GoogleTagEnv();
+
   return (
     <>
-      <AnalyticsConsentBoundary boundary={browserMeasurement} />
+      <AnalyticsConsentBoundary boundary={browserMeasurement} gtmContainerId={gtmContainerId} />
 
       <a href="#checkout" className={styles.skipLink}>
         Pular para o checkout

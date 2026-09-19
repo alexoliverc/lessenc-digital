@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { getDatabaseClient } from "@/infrastructure/database/client";
 import { PrismaPaymentRepository } from "@/infrastructure/database/prisma-payment-repository";
+import { getP13GoogleTagEnv } from "@/lib/config/env";
 
 import { PaymentChoice } from "./payment-choice";
 import { paymentSession } from "./payment.server";
@@ -62,6 +63,7 @@ export default async function PaymentPage() {
         initialState={available.state}
         amount={available.amount}
         publicKey={process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY ?? ""}
+        gtmContainerId={getP13GoogleTagEnv().GTM_CONTAINER_ID ?? null}
       />
       <p className={styles.note}>O pagamento só será confirmado após verificação no servidor.</p>
     </main>

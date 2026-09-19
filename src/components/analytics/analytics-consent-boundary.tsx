@@ -4,21 +4,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import type { BrowserMeasurementBoundary } from "@/modules/analytics/application/browser-measurement";
+import {
+  projectGa4BrowserEcommerce,
+  pushGa4EcommerceDataLayer,
+} from "@/modules/analytics/application/google-analytics-4";
 import type {
   AnalyticsConsentProjection,
   AnalyticsConsentSelection,
 } from "@/modules/analytics/application/consent";
+import {
+  createGoogleTagManagerBrowserEnvironment,
+  getGoogleTagDataLayer,
+} from "@/modules/analytics/application/google-tag-manager-browser";
+import { synchronizeGoogleTagManager } from "@/modules/analytics/application/google-tag-manager-runtime";
 
 import styles from "./analytics-consent-boundary.module.css";
 
-declare global {
-  interface Window {
-    dataLayer?: Array<Record<string, unknown>>;
-  }
-}
-
 type AnalyticsConsentBoundaryProps = Readonly<{
   boundary: BrowserMeasurementBoundary | null;
+  gtmContainerId: string | null;
 }>;
 
 function isConsentProjection(value: unknown): value is AnalyticsConsentProjection {
@@ -40,8 +44,7 @@ function isConsentProjection(value: unknown): value is AnalyticsConsentProjectio
 }
 
 function pushConsentProjection(consent: AnalyticsConsentProjection): void {
-  window.dataLayer = window.dataLayer ?? [];
-  window.dataLayer.push({
+  getGoogleTagDataLayer().push({
     event: "lessenc_consent_update",
     analyticsAllowed: consent.analytics === "GRANTED",
     advertisingAllowed: consent.advertising === "GRANTED",
@@ -57,25 +60,35 @@ function pushMeasurement(boundary: BrowserMeasurementBoundary): void {
   const storageKey = `lessenc_measurement:${boundary.measurement.eventId}`;
 
   try {
-    if (window.sessionStorage.getItem(storageKey) === "pushed") {
+    if (globalThis.sessionStorage.getItem(storageKey) === "pushed") {
       return;
     }
 
-    window.sessionStorage.setItem(storageKey, "pushed");
+    globalThis.sessionStorage.setItem(storageKey, "pushed");
   } catch {
     // Storage availability must not control measurement or Commerce.
   }
 
-  window.dataLayer = window.dataLayer ?? [];
-  window.dataLayer.push({
+  const dataLayer = getGoogleTagDataLayer();
+
+  dataLayer.push({
     ...boundary.measurement,
     analyticsAllowed: true,
     advertisingAllowed: boundary.consent.advertising === "GRANTED",
     consentPolicyVersion: boundary.consent.policyVersion,
   });
+
+  try {
+    pushGa4EcommerceDataLayer(dataLayer, projectGa4BrowserEcommerce(boundary.measurement));
+  } catch {
+    // Provider projection must not block canonical measurement or Commerce.
+  }
 }
 
-export function AnalyticsConsentBoundary({ boundary }: AnalyticsConsentBoundaryProps) {
+export function AnalyticsConsentBoundary({
+  boundary,
+  gtmContainerId,
+}: AnalyticsConsentBoundaryProps) {
   const [consent, setConsent] = useState<AnalyticsConsentProjection>(
     boundary?.consent ?? {
       analytics: "UNKNOWN",
@@ -122,6 +135,23 @@ export function AnalyticsConsentBoundary({ boundary }: AnalyticsConsentBoundaryP
   }, []);
 
   useEffect(() => {
+    try {
+      const environment = createGoogleTagManagerBrowserEnvironment();
+
+      const googleState = synchronizeGoogleTagManager({
+        containerId: gtmContainerId,
+        consent,
+        ...environment,
+        now: () => new Date(),
+      });
+
+      if (googleState.state === "BLOCKED_BY_CONSENT") {
+        return;
+      }
+    } catch {
+      // Google measurement must never control consent UI, measurement persistence or Commerce.
+    }
+
     const projectionKey = `${consent.analytics}:${consent.advertising}:${consent.policyVersion}`;
 
     if (lastProjectedConsent.current !== projectionKey) {
@@ -135,7 +165,7 @@ export function AnalyticsConsentBoundary({ boundary }: AnalyticsConsentBoundaryP
         consent,
       });
     }
-  }, [boundary, consent]);
+  }, [boundary, consent, gtmContainerId]);
 
   const updateConsent = useCallback(async (selection: AnalyticsConsentSelection) => {
     setPending(true);

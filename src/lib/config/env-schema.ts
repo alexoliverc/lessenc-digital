@@ -8,6 +8,16 @@ const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 
+const p13GoogleTagEnvSchema = z.object({
+  GTM_CONTAINER_ID: z.preprocess(
+    (value) => (typeof value === "string" && value.trim().length === 0 ? undefined : value),
+    z
+      .string()
+      .trim()
+      .regex(/^GTM-[A-Z0-9]+$/)
+      .optional(),
+  ),
+});
 const p08CommercialEnvSchema = z.object({
   P08_PRODUCT_ID: z.string().uuid(),
   P08_OFFER_ID: z.string().uuid(),
@@ -38,6 +48,9 @@ type ServerEnvInput = {
   NODE_ENV?: string;
 };
 
+type P13GoogleTagEnvInput = {
+  GTM_CONTAINER_ID?: string | undefined;
+};
 type P08CommercialEnvInput = {
   P08_PRODUCT_ID?: string | undefined;
   P08_OFFER_ID?: string | undefined;
@@ -69,6 +82,17 @@ export function parseServerEnv(input: ServerEnvInput) {
   return Object.freeze(parsed.data);
 }
 
+export function parseP13GoogleTagEnv(input: P13GoogleTagEnvInput) {
+  const parsed = p13GoogleTagEnvSchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(`Invalid P13 Google Tag configuration: ${z.prettifyError(parsed.error)}`);
+  }
+
+  return Object.freeze({
+    GTM_CONTAINER_ID: parsed.data.GTM_CONTAINER_ID ?? null,
+  });
+}
 export function parseP08CommercialEnv(input: P08CommercialEnvInput) {
   const parsed = p08CommercialEnvSchema.safeParse(input);
 

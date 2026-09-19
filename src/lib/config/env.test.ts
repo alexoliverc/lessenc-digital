@@ -8,6 +8,7 @@ import {
   parseP11BuyerSessionEnv,
   parseP12AdminAuthEnv,
   parseP11PrivateStorageEnv,
+  parseP13GoogleTagEnv,
   parseServerEnv,
 } from "./env-schema";
 
@@ -36,6 +37,51 @@ describe("parseServerEnv", () => {
   });
 });
 
+describe("parseP13GoogleTagEnv", () => {
+  it("accepts a valid GTM web container identifier", () => {
+    expect(
+      parseP13GoogleTagEnv({
+        GTM_CONTAINER_ID: "GTM-ABC1234",
+      }),
+    ).toEqual({
+      GTM_CONTAINER_ID: "GTM-ABC1234",
+    });
+  });
+
+  it("keeps Google Tag Manager disabled when configuration is absent or blank", () => {
+    expect(parseP13GoogleTagEnv({})).toEqual({
+      GTM_CONTAINER_ID: null,
+    });
+
+    expect(
+      parseP13GoogleTagEnv({
+        GTM_CONTAINER_ID: "   ",
+      }),
+    ).toEqual({
+      GTM_CONTAINER_ID: null,
+    });
+  });
+
+  it("rejects malformed or non-GTM container identifiers", () => {
+    expect(() =>
+      parseP13GoogleTagEnv({
+        GTM_CONTAINER_ID: "G-ABC123",
+      }),
+    ).toThrow("Invalid P13 Google Tag configuration");
+
+    expect(() =>
+      parseP13GoogleTagEnv({
+        GTM_CONTAINER_ID: "gtm-abc123",
+      }),
+    ).toThrow("Invalid P13 Google Tag configuration");
+
+    expect(() =>
+      parseP13GoogleTagEnv({
+        GTM_CONTAINER_ID: "https://www.googletagmanager.com",
+      }),
+    ).toThrow("Invalid P13 Google Tag configuration");
+  });
+});
 describe("parseP12AdminAuthEnv", () => {
   const SECRET = "p12-admin-auth-secret-32-bytes-minimum-value";
 
