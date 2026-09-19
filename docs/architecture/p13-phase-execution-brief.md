@@ -594,7 +594,7 @@ These operational capabilities are not implemented by P13 unless explicitly brou
 - P13-D: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 - P13-E: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 - P13-F: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
-- P13-G: NOT STARTED
+- P13-G: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 - P13-H: NOT STARTED
 - P13 runtime implementation: IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / P13-E COMPLETE / P13-F COMPLETE
 
@@ -640,6 +640,18 @@ Meta CAPI is technically complete but remains policy-blocked under `MATCHING_DAT
 
 The checkpoint remains fixed at the implementation merge.
 
-P13-G — Admin Analytics is the next execution block.
+P13-G — Admin Analytics is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED.
 
-P13-H — Technical Gate remains NOT STARTED.
+P13-H — Technical Gate is the next execution block and remains NOT STARTED.
+
+<!-- P13-G-GIT-LIFECYCLE-CLOSEOUT -->
+### P13-G implementation and Git lifecycle closeout
+
+- implementation commit: `9be89c8cc87c52e815d565239c7efe5e046a4579`;
+- PR #32: MERGED;
+- canonical implementation merge: `7da548d922046f1c90ee71e13012f3374527146b`;
+- checkpoint: `checkpoint/p13-g-admin-analytics-complete`;
+- checkpoint target: `7da548d922046f1c90ee71e13012f3374527146b`;
+- deploy: NOT PERFORMED.
+
+P13-G implements `/admin/analytics`, server-side `analytics.read`, bounded aggregate reporting, canonical Purchase revenue and immutable/temporal attribution dimensions. The checkpoint remains fixed at the implementation merge.
