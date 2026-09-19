@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P13
 
-**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E está COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION; P13-F–P13-H permanecem NOT STARTED.
+**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-F–P13-H permanecem NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -101,9 +101,9 @@ P13 está **IN PROGRESS**.
 
 P13-A — Architecture, Privacy & Measurement Contract está **COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED**.
 
-P13 runtime implementation está **IN PROGRESS**: P13-B está integrada e checkpointed; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E está COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION; P13-F–P13-H permanecem não iniciadas.
+P13 runtime implementation está **IN PROGRESS**: P13-B está integrada e checkpointed; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-F–P13-H permanecem não iniciadas.
 
-P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-C — Acquisition Journey & Order Attribution está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-D — Internal Measurement Producers & Consent Boundary está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-E — Canonical Purchase & Financial Reconciliation está **COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION**. P13-F é o próximo bloco após o gate Git da P13-E.
+P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-C — Acquisition Journey & Order Attribution está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-D — Internal Measurement Producers & Consent Boundary está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-E — Canonical Purchase & Financial Reconciliation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-F é o próximo bloco de execução.
 
 <!-- P13-B-CANONICAL-CLOSEOUT -->
 ### P13-B — Attribution Persistence Foundation
@@ -217,7 +217,7 @@ Canonical lifecycle da P13-D:
 <!-- P13-E-CANONICAL-CLOSEOUT -->
 ### P13-E — Canonical Purchase & Financial Reconciliation
 
-P13-E está **COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION**.
+P13-E está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 
 O [P13-E Final Gate](operations/p13-e-final-gate.md) registra:
 
@@ -232,6 +232,15 @@ O [P13-E Final Gate](operations/p13-e-final-gate.md) registra:
 - preservação do Outbox P10/P11.
 
 P13-F–P13-H permanecem NOT STARTED.
+
+Canonical lifecycle da P13-E:
+
+- implementation commit: `61165d7a86007cfc3cdf6e363f28c922b2b555b0`;
+- PR #28: **MERGED**;
+- implementation merge: `e3481c684bde052bc699e434f045be48fd404085`;
+- checkpoint: `checkpoint/p13-e-canonical-purchase-reconciliation-complete`;
+- checkpoint target: `e3481c684bde052bc699e434f045be48fd404085`;
+- deployment: não executado.
 
 ### Documentos canônicos
 

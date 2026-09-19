@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 — Analytics, Attribution & Growth Infrastructure is IN PROGRESS. P13-A — Architecture, Privacy & Measurement Contract is COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED. P13-B — Attribution Persistence Foundation is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-C — Acquisition Journey & Order Attribution is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-D — Internal Measurement Producers & Consent Boundary is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-E — Canonical Purchase & Financial Reconciliation is COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION. P13-F remains the next execution block after the P13-E Git gate. Production deployment remains outside the current P13 scope.
+**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 — Analytics, Attribution & Growth Infrastructure is IN PROGRESS. P13-A — Architecture, Privacy & Measurement Contract is COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED. P13-B — Attribution Persistence Foundation is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-C — Acquisition Journey & Order Attribution is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-D — Internal Measurement Producers & Consent Boundary is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-E — Canonical Purchase & Financial Reconciliation is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-F — Measurement & Advertising Adapters is the next execution block. Production deployment remains outside the current P13 scope.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -794,7 +794,7 @@ A completed sale can be attributed to its acquisition journey when data is avail
 - P13-B — Attribution Persistence Foundation: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
 - P13-C — Acquisition Journey & Order Attribution: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
 - P13-D — Internal Measurement Producers & Consent Boundary: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
-- P13-E — Canonical Purchase & Financial Reconciliation: **COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION**;
+- P13-E — Canonical Purchase & Financial Reconciliation: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
 - P13-F — Measurement & Advertising Adapters: **NOT STARTED**;
 - P13-G — Admin Analytics: **NOT STARTED**;
 - P13-H — Technical Gate: **NOT STARTED**.
