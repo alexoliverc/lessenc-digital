@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 — Analytics, Attribution & Growth Infrastructure is IN PROGRESS. P13-A — Architecture, Privacy & Measurement Contract is COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED. P13-B — Attribution Persistence Foundation is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-C — Acquisition Journey & Order Attribution is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-D — Internal Measurement Producers & Consent Boundary is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-E — Canonical Purchase & Financial Reconciliation is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-F — Measurement & Advertising Adapters is the next execution block. Production deployment remains outside the current P13 scope.
+**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 — Analytics, Attribution & Growth Infrastructure is IN PROGRESS. P13-A — Architecture, Privacy & Measurement Contract is COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED. P13-B — Attribution Persistence Foundation is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-C — Acquisition Journey & Order Attribution is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-D — Internal Measurement Producers & Consent Boundary is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-E — Canonical Purchase & Financial Reconciliation is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-F — Measurement & Advertising Adapters is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-G — Admin Analytics is the next execution block. P13-H remains NOT STARTED. Production deployment remains outside the current P13 scope.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -795,7 +795,7 @@ A completed sale can be attributed to its acquisition journey when data is avail
 - P13-C — Acquisition Journey & Order Attribution: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
 - P13-D — Internal Measurement Producers & Consent Boundary: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
 - P13-E — Canonical Purchase & Financial Reconciliation: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
-- P13-F — Measurement & Advertising Adapters: **NOT STARTED**;
+- P13-F — Measurement & Advertising Adapters: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
 - P13-G — Admin Analytics: **NOT STARTED**;
 - P13-H — Technical Gate: **NOT STARTED**.
 
@@ -1716,3 +1716,34 @@ Architecture
 + Post-Launch Stabilization
 
 Only after this state should the project transition primarily into growth and optimization.
+
+<!-- P13-F-MEASUREMENT-ADAPTERS-CLOSEOUT -->
+### P13-F — Measurement & Advertising Adapters — Git lifecycle closeout
+
+P13-F is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
+
+Canonical lifecycle:
+
+- implementation commit: `297b3a9d360a0dbc1c0d0c972d40fe63438801d6`;
+- implementation PR: #30 — MERGED;
+- canonical implementation merge: `e1ba280b49186607b2d171fca7ff458f30b0d28d`;
+- checkpoint: `checkpoint/p13-f-measurement-adapters-complete`;
+- checkpoint target: `e1ba280b49186607b2d171fca7ff458f30b0d28d`;
+- implementation branch local/remote: removed;
+- deploy: NOT PERFORMED.
+
+Technical evidence:
+
+- targeted P13-F: 108/108 PASS;
+- full unit/application: 655/655 PASS;
+- full MySQL integration: 188/188 PASS;
+- typecheck PASS;
+- lint PASS;
+- production build PASS;
+- Prisma schema/migrations unchanged.
+
+Meta CAPI is technically complete but intentionally policy-blocked under `MATCHING_DATA_POLICY_NOT_AUTHORIZED / PRIVACY_POLICY`; no live Meta transport or additional matching-data collection was authorized.
+
+The checkpoint remains fixed at the implementation merge and must not be moved by later documentation-only work.
+
+P13-G — Admin Analytics is the next execution block. P13-H remains NOT STARTED.

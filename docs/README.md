@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P13
 
-**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-F–P13-H permanecem NOT STARTED.
+**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B–P13-F COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-G–P13-H permanecem NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -101,10 +101,9 @@ P13 está **IN PROGRESS**.
 
 P13-A — Architecture, Privacy & Measurement Contract está **COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED**.
 
-P13 runtime implementation está **IN PROGRESS**: P13-B está integrada e checkpointed; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-F–P13-H permanecem não iniciadas.
+P13 runtime implementation está **IN PROGRESS**: P13-B, P13-C, P13-D, P13-E e P13-F estão COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-G–P13-H permanecem não iniciadas.
 
-P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-C — Acquisition Journey & Order Attribution está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-D — Internal Measurement Producers & Consent Boundary está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-E — Canonical Purchase & Financial Reconciliation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-F é o próximo bloco de execução.
-
+P13-B — Attribution Persistence Foundation, P13-C — Acquisition Journey & Order Attribution, P13-D — Internal Measurement Producers & Consent Boundary, P13-E — Canonical Purchase & Financial Reconciliation e P13-F — Measurement & Advertising Adapters estão **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-G — Admin Analytics é o próximo bloco de execução.
 <!-- P13-B-CANONICAL-CLOSEOUT -->
 ### P13-B — Attribution Persistence Foundation
 
@@ -249,6 +248,7 @@ Canonical lifecycle da P13-E:
 - [P13-C Final Gate](operations/p13-c-final-gate.md) — evidência canônica de aquisição, atribuição, HTTP runtime, atomicidade, rollback, idempotência, concorrência e regressão P13-C.
 - [P13-D Final Gate](operations/p13-d-final-gate.md) — evidência canônica dos produtores internos, consentimento runtime, projeção browser-safe, isolamento de falha e prova temporal HTTP + MySQL.
 - [P13-E Final Gate](operations/p13-e-final-gate.md) — evidência canônica de Purchase financeiro, unicidade, replay, concorrência, reconciliação e isolamento post-commit.
+- [P13-F Final Gate](operations/p13-f-final-gate.md) — evidência canônica de GTM/Consent Mode, GA4, Google Ads, Meta Pixel, Meta CAPI policy-blocked e provider-neutral dispatch.
 
 ### Arquitetura de measurement aprovada
 
@@ -282,6 +282,10 @@ GTM, GA4, Google Ads e Meta não são autoridade comercial, financeira ou de ent
 
 ### P13-F
 
+P13-F — Measurement & Advertising Adapters está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
+
+O [P13-F Final Gate](operations/p13-f-final-gate.md) registra a integração GTM/Consent Mode, GA4, Google Ads, Meta Pixel, Meta CAPI policy-blocked, provider dispatch, regressões, privacidade e lifecycle Git.
+
 P13-F foi redefinida como **Measurement & Advertising Adapters**:
 
 - P13-F1 — Google Tag Manager Foundation;
@@ -299,3 +303,24 @@ O [índice operacional](operations/README.md) reúne procedimentos do ambiente d
 ## HISTORICAL / SUPERSEDED DOCUMENTS
 
 Os documentos [architecture/LES-*-R01.md](architecture/README.md), o [roadmap MVP anterior](LES-ROADMAP-DIG-R01.md) e o [guia local antigo](operations/LOCAL-CONNECTIVITY-R01.md) registram a sequência anterior. São **HISTORICAL / SUPERSEDED**: não estabelecem produto, preço, oferta, ambientes, stack ou próximos gates atuais. O [LES-FLOW-DIG-R01.md](architecture/LES-FLOW-DIG-R01.md) também é **INCOMPLETE** e termina truncado; não completar suas regras por inferência. `CURRENT CANONICAL BASELINE WINS` em toda divergência. O histórico permanece legível como evidência temporal. Os diretórios não têm placeholders vazios.
+
+<!-- P13-F-POST-MERGE-CLOSEOUT -->
+### P13-F Git Integration Closeout
+
+P13-F está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
+
+Lifecycle canônico:
+
+- implementation commit: `297b3a9d360a0dbc1c0d0c972d40fe63438801d6`;
+- PR: #30 — **MERGED**;
+- implementation merge: `e1ba280b49186607b2d171fca7ff458f30b0d28d`;
+- checkpoint: `checkpoint/p13-f-measurement-adapters-complete`;
+- checkpoint target: `e1ba280b49186607b2d171fca7ff458f30b0d28d`;
+- implementation branch local/remota: removida;
+- deploy: não executado.
+
+O checkpoint permanece congelado no merge da implementação e não deve ser movido por commits documentais posteriores.
+
+Meta CAPI permanece tecnicamente concluído e bloqueado por política de privacidade; live transport e Advanced Matching não fazem parte do estado autorizado.
+
+P13-G — Admin Analytics é o próximo bloco. P13-H permanece NOT STARTED.

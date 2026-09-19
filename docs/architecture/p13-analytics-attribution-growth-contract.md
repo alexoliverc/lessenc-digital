@@ -4,7 +4,7 @@
 
 **Block:** P13-A — Architecture, Privacy & Measurement Contract
 **Status:** OWNER APPROVED / ARCHITECTURE FROZEN R2 / DOCUMENTATION COMPLETE
-**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / P13-E COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED / P13-F–P13-H NOT STARTED
+**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / P13-E COMPLETE / P13-F COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED / P13-G–P13-H NOT STARTED
 
 ## 1. Core Principle
 
@@ -922,3 +922,50 @@ P13-E implementation lifecycle:
 P13-E = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 
 The checkpoint remains fixed at the implementation merge and must not be moved by later documentation-only work.
+
+<!-- P13-F-IMPLEMENTATION-STATUS -->
+## 45. Implementation Status — P13-F
+
+This section records implementation and Git lifecycle state only. It does not amend, supersede or reopen P13-A Architecture Freeze R2.
+
+P13-F — Measurement & Advertising Adapters:
+
+**COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**
+
+Delivered responsibilities include:
+
+- GTM controlled runtime and Google Consent Mode projection;
+- GA4 projections for VIEW_CONTENT, INITIATE_CHECKOUT and canonical PURCHASE;
+- Google Ads conversion projection without application-owned account destination configuration;
+- Meta Pixel canonical Purchase projection;
+- Meta CAPI canonical server-event identity and explicit policy-block boundary;
+- provider-neutral AnalyticsDispatch enqueue, claim, suppression, retry, backoff, success and terminal failure behavior;
+- provider policy evaluation before adapter send;
+- consent/failure isolation from canonical Commerce and Payments.
+
+Meta CAPI remains deliberately policy-blocked under:
+
+- `MATCHING_DATA_POLICY_NOT_AUTHORIZED`;
+- `PRIVACY_POLICY`.
+
+No live Meta HTTP transport, Advanced Matching or additional PII/provider matching-data collection is authorized by this closeout.
+
+Canonical validation record:
+
+- `docs/operations/p13-f-final-gate.md`
+
+Canonical lifecycle:
+
+- implementation commit: `297b3a9d360a0dbc1c0d0c972d40fe63438801d6`;
+- implementation PR: #30 — MERGED;
+- canonical implementation merge: `e1ba280b49186607b2d171fca7ff458f30b0d28d`;
+- checkpoint: `checkpoint/p13-f-measurement-adapters-complete`;
+- checkpoint target: `e1ba280b49186607b2d171fca7ff458f30b0d28d`;
+- implementation branch local/remote cleanup: COMPLETE;
+- deployment: NOT PERFORMED.
+
+P13-F = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
+
+The checkpoint remains fixed at the implementation merge and is not moved by documentation-only work.
+
+P13-G — Admin Analytics is the next execution block. P13-H remains NOT STARTED.
