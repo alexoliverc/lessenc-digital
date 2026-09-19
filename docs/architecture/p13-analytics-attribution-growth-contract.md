@@ -4,7 +4,7 @@
 
 **Block:** P13-A — Architecture, Privacy & Measurement Contract
 **Status:** OWNER APPROVED / ARCHITECTURE FROZEN R2 / DOCUMENTATION COMPLETE
-**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C–P13-H NOT STARTED
+**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C IMPLEMENTATION COMPLETE / P13-D–P13-H NOT STARTED
 
 ## 1. Core Principle
 
@@ -431,7 +431,7 @@ Dependent implementation must stop if:
 - P13-A Architecture Freeze R1: SUPERSEDED BY CONTROLLED AMENDMENT
 - P13-A Architecture Freeze R2: FROZEN / COMPLETE
 - P13-A Documentation: COMPLETE
-- P13 Runtime Implementation: IN PROGRESS / P13-B COMPLETE
+- P13 Runtime Implementation: IN PROGRESS / P13-B COMPLETE / P13-C IMPLEMENTATION COMPLETE
 - P13-B: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 
 ## 27. Controlled Architecture Amendment
@@ -745,7 +745,7 @@ The physical/provider-neutral persistence foundation now exists for AcquisitionJ
 
 This status update does not change any frozen P13-A architecture decision.
 
-P13-C through P13-H remain NOT STARTED.
+Historical P13-B closeout state: P13-C through P13-H were NOT STARTED at that checkpoint.
 
 <!-- P13-B-GIT-CLOSEOUT-STATUS -->
 ### P13-B Git Lifecycle Closeout
@@ -764,4 +764,42 @@ P13-B implementation lifecycle:
 
 P13-B = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 
-P13-C through P13-H remain NOT STARTED.
+Historical P13-B closeout state: P13-C through P13-H were NOT STARTED at that checkpoint.
+
+<!-- P13-C-IMPLEMENTATION-STATUS -->
+## 42. Implementation Status — P13-C
+
+This section records implementation state only. It does not amend, supersede or reopen Architecture Freeze R2.
+
+P13-C — Acquisition Journey & Order Attribution:
+
+**IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED**
+
+Implemented behavior now includes:
+
+- first-party pseudonymous AcquisitionJourney creation/recovery;
+- eligible CAMPAIGN and REFERRAL acquisition capture;
+- immutable First Touch;
+- eligible Last Touch;
+- direct/internal preservation;
+- exact canonical UTM allowlist;
+- sanitized landing path and external referrer hostname;
+- 30-day Journey lifetime;
+- 30-day attribution lookback;
+- first-party browser cookie boundary;
+- prefetch exclusion;
+- immutable OrderAttribution at authoritative Order creation;
+- explicit unattributed Order snapshots;
+- atomic Order + OrderAttribution persistence;
+- retry immutability;
+- concurrency-safe CREATED + EXISTING behavior.
+
+P13-C does not change frozen financial, entitlement, consent, Purchase or external-provider authority.
+
+Canonical validation record:
+
+- `docs/operations/p13-c-final-gate.md`
+
+Git integration, checkpointing and deployment have not yet been performed.
+
+P13-D through P13-H remain NOT STARTED.

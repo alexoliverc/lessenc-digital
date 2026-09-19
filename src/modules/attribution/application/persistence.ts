@@ -65,6 +65,24 @@ export interface AttributionJourneyRepository {
   createTouch(input: CreateAttributionTouch): Promise<AttributionTouchRecord>;
 }
 
+export type RecordAttributionObservation = Readonly<{
+  journeyId: string;
+  touch: CreateAttributionTouch | null;
+  seenAt: Date;
+  externallyAttributable: boolean;
+}>;
+
+export type RecordAttributionObservationResult = Readonly<{
+  journey: AcquisitionJourneyRecord;
+  touch: AttributionTouchRecord | null;
+}>;
+
+export interface AttributionJourneyCaptureRepository extends AttributionJourneyRepository {
+  recordObservation(
+    input: RecordAttributionObservation,
+  ): Promise<RecordAttributionObservationResult>;
+}
+
 export type OrderAttributionRecord = Readonly<{
   id: string;
   orderId: string;

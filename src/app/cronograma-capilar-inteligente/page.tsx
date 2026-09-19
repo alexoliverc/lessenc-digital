@@ -7,6 +7,7 @@ import { StatePanel } from "@/components/ui/feedback";
 import { Surface } from "@/components/ui/surface";
 import type { PublicSalesExperience } from "@/modules/sales/application/public-sales-experience";
 
+import { capturePublicSalesAcquisition } from "./acquisition.server";
 import { resolvePublicSalesExperience } from "./public-sales.server";
 import styles from "./page.module.css";
 
@@ -91,8 +92,19 @@ function CommercialState({
   );
 }
 
-export default async function CronogramaCapilarInteligentePage() {
-  const experience = await resolvePublicSalesExperience();
+type CronogramaCapilarInteligentePageProps = Readonly<{
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}>;
+
+export default async function CronogramaCapilarInteligentePage({
+  searchParams,
+}: CronogramaCapilarInteligentePageProps) {
+  const resolvedSearchParams = await searchParams;
+
+  const [experience] = await Promise.all([
+    resolvePublicSalesExperience(),
+    capturePublicSalesAcquisition(resolvedSearchParams),
+  ]);
 
   return (
     <>

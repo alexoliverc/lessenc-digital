@@ -5,8 +5,9 @@
 **Architecture baseline:** P13-A Architecture Freeze R2
 **P13-A:** COMPLETE
 **P13-B:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
-**P13-C through P13-H:** NOT STARTED
-**Runtime implementation:** IN PROGRESS / P13-B COMPLETE
+**P13-C:** IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED
+**P13-D through P13-H:** NOT STARTED
+**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C IMPLEMENTATION COMPLETE
 
 ## 1. Objective
 
@@ -223,11 +224,11 @@ P13-B is now:
 
 **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**
 
-P13-C remains NOT STARTED.
+P13-C implementation is COMPLETE / PASS / DOCUMENTED. Git integration and checkpoint remain NOT YET PERFORMED.
 
 ## 8. P13-C — Acquisition Journey & Order Attribution
 
-Status: NOT STARTED
+Status: IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED
 
 Objective:
 
@@ -247,6 +248,59 @@ Expected behavior:
 
 Provider-specific identifiers such as gclid, gbraid, wbraid, fbclid, fbc and fbp must not become canonical commercial authority.
 
+
+<!-- P13-C-IMPLEMENTATION-EVIDENCE -->
+### P13-C implementation evidence
+
+Branch:
+
+`phase/p13-c-acquisition-order-attribution`
+
+Starting baseline:
+
+`8f501575078a589a6712a3685f92548e6e89def3`
+
+Delivered:
+
+- first-party pseudonymous AcquisitionJourney runtime;
+- canonical five-key UTM allowlist and bounded sanitation;
+- sanitized landing path and external referrer hostname;
+- immutable First Touch and eligible Last Touch;
+- direct/internal preservation behavior;
+- first-party HttpOnly SameSite=Lax Journey cookie;
+- prefetch exclusion;
+- live HTTP + MySQL acquisition validation;
+- immutable OrderAttribution snapshot;
+- explicit unattributed Order snapshots;
+- OrderAttribution creation inside the authoritative Order transaction;
+- rollback safety;
+- sequential retry immutability;
+- concurrent CREATED + EXISTING idempotency;
+- provider-neutral canonical attribution;
+- no Prisma schema or migration change;
+- no P13-D/E/F/G/H behavior.
+
+Final evidence:
+
+- 48 unit/application files / 498 tests PASS;
+- 19 MySQL integration files / 165 tests PASS;
+- P13-C focused unit/boundary evidence: 63 tests;
+- P13-C focused MySQL evidence: 10 tests;
+- Prisma validate PASS;
+- typecheck PASS;
+- lint PASS;
+- production build PASS;
+- live HTTP runtime PASS;
+- three prefetch exclusion signals PASS;
+- concurrency PASS;
+- rollback PASS;
+- `git diff --check` PASS.
+
+Canonical final review:
+
+- `docs/operations/p13-c-final-gate.md`
+
+Git lifecycle remains owner-controlled and has not yet been performed.
 ## 9. P13-D — Internal Measurement Producers & Consent Boundary
 
 Status: NOT STARTED
@@ -516,10 +570,10 @@ These operational capabilities are not implemented by P13 unless explicitly brou
 - P13-A: COMPLETE
 - P13-A Architecture Freeze R2: CURRENT CANONICAL BASELINE
 - P13-B: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
-- P13-C: NOT STARTED
+- P13-C: IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED
 - P13-D: NOT STARTED
 - P13-E: NOT STARTED
 - P13-F: NOT STARTED
 - P13-G: NOT STARTED
 - P13-H: NOT STARTED
-- P13 runtime implementation: IN PROGRESS / P13-B COMPLETE
+- P13 runtime implementation: IN PROGRESS / P13-B COMPLETE / P13-C IMPLEMENTATION COMPLETE
