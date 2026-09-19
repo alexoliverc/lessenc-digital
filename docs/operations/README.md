@@ -57,3 +57,4 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
 - [P13-B Final Gate](./p13-b-final-gate.md) — provider-neutral attribution and analytics persistence foundation.
 - [P13-C Final Gate](./p13-c-final-gate.md) — AcquisitionJourney, First/Last Touch and immutable OrderAttribution.
 - [P13-D Final Gate](./p13-d-final-gate.md) — canonical VIEW_CONTENT and INITIATE_CHECKOUT producers, runtime consent, browser-safe projection and exact HTTP + MySQL temporal proof.
+- [P13-E Final Gate](./p13-e-final-gate.md) — canonical Purchase from persisted financial truth, concurrency-safe uniqueness, reconciliation and post-commit failure isolation.

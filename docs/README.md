@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P13
 
-**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E–P13-H permanecem NOT STARTED.
+**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E está COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION; P13-F–P13-H permanecem NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -101,9 +101,9 @@ P13 está **IN PROGRESS**.
 
 P13-A — Architecture, Privacy & Measurement Contract está **COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED**.
 
-P13 runtime implementation está **IN PROGRESS**: P13-B está integrada e checkpointed; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E–P13-H permanecem não iniciadas.
+P13 runtime implementation está **IN PROGRESS**: P13-B está integrada e checkpointed; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E está COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION; P13-F–P13-H permanecem não iniciadas.
 
-P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-C — Acquisition Journey & Order Attribution está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-D — Internal Measurement Producers & Consent Boundary está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-E é o próximo bloco de execução.
+P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-C — Acquisition Journey & Order Attribution está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-D — Internal Measurement Producers & Consent Boundary está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-E — Canonical Purchase & Financial Reconciliation está **COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION**. P13-F é o próximo bloco após o gate Git da P13-E.
 
 <!-- P13-B-CANONICAL-CLOSEOUT -->
 ### P13-B — Attribution Persistence Foundation
@@ -214,12 +214,32 @@ Canonical lifecycle da P13-D:
 - checkpoint target: `bc18ca723019aeaf3cd500788f8e46982f269150`;
 - deployment: não executado.
 
+<!-- P13-E-CANONICAL-CLOSEOUT -->
+### P13-E — Canonical Purchase & Financial Reconciliation
+
+P13-E está **COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION**.
+
+O [P13-E Final Gate](operations/p13-e-final-gate.md) registra:
+
+- Purchase exclusivamente de `Order.PAID + Payment.APPROVED` persistidos;
+- revalidação de identidade, fingerprint, observação aplicada, valor e moeda;
+- Product/Offer e receita autoritativos;
+- snapshots de atribuição e consentimento;
+- Purchase atribuído e não atribuído;
+- unicidade, replay e concorrência;
+- reconciliação bounded de Purchase ausente;
+- isolamento post-commit de falha Analytics;
+- preservação do Outbox P10/P11.
+
+P13-F–P13-H permanecem NOT STARTED.
+
 ### Documentos canônicos
 
 - [P13 Analytics, Attribution & Growth Contract](architecture/p13-analytics-attribution-growth-contract.md) — contrato de arquitetura, privacidade, consentimento, atribuição, canonical measurement, Purchase authority, GTM, GA4, Google Ads, Meta e stop conditions;
 - [P13 Phase Execution Brief](architecture/p13-phase-execution-brief.md) — sequência operacional P13-A–H e responsabilidades dos blocos.
 - [P13-C Final Gate](operations/p13-c-final-gate.md) — evidência canônica de aquisição, atribuição, HTTP runtime, atomicidade, rollback, idempotência, concorrência e regressão P13-C.
 - [P13-D Final Gate](operations/p13-d-final-gate.md) — evidência canônica dos produtores internos, consentimento runtime, projeção browser-safe, isolamento de falha e prova temporal HTTP + MySQL.
+- [P13-E Final Gate](operations/p13-e-final-gate.md) — evidência canônica de Purchase financeiro, unicidade, replay, concorrência, reconciliação e isolamento post-commit.
 
 ### Arquitetura de measurement aprovada
 
