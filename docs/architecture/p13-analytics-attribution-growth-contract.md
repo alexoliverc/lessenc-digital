@@ -4,7 +4,7 @@
 
 **Block:** P13-A — Architecture, Privacy & Measurement Contract
 **Status:** OWNER APPROVED / ARCHITECTURE FROZEN R2 / DOCUMENTATION COMPLETE
-**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED / P13-E–P13-H NOT STARTED
+**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / P13-E COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION / P13-F–P13-H NOT STARTED
 
 ## 1. Core Principle
 
@@ -853,7 +853,7 @@ Canonical validation record:
 
 Git integration and checkpointing are complete as recorded below. Deployment remains NOT PERFORMED.
 
-P13-E through P13-H remain NOT STARTED.
+At the P13-D checkpoint, P13-E through P13-H remained NOT STARTED.
 
 <!-- P13-D-GIT-CLOSEOUT-STATUS -->
 ### P13-D Git Lifecycle Closeout
@@ -873,3 +873,33 @@ P13-D implementation lifecycle:
 P13-D = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 
 The checkpoint remains fixed at the implementation merge and must not be moved by later documentation-only work.
+
+<!-- P13-E-IMPLEMENTATION-STATUS -->
+## 44. Implementation Status — P13-E
+
+This section records implementation state only. It does not amend, supersede or reopen Architecture Freeze R2.
+
+P13-E — Canonical Purchase & Financial Reconciliation:
+
+**COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION**
+
+Implemented behavior now includes:
+
+- canonical Purchase only from persisted `Order.PAID + Payment.APPROVED`;
+- P10 operation fingerprint and applied financial observation validation;
+- authoritative Product, Offer, amount and currency projection;
+- immutable OrderAttribution and first-party consent snapshots;
+- attributed and unattributed Purchase;
+- one Purchase per Order;
+- sequential, concurrent and webhook replay safety;
+- bounded reconciliation of eligible missing Purchase;
+- post-commit failure isolation from Commerce;
+- no P10/P11 Outbox reinterpretation.
+
+Canonical validation record:
+
+- `docs/operations/p13-e-final-gate.md`
+
+Git integration, checkpointing and deployment have not yet been performed.
+
+P13-F through P13-H remain NOT STARTED.

@@ -48,6 +48,17 @@ export interface FinancialRepository {
   ): Promise<"APPLIED" | "NOOP" | "REVIEW" | "REJECTED">;
 }
 
+export type FinancialObservationResult = Readonly<{
+  orderId: string;
+  paymentId: string;
+  source: "CREATE_RESPONSE" | "WEBHOOK" | "RECONCILIATION" | "RECOVERY";
+  result: "APPLIED" | "NOOP" | "REVIEW" | "REJECTED";
+}>;
+
+export interface FinancialObservationObserver {
+  afterFinancialObservation(input: FinancialObservationResult): Promise<void>;
+}
+
 export type BuyerPaymentState = Readonly<{
   state:
     | "awaiting_payment"
@@ -86,7 +97,40 @@ export class FinancialCoordinator {
   constructor(
     private readonly repo: FinancialRepository,
     private readonly provider: PaymentProvider,
+    private readonly observer?: FinancialObservationObserver,
   ) {}
+
+  private async notifyObserver(input: FinancialObservationResult): Promise<void> {
+    if (this.observer === undefined) {
+      return;
+    }
+
+    try {
+      await this.observer.afterFinancialObservation(input);
+    } catch {
+      /*
+       * Analytics is a post-commit projection. Its failure
+       * must never roll back or reinterpret financial truth.
+       */
+      console.error("P13_CANONICAL_PURCHASE_PROJECTION_FAILED");
+    }
+  }
+
+  private async applyObservation(
+    orderId: string,
+    input: Parameters<FinancialRepository["applyObservation"]>[0],
+  ): Promise<"APPLIED" | "NOOP" | "REVIEW" | "REJECTED"> {
+    const result = await this.repo.applyObservation(input);
+
+    await this.notifyObserver({
+      orderId,
+      paymentId: input.paymentId,
+      source: input.source,
+      result,
+    });
+
+    return result;
+  }
 
   async start(
     orderId: string,
@@ -113,7 +157,7 @@ export class FinancialCoordinator {
         ...(card ? { card } : {}),
       };
       const snapshot = await this.provider.createPayment(request);
-      const applied = await this.repo.applyObservation({
+      const applied = await this.applyObservation(attempt.orderId, {
         paymentId: attempt.paymentId,
         snapshot,
         source: "CREATE_RESPONSE",
@@ -153,6 +197,16 @@ export class FinancialCoordinator {
     }
     const state = await this.repo.state(orderId);
     if (!state) throw new Error("ORDER_NOT_FOUND");
+
+    if (state.state === "approved" && state.paymentId !== null) {
+      await this.notifyObserver({
+        orderId,
+        paymentId: state.paymentId,
+        source: "RECONCILIATION",
+        result: "NOOP",
+      });
+    }
+
     return publicState(state.state, presentation);
   }
 
@@ -190,7 +244,7 @@ export class FinancialCoordinator {
       if (!candidate) return null;
       snapshot = await this.provider.getSnapshot(candidate.providerOrderId);
     }
-    const applied = await this.repo.applyObservation({
+    const applied = await this.applyObservation(attempt.orderId, {
       paymentId,
       snapshot,
       source: "RECONCILIATION",
@@ -207,7 +261,7 @@ export class FinancialCoordinator {
         ? await this.repo.findRecoverableByOrderId(snapshot.externalReference)
         : null);
     if (!attempt) throw new Error("PAYMENT_UNRESOLVED");
-    return this.repo.applyObservation({
+    return this.applyObservation(attempt.orderId, {
       paymentId: attempt.paymentId,
       snapshot,
       source: "WEBHOOK",
