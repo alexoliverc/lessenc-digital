@@ -981,4 +981,4 @@ For pre-Purchase events, Last Touch is reconstructed from the latest eligible pe
 
 Canonical validation: `docs/operations/p13-g-final-gate.md`.
 
-Implementation merge: `7da548d922046f1c90ee71e13012f3374527146b`; checkpoint: `checkpoint/p13-g-admin-analytics-complete` at that merge. P13-H remains NOT STARTED.
+Implementation merge: `7da548d922046f1c90ee71e13012f3374527146b`; checkpoint: `checkpoint/p13-g-admin-analytics-complete` at that merge. P13-H final technical validation is recorded in `docs/operations/p13-h-final-gate.md`.
