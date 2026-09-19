@@ -8,8 +8,9 @@
 **P13-C:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 **P13-D:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 **P13-E:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
-**P13-F through P13-H:** NOT STARTED
-**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / P13-E COMPLETE
+**P13-F:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
+**P13-G through P13-H:** NOT STARTED
+**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / P13-E COMPLETE / P13-F COMPLETE
 
 ## 1. Objective
 
@@ -382,7 +383,7 @@ Analytics failure must never roll back a successful commercial transaction.
 
 ## 11. P13-F — Measurement & Advertising Adapters
 
-Status: NOT STARTED
+Status: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 
 The former Meta-only P13-F scope is superseded.
 
@@ -592,7 +593,53 @@ These operational capabilities are not implemented by P13 unless explicitly brou
 - P13-C: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 - P13-D: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 - P13-E: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
-- P13-F: NOT STARTED
+- P13-F: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 - P13-G: NOT STARTED
 - P13-H: NOT STARTED
-- P13 runtime implementation: IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / P13-E COMPLETE
+- P13 runtime implementation: IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / P13-E COMPLETE / P13-F COMPLETE
+
+<!-- P13-F-GIT-LIFECYCLE-CLOSEOUT -->
+### P13-F implementation and Git lifecycle closeout
+
+P13-F is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
+
+Implemented provider boundaries:
+
+- GTM + Google Consent Mode;
+- GA4;
+- Google Ads;
+- Meta Pixel;
+- Meta CAPI canonical/policy boundary;
+- provider-neutral dispatch lifecycle.
+
+Canonical validation:
+
+- `docs/operations/p13-f-final-gate.md`
+
+Final evidence:
+
+- targeted F1–F6: 108/108 PASS;
+- full unit/application: 655/655 PASS;
+- full MySQL integration: 188/188 PASS;
+- typecheck PASS;
+- lint PASS;
+- production build PASS;
+- Prisma schema/migrations unchanged.
+
+Canonical Git lifecycle:
+
+- implementation commit: `297b3a9d360a0dbc1c0d0c972d40fe63438801d6`;
+- PR #30: MERGED;
+- canonical implementation merge: `e1ba280b49186607b2d171fca7ff458f30b0d28d`;
+- checkpoint: `checkpoint/p13-f-measurement-adapters-complete`;
+- checkpoint target: `e1ba280b49186607b2d171fca7ff458f30b0d28d`;
+- implementation branch local/remote: removed;
+- deployment: NOT PERFORMED.
+
+Meta CAPI is technically complete but remains policy-blocked under `MATCHING_DATA_POLICY_NOT_AUTHORIZED / PRIVACY_POLICY`. No live Meta transport or Advanced Matching was authorized.
+
+The checkpoint remains fixed at the implementation merge.
+
+P13-G — Admin Analytics is the next execution block.
+
+P13-H — Technical Gate remains NOT STARTED.

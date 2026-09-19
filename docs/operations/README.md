@@ -58,3 +58,4 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
 - [P13-C Final Gate](./p13-c-final-gate.md) — AcquisitionJourney, First/Last Touch and immutable OrderAttribution.
 - [P13-D Final Gate](./p13-d-final-gate.md) — canonical VIEW_CONTENT and INITIATE_CHECKOUT producers, runtime consent, browser-safe projection and exact HTTP + MySQL temporal proof.
 - [P13-E Final Gate](./p13-e-final-gate.md) — canonical Purchase from persisted financial truth, concurrency-safe uniqueness, reconciliation and post-commit failure isolation.
+- [P13-F Final Gate](./p13-f-final-gate.md) — GTM + Google Consent Mode, GA4, Google Ads, Meta Pixel, Meta CAPI policy block, provider-neutral dispatch and final P13-F regression evidence.
