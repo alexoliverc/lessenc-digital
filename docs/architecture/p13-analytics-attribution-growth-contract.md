@@ -4,7 +4,7 @@
 
 **Block:** P13-A — Architecture, Privacy & Measurement Contract
 **Status:** OWNER APPROVED / ARCHITECTURE FROZEN R2 / DOCUMENTATION COMPLETE
-**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION / P13-E–P13-H NOT STARTED
+**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE / P13-D COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED / P13-E–P13-H NOT STARTED
 
 ## 1. Core Principle
 
@@ -831,7 +831,7 @@ This section records implementation state only. It does not amend, supersede or 
 
 P13-D — Internal Measurement Producers & Consent Boundary:
 
-**COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION**
+**COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**
 
 Implemented behavior now includes:
 
@@ -851,6 +851,25 @@ Canonical validation record:
 
 - `docs/operations/p13-d-final-gate.md`
 
-Git integration, checkpointing and deployment have not yet been performed.
+Git integration and checkpointing are complete as recorded below. Deployment remains NOT PERFORMED.
 
 P13-E through P13-H remain NOT STARTED.
+
+<!-- P13-D-GIT-CLOSEOUT-STATUS -->
+### P13-D Git Lifecycle Closeout
+
+This subsection records lifecycle state only. It does not amend, supersede or reopen Architecture Freeze R2.
+
+P13-D implementation lifecycle:
+
+- implementation commit: `92f99559d32ee9658e94957f9dfc3fff8aad1ebd`;
+- PR #26: MERGED;
+- canonical implementation merge: `bc18ca723019aeaf3cd500788f8e46982f269150`;
+- checkpoint: `checkpoint/p13-d-internal-measurement-consent-complete`;
+- checkpoint target: `bc18ca723019aeaf3cd500788f8e46982f269150`;
+- implementation branch local/remote cleanup: COMPLETE;
+- deployment: NOT PERFORMED.
+
+P13-D = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
+
+The checkpoint remains fixed at the implementation merge and must not be moved by later documentation-only work.

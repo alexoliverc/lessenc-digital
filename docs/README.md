@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P13
 
-**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION; P13-E–P13-H permanecem NOT STARTED.
+**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E–P13-H permanecem NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -101,9 +101,9 @@ P13 está **IN PROGRESS**.
 
 P13-A — Architecture, Privacy & Measurement Contract está **COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED**.
 
-P13 runtime implementation está **IN PROGRESS**: P13-B está integrada e checkpointed; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION; P13-E–P13-H permanecem não iniciadas.
+P13 runtime implementation está **IN PROGRESS**: P13-B está integrada e checkpointed; P13-C está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-D está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-E–P13-H permanecem não iniciadas.
 
-P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-C — Acquisition Journey & Order Attribution está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-D — Internal Measurement Producers & Consent Boundary está **COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION**. P13-E é o próximo bloco após o gate Git da P13-D.
+P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-C — Acquisition Journey & Order Attribution está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-D — Internal Measurement Producers & Consent Boundary está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-E é o próximo bloco de execução.
 
 <!-- P13-B-CANONICAL-CLOSEOUT -->
 ### P13-B — Attribution Persistence Foundation
@@ -187,7 +187,7 @@ No checkpoint da P13-C, P13-D–P13-H permaneciam NOT STARTED.
 <!-- P13-D-CANONICAL-CLOSEOUT -->
 ### P13-D — Internal Measurement Producers & Consent Boundary
 
-P13-D está **COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION**.
+P13-D está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 
 O [P13-D Final Gate](operations/p13-d-final-gate.md) registra:
 
@@ -204,6 +204,15 @@ O [P13-D Final Gate](operations/p13-d-final-gate.md) registra:
 - regressões, build e auditoria de dependências.
 
 P13-E–P13-H permanecem NOT STARTED.
+
+Canonical lifecycle da P13-D:
+
+- implementation commit: `92f99559d32ee9658e94957f9dfc3fff8aad1ebd`;
+- PR #26: **MERGED**;
+- implementation merge: `bc18ca723019aeaf3cd500788f8e46982f269150`;
+- checkpoint: `checkpoint/p13-d-internal-measurement-consent-complete`;
+- checkpoint target: `bc18ca723019aeaf3cd500788f8e46982f269150`;
+- deployment: não executado.
 
 ### Documentos canônicos
 

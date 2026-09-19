@@ -3,7 +3,8 @@
 **Project:** L'Essenc Digital
 **Phase:** P13-D — Internal Measurement Producers & Consent Boundary
 **Date:** 2026-09-19
-**Status:** COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION
+**Git closeout:** 2026-09-19
+**Status:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 **Branch:** `phase/p13-d-internal-measurement-consent`
 **Starting baseline:** `ff07153ad4494c54e0984e38b7a4a26bae8b3bad`
 **Deploy:** NOT PERFORMED
@@ -203,13 +204,15 @@ P10 remains financial authority. P11 remains entitlement and secure-delivery aut
 
 ## 11. Git and progression state
 
-At this implementation gate:
+The implementation gate above preceded the authorized Git lifecycle. The durable closeout is:
 
-- implementation commit: NOT YET CREATED;
-- push: NOT YET PERFORMED;
-- PR: NOT YET CREATED;
-- merge: NOT YET PERFORMED;
-- checkpoint: NOT YET CREATED;
+- implementation commit: `92f99559d32ee9658e94957f9dfc3fff8aad1ebd`;
+- implementation push: COMPLETE;
+- PR #26: MERGED;
+- canonical implementation merge: `bc18ca723019aeaf3cd500788f8e46982f269150`;
+- checkpoint: `checkpoint/p13-d-internal-measurement-consent-complete`;
+- checkpoint target: `bc18ca723019aeaf3cd500788f8e46982f269150`;
+- implementation branch local/remote cleanup: COMPLETE;
 - deploy: NOT PERFORMED.
 
-P13-D is technically complete and may proceed through its authorized Git lifecycle. P13-E remains the next execution block after P13-D integration and checkpointing.
+P13-D is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-E is the next execution block.
