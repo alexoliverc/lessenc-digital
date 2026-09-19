@@ -5,9 +5,9 @@
 **Architecture baseline:** P13-A Architecture Freeze R2
 **P13-A:** COMPLETE
 **P13-B:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
-**P13-C:** IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED
+**P13-C:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 **P13-D through P13-H:** NOT STARTED
-**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C IMPLEMENTATION COMPLETE
+**Runtime implementation:** IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE
 
 ## 1. Objective
 
@@ -224,11 +224,11 @@ P13-B is now:
 
 **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**
 
-P13-C implementation is COMPLETE / PASS / DOCUMENTED. Git integration and checkpoint remain NOT YET PERFORMED.
+P13-C is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED.
 
 ## 8. P13-C — Acquisition Journey & Order Attribution
 
-Status: IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED
+Status: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 
 Objective:
 
@@ -301,6 +301,23 @@ Canonical final review:
 - `docs/operations/p13-c-final-gate.md`
 
 Git lifecycle remains owner-controlled and has not yet been performed.
+
+The sentence above is retained as historical implementation-closeout evidence.
+
+<!-- P13-C-GIT-LIFECYCLE-CLOSEOUT -->
+### P13-C Git lifecycle closeout
+
+- implementation commit: `e7b99cb18c655465845ef91f968dc588b78c0575`;
+- PR #24: MERGED;
+- canonical implementation merge: `52ae12416abbdb1931f0b8798de3fb6866695d98`;
+- checkpoint: `checkpoint/p13-c-acquisition-order-attribution-complete`;
+- checkpoint target: `52ae12416abbdb1931f0b8798de3fb6866695d98`;
+- deployment: NOT PERFORMED.
+
+The checkpoint remains fixed at the implementation merge. This lifecycle closeout does not reopen P13-A Architecture Freeze R2.
+
+P13-D through P13-H remain NOT STARTED.
+
 ## 9. P13-D — Internal Measurement Producers & Consent Boundary
 
 Status: NOT STARTED
@@ -570,10 +587,10 @@ These operational capabilities are not implemented by P13 unless explicitly brou
 - P13-A: COMPLETE
 - P13-A Architecture Freeze R2: CURRENT CANONICAL BASELINE
 - P13-B: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
-- P13-C: IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED
+- P13-C: COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 - P13-D: NOT STARTED
 - P13-E: NOT STARTED
 - P13-F: NOT STARTED
 - P13-G: NOT STARTED
 - P13-H: NOT STARTED
-- P13 runtime implementation: IN PROGRESS / P13-B COMPLETE / P13-C IMPLEMENTATION COMPLETE
+- P13 runtime implementation: IN PROGRESS / P13-B COMPLETE / P13-C COMPLETE

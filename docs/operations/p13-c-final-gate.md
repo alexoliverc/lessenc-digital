@@ -3,7 +3,8 @@
 **Project:** L'Essenc Digital
 **Phase:** P13-C — Acquisition Journey & Order Attribution
 **Date:** 2026-09-17
-**Status:** IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED
+**Git closeout:** 2026-09-19
+**Status:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 **Branch:** `phase/p13-c-acquisition-order-attribution`
 **Starting baseline:** `8f501575078a589a6712a3685f92548e6e89def3`
 **Deploy:** NOT PERFORMED
@@ -23,6 +24,8 @@ Its checkpoint remains:
 P13-C does not alter or move that checkpoint.
 
 No P13-C Git integration, checkpoint or deployment has been performed yet.
+
+The sentence above is retained as historical evidence of the 2026-09-17 implementation gate. The current Git lifecycle state is recorded in section 12. Deployment remains NOT PERFORMED.
 
 ## 2. Acquisition Journey behavior delivered
 
@@ -271,7 +274,7 @@ The full worktree and final validation include both files.
 
 ## 12. Git state
 
-At this documentary closeout:
+At the 2026-09-17 implementation documentary closeout:
 
 - branch: `phase/p13-c-acquisition-order-attribution`;
 - starting HEAD remains `8f501575078a589a6712a3685f92548e6e89def3`;
@@ -284,13 +287,27 @@ At this documentary closeout:
 
 These operations remain owner-controlled.
 
+The block above is preserved as historical pre-integration evidence.
+
+Current canonical Git lifecycle:
+
+- implementation commit: `e7b99cb18c655465845ef91f968dc588b78c0575`;
+- push: COMPLETE;
+- PR #24: MERGED;
+- canonical implementation merge: `52ae12416abbdb1931f0b8798de3fb6866695d98`;
+- checkpoint/tag: `checkpoint/p13-c-acquisition-order-attribution-complete`;
+- checkpoint target: `52ae12416abbdb1931f0b8798de3fb6866695d98`;
+- deploy: NOT PERFORMED.
+
+The annotated checkpoint intentionally remains fixed at the implementation merge. Documentation-only closeout commits must not move, recreate or retarget it.
+
 ## 13. Final status
 
 P13-C implementation, technical validation and documentation are complete.
 
 Current state:
 
-`P13-C = IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED`
+`P13-C = COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED`
 
 P13-D through P13-H remain NOT STARTED.
 
