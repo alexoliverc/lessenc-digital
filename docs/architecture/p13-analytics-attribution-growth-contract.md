@@ -969,3 +969,16 @@ P13-F = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 The checkpoint remains fixed at the implementation merge and is not moved by documentation-only work.
 
 P13-G — Admin Analytics is the next execution block. P13-H remains NOT STARTED.
+
+<!-- P13-G-IMPLEMENTATION-STATUS -->
+## 46. Implementation Status — P13-G
+
+P13-G — Admin Analytics is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
+
+`/admin/analytics` is a dynamic aggregate-only read surface guarded server-side by the existing P12 authentication, MFA and `analytics.read` boundary. OWNER and ADMIN are allowed; SUPPORT is denied. Analytics reports use a 30-day default and 90-day maximum UTC window, canonical internal events and canonical Purchase revenue only.
+
+For pre-Purchase events, Last Touch is reconstructed from the latest eligible persisted touch at or before the event timestamp. Purchase dimensions use immutable `OrderAttribution`. No PII expansion, financial mutation, provider authority, ROAS, schema change or migration was introduced.
+
+Canonical validation: `docs/operations/p13-g-final-gate.md`.
+
+Implementation merge: `7da548d922046f1c90ee71e13012f3374527146b`; checkpoint: `checkpoint/p13-g-admin-analytics-complete` at that merge. P13-H remains NOT STARTED.

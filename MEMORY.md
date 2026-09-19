@@ -1845,6 +1845,8 @@ with:
 
 The P13-F checkpoint is frozen at the implementation merge and must not be moved, recreated or retargeted by documentation-only closeout work.
 
-P13-G — Admin Analytics is the next execution block.
+P13-G — Admin Analytics was integrated through PR #32 and implementation merge `7da548d922046f1c90ee71e13012f3374527146b`.
 
-P13-H remains NOT STARTED.
+P13-G = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. Its permanent checkpoint `checkpoint/p13-g-admin-analytics-complete` targets that implementation merge. It added aggregate-only, server-authorized read-only analytics with no schema/migration, PII, ROAS or financial/provider authority expansion.
+
+P13-H — Technical Gate is the next execution block and remains NOT STARTED.
