@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P12 + P13-A
+# Índice oficial da baseline documental LES-DIG P00–P13
 
-**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B — Attribution Persistence Foundation está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C permanece NOT STARTED.
+**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED; P13-D–P13-H permanecem NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -92,7 +92,7 @@ O [P11 Final Gate](operations/p11-final-gate.md) e o [Gate B — Commerce Core R
 
 A [ADR-0011](decisions/ADR-0011-better-auth-admin-identity.md) congela a decisão de identidade administrativa isolada; o [Phase Execution Brief](architecture/p12-identity-auth-admin-phase-execution-brief.md) preserva a especificação P12-A e seu resultado de implementação; o [P12 Final Gate](operations/p12-final-gate.md) consolida P12-A–H, arquitetura final, rotas, backoffice, RBAC, auditoria, evidências e limites.
 
-P12-H Technical Gate é PASS. A PR #18 integrou o checkpoint final de implementação P12 `ea3295cf1703466763c9cd333d98e59fe6535f8e` através do merge `482e095e9c515c163dd4b057f07baf06f3450f95`; a PR #19 integrou o documentation closeout auditado `8d7a64430532b42019ba346fd8591087e2a7cc3a` através do merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Checkpoint/tagging permanece separado, produção está fora da P12 e P13 está IN PROGRESS; P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED e P13-C permanece NOT STARTED.
+P12-H Technical Gate é PASS. A PR #18 integrou o checkpoint final de implementação P12 `ea3295cf1703466763c9cd333d98e59fe6535f8e` através do merge `482e095e9c515c163dd4b057f07baf06f3450f95`; a PR #19 integrou o documentation closeout auditado `8d7a64430532b42019ba346fd8591087e2a7cc3a` através do merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. O primeiro OWNER não foi inicializado e nenhuma conta administrativa real foi criada. Checkpoint/tagging permanece separado, produção está fora da P12 e P13 está IN PROGRESS; P13-A está COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-C está IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED.
 
 <!-- P13-A-CANONICAL-DOCUMENTS -->
 ## P13 — Analytics, Attribution & Growth Infrastructure
@@ -101,9 +101,9 @@ P13 está **IN PROGRESS**.
 
 P13-A — Architecture, Privacy & Measurement Contract está **COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED**.
 
-P13 runtime implementation está **IN PROGRESS**: P13-B está concluída e P13-C–P13-H permanecem não iniciadas.
+P13 runtime implementation está **IN PROGRESS**: P13-B está integrada e checkpointed; P13-C está com implementação, validação e documentação concluídas, ainda sem integração/checkpoint; P13-D–P13-H permanecem não iniciadas.
 
-P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-C — Acquisition Journey & Order Attribution é o próximo bloco e permanece **NOT STARTED**.
+P13-B — Attribution Persistence Foundation está **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. P13-C — Acquisition Journey & Order Attribution está **IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED**. P13-D é o próximo bloco ainda não iniciado.
 
 <!-- P13-B-CANONICAL-CLOSEOUT -->
 ### P13-B — Attribution Persistence Foundation
@@ -140,10 +140,34 @@ O checkpoint congela o merge da implementação e não é movido por este closeo
 
 P13-C permanece NOT STARTED.
 
+<!-- P13-C-CANONICAL-CLOSEOUT -->
+### P13-C — Acquisition Journey & Order Attribution
+
+P13-C está **IMPLEMENTATION COMPLETE / PASS / DOCUMENTED / NOT YET INTEGRATED / NOT YET CHECKPOINTED**.
+
+O [P13-C Final Gate](operations/p13-c-final-gate.md) registra:
+
+- first-party AcquisitionJourney;
+- First Touch e Last Touch;
+- canonical UTM sanitation;
+- landing/referrer sanitation;
+- first-party Journey cookie;
+- prefetch exclusion;
+- immutable OrderAttribution;
+- atomicidade Order + OrderAttribution;
+- rollback;
+- retry `EXISTING`;
+- concorrência;
+- regressão completa;
+- build de produção;
+- limites P13-D–P13-H.
+
+Nenhum commit, push, PR, merge, checkpoint/tag ou deploy da P13-C foi realizado até este closeout documental.
 ### Documentos canônicos
 
 - [P13 Analytics, Attribution & Growth Contract](architecture/p13-analytics-attribution-growth-contract.md) — contrato de arquitetura, privacidade, consentimento, atribuição, canonical measurement, Purchase authority, GTM, GA4, Google Ads, Meta e stop conditions;
 - [P13 Phase Execution Brief](architecture/p13-phase-execution-brief.md) — sequência operacional P13-A–H e responsabilidades dos blocos.
+- [P13-C Final Gate](operations/p13-c-final-gate.md) — evidência canônica de aquisição, atribuição, HTTP runtime, atomicidade, rollback, idempotência, concorrência e regressão P13-C.
 
 ### Arquitetura de measurement aprovada
 

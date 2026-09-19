@@ -6,6 +6,10 @@ import { cookies } from "next/headers";
 import { getDatabaseClient } from "@/infrastructure/database/client";
 import { PrismaCatalogRepository } from "@/infrastructure/database/prisma-catalog-repository";
 import { PrismaCheckoutOrderRepository } from "@/infrastructure/database/prisma-checkout-order-repository";
+import {
+  ACQUISITION_JOURNEY_COOKIE_NAME,
+  normalizeAcquisitionJourneyId,
+} from "@/modules/attribution/application/acquisition-http-boundary";
 import { HmacCheckoutSubmissionTokenService } from "@/infrastructure/security/hmac-checkout-submission-token";
 import { HmacPaymentContinuation } from "@/infrastructure/security/hmac-payment-continuation";
 import { getP08CommercialEnv, getP09SubmissionEnv } from "@/lib/config/env";
@@ -100,13 +104,21 @@ export async function createCheckoutOrderAction(
     const commercial = getP08CommercialEnv();
     const database = getDatabaseClient();
 
+    const requestCookies = await cookies();
+
+    const acquisitionJourneyId = normalizeAcquisitionJourneyId(
+      requestCookies.get(ACQUISITION_JOURNEY_COOKIE_NAME)?.value,
+    );
+
     const resolveOffer = new ResolvePurchasableOffer(new PrismaCatalogRepository(database));
 
     const prepareOrder = new PrepareOrder(resolveOffer, new SystemClock());
 
     const createOrder = new CreateCheckoutOrder(
       prepareOrder,
-      new PrismaCheckoutOrderRepository(database),
+      new PrismaCheckoutOrderRepository(database, {
+        journeyId: acquisitionJourneyId,
+      }),
     );
 
     const result = await createOrder.execute({

@@ -3,7 +3,14 @@ import {
   type CheckoutOrderPersistenceResult,
   type CheckoutOrderRepository,
 } from "../../modules/commerce/application/create-checkout-order";
+import { randomUUID } from "node:crypto";
+
 import { type Order } from "../../modules/commerce/domain/order";
+
+import {
+  type CheckoutOrderAttributionContext,
+  createOrderAttributionInTransaction,
+} from "./checkout-order-attribution";
 
 type CreateCheckoutInput = Parameters<CheckoutOrderRepository["create"]>[0];
 
@@ -104,7 +111,11 @@ function orderItemCreateData(item: Order["items"][number]) {
 }
 
 export class PrismaCheckoutOrderRepository implements CheckoutOrderRepository {
-  constructor(private readonly database: PrismaClient) {}
+  constructor(
+    private readonly database: PrismaClient,
+    private readonly attributionContext?: CheckoutOrderAttributionContext,
+    private readonly attributionSnapshotIdFactory: () => string = randomUUID,
+  ) {}
 
   async create(input: CreateCheckoutInput): Promise<CheckoutOrderPersistenceResult> {
     let orderIdConflict = false;
@@ -131,6 +142,15 @@ export class PrismaCheckoutOrderRepository implements CheckoutOrderRepository {
         for (const item of input.order.items) {
           await transaction.orderItem.create({
             data: orderItemCreateData(item),
+          });
+        }
+
+        if (this.attributionContext !== undefined) {
+          await createOrderAttributionInTransaction(transaction, {
+            snapshotId: this.attributionSnapshotIdFactory(),
+            orderId: input.order.id,
+            journeyId: this.attributionContext.journeyId,
+            capturedAt: new Date(input.order.createdAt),
           });
         }
       });
