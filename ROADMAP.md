@@ -1746,4 +1746,4 @@ Meta CAPI is technically complete but intentionally policy-blocked under `MATCHI
 
 The checkpoint remains fixed at the implementation merge and must not be moved by later documentation-only work.
 
-P13-G — Admin Analytics is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED** through PR #32, implementation merge `7da548d922046f1c90ee71e13012f3374527146b` and permanent checkpoint `checkpoint/p13-g-admin-analytics-complete`. P13-H remains NOT STARTED and is the next execution block.
+P13-G — Admin Analytics is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED** through PR #32, implementation merge `7da548d922046f1c90ee71e13012f3374527146b` and permanent checkpoint `checkpoint/p13-g-admin-analytics-complete`. P13-H is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13 is complete and P14 remains pending.

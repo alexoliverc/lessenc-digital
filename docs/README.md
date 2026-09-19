@@ -250,6 +250,7 @@ Canonical lifecycle da P13-E:
 - [P13-E Final Gate](operations/p13-e-final-gate.md) — evidência canônica de Purchase financeiro, unicidade, replay, concorrência, reconciliação e isolamento post-commit.
 - [P13-F Final Gate](operations/p13-f-final-gate.md) — evidência canônica de GTM/Consent Mode, GA4, Google Ads, Meta Pixel, Meta CAPI policy-blocked e provider-neutral dispatch.
 - [P13-G Final Gate](operations/p13-g-final-gate.md) — Admin Analytics read-only, RBAC, funil, receita canônica e dimensões temporais.
+- [P13-H Final Gate](operations/p13-h-final-gate.md) — gate técnico final, regressões P08–P13 e fechamento canônico da P13.
 
 ### Arquitetura de measurement aprovada
 

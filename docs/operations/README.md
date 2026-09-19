@@ -60,3 +60,4 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
 - [P13-E Final Gate](./p13-e-final-gate.md) — canonical Purchase from persisted financial truth, concurrency-safe uniqueness, reconciliation and post-commit failure isolation.
 - [P13-F Final Gate](./p13-f-final-gate.md) — GTM + Google Consent Mode, GA4, Google Ads, Meta Pixel, Meta CAPI policy block, provider-neutral dispatch and final P13-F regression evidence.
 - [P13-G Final Gate](./p13-g-final-gate.md) — server-protected read-only Admin Analytics, canonical Purchase revenue, First/Last Touch temporal reporting and RBAC evidence.
+- [P13-H Final Gate](./p13-h-final-gate.md) — complete P13 technical validation, regressions, security/privacy boundaries and final lifecycle closure.
