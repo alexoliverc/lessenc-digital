@@ -25,6 +25,10 @@
 - P16-HDB-01-FIX01 torna o vínculo de release um controle independente do migration guard:
   `P16_RELEASE_COMMIT` deve ser um SHA de 40 hexadecimais e corresponder exatamente ao `HEAD`
   resolvido por Git; valor ausente, malformado, divergente ou HEAD não verificável falha fechado.
+- P16-HDB-02 vincula o datasource efetivo do Prisma Migrate ao `DB_TLS_CA_FILE`: em staging, a
+  configuração deriva o caminho relativo a `prisma/`, substitui parâmetros TLS conflitantes e força
+  `sslcert` mais `sslaccept=strict`. A implementação interna está pronta; a prova TLS do Prisma
+  contra o banco hospedado continua pendente e nenhuma migration foi executada.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
 - Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11, identidade/autenticação/administração P12, analytics P13, Security Hardening P14 e Observability & Operational Readiness P15 permanecem nas respectivas baselines canônicas. P13, P14 e P15 estão COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. O checkpoint técnico permanente da P15 permanece em `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Produção continua fora do escopo atual; P16 está em implementação interna e não está completa.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.

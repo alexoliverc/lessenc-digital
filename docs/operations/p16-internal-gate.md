@@ -33,6 +33,7 @@
 | P16-F08 hosted recovery implementation | PARTIAL / CODE READY | scheduler, encryption, off-site copy and restore drill |
 | P16-F09 hosted observability delivery | APPLICATION CONTRACT READY | external monitor, alert destination and status page |
 | P16-HDB-F01 migration release binding | REMEDIATED IN FIX01 | hosted migration remains separately authorized and pending |
+| P16-HDB-F02 Prisma migration TLS binding | REMEDIATED IN P16-HDB-02 | hosted Prisma TLS proof remains pending |
 
 ## Gate evidence
 
@@ -80,3 +81,12 @@ closed. The fix tests only the guard and does not execute Prisma migration.
 FIX01 local evidence: 5 P16-HDB files / 41 tests PASS; complete regression 93 files / 772 tests
 PASS; lint, typecheck, formatting, dependency audit and synthetic staging build PASS. MySQL
 integration was not repeated because the fix does not change database, Prisma or persistence code.
+
+P16-HDB-02 derives the staging Prisma datasource internally from `DATABASE_URL` and the absolute
+`DB_TLS_CA_FILE`, forces `sslaccept=strict`, replaces conflicting TLS query parameters and preserves
+the no-database generation fallback. Local proof does not claim a hosted Prisma TLS connection or
+migration.
+
+P16-HDB-02 local evidence: 6 focused files / 53 tests PASS; complete regression 94 files / 784
+tests PASS; staging-config Prisma validate/generate, lint, typecheck, formatting, dependency audit
+and synthetic staging build PASS. No database connection or migration was executed.

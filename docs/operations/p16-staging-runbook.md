@@ -80,6 +80,18 @@ The migration guard independently executes `git rev-parse HEAD` and requires the
 `P16_RELEASE_COMMIT` exactly. Missing, malformed, mismatched or unverifiable release identity stops
 the command before Prisma. This control does not depend on an earlier preflight execution.
 
+For staging, operators configure the raw migration identity only in `DATABASE_URL` and the trust
+anchor only in absolute `DB_TLS_CA_FILE`; they do not manually duplicate Prisma TLS query
+parameters. `prisma.config.ts` derives the CA path relative to `prisma/`, converts Windows
+backslashes to forward slashes for URL transport, replaces all case variants of operator-provided
+`sslcert`/`sslaccept`, and forces the effective datasource to contain the derived `sslcert` plus
+`sslaccept=strict`. A missing/relative/unrepresentable CA or malformed/non-MySQL URL fails closed
+with a value-free code. Neither the raw nor effective datasource URL is printed.
+
+The configuration-only fallback `mysql://127.0.0.1:1/lessenc_unconfigured` remains available when
+`DATABASE_URL` is absent, so generate/static operations do not require hosted connectivity. The
+approved migration chain remains guard -> Prisma config TLS binding -> `prisma migrate deploy`.
+
 ### Hostinger managed single-user migration window
 
 The owner-approved `P16-DB-DECISION-01` compensates for Hostinger's one-user model through

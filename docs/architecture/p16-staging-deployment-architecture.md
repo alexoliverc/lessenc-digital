@@ -182,6 +182,12 @@ independently resolves `git rev-parse HEAD` and requires an exact match with the
 `P16_RELEASE_COMMIT`. Missing, malformed, mismatched or unverifiable release identity fails closed;
 running the staging preflight beforehand is not assumed.
 
+`P16-HDB-02` binds the effective Prisma migration datasource to the same explicit trust anchor used
+by P16. In staging, `prisma.config.ts` requires an absolute `DB_TLS_CA_FILE`, derives its path
+relative to the repository `prisma/` directory, normalizes it for URL transport and forces exactly
+one `sslcert=<derived path>` plus `sslaccept=strict`. Operator-supplied variants are replaced and
+cannot weaken the effective URL. The raw and effective URLs are never logged.
+
 ## 9. Private digital storage
 
 The application contract remains provider-independent through:
@@ -312,6 +318,13 @@ Database compatibility, TLS and hosted migrations have not yet been proven.
 `REMEDIATED IN P16-HDB-01-FIX01`: the migration guard now independently verifies that
 `P16_RELEASE_COMMIT` exactly matches the repository `HEAD` before `prisma migrate deploy` can be
 eligible. Hosted execution remains pending and was not performed by the fix.
+
+### P16-HDB-F02 — Prisma migration TLS binding missing
+
+`REMEDIATED IN P16-HDB-02 / HOSTED PRISMA TLS PROOF PENDING`: the staging Prisma datasource is now
+derived internally from `DATABASE_URL` and `DB_TLS_CA_FILE`, with an exact Prisma-relative CA path
+and forced `sslaccept=strict`. Local/static validation does not prove the hosted Prisma TLS session;
+no Hostinger connection or migration was performed by this remediation.
 
 ### P16-F10 — Hostinger single-user privilege rotation pending
 
