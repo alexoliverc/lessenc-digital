@@ -80,13 +80,17 @@ The migration guard independently executes `git rev-parse HEAD` and requires the
 `P16_RELEASE_COMMIT` exactly. Missing, malformed, mismatched or unverifiable release identity stops
 the command before Prisma. This control does not depend on an earlier preflight execution.
 
-For staging, operators configure the raw migration identity only in `DATABASE_URL` and the trust
-anchor only in absolute `DB_TLS_CA_FILE`; they do not manually duplicate Prisma TLS query
-parameters. `prisma.config.ts` derives the CA path relative to `prisma/`, converts Windows
-backslashes to forward slashes for URL transport, replaces all case variants of operator-provided
-`sslcert`/`sslaccept`, and forces the effective datasource to contain the derived `sslcert` plus
-`sslaccept=strict`. A missing/relative/unrepresentable CA or malformed/non-MySQL URL fails closed
-with a value-free code. Neither the raw nor effective datasource URL is printed.
+For staging, operators configure the raw migration identity in `DATABASE_URL`. `DB_TLS_CA_FILE`
+remains mandatory for the hosted application runtime and staging safety contract, but Prisma
+Migrate does not translate that file into `sslcert`.
+
+`prisma.config.ts` removes every case-insensitive operator-provided `sslcert` and `sslaccept`,
+emits exactly one `sslaccept=strict`, emits no `sslcert`, and relies on the
+Prisma/operating-system public trust store for migration certificate validation.
+
+A malformed or non-MySQL migration URL fails closed with a value-free error code. Neither the raw
+nor effective datasource URL is printed. Runtime database access separately continues to load
+`DB_TLS_CA_FILE` with `rejectUnauthorized=true`.
 
 The configuration-only fallback `mysql://127.0.0.1:1/lessenc_unconfigured` remains available when
 `DATABASE_URL` is absent, so generate/static operations do not require hosted connectivity. The

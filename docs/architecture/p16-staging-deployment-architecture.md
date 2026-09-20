@@ -182,11 +182,17 @@ independently resolves `git rev-parse HEAD` and requires an exact match with the
 `P16_RELEASE_COMMIT`. Missing, malformed, mismatched or unverifiable release identity fails closed;
 running the staging preflight beforehand is not assumed.
 
-`P16-HDB-02` binds the effective Prisma migration datasource to the same explicit trust anchor used
-by P16. In staging, `prisma.config.ts` requires an absolute `DB_TLS_CA_FILE`, derives its path
-relative to the repository `prisma/` directory, normalizes it for URL transport and forces exactly
-one `sslcert=<derived path>` plus `sslaccept=strict`. Operator-supplied variants are replaced and
-cannot weaken the effective URL. The raw and effective URLs are never logged.
+`P16-HDB-02` originally attempted to bind Prisma Migrate to the explicit runtime trust anchor by
+deriving `sslcert` from `DB_TLS_CA_FILE` and forcing `sslaccept=strict`. Hosted H2-I-D1/H2-I-D2
+validation showed that every tested explicit `sslcert` representation returned `P1001`, while
+`sslaccept=strict` with the Prisma/operating-system public trust store reached migration-state
+inspection.
+
+`P16-HDB-03` supersedes that migration-specific trust strategy. In staging, `prisma.config.ts`
+removes every case-insensitive operator-provided `sslcert` and `sslaccept`, emits exactly one
+`sslaccept=strict`, emits no `sslcert`, and never logs the raw or effective datasource URL.
+Application runtime TLS remains separate and continues to require `DB_TLS_CA_FILE`, explicit CA
+loading and `rejectUnauthorized=true`.
 
 ## 9. Private digital storage
 
@@ -321,10 +327,33 @@ eligible. Hosted execution remains pending and was not performed by the fix.
 
 ### P16-HDB-F02 — Prisma migration TLS binding missing
 
-`REMEDIATED IN P16-HDB-02 / HOSTED PRISMA TLS PROOF PENDING`: the staging Prisma datasource is now
-derived internally from `DATABASE_URL` and `DB_TLS_CA_FILE`, with an exact Prisma-relative CA path
-and forced `sslaccept=strict`. Local/static validation does not prove the hosted Prisma TLS session;
-no Hostinger connection or migration was performed by this remediation.
+`REMEDIATED INTERNALLY IN P16-HDB-02 / HOSTED VALIDATION EXPOSED P16-HDB-F03`: P16-HDB-02
+introduced strict TLS canonicalization with explicit `sslcert`. Local validation passed, but hosted
+validation later demonstrated that the explicit `sslcert` strategy was incompatible with the tested
+Prisma Schema Engine path.
+
+### P16-HDB-F03 — Prisma explicit sslcert incompatible with hosted Schema Engine
+
+`REMEDIATED IN P16-HDB-03 / HOSTED REVALIDATION PASS`: H2-I-D1 and H2-I-D2 demonstrated that
+`sslaccept=strict` with the Prisma/operating-system public trust store reaches migration-state
+inspection. Raw relative, encoded relative, Prisma-directory root-CA and Prisma-directory full-bundle
+`sslcert` variants returned `P1001`.
+
+The canonical Prisma Migrate contract therefore forces exactly one `sslaccept=strict`, removes all
+operator-provided `sslcert` parameters and emits no `sslcert`. Runtime database access continues to
+require `DB_TLS_CA_FILE` and `rejectUnauthorized=true`. No `prisma migrate deploy` or database
+mutation was performed during these hosted diagnostics.
+
+Final P16-HDB-03 hosted revalidation passed against the real Hostinger staging endpoint: the
+canonical hostname with `APP_ENV=staging` reached Prisma migration-state inspection under the final
+configuration; the same endpoint addressed by IP was rejected with `P1011` and TLS evidence; and a
+second canonical-hostname attempt reached migration-state inspection again. This proves that the
+final migration path remains strict rather than permissive.
+
+A subsequent synthetic staging production build also passed with `APP_ENV=staging`,
+`NODE_ENV=production`, synthetic `.invalid` database targets and the local environment file
+temporarily quarantined and restored. No hosted database connection, deploy, migration or database
+mutation occurred during that build.
 
 ### P16-F10 — Hostinger single-user privilege rotation pending
 

@@ -33,7 +33,8 @@
 | P16-F08 hosted recovery implementation | PARTIAL / CODE READY | scheduler, encryption, off-site copy and restore drill |
 | P16-F09 hosted observability delivery | APPLICATION CONTRACT READY | external monitor, alert destination and status page |
 | P16-HDB-F01 migration release binding | REMEDIATED IN FIX01 | hosted migration remains separately authorized and pending |
-| P16-HDB-F02 Prisma migration TLS binding | REMEDIATED IN P16-HDB-02 | hosted Prisma TLS proof remains pending |
+| P16-HDB-F02 Prisma migration TLS binding | REMEDIATED IN P16-HDB-02 | hosted validation exposed P16-HDB-F03 |
+| P16-HDB-F03 explicit Prisma `sslcert` incompatibility | REMEDIATED IN P16-HDB-03 | hosted strict-system-trust revalidation PASS |
 
 ## Gate evidence
 
@@ -82,10 +83,34 @@ FIX01 local evidence: 5 P16-HDB files / 41 tests PASS; complete regression 93 fi
 PASS; lint, typecheck, formatting, dependency audit and synthetic staging build PASS. MySQL
 integration was not repeated because the fix does not change database, Prisma or persistence code.
 
-P16-HDB-02 derives the staging Prisma datasource internally from `DATABASE_URL` and the absolute
-`DB_TLS_CA_FILE`, forces `sslaccept=strict`, replaces conflicting TLS query parameters and preserves
-the no-database generation fallback. Local proof does not claim a hosted Prisma TLS connection or
-migration.
+P16-HDB-02 originally derived the staging Prisma datasource from `DATABASE_URL` and
+`DB_TLS_CA_FILE`, forcing explicit `sslcert` and `sslaccept=strict`. Its local proof passed, but
+hosted H2-I-D1/H2-I-D2 exposed P16-HDB-F03: every tested explicit `sslcert` representation returned
+`P1001`.
+
+P16-HDB-03 supersedes that migration-specific strategy. The staging Prisma datasource now strips
+all case-insensitive `sslcert`/`sslaccept` operator parameters, emits exactly one
+`sslaccept=strict`, emits no `sslcert`, preserves the no-database generation fallback and relies on
+the Prisma/operating-system public trust store.
+
+This does not alter runtime database TLS: `DB_TLS_CA_FILE` and `rejectUnauthorized=true` remain
+mandatory for application database access.
+
+P16-HDB-03 final validation evidence:
+
+- complete local quality gate: 94 files / 788 tests PASS;
+- Prisma validate: PASS;
+- Prisma generate 7.10.0: PASS;
+- dependency audit: 0 vulnerabilities;
+- Prisma schema, migrations, packages and runtime database client: unchanged;
+- secret/hosted-identifier scan: 0 findings;
+- real hosted Prisma positive control with canonical hostname: migration-state inspection reached;
+- real hosted negative control using the same endpoint by IP: rejected with `P1011` and TLS evidence;
+- canonical-hostname positive reconfirmation: migration-state inspection reached;
+- synthetic staging production build: PASS;
+- local `.env.local` quarantine and restore: PASS;
+- `prisma migrate deploy`: NOT EXECUTED;
+- database mutation: NOT PERFORMED.
 
 P16-HDB-02 local evidence: 6 focused files / 53 tests PASS; complete regression 94 files / 784
 tests PASS; staging-config Prisma validate/generate, lint, typecheck, formatting, dependency audit

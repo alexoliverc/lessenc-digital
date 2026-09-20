@@ -25,10 +25,17 @@
 - P16-HDB-01-FIX01 torna o vínculo de release um controle independente do migration guard:
   `P16_RELEASE_COMMIT` deve ser um SHA de 40 hexadecimais e corresponder exatamente ao `HEAD`
   resolvido por Git; valor ausente, malformado, divergente ou HEAD não verificável falha fechado.
-- P16-HDB-02 vincula o datasource efetivo do Prisma Migrate ao `DB_TLS_CA_FILE`: em staging, a
-  configuração deriva o caminho relativo a `prisma/`, substitui parâmetros TLS conflitantes e força
-  `sslcert` mais `sslaccept=strict`. A implementação interna está pronta; a prova TLS do Prisma
-  contra o banco hospedado continua pendente e nenhuma migration foi executada.
+- P16-HDB-02 implementou inicialmente `sslcert` explícito mais `sslaccept=strict` para Prisma
+  Migrate. A validação hosted H2-I-D1/H2-I-D2 demonstrou que `sslaccept=strict` com o trust store
+  público alcança o estado das migrations, enquanto todas as variantes testadas de `sslcert`
+  explícito retornam `P1001`.
+- P16-HDB-03 passa a ser a regra canônica para Prisma Migrate: remover qualquer `sslcert`, forçar
+  exatamente um `sslaccept=strict` e usar o trust store público do Prisma/sistema operacional.
+  O runtime permanece separado, exigindo `DB_TLS_CA_FILE`, CA explícita e
+  `rejectUnauthorized=true`. A revalidação hosted final do P16-HDB-03 passou: hostname canônico
+  alcançou o estado das migrations, o mesmo endpoint por IP foi rejeitado com `P1011`/evidência TLS
+  e o hostname canônico passou novamente. O build staging sintético também passou. Nenhum
+  `prisma migrate deploy` ou mutation hosted foi executado.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
 - Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11, identidade/autenticação/administração P12, analytics P13, Security Hardening P14 e Observability & Operational Readiness P15 permanecem nas respectivas baselines canônicas. P13, P14 e P15 estão COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. O checkpoint técnico permanente da P15 permanece em `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Produção continua fora do escopo atual; P16 está em implementação interna e não está completa.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.
