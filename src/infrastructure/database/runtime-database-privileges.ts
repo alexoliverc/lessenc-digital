@@ -1,5 +1,12 @@
 const REQUIRED_RUNTIME_PRIVILEGES = new Set(["SELECT", "INSERT", "UPDATE", "DELETE"]);
 
+const HOSTINGER_MANAGED_RUNTIME_PRIVILEGE_EXTRAS = new Set([
+  "DELETE HISTORY",
+  "SHOW CREATE ROUTINE",
+]);
+
+export type RuntimeDatabaseAccessModel = "distinct-users" | "hostinger-managed-single-user";
+
 export type RuntimePrivilegeVerification = Readonly<{
   safe: boolean;
   failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE" | null;
@@ -28,8 +35,23 @@ function normalizeScope(scope: string): string {
 export function verifyRuntimeDatabasePrivileges(
   rows: readonly Readonly<Record<string, unknown>>[],
   expectedDatabase: string,
+  accessModel: RuntimeDatabaseAccessModel,
 ): RuntimePrivilegeVerification {
-  if (rows.length === 0 || !/^[A-Za-z0-9_-]+$/u.test(expectedDatabase)) return unsafe();
+  if (
+    rows.length === 0 ||
+    !/^[A-Za-z0-9_-]+$/u.test(expectedDatabase) ||
+    (accessModel !== "distinct-users" && accessModel !== "hostinger-managed-single-user")
+  ) {
+    return unsafe();
+  }
+
+  const allowedRuntimePrivileges = new Set(REQUIRED_RUNTIME_PRIVILEGES);
+
+  if (accessModel === "hostinger-managed-single-user") {
+    for (const privilege of HOSTINGER_MANAGED_RUNTIME_PRIVILEGE_EXTRAS) {
+      allowedRuntimePrivileges.add(privilege);
+    }
+  }
 
   const observedRuntimePrivileges = new Set<string>();
 
@@ -57,8 +79,11 @@ export function verifyRuntimeDatabasePrivileges(
     if (scope !== `${expectedDatabase}.*`) return unsafe();
 
     for (const privilege of privileges) {
-      if (!REQUIRED_RUNTIME_PRIVILEGES.has(privilege)) return unsafe();
-      observedRuntimePrivileges.add(privilege);
+      if (!allowedRuntimePrivileges.has(privilege)) return unsafe();
+
+      if (REQUIRED_RUNTIME_PRIVILEGES.has(privilege)) {
+        observedRuntimePrivileges.add(privilege);
+      }
     }
   }
 

@@ -67,17 +67,20 @@ describe("P15 readiness diagnostic correlation", () => {
       P16_DATABASE_MIGRATION_WINDOW: process.env.P16_DATABASE_MIGRATION_WINDOW,
       PRIVATE_STORAGE_DRIVER: process.env.PRIVATE_STORAGE_DRIVER,
     };
+
     process.env.APP_ENV = "staging";
     process.env.DB_RUNTIME_URL = "mysql://hostinger:synthetic@db.invalid/lessenc_staging";
     process.env.P16_DATABASE_ACCESS_MODEL = "hostinger-managed-single-user";
     process.env.P16_DATABASE_MIGRATION_WINDOW = "disabled";
     process.env.PRIVATE_STORAGE_DRIVER = "hosted";
+
     databaseQuery.mockResolvedValue([{ readiness: 1 }]);
     databaseQueryUnsafe.mockResolvedValue([
       {
         "Grants for staged@%": "GRANT ALL PRIVILEGES ON `lessenc_staging`.* TO `staged`@`%`",
       },
     ]);
+
     const output = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     try {
@@ -96,4 +99,115 @@ describe("P15 readiness diagnostic correlation", () => {
       }
     }
   });
+
+  it("accepts the Hostinger-managed grant baseline when provider-extra target surfaces are absent", async () => {
+    const previous = {
+      APP_ENV: process.env.APP_ENV,
+      DB_RUNTIME_URL: process.env.DB_RUNTIME_URL,
+      P16_DATABASE_ACCESS_MODEL: process.env.P16_DATABASE_ACCESS_MODEL,
+      P16_DATABASE_MIGRATION_WINDOW: process.env.P16_DATABASE_MIGRATION_WINDOW,
+      PRIVATE_STORAGE_DRIVER: process.env.PRIVATE_STORAGE_DRIVER,
+    };
+
+    process.env.APP_ENV = "staging";
+    process.env.DB_RUNTIME_URL = "mysql://hostinger:synthetic@db.invalid/lessenc_staging";
+    process.env.P16_DATABASE_ACCESS_MODEL = "hostinger-managed-single-user";
+    process.env.P16_DATABASE_MIGRATION_WINDOW = "disabled";
+    process.env.PRIVATE_STORAGE_DRIVER = "hosted";
+
+    databaseQuery.mockReset();
+    databaseQueryUnsafe.mockReset();
+
+    databaseQuery
+      .mockResolvedValueOnce([{ readiness: 1 }])
+      .mockResolvedValueOnce([{ total: 0 }])
+      .mockResolvedValueOnce([{ total: 0 }]);
+
+    databaseQueryUnsafe.mockResolvedValue([
+      {
+        "Grants for staged@%": "GRANT USAGE ON *.* TO `staged`@`%`",
+      },
+      {
+        "Grants for staged@%":
+          "GRANT SELECT, INSERT, UPDATE, DELETE, DELETE HISTORY, SHOW CREATE ROUTINE ON `lessenc_staging`.* TO `staged`@`%`",
+      },
+    ]);
+
+    const output = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      const report = await runReadinessProbe(correlationId);
+      const logs = JSON.stringify(output.mock.calls);
+
+      expect(report.status).toBe("NOT_READY");
+      expect(logs).not.toContain("readiness_database_privilege_check_failed");
+      expect(logs).not.toContain("DELETE HISTORY");
+      expect(logs).not.toContain("SHOW CREATE ROUTINE");
+      expect(databaseQueryUnsafe).toHaveBeenCalledTimes(1);
+      expect(databaseQuery).toHaveBeenCalledTimes(3);
+    } finally {
+      for (const [key, value] of Object.entries(previous)) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+    }
+  });
+
+  it.each([
+    ["system-versioned table", 1, 0],
+    ["stored routine", 0, 1],
+  ])(
+    "fails closed when a Hostinger provider-managed privilege gains a %s target surface",
+    async (_surface, versionedTableCount, storedRoutineCount) => {
+      const previous = {
+        APP_ENV: process.env.APP_ENV,
+        DB_RUNTIME_URL: process.env.DB_RUNTIME_URL,
+        P16_DATABASE_ACCESS_MODEL: process.env.P16_DATABASE_ACCESS_MODEL,
+        P16_DATABASE_MIGRATION_WINDOW: process.env.P16_DATABASE_MIGRATION_WINDOW,
+        PRIVATE_STORAGE_DRIVER: process.env.PRIVATE_STORAGE_DRIVER,
+      };
+
+      process.env.APP_ENV = "staging";
+      process.env.DB_RUNTIME_URL = "mysql://hostinger:synthetic@db.invalid/lessenc_staging";
+      process.env.P16_DATABASE_ACCESS_MODEL = "hostinger-managed-single-user";
+      process.env.P16_DATABASE_MIGRATION_WINDOW = "disabled";
+      process.env.PRIVATE_STORAGE_DRIVER = "hosted";
+
+      databaseQuery.mockReset();
+      databaseQueryUnsafe.mockReset();
+
+      databaseQuery
+        .mockResolvedValueOnce([{ readiness: 1 }])
+        .mockResolvedValueOnce([{ total: versionedTableCount }])
+        .mockResolvedValueOnce([{ total: storedRoutineCount }]);
+
+      databaseQueryUnsafe.mockResolvedValue([
+        {
+          "Grants for staged@%": "GRANT USAGE ON *.* TO `staged`@`%`",
+        },
+        {
+          "Grants for staged@%":
+            "GRANT SELECT, INSERT, UPDATE, DELETE, DELETE HISTORY, SHOW CREATE ROUTINE ON `lessenc_staging`.* TO `staged`@`%`",
+        },
+      ]);
+
+      const output = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+      try {
+        const report = await runReadinessProbe(correlationId);
+        const logs = JSON.stringify(output.mock.calls);
+
+        expect(report.status).toBe("NOT_READY");
+        expect(logs).toContain("readiness_database_privilege_check_failed");
+        expect(logs).toContain("DATABASE_RUNTIME_PRIVILEGES_UNSAFE");
+        expect(logs).not.toContain("DELETE HISTORY");
+        expect(logs).not.toContain("SHOW CREATE ROUTINE");
+      } finally {
+        for (const [key, value] of Object.entries(previous)) {
+          if (value === undefined) delete process.env[key];
+          else process.env[key] = value;
+        }
+      }
+    },
+  );
 });

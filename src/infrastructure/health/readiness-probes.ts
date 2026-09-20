@@ -57,7 +57,7 @@ async function databaseCheck(correlationId: string): Promise<ReadinessCheck> {
       const databaseName = databaseNameFromRuntimeUrl(process.env.DB_RUNTIME_URL);
 
       if (
-        !["distinct-users", "hostinger-managed-single-user"].includes(accessModel ?? "") ||
+        (accessModel !== "distinct-users" && accessModel !== "hostinger-managed-single-user") ||
         migrationWindow !== "disabled" ||
         databaseName === null
       ) {
@@ -71,7 +71,7 @@ async function databaseCheck(correlationId: string): Promise<ReadinessCheck> {
       const grants = await database.$queryRawUnsafe<Array<Record<string, unknown>>>(
         "SHOW GRANTS FOR CURRENT_USER()",
       );
-      const verification = verifyRuntimeDatabasePrivileges(grants, databaseName);
+      const verification = verifyRuntimeDatabasePrivileges(grants, databaseName, accessModel);
       if (!verification.safe) {
         logger.error("readiness_database_privilege_check_failed", {
           correlationId,
@@ -84,6 +84,39 @@ async function databaseCheck(correlationId: string): Promise<ReadinessCheck> {
           ready: false,
           failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
         });
+      }
+
+      if (accessModel === "hostinger-managed-single-user") {
+        const [versionedTables, storedRoutines] = await Promise.all([
+          database.$queryRaw<Array<{ total: bigint | number }>>`
+            SELECT COUNT(*) AS total
+            FROM information_schema.TABLES
+            WHERE TABLE_SCHEMA = ${databaseName}
+              AND TABLE_TYPE = 'SYSTEM VERSIONED'
+          `,
+          database.$queryRaw<Array<{ total: bigint | number }>>`
+            SELECT COUNT(*) AS total
+            FROM information_schema.ROUTINES
+            WHERE ROUTINE_SCHEMA = ${databaseName}
+          `,
+        ]);
+
+        const versionedTableCount = Number(versionedTables[0]?.total ?? -1);
+        const storedRoutineCount = Number(storedRoutines[0]?.total ?? -1);
+
+        if (versionedTableCount !== 0 || storedRoutineCount !== 0) {
+          logger.error("readiness_database_privilege_check_failed", {
+            correlationId,
+            surface: "DATABASE",
+            outcome: "FAILED",
+            failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+          });
+          return Object.freeze({
+            name: "DATABASE_CONNECTIVITY",
+            ready: false,
+            failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+          });
+        }
       }
     }
 

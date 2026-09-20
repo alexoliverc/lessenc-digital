@@ -21,7 +21,12 @@
   `hostinger-managed-single-user` preserva `DATABASE_URL` e `DB_RUNTIME_URL` como contextos lógicos
   separados sobre uma identidade física, compensado por janela de migration fail-closed, rotação
   externa de privilégios e verificação read-only pós-migration. O modo `distinct-users` continua
-  suportado. TLS/CA, migration e grants efetivos permanecem HOSTED VALIDATION REQUIRED.
+  suportado. TLS/CA hosted, migration 8/8 e grants efetivos já foram validados. Após redução no
+  hPanel, o grant real ficou `USAGE` global + `SELECT`, `INSERT`, `UPDATE`, `DELETE`,
+  `DELETE HISTORY` e `SHOW CREATE ROUTINE` no schema, sem `ALL PRIVILEGES` e sem `GRANT OPTION`.
+  Os dois extras são restrição gerenciada da Hostinger: são aceitos somente no modo Hostinger e
+  somente enquanto existirem zero tabelas system-versioned e zero stored routines; readiness falha
+  fechado se essa condição mudar.
 - P16-HDB-01-FIX01 torna o vínculo de release um controle independente do migration guard:
   `P16_RELEASE_COMMIT` deve ser um SHA de 40 hexadecimais e corresponder exatamente ao `HEAD`
   resolvido por Git; valor ausente, malformado, divergente ou HEAD não verificável falha fechado.

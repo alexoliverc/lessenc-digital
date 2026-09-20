@@ -125,7 +125,7 @@ If it cannot satisfy the frozen requirements, the application may remain on Host
 
 **Reason:** the selected Hostinger service exposes one database user for the database
 
-**Status:** OWNER APPROVED / CODE ADAPTATION COMPLETE / HOSTED VALIDATION REQUIRED
+**Status:** OWNER APPROVED / CODE ADAPTATION COMPLETE / HOSTED DATABASE VALIDATION COMPLETE / APPLICATION READINESS PENDING
 
 P16 supports two explicit access models through `P16_DATABASE_ACCESS_MODEL`:
 
@@ -150,10 +150,21 @@ Privilege elevation and reduction are Hostinger control-plane actions outside th
 6. validate runtime grants and protected readiness.
 
 Repository runtime behavior demonstrably requires `SELECT`, `INSERT`, `UPDATE` and `DELETE`.
-The runtime verifier permits only those privileges on the exact staging schema plus non-material
-global `USAGE`. It rejects `ALL PRIVILEGES`, global DML, DDL/administrative privileges, `GRANT
-OPTION`, foreign scopes, incomplete DML and uninterpreted role grants. Hosted validation must also
-audit inherited/public grants and prove the effective final privilege posture.
+
+Under `distinct-users`, the runtime verifier continues to permit only those four DML privileges on
+the exact staging schema plus global `USAGE`.
+
+Hosted Hostinger validation proved that the managed single-user control plane retains two additional
+schema privileges which are not individually exposed by hPanel: `DELETE HISTORY` and
+`SHOW CREATE ROUTINE`. They are accepted only when
+`P16_DATABASE_ACCESS_MODEL=hostinger-managed-single-user`.
+
+This is a provider-specific fail-closed exception, not a general privilege expansion. The readiness
+contract permits no other additional privilege, continues to reject `ALL PRIVILEGES`,
+`GRANT OPTION`, global DML, foreign scopes, incomplete DML, DDL/administrative privileges and
+uninterpreted role grants, and continuously requires zero `SYSTEM VERSIONED` tables and zero stored
+routines. If either provider-extra target surface appears, staging readiness returns
+`DATABASE_RUNTIME_PRIVILEGES_UNSAFE`.
 
 ## 8. Staging migrations
 
@@ -355,11 +366,25 @@ A subsequent synthetic staging production build also passed with `APP_ENV=stagin
 temporarily quarantined and restored. No hosted database connection, deploy, migration or database
 mutation occurred during that build.
 
-### P16-F10 — Hostinger single-user privilege rotation pending
+### P16-F10 — Hostinger single-user database lifecycle validated
 
-`P16-DB-DECISION-01` is implemented in code. Hostinger privilege elevation, guarded migration,
-privilege reduction, `SHOW GRANTS FOR CURRENT_USER()` proof, inherited/public grant audit and final
-runtime readiness remain hosted actions.
+`P16-DB-DECISION-01` is implemented in code and its hosted database lifecycle has been exercised
+against the real staging database. The authorized migration window was opened for
+`prisma migrate deploy`, all eight repository migrations were applied successfully, the migration
+window was returned to `disabled`, and subsequent Prisma migration-state inspection reported the
+schema up to date.
+
+Post-migration privilege reduction was also exercised through the Hostinger control plane. Effective
+`SHOW GRANTS FOR CURRENT_USER()` evidence established global `USAGE`, required schema
+`SELECT`/`INSERT`/`UPDATE`/`DELETE`, absence of `ALL PRIVILEGES` and absence of `GRANT OPTION`.
+
+Hostinger retains `DELETE HISTORY` and `SHOW CREATE ROUTINE` as provider-managed schema extras not
+individually exposed by hPanel. H2-M1 reconciles those exact exceptions with continuous fail-closed
+readiness controls requiring zero system-versioned tables and zero stored routines.
+
+The database lifecycle portion of P16-F10 is therefore validated. Full application readiness remains
+pending because hosted private storage and the remaining P16 hosted operational dependencies are not
+yet complete.
 
 ### P16-F11 — Hosted APP_URL drift
 
@@ -409,3 +434,32 @@ The architecture is frozen sufficiently to begin P16-02.
 P16-01 does not claim complete database, storage, payment, readiness, backup, monitoring or complete staging readiness.
 
 Those proofs belong to subsequent P16 subphases.
+
+## P16-H2-M1 — Hostinger managed runtime privilege exception
+
+Real hosted validation established the final Hostinger managed grant posture after migration and
+privilege reduction:
+
+- global scope: `USAGE`;
+- required schema DML: `SELECT`, `INSERT`, `UPDATE`, `DELETE`;
+- provider-managed schema extras: `DELETE HISTORY`, `SHOW CREATE ROUTINE`;
+- `ALL PRIVILEGES`: absent;
+- `GRANT OPTION`: absent;
+- system-versioned tables: zero;
+- stored routines: zero.
+
+The hPanel database-permission surface exposes the four required DML permissions but does not expose
+individual controls for `DELETE HISTORY` or `SHOW CREATE ROUTINE`. The application therefore binds
+those two exact exceptions exclusively to `hostinger-managed-single-user`.
+
+The runtime readiness probe now continuously verifies both the effective grant allowlist and the
+absence of target surfaces for the two provider-managed extras. A new system-versioned table, stored
+routine, unexpected privilege, foreign schema grant, global DML, grant option or broad privilege
+fails closed.
+
+The hosted staging database migration itself is complete: all eight repository migrations were
+applied successfully and subsequent Prisma migration-state inspection reported the schema up to
+date. The migration window was returned to `disabled`.
+
+This remediation does not authorize an application deployment. Hosted private storage and the
+remaining P16 hosted operational controls remain separate blockers.

@@ -16,6 +16,7 @@ describe("P16-HDB runtime privilege verification", () => {
           row("GRANT SELECT, INSERT, UPDATE, DELETE ON `lessenc_staging`.* TO `staged`@`%`"),
         ],
         "lessenc_staging",
+        "distinct-users",
       ),
     ).toEqual({ safe: true, failureCode: null });
   });
@@ -40,8 +41,12 @@ describe("P16-HDB runtime privilege verification", () => {
           ),
         ],
         "lessenc_staging",
+        "distinct-users",
       ),
-    ).toEqual({ safe: false, failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE" });
+    ).toEqual({
+      safe: false,
+      failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+    });
   });
 
   it("rejects grant option, missing DML, other schemas, global DML and uninterpreted roles", () => {
@@ -58,8 +63,59 @@ describe("P16-HDB runtime privilege verification", () => {
     ];
 
     for (const grants of cases) {
-      expect(verifyRuntimeDatabasePrivileges(grants, "lessenc_staging").safe).toBe(false);
+      expect(
+        verifyRuntimeDatabasePrivileges(grants, "lessenc_staging", "distinct-users").safe,
+      ).toBe(false);
     }
+  });
+
+  it("accepts only the known provider extras under explicit Hostinger mode", () => {
+    const grants = [
+      row("GRANT USAGE ON *.* TO `staged`@`%`"),
+      row(
+        "GRANT SELECT, INSERT, UPDATE, DELETE, DELETE HISTORY, SHOW CREATE ROUTINE ON `lessenc_staging`.* TO `staged`@`%`",
+      ),
+    ];
+
+    expect(
+      verifyRuntimeDatabasePrivileges(grants, "lessenc_staging", "hostinger-managed-single-user"),
+    ).toEqual({ safe: true, failureCode: null });
+
+    expect(verifyRuntimeDatabasePrivileges(grants, "lessenc_staging", "distinct-users")).toEqual({
+      safe: false,
+      failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+    });
+  });
+
+  it("accepts a stricter Hostinger grant if the provider removes its managed extras", () => {
+    expect(
+      verifyRuntimeDatabasePrivileges(
+        [
+          row("GRANT USAGE ON *.* TO `staged`@`%`"),
+          row("GRANT SELECT, INSERT, UPDATE, DELETE ON `lessenc_staging`.* TO `staged`@`%`"),
+        ],
+        "lessenc_staging",
+        "hostinger-managed-single-user",
+      ),
+    ).toEqual({ safe: true, failureCode: null });
+  });
+
+  it("rejects every unapproved additional privilege under Hostinger mode", () => {
+    expect(
+      verifyRuntimeDatabasePrivileges(
+        [
+          row("GRANT USAGE ON *.* TO `staged`@`%`"),
+          row(
+            "GRANT SELECT, INSERT, UPDATE, DELETE, DELETE HISTORY, SHOW CREATE ROUTINE, CREATE ON `lessenc_staging`.* TO `staged`@`%`",
+          ),
+        ],
+        "lessenc_staging",
+        "hostinger-managed-single-user",
+      ),
+    ).toEqual({
+      safe: false,
+      failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+    });
   });
 
   it("extracts only an explicit MySQL database name without exposing credentials", () => {

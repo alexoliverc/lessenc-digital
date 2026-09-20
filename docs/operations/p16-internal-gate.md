@@ -72,8 +72,13 @@ repository now supports explicit `distinct-users` and `hostinger-managed-single-
 requires an enabled migration window only for guarded migration, requires a disabled window for
 runtime, and validates runtime grants conservatively through protected readiness.
 
-This adaptation does not connect to Hostinger and does not prove TLS, effective privileges,
-migration success or runtime readiness in the hosted environment. P16 remains incomplete.
+At the time of P16-HDB-01 this adaptation had not yet connected to Hostinger or proved TLS,
+effective privileges, migration success or runtime readiness. Subsequent P16 hosted validation has
+since proved database TLS, completed all eight hosted migrations, reconciled effective runtime
+privileges and validated the provider-specific privilege constraint.
+
+Full application readiness is still not proven because hosted private storage and the remaining P16
+hosted operational dependencies remain incomplete. P16 therefore remains incomplete.
 
 `P16-HDB-01-FIX01` makes release binding an independent migration-guard control: the configured
 40-hex release commit must equal the current Git `HEAD`, and inability to resolve `HEAD` fails
@@ -115,3 +120,39 @@ P16-HDB-03 final validation evidence:
 P16-HDB-02 local evidence: 6 focused files / 53 tests PASS; complete regression 94 files / 784
 tests PASS; staging-config Prisma validate/generate, lint, typecheck, formatting, dependency audit
 and synthetic staging build PASS. No database connection or migration was executed.
+
+## P16-H2-M1 — Hosted database privilege reconciliation
+
+Hosted execution completed the Hostinger database migration and post-migration privilege analysis.
+
+Evidence established:
+
+- all 8 repository migrations applied successfully;
+- subsequent Prisma migration status reported the hosted schema up to date;
+- migration window returned to `disabled`;
+- runtime connectivity and authentication passed through the MariaDB driver;
+- Prisma migration-state inspection passed under the same locked runtime credential;
+- effective global privilege is `USAGE` only;
+- required schema privileges `SELECT`, `INSERT`, `UPDATE`, `DELETE` are present;
+- `ALL PRIVILEGES` is absent;
+- `GRANT OPTION` is absent;
+- Hostinger retains `DELETE HISTORY` and `SHOW CREATE ROUTINE` as provider-managed extras;
+- hPanel does not expose individual controls for those two extras;
+- real hosted inspection found zero system-versioned tables and zero stored routines.
+
+H2-M1B reconciles runtime readiness with that provider constraint without weakening the generic
+database-security contract. `distinct-users` remains restricted to the four required DML
+privileges. `hostinger-managed-single-user` additionally permits only the two observed
+provider-managed extras and fails closed if either corresponding target surface becomes present.
+
+Focused validation after remediation:
+
+- 4 test files passed;
+- 42 tests passed;
+- TypeScript typecheck passed;
+- ESLint passed;
+- `git diff --check` passed;
+- code/test scope remained exactly four files before this documentation reconciliation.
+
+Application deployment remains NOT EXECUTED. P16 remains incomplete because hosted private storage
+and the remaining hosted operational validation are still pending.

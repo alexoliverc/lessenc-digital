@@ -124,9 +124,16 @@ Protected staging readiness executes the read-only statement:
 SHOW GRANTS FOR CURRENT_USER()
 ```
 
-It accepts only those four DML privileges on the exact staging schema plus optional global
-`USAGE`. Broad, missing, foreign, DDL, administrative, role or grant-option results fail closed.
-Neither the readiness response nor application logs include the grant statements. Hosted evidence
+Under `distinct-users`, it accepts only those four DML privileges on the exact staging schema plus
+global `USAGE`.
+
+Under explicit `hostinger-managed-single-user`, hosted evidence permits exactly two provider-managed
+extras in addition to the required DML set: `DELETE HISTORY` and `SHOW CREATE ROUTINE`. The readiness
+probe compensates by requiring zero `SYSTEM VERSIONED` tables and zero stored routines. Any other
+additional privilege, target-surface appearance, broad privilege, foreign scope, global DML,
+administrative/DDL grant, role grant or `GRANT OPTION` fails closed.
+
+Neither the readiness response nor application logs include the raw grant statements. Hosted evidence
 must separately confirm effective/inherited privileges, including `PUBLIC`, because provider
 behavior cannot be proven locally.
 
@@ -213,3 +220,27 @@ RPO/RTO and rollback.
 For Hostinger MariaDB this explicitly includes migration privilege elevation, subsequent reduction,
 current-user and inherited/public grant evidence, and correction of the observed hosted
 `APP_URL=https://staging.lessenc.com.br` to the canonical `https://lessenc.com.br`.
+
+### Hostinger managed single-user post-migration baseline
+
+The hosted database migration and runtime privilege-reduction procedure has been exercised against
+the real staging database.
+
+The current accepted Hostinger runtime posture is:
+
+- global `USAGE`;
+- schema `SELECT`, `INSERT`, `UPDATE`, `DELETE`;
+- provider-managed `DELETE HISTORY`;
+- provider-managed `SHOW CREATE ROUTINE`;
+- no `ALL PRIVILEGES`;
+- no `GRANT OPTION`;
+- zero system-versioned tables;
+- zero stored routines.
+
+The last two privileges are not treated as application requirements. They are provider-specific
+exceptions accepted only by the explicit Hostinger access model while their target surfaces remain
+absent.
+
+After an authorized migration, the migration window must be returned to `disabled` before ordinary
+runtime/readiness operation. No application deployment is implied by successful database migration
+or privilege verification.
