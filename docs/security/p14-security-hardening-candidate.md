@@ -1,12 +1,15 @@
-# P14 — Security Hardening — implementation candidate
+# P14 — Security Hardening — implementation and PR candidate
 
-**Status:** P14 IMPLEMENTATION CANDIDATE — AWAITING INDEPENDENT AUDIT
+**Status:** P14 IMPLEMENTATION PASS / PR #36 / HOSTED CI PASS / AWAITING FINAL MERGE AUDIT
 **Branch:** `phase/p14-security-hardening`
 **Canonical parent:** `420ee72753816ec69b4639f6cfdf357b45df817d`
+**Implementation commit:** `2acc5f8aad0fb1e697171358f2b25355e3a04b69`
+**Pull request:** [#36 — P14 Security Hardening](https://github.com/alexoliverc/lessenc-digital/pull/36)
 **Deployment:** NOT PERFORMED
 
-This document records the uncommitted candidate produced by P14-01 through P14-06. It does not
-declare P14 complete, merged, checkpointed, deployed or ready for production.
+This document records the independently audited P14-01 through P14-06 implementation and its
+hosted CI validation. It does not declare P14 complete, merged, checkpointed, deployed or ready for
+production; final merge audit remains pending.
 
 ## P14-01 — HTTP security headers and CSP
 
@@ -190,17 +193,19 @@ including build/test/dev tooling. A production-only audit remains useful as addi
 but is not the sole CI gate. The local full audit reported 0 vulnerabilities: 0 critical, high,
 moderate, low or informational across 416 total dependency records. No dependency or lockfile changed.
 
-Quality/security workflow, CodeQL and Dependabot are **IMPLEMENTED AS CODE / GITHUB EXECUTION
-VALIDATION PENDING** because commit, push and PR remain prohibited. `dependabot.yml` configures
-version updates; it does not prove that Dependabot Alerts or Dependabot Security Updates are enabled.
-GitHub Secret Scanning and branch-protection settings are also not claimed as enabled.
+Quality/security and CodeQL executed successfully in PR #36. Hosted CodeQL downloaded, initialized
+and analyzed with `github/codeql-action/*@1c5b675653bb5c22dbe9b12b556ec555138e09fd`; no code-scanning
+alert was returned for the branch. `dependabot.yml` configures version updates, but platform
+inspection found Dependabot Alerts, Dependabot Security Updates, Secret Scanning and Push Protection
+disabled; `main` has neither branch protection nor a ruleset. Those platform settings were not
+changed in P14.
 
 ## Original finding closure
 
 | Finding | Original | Candidate evidence | Current status | Remaining limitation |
 | --- | --- | --- | --- | --- |
 | P14-G01 | missing global headers | global/route-specific CSP/header policy plus eight tests and optimized-runtime smoke | IMPLEMENTED | hosted CSP/HSTS validation P16 |
-| P14-G02 | no versioned CI/security gates | quality workflow, CodeQL and Dependabot present only as uncommitted worktree code | IMPLEMENTED AS CODE / GITHUB EXECUTION VALIDATION PENDING | no authorized commit/push/PR; platform settings and CI MySQL harness remain open |
+| P14-G02 | no versioned CI/security gates | quality workflow and CodeQL committed, PR #36 hosted execution PASS; Dependabot configuration versioned | IMPLEMENTED / HOSTED CI PASS | platform settings and CI MySQL harness remain open |
 | P14-G03 | arbitrary HTTPS payment presentation; first P14 fix conflated PIX and 3DS | provenance-bound dynamic ACS validation, strict PIX allowlist, state/association binding and negative tests | IMPLEMENTED AS CORRECTED / RE-AUDIT PENDING | provider TEST/browser validation P16/P17 |
 | P14-U01 | hosted CORS/headers unknown | same-origin route controls and application headers reviewed | UNKNOWN / NEEDS HOSTED VALIDATION | P16 |
 | P14-U02 | CSP/provider compatibility unknown | explicit source matrix and unit tests | PARTIAL | real Brick/GTM/Meta behavior P16/P17 |
@@ -250,7 +255,7 @@ Final classification:
 | secrets/PII/log redaction | IMPLEMENTED |
 | audit/download/webhook/payment/provider boundaries | IMPLEMENTED |
 | dependency audit | IMPLEMENTED over the complete dependency graph |
-| repository CI tooling | IMPLEMENTED AS CODE / GITHUB EXECUTION VALIDATION PENDING |
+| repository CI tooling | IMPLEMENTED / HOSTED CI PASS / platform controls remain open |
 | TLS/HSTS effectiveness, hosted CORS, production cookies/secrets/storage | UNKNOWN / NEEDS HOSTED VALIDATION |
 | observability/incident response consolidation | DEFERRED TO CANONICAL FUTURE PHASE P15 |
 | staging/provider/browser E2E | DEFERRED TO CANONICAL FUTURE PHASE P16/P17 |

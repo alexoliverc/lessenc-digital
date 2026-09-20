@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 — Security Hardening has an uncommitted implementation candidate on `phase/p14-security-hardening` and is AWAITING INDEPENDENT AUDIT. No deployment has been performed.
+**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 — Security Hardening passed independent audit, is committed on `phase/p14-security-hardening` and has hosted CI PASS in PR #36; final merge audit remains pending. No deployment has been performed.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1067,7 +1067,7 @@ The initial P13 MVP does not require:
 ---
 ## P14 — Security Hardening
 
-**Status:** IMPLEMENTATION CANDIDATE — AWAITING INDEPENDENT AUDIT
+**Status:** IMPLEMENTATION PASS / PR #36 / HOSTED CI PASS / AWAITING FINAL MERGE AUDIT
 
 ### Objective
 
@@ -1123,8 +1123,8 @@ Security acceptance criteria are satisfied.
 
 The candidate implementation and evidence are recorded in
 [`docs/security/p14-security-hardening-candidate.md`](docs/security/p14-security-hardening-candidate.md).
-This state does not mean COMPLETE, MERGED, CHECKPOINTED or deployed; independent owner/ChatGPT
-audit and the separately authorized Git lifecycle remain pending.
+This state does not mean COMPLETE, MERGED, CHECKPOINTED or deployed; the final merge audit and
+separately authorized merge lifecycle remain pending.
 
 ---
 
