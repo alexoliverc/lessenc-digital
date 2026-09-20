@@ -2,14 +2,19 @@
 import { access } from "node:fs/promises";
 import process from "node:process";
 
+import { validateReleaseCommitBinding } from "./lib/p16-release-binding.mjs";
 import { validateStagingEnvironment } from "./lib/p16-staging-contract.mjs";
 
-const failures = validateStagingEnvironment(process.env, { gate: "migration" }).filter(
+const failures = [
+  ...validateStagingEnvironment(process.env, { gate: "migration" }),
+  ...validateReleaseCommitBinding(process.env.P16_RELEASE_COMMIT),
+].filter(
   (failure) =>
     failure.startsWith("APP_") ||
     failure.startsWith("NODE_") ||
     failure.startsWith("P16_STAGING_") ||
     failure.startsWith("P16_DATABASE_") ||
+    failure.startsWith("P16_RELEASE_") ||
     failure.startsWith("HOSTINGER_") ||
     failure.startsWith("DATABASE_") ||
     failure.startsWith("DB_RUNTIME_") ||

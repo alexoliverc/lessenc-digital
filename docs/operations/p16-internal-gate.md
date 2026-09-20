@@ -32,6 +32,7 @@
 | P16-F07 hosted readiness access control | REMEDIATED IN CODE | hosted HTTP proof |
 | P16-F08 hosted recovery implementation | PARTIAL / CODE READY | scheduler, encryption, off-site copy and restore drill |
 | P16-F09 hosted observability delivery | APPLICATION CONTRACT READY | external monitor, alert destination and status page |
+| P16-HDB-F01 migration release binding | REMEDIATED IN FIX01 | hosted migration remains separately authorized and pending |
 
 ## Gate evidence
 
@@ -71,3 +72,11 @@ runtime, and validates runtime grants conservatively through protected readiness
 
 This adaptation does not connect to Hostinger and does not prove TLS, effective privileges,
 migration success or runtime readiness in the hosted environment. P16 remains incomplete.
+
+`P16-HDB-01-FIX01` makes release binding an independent migration-guard control: the configured
+40-hex release commit must equal the current Git `HEAD`, and inability to resolve `HEAD` fails
+closed. The fix tests only the guard and does not execute Prisma migration.
+
+FIX01 local evidence: 5 P16-HDB files / 41 tests PASS; complete regression 93 files / 772 tests
+PASS; lint, typecheck, formatting, dependency audit and synthetic staging build PASS. MySQL
+integration was not repeated because the fix does not change database, Prisma or persistence code.

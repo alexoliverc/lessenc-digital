@@ -1,12 +1,15 @@
 #!/usr/bin/env node
-import { execFileSync } from "node:child_process";
 import { access, readFile } from "node:fs/promises";
 import process from "node:process";
 import { URL } from "node:url";
 
+import { validateReleaseCommitBinding } from "./lib/p16-release-binding.mjs";
 import { validateStagingEnvironment } from "./lib/p16-staging-contract.mjs";
 
-const failures = [...validateStagingEnvironment(process.env)];
+const failures = [
+  ...validateStagingEnvironment(process.env),
+  ...validateReleaseCommitBinding(process.env.P16_RELEASE_COMMIT),
+];
 
 if (process.versions.node.split(".")[0] !== "24") failures.push("NODE_RUNTIME_NOT_24_X");
 
@@ -24,13 +27,6 @@ try {
   await access(process.env.DB_TLS_CA_FILE ?? "");
 } catch {
   failures.push("DB_TLS_CA_FILE_UNREADABLE");
-}
-
-try {
-  const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-  if (head !== process.env.P16_RELEASE_COMMIT) failures.push("RELEASE_COMMIT_DOES_NOT_MATCH_HEAD");
-} catch {
-  failures.push("RELEASE_COMMIT_UNVERIFIABLE");
 }
 
 const uniqueFailures = [...new Set(failures)].sort();

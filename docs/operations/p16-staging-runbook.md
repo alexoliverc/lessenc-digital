@@ -76,6 +76,10 @@ identity. In `distinct-users`, shared usernames are rejected. In
 `hostinger-managed-single-user`, only the same username/credential is accepted. It never prints
 either database URL. `prisma migrate reset` and `prisma db push` are not staging procedures.
 
+The migration guard independently executes `git rev-parse HEAD` and requires the result to match
+`P16_RELEASE_COMMIT` exactly. Missing, malformed, mismatched or unverifiable release identity stops
+the command before Prisma. This control does not depend on an earlier preflight execution.
+
 ### Hostinger managed single-user migration window
 
 The owner-approved `P16-DB-DECISION-01` compensates for Hostinger's one-user model through

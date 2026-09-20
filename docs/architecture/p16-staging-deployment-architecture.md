@@ -177,6 +177,11 @@ The implemented guard additionally requires `P16_DATABASE_MIGRATION_WINDOW=enabl
 runtime configuration use `disabled`; migration authorization is not a credential and is never
 required by ordinary application startup.
 
+`P16-HDB-01-FIX01` also binds the migration guard directly to the checked-out release. The guard
+independently resolves `git rev-parse HEAD` and requires an exact match with the valid 40-hex
+`P16_RELEASE_COMMIT`. Missing, malformed, mismatched or unverifiable release identity fails closed;
+running the staging preflight beforehand is not assumed.
+
 ## 9. Private digital storage
 
 The application contract remains provider-independent through:
@@ -301,6 +306,12 @@ still pending.
 ### P16-F05 — Hosted database validation pending
 
 Database compatibility, TLS and hosted migrations have not yet been proven.
+
+### P16-HDB-F01 — Migration release-commit binding
+
+`REMEDIATED IN P16-HDB-01-FIX01`: the migration guard now independently verifies that
+`P16_RELEASE_COMMIT` exactly matches the repository `HEAD` before `prisma migrate deploy` can be
+eligible. Hosted execution remains pending and was not performed by the fix.
 
 ### P16-F10 — Hostinger single-user privilege rotation pending
 
