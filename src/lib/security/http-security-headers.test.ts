@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import nextConfig, {
+import {
   checkoutPaymentSecurityHeaders,
   globalSecurityHeaders,
   securityHeaderRules,
-} from "../../../next.config";
+} from "./http-security-headers";
 
 function asMap(appEnv: string) {
   return new Map(globalSecurityHeaders(appEnv).map(({ key, value }) => [key, value]));
 }
 
 describe("global HTTP security headers", () => {
-  it("applies the baseline to every application route", async () => {
-    const rules = await nextConfig.headers!();
+  it("applies the baseline to every application route", () => {
+    const rules = securityHeaderRules("local");
 
     expect(rules).toHaveLength(2);
     expect(rules[0]?.source).toBe("/:path*");
@@ -51,7 +51,9 @@ describe("global HTTP security headers", () => {
   it("derives hosted-only policy from the APP_ENV supplied at build configuration time", () => {
     const local = securityHeaderRules("local");
     const production = securityHeaderRules("production");
+
     const localGlobal = new Map(local[0]!.headers.map(({ key, value }) => [key, value]));
+
     const productionGlobal = new Map(production[0]!.headers.map(({ key, value }) => [key, value]));
 
     expect(localGlobal.has("Strict-Transport-Security")).toBe(false);
@@ -71,6 +73,7 @@ describe("global HTTP security headers", () => {
 
   it.each(["staging", "production"])("sets conservative HSTS in %s", (appEnv) => {
     expect(asMap(appEnv).get("Strict-Transport-Security")).toBe("max-age=31536000");
+
     expect(asMap(appEnv).get("Content-Security-Policy")).toContain("upgrade-insecure-requests");
   });
 
