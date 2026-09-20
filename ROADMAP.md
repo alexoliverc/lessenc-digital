@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 — Security Hardening is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED through PR #36, canonical merge `dfd4977a7c1db00314b613b5d695e166a62d614f` and permanent checkpoint `checkpoint/p14-security-hardening-complete`. P15 completed independent technical re-review with PASS after R1 corrections. The owner approved the recovery objectives. P15 is COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION. Gate C — OPERATIONS READY is PASS. P15 is not yet integrated or checkpointed. No deployment has been performed.
+**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure and P14 — Security Hardening remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as canonical technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets that technical merge and must not be retargeted by the documentation closeout. Gate C — OPERATIONS READY is PASS. No deployment has been performed. P16 remains NOT STARTED.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1134,7 +1134,7 @@ deployment remains NOT PERFORMED.
 
 ## P15 — Observability & Operational Readiness
 
-**Status:** COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION
+**Status:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 
 ### Objective
 

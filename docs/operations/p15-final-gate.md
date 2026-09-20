@@ -153,3 +153,15 @@ P17 owns real browser/provider E2E and other live browser/provider interactions.
 - P16: NOT STARTED.
 
 ChatGPT re-review remains the next and only authorized decision point.
+
+## Git lifecycle closeout
+
+The lifecycle state in this section supersedes earlier pre-integration lifecycle statements in this document; those earlier statements remain preserved as historical gate evidence.
+
+P15 implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`.
+
+Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` and must not be retargeted by this documentation-only closeout.
+
+Gate C remains `PASS — OPERATIONS READY`. RPO <= 24h, RTO <= 8h and retention 7 daily / 4 weekly / 3 monthly are owner-approved release objectives that still require hosted validation in P16.
+
+No deployment was performed. P16 remains NOT STARTED.

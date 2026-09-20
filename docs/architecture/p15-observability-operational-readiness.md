@@ -1,6 +1,6 @@
 # P15 — Observability & Operational Readiness Architecture
 
-**Status:** COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION
+**Status:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 
 **Branch:** `phase/p15-observability-operational-readiness`
 

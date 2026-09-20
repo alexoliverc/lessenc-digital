@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P15
 
-**Estado:** P00–P14 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION. Gate C — OPERATIONS READY está PASS. P15 ainda não está integrada nem checkpointed. Nenhum deploy foi executado e P16 permanece NOT STARTED.
+**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897`, PR #43 MERGED, merge técnico canônico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` e checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete`. Gate C — OPERATIONS READY está PASS. Nenhum deploy foi executado e P16 permanece NOT STARTED.
 
 ## Precedência e classificação das fontes
 
