@@ -1,15 +1,19 @@
-# P14 — Security Hardening — implementation and PR candidate
+# P14 — Security Hardening — Final Gate
 
-**Status:** P14 IMPLEMENTATION PASS / PR #36 / HOSTED CI PASS / AWAITING FINAL MERGE AUDIT
-**Branch:** `phase/p14-security-hardening`
+**Status:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
+**Implementation branch:** `phase/p14-security-hardening` — REMOVED AFTER MERGE
 **Canonical parent:** `420ee72753816ec69b4639f6cfdf357b45df817d`
 **Implementation commit:** `2acc5f8aad0fb1e697171358f2b25355e3a04b69`
+**Canonical implementation merge:** `dfd4977a7c1db00314b613b5d695e166a62d614f`
+**Permanent checkpoint:** `checkpoint/p14-security-hardening-complete`
+**Checkpoint target:** `dfd4977a7c1db00314b613b5d695e166a62d614f`
 **Pull request:** [#36 — P14 Security Hardening](https://github.com/alexoliverc/lessenc-digital/pull/36)
 **Deployment:** NOT PERFORMED
 
-This document records the independently audited P14-01 through P14-06 implementation and its
-hosted CI validation. It does not declare P14 complete, merged, checkpointed, deployed or ready for
-production; final merge audit remains pending.
+This document records the final independently audited P14-01 through P14-06 implementation,
+its hosted PR and post-merge validation, canonical merge and permanent checkpoint. P14 is complete,
+documented and integrated. This does not claim production deployment or completion of the hosted,
+staging and provider/browser validations explicitly deferred to P15–P17.
 
 ## P14-01 — HTTP security headers and CSP
 
@@ -206,7 +210,7 @@ changed in P14.
 | --- | --- | --- | --- | --- |
 | P14-G01 | missing global headers | global/route-specific CSP/header policy plus eight tests and optimized-runtime smoke | IMPLEMENTED | hosted CSP/HSTS validation P16 |
 | P14-G02 | no versioned CI/security gates | quality workflow and CodeQL committed, PR #36 hosted execution PASS; Dependabot configuration versioned | IMPLEMENTED / HOSTED CI PASS | platform settings and CI MySQL harness remain open |
-| P14-G03 | arbitrary HTTPS payment presentation; first P14 fix conflated PIX and 3DS | provenance-bound dynamic ACS validation, strict PIX allowlist, state/association binding and negative tests | IMPLEMENTED AS CORRECTED / RE-AUDIT PENDING | provider TEST/browser validation P16/P17 |
+| P14-G03 | arbitrary HTTPS payment presentation; first P14 fix conflated PIX and 3DS | provenance-bound dynamic ACS validation, strict PIX allowlist, state/association binding and negative tests | IMPLEMENTED AS CORRECTED / FINAL AUDIT PASS | provider TEST/browser validation P16/P17 |
 | P14-U01 | hosted CORS/headers unknown | same-origin route controls and application headers reviewed | UNKNOWN / NEEDS HOSTED VALIDATION | P16 |
 | P14-U02 | CSP/provider compatibility unknown | explicit source matrix and unit tests | PARTIAL | real Brick/GTM/Meta behavior P16/P17 |
 | P14-U03 | production rate-limit capacity unknown | existing DB-backed controls/regression preserved | DEFERRED TO CANONICAL FUTURE PHASE | P15/P16 |
@@ -266,7 +270,25 @@ architecture. `style-src 'unsafe-inline'` remains a LOW residual. GitHub workflo
 settings and hosted integration automation are INFORMATIONAL/open operational items, not falsely
 represented as complete.
 
-Independent audit should verify the CSP source matrix against real staging network behavior, review
-the lazy admin-auth lifecycle and bounded request reconstruction, confirm the separated PIX/3DS trust
-models and route-specific CSP, inspect immutable action pins and reproduce the complete test matrix
-before any Git lifecycle action.
+Independent audits verified the CSP source matrix and residual-risk classification, lazy admin-auth
+lifecycle, bounded request reconstruction, separated PIX/3DS trust models, route-specific CSP,
+immutable GitHub Action pins and the complete local/hosted validation evidence before merge.
+
+## Git lifecycle and permanent checkpoint
+
+- implementation commit: `2acc5f8aad0fb1e697171358f2b25355e3a04b69`;
+- lifecycle documentation commit on the implementation branch:
+  `89470227fe47d6aba1c54a49cd3c2c6eecdaefe0`;
+- implementation PR: #36 — MERGED;
+- canonical implementation merge: `dfd4977a7c1db00314b613b5d695e166a62d614f`;
+- post-merge Quality and security run: `35483293728` — PASS;
+- post-merge CodeQL run: `35483293711` — PASS;
+- Dependabot update runs `35483296546` and `35483296095` — PASS;
+- permanent checkpoint: `checkpoint/p14-security-hardening-complete`;
+- checkpoint target: `dfd4977a7c1db00314b613b5d695e166a62d614f`;
+- implementation branch: removed locally and remotely after merge;
+- deployment: NOT PERFORMED;
+- P15: NOT STARTED.
+
+The checkpoint is permanently tied to the technical implementation merge. This documentation
+closeout is intentionally later and must not retarget or move that checkpoint.

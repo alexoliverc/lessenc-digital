@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P14
 
-**Estado:** P00–P13 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 passou na auditoria independente, está commitada em `phase/p14-security-hardening` e possui hosted CI PASS na PR #36; a auditoria final de merge permanece pendente. Nenhum deploy foi executado.
+**Estado:** P00–P14 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED através da PR #36, merge canônico `dfd4977a7c1db00314b613b5d695e166a62d614f` e checkpoint permanente `checkpoint/p14-security-hardening-complete`. P15 permanece NOT STARTED. Nenhum deploy foi executado.
 
 ## Precedência e classificação das fontes
 
@@ -302,13 +302,14 @@ Google Enhanced Conversions e Meta Advanced Matching permanecem fora do P13 MVP 
 ## Operações
 O [índice operacional](operations/README.md) reúne procedimentos do ambiente de desenvolvimento. A [baseline da workstation e VS Code](operations/development-workstation-vscode.md) registra Profile, editor, terminal, Git/SCM, extensões, segurança, performance e recuperação sem redefinir a stack ou os ambientes canônicos da aplicação.
 
-## P14 — Security Hardening — hosted CI passed, awaiting final merge audit
+## P14 — Security Hardening — COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 
 O [dossiê P14](security/p14-security-hardening-candidate.md) registra P14-01–P14-06, as
 correções R1/R2, audit completo, cobertura negativa, revisão de SQL/SSRF/provider/webhook, dados
 sensíveis, CI/supply chain, findings, hosted CI e limitações que continuam atribuídas a P15–P17.
-O estado não é COMPLETE, MERGED ou CHECKPOINTED antes da auditoria final de merge e do lifecycle
-Git autorizado correspondente.
+A P14 está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. O checkpoint permanente
+`checkpoint/p14-security-hardening-complete` permanece fixo no merge técnico `dfd4977a7c1db00314b613b5d695e166a62d614f`
+e não deve ser movido por este closeout documental.
 
 ## HISTORICAL / SUPERSEDED DOCUMENTS
 

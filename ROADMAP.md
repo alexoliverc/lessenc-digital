@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 — Security Hardening passed independent audit, is committed on `phase/p14-security-hardening` and has hosted CI PASS in PR #36; final merge audit remains pending. No deployment has been performed.
+**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 — Security Hardening is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED through PR #36, canonical merge `dfd4977a7c1db00314b613b5d695e166a62d614f` and permanent checkpoint `checkpoint/p14-security-hardening-complete`. P15 — Observability & Operational Readiness is the next canonical phase and remains NOT STARTED. No deployment has been performed.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1067,7 +1067,7 @@ The initial P13 MVP does not require:
 ---
 ## P14 — Security Hardening
 
-**Status:** IMPLEMENTATION PASS / PR #36 / HOSTED CI PASS / AWAITING FINAL MERGE AUDIT
+**Status:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 
 ### Objective
 
@@ -1123,8 +1123,11 @@ Security acceptance criteria are satisfied.
 
 The candidate implementation and evidence are recorded in
 [`docs/security/p14-security-hardening-candidate.md`](docs/security/p14-security-hardening-candidate.md).
-This state does not mean COMPLETE, MERGED, CHECKPOINTED or deployed; the final merge audit and
-separately authorized merge lifecycle remain pending.
+P14 is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED through PR #36, canonical
+implementation merge `dfd4977a7c1db00314b613b5d695e166a62d614f` and permanent checkpoint
+`checkpoint/p14-security-hardening-complete`. The checkpoint remains fixed on the technical merge
+and must not be moved by later documentation-only work. Post-merge Quality/security and CodeQL
+validation on `main` passed. P15 remains NOT STARTED and deployment remains NOT PERFORMED.
 
 ---
 
