@@ -8,11 +8,9 @@ import {
   RateLimitedProtectedDownloadPreparer,
 } from "./buyer-access-rate-limit-enforcement";
 
-const HASH_A =
-  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+const HASH_A = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-const HASH_B =
-  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+const HASH_B = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
 const SUBJECT: BuyerSubject = Object.freeze({
   customerId: "11111111-1111-4111-8111-111111111111",
@@ -44,9 +42,7 @@ function denied(retryAfterSeconds = 37) {
 
 function hasher() {
   return {
-    hash: vi.fn((scope: string) =>
-      scope === "EXCHANGE_GLOBAL" ? HASH_A : HASH_B,
-    ),
+    hash: vi.fn((scope: string) => (scope === "EXCHANGE_GLOBAL" ? HASH_A : HASH_B)),
   };
 }
 
@@ -64,16 +60,9 @@ describe("Buyer Access rate-limit enforcement decorators", () => {
 
     const keyHasher = hasher();
 
-    const executor =
-      new RateLimitedBuyerAccessExchangeExecutor(
-        inner,
-        limiter,
-        keyHasher,
-      );
+    const executor = new RateLimitedBuyerAccessExchangeExecutor(inner, limiter, keyHasher);
 
-    await expect(
-      executor.execute("lba_example"),
-    ).resolves.toEqual({
+    await expect(executor.execute("lba_example")).resolves.toEqual({
       sessionToken: "session-token",
     });
 
@@ -87,21 +76,12 @@ describe("Buyer Access rate-limit enforcement decorators", () => {
     };
 
     const limiter = {
-      consume: vi.fn().mockResolvedValue(
-        denied(42),
-      ),
+      consume: vi.fn().mockResolvedValue(denied(42)),
     };
 
-    const executor =
-      new RateLimitedBuyerAccessExchangeExecutor(
-        inner,
-        limiter,
-        hasher(),
-      );
+    const executor = new RateLimitedBuyerAccessExchangeExecutor(inner, limiter, hasher());
 
-    await expect(
-      executor.execute("lba_example"),
-    ).rejects.toMatchObject({
+    await expect(executor.execute("lba_example")).rejects.toMatchObject({
       message: "RATE_LIMIT_EXCEEDED",
       retryAfterSeconds: 42,
     });
@@ -116,22 +96,12 @@ describe("Buyer Access rate-limit enforcement decorators", () => {
     };
 
     const limiter = {
-      consume: vi
-        .fn()
-        .mockResolvedValueOnce(allowed())
-        .mockResolvedValueOnce(denied(300)),
+      consume: vi.fn().mockResolvedValueOnce(allowed()).mockResolvedValueOnce(denied(300)),
     };
 
-    const executor =
-      new RateLimitedBuyerAccessExchangeExecutor(
-        inner,
-        limiter,
-        hasher(),
-      );
+    const executor = new RateLimitedBuyerAccessExchangeExecutor(inner, limiter, hasher());
 
-    await expect(
-      executor.execute("lba_example"),
-    ).rejects.toMatchObject({
+    await expect(executor.execute("lba_example")).rejects.toMatchObject({
       message: "RATE_LIMIT_EXCEEDED",
       retryAfterSeconds: 300,
     });
@@ -146,21 +116,12 @@ describe("Buyer Access rate-limit enforcement decorators", () => {
     };
 
     const limiter = {
-      consume: vi.fn().mockRejectedValue(
-        new Error("DB_UNAVAILABLE"),
-      ),
+      consume: vi.fn().mockRejectedValue(new Error("DB_UNAVAILABLE")),
     };
 
-    const executor =
-      new RateLimitedBuyerAccessExchangeExecutor(
-        inner,
-        limiter,
-        hasher(),
-      );
+    const executor = new RateLimitedBuyerAccessExchangeExecutor(inner, limiter, hasher());
 
-    await expect(
-      executor.execute("lba_example"),
-    ).rejects.toThrow("DB_UNAVAILABLE");
+    await expect(executor.execute("lba_example")).rejects.toThrow("DB_UNAVAILABLE");
 
     expect(inner.execute).not.toHaveBeenCalled();
   });
@@ -178,22 +139,13 @@ describe("Buyer Access rate-limit enforcement decorators", () => {
 
     const keyHasher = hasher();
 
-    const executor =
-      new RateLimitedBuyerAccessExchangeExecutor(
-        inner,
-        limiter,
-        keyHasher,
-      );
+    const executor = new RateLimitedBuyerAccessExchangeExecutor(inner, limiter, keyHasher);
 
     await executor.execute({
       invalid: true,
     });
 
-    expect(keyHasher.hash).toHaveBeenNthCalledWith(
-      2,
-      "EXCHANGE_CREDENTIAL",
-      '{"invalid":true}',
-    );
+    expect(keyHasher.hash).toHaveBeenNthCalledWith(2, "EXCHANGE_CREDENTIAL", '{"invalid":true}');
   });
 
   it("allows library access only after the credential bucket allows it", async () => {
@@ -205,16 +157,9 @@ describe("Buyer Access rate-limit enforcement decorators", () => {
       consume: vi.fn().mockResolvedValue(allowed()),
     };
 
-    const reader =
-      new RateLimitedBuyerLibraryReader(
-        inner,
-        limiter,
-        hasher(),
-      );
+    const reader = new RateLimitedBuyerLibraryReader(inner, limiter, hasher());
 
-    await expect(
-      reader.execute(SUBJECT),
-    ).resolves.toEqual([]);
+    await expect(reader.execute(SUBJECT)).resolves.toEqual([]);
 
     expect(inner.execute).toHaveBeenCalledWith(SUBJECT);
   });
@@ -225,23 +170,12 @@ describe("Buyer Access rate-limit enforcement decorators", () => {
     };
 
     const limiter = {
-      consume: vi.fn().mockResolvedValue(
-        denied(18),
-      ),
+      consume: vi.fn().mockResolvedValue(denied(18)),
     };
 
-    const reader =
-      new RateLimitedBuyerLibraryReader(
-        inner,
-        limiter,
-        hasher(),
-      );
+    const reader = new RateLimitedBuyerLibraryReader(inner, limiter, hasher());
 
-    await expect(
-      reader.execute(SUBJECT),
-    ).rejects.toBeInstanceOf(
-      BuyerAccessRateLimitExceeded,
-    );
+    await expect(reader.execute(SUBJECT)).rejects.toBeInstanceOf(BuyerAccessRateLimitExceeded);
 
     expect(inner.execute).not.toHaveBeenCalled();
   });
@@ -259,19 +193,9 @@ describe("Buyer Access rate-limit enforcement decorators", () => {
       consume: vi.fn().mockResolvedValue(allowed()),
     };
 
-    const preparer =
-      new RateLimitedProtectedDownloadPreparer(
-        inner as never,
-        limiter,
-        hasher(),
-      );
+    const preparer = new RateLimitedProtectedDownloadPreparer(inner as never, limiter, hasher());
 
-    await expect(
-      preparer.execute(
-        SUBJECT,
-        delivery.resourceId,
-      ),
-    ).resolves.toBe(delivery);
+    await expect(preparer.execute(SUBJECT, delivery.resourceId)).resolves.toBe(delivery);
   });
 
   it("denies protected delivery before storage preparation executes", async () => {
@@ -280,23 +204,13 @@ describe("Buyer Access rate-limit enforcement decorators", () => {
     };
 
     const limiter = {
-      consume: vi.fn().mockResolvedValue(
-        denied(12),
-      ),
+      consume: vi.fn().mockResolvedValue(denied(12)),
     };
 
-    const preparer =
-      new RateLimitedProtectedDownloadPreparer(
-        inner,
-        limiter,
-        hasher(),
-      );
+    const preparer = new RateLimitedProtectedDownloadPreparer(inner, limiter, hasher());
 
     await expect(
-      preparer.execute(
-        SUBJECT,
-        "44444444-4444-4444-8444-444444444444",
-      ),
+      preparer.execute(SUBJECT, "44444444-4444-4444-8444-444444444444"),
     ).rejects.toMatchObject({
       retryAfterSeconds: 12,
     });

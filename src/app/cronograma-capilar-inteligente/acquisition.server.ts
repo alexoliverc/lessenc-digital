@@ -7,6 +7,8 @@ import { headers } from "next/headers";
 import { getDatabaseClient } from "@/infrastructure/database/client";
 import { PrismaAttributionJourneyRepository } from "@/infrastructure/database/prisma-attribution-journey-repository";
 import { serverEnv } from "@/lib/config/env";
+import { resolveRequestCorrelationId } from "@/lib/observability/correlation";
+import { logger } from "@/lib/observability/logger";
 import {
   ACQUISITION_JOURNEY_REQUEST_HEADER,
   ACQUISITION_OBSERVED_AT_REQUEST_HEADER,
@@ -23,6 +25,7 @@ export async function capturePublicSalesAcquisition(
   searchParams: PublicAcquisitionSearchParams,
 ): Promise<AcquisitionJourneyRecord | null> {
   const requestHeaders = await headers();
+  const correlationId = resolveRequestCorrelationId(requestHeaders);
 
   const journeyId = normalizeAcquisitionJourneyId(
     requestHeaders.get(ACQUISITION_JOURNEY_REQUEST_HEADER),
@@ -64,7 +67,12 @@ export async function capturePublicSalesAcquisition(
      * make the public commercial experience unavailable.
      * No raw URL, referrer or customer data is logged.
      */
-    console.error("P13_PUBLIC_SALES_ACQUISITION_CAPTURE_FAILED");
+    logger.error("public_sales_acquisition_capture_failed", {
+      correlationId,
+      surface: "PUBLIC_SITE",
+      outcome: "DEGRADED",
+      failureCode: "ACQUISITION_CAPTURE_FAILED",
+    });
 
     return null;
   }

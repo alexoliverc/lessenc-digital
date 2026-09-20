@@ -5,6 +5,11 @@ import { NextResponse } from "next/server";
 
 import { VIEW_CONTENT_EVENT_REQUEST_HEADER } from "./modules/analytics/application/measurement-http-boundary";
 import {
+  CORRELATION_RESPONSE_HEADER,
+  createCorrelationId,
+  INTERNAL_CORRELATION_REQUEST_HEADER,
+} from "./lib/observability/correlation";
+import {
   ACQUISITION_JOURNEY_COOKIE_NAME,
   ACQUISITION_JOURNEY_REQUEST_HEADER,
   ACQUISITION_OBSERVED_AT_REQUEST_HEADER,
@@ -14,8 +19,26 @@ import {
 } from "./modules/attribution/application/acquisition-http-boundary";
 
 export function proxy(request: NextRequest) {
-  if (request.method !== "GET" || isAcquisitionPrefetch(request.headers)) {
-    return NextResponse.next();
+  const correlationId = createCorrelationId();
+  const requestHeaders = new Headers(request.headers);
+
+  requestHeaders.set(INTERNAL_CORRELATION_REQUEST_HEADER, correlationId);
+
+  const isPublicSalesAcquisition =
+    request.nextUrl.pathname === "/cronograma-capilar-inteligente" &&
+    request.method === "GET" &&
+    !isAcquisitionPrefetch(request.headers);
+
+  if (!isPublicSalesAcquisition) {
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+
+    response.headers.set(CORRELATION_RESPONSE_HEADER, correlationId);
+
+    return response;
   }
 
   const observedAt = new Date();
@@ -24,8 +47,6 @@ export function proxy(request: NextRequest) {
     request.cookies.get(ACQUISITION_JOURNEY_COOKIE_NAME)?.value,
     randomUUID,
   );
-
-  const requestHeaders = new Headers(request.headers);
 
   requestHeaders.set(ACQUISITION_JOURNEY_REQUEST_HEADER, resolved.journeyId);
 
@@ -38,6 +59,8 @@ export function proxy(request: NextRequest) {
       headers: requestHeaders,
     },
   });
+
+  response.headers.set(CORRELATION_RESPONSE_HEADER, correlationId);
 
   if (resolved.created) {
     response.cookies.set({
@@ -57,18 +80,7 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     {
-      source: "/cronograma-capilar-inteligente",
-      missing: [
-        {
-          type: "header",
-          key: "next-router-prefetch",
-        },
-        {
-          type: "header",
-          key: "purpose",
-          value: "prefetch",
-        },
-      ],
+      source: "/((?!_next/static|_next/image|favicon.ico).*)",
     },
   ],
 };

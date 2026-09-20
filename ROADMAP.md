@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 — Security Hardening is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED through PR #36, canonical merge `dfd4977a7c1db00314b613b5d695e166a62d614f` and permanent checkpoint `checkpoint/p14-security-hardening-complete`. P15 — Observability & Operational Readiness is the next canonical phase and remains NOT STARTED. No deployment has been performed.
+**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 — Security Hardening is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED through PR #36, canonical merge `dfd4977a7c1db00314b613b5d695e166a62d614f` and permanent checkpoint `checkpoint/p14-security-hardening-complete`. P15 completed independent technical re-review with PASS after R1 corrections. The owner approved the recovery objectives. P15 is COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION. Gate C — OPERATIONS READY is PASS. P15 is not yet integrated or checkpointed. No deployment has been performed.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1127,13 +1127,14 @@ P14 is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED through PR #36, 
 implementation merge `dfd4977a7c1db00314b613b5d695e166a62d614f` and permanent checkpoint
 `checkpoint/p14-security-hardening-complete`. The checkpoint remains fixed on the technical merge
 and must not be moved by later documentation-only work. Post-merge Quality/security and CodeQL
-validation on `main` passed. P15 remains NOT STARTED and deployment remains NOT PERFORMED.
+validation on `main` passed. P15 is now an independently auditable local implementation candidate;
+deployment remains NOT PERFORMED.
 
 ---
 
 ## P15 — Observability & Operational Readiness
 
-**Status:** PENDENTE
+**Status:** COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION
 
 ### Objective
 
@@ -1178,11 +1179,17 @@ Infrastructure-changing actions remain protected.
 
 The team can monitor, diagnose and recover the platform.
 
+Candidate evidence is recorded in
+[`docs/operations/p15-final-gate.md`](docs/operations/p15-final-gate.md). The exit criterion and
+Gate C remain pending ChatGPT re-review; no integration, checkpoint or deployment is
+implied by local validation.
+
 ---
 
 # GATE C — OPERATIONS READY
 
 **Position:** after P15.
+**Status:** PASS — OPERATIONS READY
 
 ### Question
 
@@ -1228,6 +1235,7 @@ These concepts remain separate.
 - private storage;
 - Mercado Pago TEST;
 - observability;
+- hosted machine/internal exposure control for `/api/readiness`;
 - backups;
 - rollback.
 
@@ -1246,6 +1254,11 @@ Deployment, infrastructure, DNS and external-effect operations require authoriza
 ### Exit criteria
 
 Staging represents the intended production architecture sufficiently for release validation.
+
+The hosted access model for `/api/readiness` is selected and validated as a machine-monitor
+boundary—through infrastructure/reverse-proxy restriction or another explicitly approved control—
+without turning readiness into a general public diagnostic API. `/api/health` remains public
+liveness.
 
 ---
 

@@ -42,11 +42,7 @@ function validScope(value: string): value is BuyerAccessRateLimitScope {
 }
 
 function requirePolicy(policy: BuyerAccessRateLimitPolicy): void {
-  if (
-    !Number.isSafeInteger(policy.limit) ||
-    policy.limit < 1 ||
-    policy.limit > 100_000
-  ) {
+  if (!Number.isSafeInteger(policy.limit) || policy.limit < 1 || policy.limit > 100_000) {
     throw new Error("INVALID_RATE_LIMIT_POLICY");
   }
 
@@ -89,8 +85,7 @@ export class FixedWindowBuyerAccessRateLimiter {
 
     const windowMs = policy.windowSeconds * 1000;
 
-    const windowStartMs =
-      Math.floor(observedAtMs / windowMs) * windowMs;
+    const windowStartMs = Math.floor(observedAtMs / windowMs) * windowMs;
 
     const windowStart = new Date(windowStartMs);
     const windowEnd = new Date(windowStartMs + windowMs);
@@ -111,22 +106,13 @@ export class FixedWindowBuyerAccessRateLimiter {
       throw new Error("INVALID_RATE_LIMIT_COUNTER");
     }
 
-    const allowed =
-      requestCount <= policy.limit;
+    const allowed = requestCount <= policy.limit;
 
-    const remaining =
-      Math.max(0, policy.limit - requestCount);
+    const remaining = Math.max(0, policy.limit - requestCount);
 
-    const retryAfterSeconds =
-      allowed
-        ? 0
-        : Math.max(
-            1,
-            Math.ceil(
-              (windowEnd.getTime() - observedAtMs) /
-                1000,
-            ),
-          );
+    const retryAfterSeconds = allowed
+      ? 0
+      : Math.max(1, Math.ceil((windowEnd.getTime() - observedAtMs) / 1000));
 
     return Object.freeze({
       allowed,

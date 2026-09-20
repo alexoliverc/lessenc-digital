@@ -512,7 +512,16 @@ describe("P13-E canonical Purchase on isolated MySQL", () => {
       status: "APPROVED",
     });
     expect(await db.analyticsEvent.count({ where: { orderId: ids.order } })).toBe(0);
-    expect(errorSpy).toHaveBeenCalledWith("P13_CANONICAL_PURCHASE_PROJECTION_FAILED");
+    const diagnostic = JSON.parse(String(errorSpy.mock.calls.at(-1)?.[0])) as Record<
+      string,
+      unknown
+    >;
+    expect(diagnostic).toMatchObject({
+      event: "canonical_purchase_projection_failed",
+      surface: "PAYMENTS",
+      outcome: "DEGRADED",
+      failureCode: "CANONICAL_PURCHASE_PROJECTION_FAILED",
+    });
 
     errorSpy.mockRestore();
   });

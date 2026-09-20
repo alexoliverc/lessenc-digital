@@ -13,6 +13,8 @@ import {
 import { HmacCheckoutSubmissionTokenService } from "@/infrastructure/security/hmac-checkout-submission-token";
 import { HmacPaymentContinuation } from "@/infrastructure/security/hmac-payment-continuation";
 import { getP08CommercialEnv, getP09SubmissionEnv } from "@/lib/config/env";
+import { createCorrelationId } from "@/lib/observability/correlation";
+import { logger } from "@/lib/observability/logger";
 import { ResolvePurchasableOffer } from "@/modules/catalog/application/resolve-purchasable-offer";
 import { CreateCheckoutOrder } from "@/modules/commerce/application/create-checkout-order";
 import { PrepareOrder } from "@/modules/commerce/application/prepare-order";
@@ -37,7 +39,7 @@ function safeLog(event: string, correlationId: string, code?: string): void {
           code,
         };
 
-  console.error(JSON.stringify(diagnostic));
+  logger.error(event, diagnostic);
 }
 
 function emailErrorMessage(reason: CheckoutEmailError): string {
@@ -74,7 +76,7 @@ export async function createCheckoutOrderAction(
 ): Promise<CheckoutActionState> {
   void previousState;
 
-  const correlationId = randomUUID();
+  const correlationId = createCorrelationId();
 
   try {
     const submission = getP09SubmissionEnv();

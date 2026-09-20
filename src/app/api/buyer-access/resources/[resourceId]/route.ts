@@ -25,69 +25,39 @@ type RouteContext = Readonly<{
   }>;
 }>;
 
-export async function GET(
-  request: NextRequest,
-  context: RouteContext,
-) {
+export async function GET(request: NextRequest, context: RouteContext) {
   const { resourceId } = await context.params;
 
   const db = getDatabaseClient();
 
   const sessionEnv = getP11BuyerSessionEnv();
 
-  const sessionService =
-    new HmacBuyerSession(
-      sessionEnv.P11_BUYER_SESSION_SECRET,
-    );
+  const sessionService = new HmacBuyerSession(sessionEnv.P11_BUYER_SESSION_SECRET);
 
-  const credentialRepository =
-    new PrismaBuyerAccessCredentialRepository(db);
+  const credentialRepository = new PrismaBuyerAccessCredentialRepository(db);
 
-  const resourceRepository =
-    new PrismaResourceAuthorizationRepository(db);
+  const resourceRepository = new PrismaResourceAuthorizationRepository(db);
 
-  const auditRepository =
-    new PrismaDigitalDeliveryAuditRepository(db);
+  const auditRepository = new PrismaDigitalDeliveryAuditRepository(db);
 
-  const validateSession =
-    new ValidateBuyerSession(
-      credentialRepository,
-      sessionService,
-    );
+  const validateSession = new ValidateBuyerSession(credentialRepository, sessionService);
 
-  const authorizeResource =
-    new AuthorizeDigitalResource(
-      resourceRepository,
-    );
+  const authorizeResource = new AuthorizeDigitalResource(resourceRepository);
 
-  const storage =
-    createConfiguredPrivateFileStorage();
+  const storage = createConfiguredPrivateFileStorage();
 
-  const prepareDelivery =
-    new RateLimitedProtectedDownloadPreparer(
-      new PrepareProtectedDelivery(
-        authorizeResource,
-        storage,
-        auditRepository,
-      ),
-      new FixedWindowBuyerAccessRateLimiter(
-        new PrismaBuyerAccessRateLimitRepository(db),
-      ),
-      new Sha256BuyerAccessRateLimitKey(),
-    );
+  const prepareDelivery = new RateLimitedProtectedDownloadPreparer(
+    new PrepareProtectedDelivery(authorizeResource, storage, auditRepository),
+    new FixedWindowBuyerAccessRateLimiter(new PrismaBuyerAccessRateLimitRepository(db)),
+    new Sha256BuyerAccessRateLimitKey(),
+  );
 
-  const recordOutcome =
-    new RecordProtectedDeliveryOutcome(
-      auditRepository,
-    );
+  const recordOutcome = new RecordProtectedDeliveryOutcome(auditRepository);
 
   return createProtectedDownloadHandler({
     validateSession,
     prepareDelivery,
     recordOutcome,
     appEnv: serverEnv.APP_ENV,
-  })(
-    request,
-    resourceId,
-  );
+  })(request, resourceId);
 }

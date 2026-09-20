@@ -128,41 +128,32 @@ function auditedBody(
             error instanceof Error &&
             error.message === "DELIVERY_AUDIT_UNAVAILABLE"
           ) {
-            p11Observability.error(
-              "delivery_audit_unavailable",
-              {
-                correlationId,
-                surface: "DELIVERY_AUDIT",
-                outcome: "FAILED",
-                failureCode: "DELIVERY_AUDIT_UNAVAILABLE",
-              },
-            );
+            p11Observability.error("delivery_audit_unavailable", {
+              correlationId,
+              surface: "DELIVERY_AUDIT",
+              outcome: "FAILED",
+              failureCode: "DELIVERY_AUDIT_UNAVAILABLE",
+            });
           }
 
           if (started) {
             try {
               await recorder.streamFailed(delivery);
             } catch {
-              p11Observability.error(
-                "delivery_audit_unavailable",
-                {
-                  correlationId,
-                  surface: "DELIVERY_AUDIT",
-                  outcome: "FAILED",
-                  failureCode: "DELIVERY_AUDIT_UNAVAILABLE",
-                },
-              );
+              p11Observability.error("delivery_audit_unavailable", {
+                correlationId,
+                surface: "DELIVERY_AUDIT",
+                outcome: "FAILED",
+                failureCode: "DELIVERY_AUDIT_UNAVAILABLE",
+              });
             }
 
-            p11Observability.warn(
-              "delivery_stream_failed",
-              {
-                correlationId,
-                surface: "PROTECTED_DOWNLOAD",
-                outcome: "FAILED",
-                failureCode: "STREAM_FAILED",
-              },
-            );
+            p11Observability.warn("delivery_stream_failed", {
+              correlationId,
+              surface: "PROTECTED_DOWNLOAD",
+              outcome: "FAILED",
+              failureCode: "STREAM_FAILED",
+            });
           }
 
           await closeIterator(iterator);
@@ -221,15 +212,12 @@ export function createProtectedDownloadHandler(dependencies: ProtectedDownloadDe
     try {
       subject = await dependencies.validateSession.execute(sessionToken);
     } catch {
-      p11Observability.warn(
-        "buyer_access_invalid",
-        {
-          correlationId,
-          surface: "PROTECTED_DOWNLOAD",
-          outcome: "DENIED",
-          failureCode: "SESSION_INVALID",
-        },
-      );
+      p11Observability.warn("buyer_access_invalid", {
+        correlationId,
+        surface: "PROTECTED_DOWNLOAD",
+        outcome: "DENIED",
+        failureCode: "SESSION_INVALID",
+      });
 
       return genericJson("SESSION_INVALID", 401);
     }
@@ -240,17 +228,14 @@ export function createProtectedDownloadHandler(dependencies: ProtectedDownloadDe
       delivery = await dependencies.prepareDelivery.execute(subject, resourceId);
     } catch (error) {
       if (error instanceof BuyerAccessRateLimitExceeded) {
-        p11Observability.warn(
-          "buyer_access_rate_limited",
-          {
-            correlationId,
-            surface: "PROTECTED_DOWNLOAD",
-            scope: "DOWNLOAD_CREDENTIAL",
-            outcome: "DENIED",
-            failureCode: "RATE_LIMIT_EXCEEDED",
-            retryAfterSeconds: error.retryAfterSeconds,
-          },
-        );
+        p11Observability.warn("buyer_access_rate_limited", {
+          correlationId,
+          surface: "PROTECTED_DOWNLOAD",
+          scope: "DOWNLOAD_CREDENTIAL",
+          outcome: "DENIED",
+          failureCode: "RATE_LIMIT_EXCEEDED",
+          retryAfterSeconds: error.retryAfterSeconds,
+        });
 
         return NextResponse.json(
           {
@@ -268,89 +253,64 @@ export function createProtectedDownloadHandler(dependencies: ProtectedDownloadDe
       }
 
       if (error instanceof BuyerAccessRateLimitUnavailable) {
-        p11Observability.error(
-          "buyer_access_limiter_unavailable",
-          {
-            correlationId,
-            surface: "RATE_LIMIT",
-            scope: error.scope,
-            outcome: "FAILED",
-            failureCode: "RATE_LIMIT_UNAVAILABLE",
-          },
-        );
+        p11Observability.error("buyer_access_limiter_unavailable", {
+          correlationId,
+          surface: "RATE_LIMIT",
+          scope: error.scope,
+          outcome: "FAILED",
+          failureCode: "RATE_LIMIT_UNAVAILABLE",
+        });
 
         return genericJson("SERVICE_UNAVAILABLE", 503);
       }
 
       if (error instanceof Error && error.message === "RESOURCE_NOT_AVAILABLE") {
-        p11Observability.warn(
-          "buyer_access_invalid",
-          {
-            correlationId,
-            surface: "PROTECTED_DOWNLOAD",
-            outcome: "DENIED",
-            failureCode: "RESOURCE_NOT_AVAILABLE",
-          },
-        );
+        p11Observability.warn("buyer_access_invalid", {
+          correlationId,
+          surface: "PROTECTED_DOWNLOAD",
+          outcome: "DENIED",
+          failureCode: "RESOURCE_NOT_AVAILABLE",
+        });
 
         return genericJson("RESOURCE_NOT_AVAILABLE", 404);
       }
 
-      if (
-        error instanceof Error &&
-        error.message === "DELIVERY_AUDIT_UNAVAILABLE"
-      ) {
-        p11Observability.error(
-          "delivery_audit_unavailable",
-          {
-            correlationId,
-            surface: "DELIVERY_AUDIT",
-            outcome: "FAILED",
-            failureCode: "DELIVERY_AUDIT_UNAVAILABLE",
-          },
-        );
+      if (error instanceof Error && error.message === "DELIVERY_AUDIT_UNAVAILABLE") {
+        p11Observability.error("delivery_audit_unavailable", {
+          correlationId,
+          surface: "DELIVERY_AUDIT",
+          outcome: "FAILED",
+          failureCode: "DELIVERY_AUDIT_UNAVAILABLE",
+        });
       }
 
-      if (
-        error instanceof Error &&
-        error.message === "DELIVERY_UNAVAILABLE"
-      ) {
+      if (error instanceof Error && error.message === "DELIVERY_UNAVAILABLE") {
         const storageFailureCode =
           error.cause instanceof PrivateResourceStorageError
             ? error.cause.code
             : "STORAGE_UNAVAILABLE";
 
         if (storageFailureCode === "RESOURCE_NOT_FOUND") {
-          p11Observability.warn(
-            "private_storage_failure",
-            {
-              correlationId,
-              surface: "PRIVATE_STORAGE",
-              outcome: "DEGRADED",
-              failureCode: storageFailureCode,
-            },
-          );
+          p11Observability.warn("private_storage_failure", {
+            correlationId,
+            surface: "PRIVATE_STORAGE",
+            outcome: "DEGRADED",
+            failureCode: storageFailureCode,
+          });
         } else {
-          p11Observability.error(
-            "private_storage_failure",
-            {
-              correlationId,
-              surface: "PRIVATE_STORAGE",
-              outcome: "FAILED",
-              failureCode: storageFailureCode,
-            },
-          );
+          p11Observability.error("private_storage_failure", {
+            correlationId,
+            surface: "PRIVATE_STORAGE",
+            outcome: "FAILED",
+            failureCode: storageFailureCode,
+          });
         }
       }
 
       return genericJson("SERVICE_UNAVAILABLE", 503);
     }
 
-    const body = auditedBody(
-      delivery,
-      dependencies.recordOutcome,
-      correlationId,
-    );
+    const body = auditedBody(delivery, dependencies.recordOutcome, correlationId);
 
     return new NextResponse(body, {
       status: 200,

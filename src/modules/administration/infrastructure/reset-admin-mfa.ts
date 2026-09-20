@@ -1,6 +1,5 @@
-import { randomUUID } from "node:crypto";
-
 import type { PrismaClient } from "@/generated/prisma/client";
+import { createCorrelationId } from "@/lib/observability/correlation";
 import { recordAdminDenial, runCriticalAdminMutation } from "./admin-audit";
 import { AdminAccessDenied, type AdminSubject } from "./admin-subject";
 
@@ -11,7 +10,7 @@ export async function resetAdminMfa(input: {
   targetAdminUserId: string;
   correlationId?: string;
 }): Promise<void> {
-  const correlationId = input.correlationId ?? randomUUID();
+  const correlationId = input.correlationId ?? createCorrelationId();
   try {
     await runCriticalAdminMutation({
       database: input.database,

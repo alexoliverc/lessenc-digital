@@ -4,6 +4,8 @@ import { getDatabaseClient } from "@/infrastructure/database/client";
 import { PrismaCatalogRepository } from "@/infrastructure/database/prisma-catalog-repository";
 import { HmacCheckoutSubmissionTokenService } from "@/infrastructure/security/hmac-checkout-submission-token";
 import { getP08CommercialEnv, getP09SubmissionEnv } from "@/lib/config/env";
+import { createCorrelationId } from "@/lib/observability/correlation";
+import { logger } from "@/lib/observability/logger";
 import { ResolvePurchasableOffer } from "@/modules/catalog/application/resolve-purchasable-offer";
 import {
   createPublicSalesExperience,
@@ -118,7 +120,12 @@ export async function resolveCheckoutPageResolution(): Promise<CheckoutPageResol
     });
 
     if (!token.ok) {
-      console.error("P09_CHECKOUT_TOKEN_ISSUE_FAILED");
+      logger.error("checkout_token_issue_failed", {
+        correlationId: createCorrelationId(),
+        surface: "CHECKOUT",
+        outcome: "FAILED",
+        failureCode: "CHECKOUT_TOKEN_ISSUE_FAILED",
+      });
       return failedCheckoutResolution();
     }
 
@@ -145,7 +152,12 @@ export async function resolveCheckoutPageResolution(): Promise<CheckoutPageResol
       }),
     });
   } catch {
-    console.error("P09_CHECKOUT_PAGE_RESOLUTION_FAILED");
+    logger.error("checkout_page_resolution_failed", {
+      correlationId: createCorrelationId(),
+      surface: "CHECKOUT",
+      outcome: "FAILED",
+      failureCode: "CHECKOUT_PAGE_RESOLUTION_FAILED",
+    });
 
     return failedCheckoutResolution();
   }

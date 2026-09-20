@@ -1033,9 +1033,7 @@ describe("P11 entitlement grant on isolated MySQL", () => {
 
             protectedDeliveryStageReached = true;
 
-            throw new Error(
-              `C7_PROTECTED_DELIVERY_SHOULD_NOT_BE_REACHED:${authorized.resourceId}`,
-            );
+            throw new Error(`C7_PROTECTED_DELIVERY_SHOULD_NOT_BE_REACHED:${authorized.resourceId}`);
           },
         },
         recordOutcome: {
@@ -1121,5 +1119,5 @@ describe("P11 entitlement grant on isolated MySQL", () => {
         },
       });
     }
-  });;
+  });
 });

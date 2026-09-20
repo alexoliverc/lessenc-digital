@@ -18,34 +18,27 @@ const SUBJECT: BuyerSubject = Object.freeze({
 describe("Buyer Access HTTP rate-limit boundary", () => {
   it("maps exchange throttling to generic 429 with Retry-After and no session cookie", async () => {
     const exchange = {
-      execute: vi.fn().mockRejectedValue(
-        new BuyerAccessRateLimitExceeded(57),
-      ),
+      execute: vi.fn().mockRejectedValue(new BuyerAccessRateLimitExceeded(57)),
     };
 
-    const handler =
-      createBuyerAccessExchangeHandler({
-        exchange,
-        appUrl: APP_URL,
-        appEnv: "production",
-      });
+    const handler = createBuyerAccessExchangeHandler({
+      exchange,
+      appUrl: APP_URL,
+      appEnv: "production",
+    });
 
-    const response =
-      await handler(
-        new Request(
-          `${APP_URL}/api/buyer-access/exchange`,
-          {
-            method: "POST",
-            headers: {
-              origin: APP_URL,
-              "content-type": "application/json",
-            },
-            body: JSON.stringify({
-              credential: "lba_example",
-            }),
-          },
-        ),
-      );
+    const response = await handler(
+      new Request(`${APP_URL}/api/buyer-access/exchange`, {
+        method: "POST",
+        headers: {
+          origin: APP_URL,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          credential: "lba_example",
+        }),
+      }),
+    );
 
     expect(response.status).toBe(429);
     expect(response.headers.get("retry-after")).toBe("57");
@@ -61,30 +54,22 @@ describe("Buyer Access HTTP rate-limit boundary", () => {
     };
 
     const listResources = {
-      execute: vi.fn().mockRejectedValue(
-        new BuyerAccessRateLimitExceeded(23),
-      ),
+      execute: vi.fn().mockRejectedValue(new BuyerAccessRateLimitExceeded(23)),
     };
 
-    const handler =
-      createBuyerAccessLibraryHandler({
-        validateSession,
-        listResources,
-        appEnv: "production",
-      });
+    const handler = createBuyerAccessLibraryHandler({
+      validateSession,
+      listResources,
+      appEnv: "production",
+    });
 
-    const request =
-      new NextRequest(
-        `${APP_URL}/api/buyer-access/library`,
-        {
-          headers: {
-            cookie: "__Host-lessenc_buyer=session-token",
-          },
-        },
-      );
+    const request = new NextRequest(`${APP_URL}/api/buyer-access/library`, {
+      headers: {
+        cookie: "__Host-lessenc_buyer=session-token",
+      },
+    });
 
-    const response =
-      await handler(request);
+    const response = await handler(request);
 
     expect(response.status).toBe(429);
     expect(response.headers.get("retry-after")).toBe("23");
@@ -102,9 +87,7 @@ describe("Buyer Access HTTP rate-limit boundary", () => {
     };
 
     const prepareDelivery = {
-      execute: vi.fn().mockRejectedValue(
-        new BuyerAccessRateLimitExceeded(11),
-      ),
+      execute: vi.fn().mockRejectedValue(new BuyerAccessRateLimitExceeded(11)),
     };
 
     const recordOutcome = {
@@ -112,29 +95,23 @@ describe("Buyer Access HTTP rate-limit boundary", () => {
       streamFailed: vi.fn(),
     };
 
-    const handler =
-      createProtectedDownloadHandler({
-        validateSession,
-        prepareDelivery,
-        recordOutcome,
-        appEnv: "production",
-      });
+    const handler = createProtectedDownloadHandler({
+      validateSession,
+      prepareDelivery,
+      recordOutcome,
+      appEnv: "production",
+    });
 
-    const request =
-      new NextRequest(
-        `${APP_URL}/api/buyer-access/resources/44444444-4444-4444-8444-444444444444`,
-        {
-          headers: {
-            cookie: "__Host-lessenc_buyer=session-token",
-          },
+    const request = new NextRequest(
+      `${APP_URL}/api/buyer-access/resources/44444444-4444-4444-8444-444444444444`,
+      {
+        headers: {
+          cookie: "__Host-lessenc_buyer=session-token",
         },
-      );
+      },
+    );
 
-    const response =
-      await handler(
-        request,
-        "44444444-4444-4444-8444-444444444444",
-      );
+    const response = await handler(request, "44444444-4444-4444-8444-444444444444");
 
     expect(response.status).toBe(429);
     expect(response.headers.get("retry-after")).toBe("11");

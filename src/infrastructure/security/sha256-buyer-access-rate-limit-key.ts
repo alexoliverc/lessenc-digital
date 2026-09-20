@@ -26,14 +26,7 @@ export class Sha256BuyerAccessRateLimitKey {
     }
 
     return createHash("sha256")
-      .update(
-        JSON.stringify([
-          1,
-          scope,
-          material,
-        ]),
-        "utf8",
-      )
+      .update(JSON.stringify([1, scope, material]), "utf8")
       .digest("hex");
   }
 }

@@ -21,48 +21,29 @@ import { URL, pathToFileURL } from "node:url";
 
 const FORMAT_VERSION = 1;
 
-const BACKUP_RESTORE_FAILURE_EVENTS =
-  new Set([
-    "backup_verification_failed",
-    "restore_validation_failed",
-  ]);
+const BACKUP_RESTORE_FAILURE_EVENTS = new Set([
+  "backup_verification_failed",
+  "restore_validation_failed",
+]);
 
-const BACKUP_RESTORE_FAILURE_CODES =
-  new Set([
-    "BACKUP_VERIFICATION_FAILED",
-    "RESTORE_VALIDATION_FAILED",
-  ]);
+const BACKUP_RESTORE_FAILURE_CODES = new Set([
+  "BACKUP_VERIFICATION_FAILED",
+  "RESTORE_VALIDATION_FAILED",
+]);
 
-function emitBackupRestoreFailure(
-  event,
-  failureCode,
-) {
-  if (
-    !BACKUP_RESTORE_FAILURE_EVENTS.has(
-      event,
-    ) ||
-    !BACKUP_RESTORE_FAILURE_CODES.has(
-      failureCode,
-    )
-  ) {
-    throw new Error(
-      "INVALID_BACKUP_RESTORE_FAILURE_SIGNAL",
-    );
+function emitBackupRestoreFailure(event, failureCode) {
+  if (!BACKUP_RESTORE_FAILURE_EVENTS.has(event) || !BACKUP_RESTORE_FAILURE_CODES.has(failureCode)) {
+    throw new Error("INVALID_BACKUP_RESTORE_FAILURE_SIGNAL");
   }
 
   console.error(
     JSON.stringify({
-      timestamp:
-        new Date().toISOString(),
-      level:
-        "error",
+      timestamp: new Date().toISOString(),
+      level: "error",
       event,
-      correlationId:
-        randomUUID(),
-      surface:
-        "BACKUP_RESTORE",
-      outcome:
-        "FAILED",
+      correlationId: randomUUID(),
+      surface: "BACKUP_RESTORE",
+      outcome: "FAILED",
       failureCode,
     }),
   );
@@ -700,14 +681,9 @@ async function createBundle(options) {
     );
 
     try {
-      await verifyBundle(
-        bundleDirectory,
-      );
+      await verifyBundle(bundleDirectory);
     } catch (error) {
-      emitBackupRestoreFailure(
-        "backup_verification_failed",
-        "BACKUP_VERIFICATION_FAILED",
-      );
+      emitBackupRestoreFailure("backup_verification_failed", "BACKUP_VERIFICATION_FAILED");
 
       throw error;
     }
@@ -748,70 +724,42 @@ async function main() {
   }
 
   if (mode === "verify") {
-    const bundle =
-      options.get("bundle");
+    const bundle = options.get("bundle");
 
-    invariant(
-      typeof bundle === "string" &&
-        bundle.length > 0,
-      "BACKUP_VERIFY_BUNDLE_REQUIRED",
-    );
+    invariant(typeof bundle === "string" && bundle.length > 0, "BACKUP_VERIFY_BUNDLE_REQUIRED");
 
     try {
-      await verifyBundle(
-        bundle,
-      );
+      await verifyBundle(bundle);
     } catch (error) {
-      emitBackupRestoreFailure(
-        "backup_verification_failed",
-        "BACKUP_VERIFICATION_FAILED",
-      );
+      emitBackupRestoreFailure("backup_verification_failed", "BACKUP_VERIFICATION_FAILED");
 
       throw error;
     }
 
-    console.log(
-      `BACKUP_BUNDLE_VERIFIED=${resolve(bundle)}`,
-    );
+    console.log(`BACKUP_BUNDLE_VERIFIED=${resolve(bundle)}`);
 
     return;
   }
 
-  if (
-    mode === "restore-validate"
-  ) {
-    const bundle =
-      options.get("bundle");
+  if (mode === "restore-validate") {
+    const bundle = options.get("bundle");
 
-    invariant(
-      typeof bundle === "string" &&
-        bundle.length > 0,
-      "RESTORE_VALIDATE_BUNDLE_REQUIRED",
-    );
+    invariant(typeof bundle === "string" && bundle.length > 0, "RESTORE_VALIDATE_BUNDLE_REQUIRED");
 
     try {
-      await verifyBundle(
-        bundle,
-      );
+      await verifyBundle(bundle);
     } catch (error) {
-      emitBackupRestoreFailure(
-        "restore_validation_failed",
-        "RESTORE_VALIDATION_FAILED",
-      );
+      emitBackupRestoreFailure("restore_validation_failed", "RESTORE_VALIDATION_FAILED");
 
       throw error;
     }
 
-    console.log(
-      "RESTORE_BUNDLE_VALIDATED=1",
-    );
+    console.log("RESTORE_BUNDLE_VALIDATED=1");
 
     return;
   }
 
-  throw new Error(
-    "BACKUP_CLI_MODE_INVALID",
-  );
+  throw new Error("BACKUP_CLI_MODE_INVALID");
 }
 
 const invokedAsScript =
@@ -819,9 +767,7 @@ const invokedAsScript =
 
 if (invokedAsScript) {
   main().catch(() => {
-    console.error(
-      "P11_BACKUP_ERROR=BACKUP_OPERATION_FAILED",
-    );
+    console.error("P11_BACKUP_ERROR=BACKUP_OPERATION_FAILED");
 
     process.exitCode = 1;
   });

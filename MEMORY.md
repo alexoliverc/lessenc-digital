@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 19/09/2026
+**Última atualização:** 20/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P14 implementadas. Gate A — FOUNDATION READY PASS. Gate B — COMMERCE CORE READY PASS / DOCUMENTED / FROZEN. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED.
-**Estado atual:** P14 — Security Hardening está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `2acc5f8aad0fb1e697171358f2b25355e3a04b69`, PR #36 MERGED, canonical implementation merge `dfd4977a7c1db00314b613b5d695e166a62d614f` e checkpoint permanente `checkpoint/p14-security-hardening-complete` apontando exatamente para esse merge. Pós-merge em `main`: Quality and security run `35483293728` PASS e CodeQL run `35483293711` PASS; Dependabot update runs `35483296546` e `35483296095` PASS. Correções R1/R2 permanecem incorporadas: trust models PIX/3DS separados, CSP específica para `/checkout/payment`, `script-src-attr 'none'` e CodeQL v4.38.1 pinado no commit `1c5b675653bb5c22dbe9b12b556ec555138e09fd`. Não há finding CRITICAL/HIGH conhecido; riscos residuais e validações hosted permanecem atribuídos a P15–P17. P15 é a próxima fase e permanece NOT STARTED. Deploy permanece NOT PERFORMED.
+**Estado documental:** P00–P14 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION. Gate C — OPERATIONS READY está PASS. P16 permanece NOT STARTED.
+**Estado atual:** P14 — Security Hardening está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `2acc5f8aad0fb1e697171358f2b25355e3a04b69`, PR #36 MERGED, canonical implementation merge `dfd4977a7c1db00314b613b5d695e166a62d614f` e checkpoint permanente `checkpoint/p14-security-hardening-complete` apontando exatamente para esse merge. P15 foi implementada localmente na branch `phase/p15-observability-operational-readiness`, a partir de `ec12362c21682516f4882c7d70fac51974f17072`. Após audit PASS WITH FIXES, R1 consolidou correlação checkout/admin/readiness, formatting gate, governança RPO/RTO/retenção, boundary machine/internal de readiness e contract checks por exports reais. Evidência atual: 12/51 targeted PASS, 2/14 admin MySQL targeted PASS, 87/721 unit/application PASS e 22/191 MySQL integration PASS. Nenhum commit, push, PR, merge, tag, checkpoint ou deploy P15 foi executado; ChatGPT technical re-review PASS e os objetivos de recovery foram aprovados pelo owner; os requisitos do Gate C estão satisfeitos. A integração Git da P15 permanece pendente. P16 permanece NOT STARTED.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -18,15 +18,15 @@
 - O brief do owner de 12/09/2026 autorizou a P06 a partir de `c77ff9c`: MySQL 8.4 LTS local isolado, Prisma CLI/Client/adapter MariaDB exatamente 7.10.0, schema, migrations e testes físicos. Os 6 alertas transitivos iniciais foram corrigidos na P06 pelos overrides de mariadb 3.5.4, mysql2 3.24.4 e deepmerge-ts 8.0.2; auditoria P07 confirmou 0 vulnerabilidades. Não há liberação de produção.
 - Ambientes aprovados na nova baseline: LOCAL, TEST, STAGING e PRODUCTION com `APP_ENV` separado de `NODE_ENV`, sem afirmar que tenham sido provisionados.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
-- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11, identidade/autenticação/administração P12, analytics P13 e Security Hardening P14 permanecem nas respectivas baselines canônicas. P13 e P14 estão COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness é a próxima fase e permanece NOT STARTED. Produção continua fora do escopo atual.
+- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11, identidade/autenticação/administração P12, analytics P13 e Security Hardening P14 permanecem nas respectivas baselines canônicas. P13 e P14 estão COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness está como COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION, sem integração/checkpoint. Produção continua fora do escopo atual.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.
 - Cada execução requer Phase Execution Brief, branch, autorização de operações protegidas por `AGENTS.md`, validação e retorno ao ChatGPT antes da progressão. Repositório é a memória técnica oficial; ler os arquivos na ordem definida em AGENTS.md.
 - O projeto principal de cosméticos físicos continua separado e será retomado com a formação de caixa.
 
 ## Onde encontrar as decisões
 
-- [ROADMAP.md](ROADMAP.md): fases P00–P20; P13 IN PROGRESS; P13-A COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B–P13-F COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-G–P13-H NOT STARTED.
-- [docs/README.md](docs/README.md): índice canônico P00–P13, incluindo contrato arquitetural P13, Phase Execution Brief e os Final Gates P13-C/P13-D/P13-E/P13-F.
+- [ROADMAP.md](ROADMAP.md): fases P00–P20; P13/P14 encerradas; P15 COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION; Gate C — OPERATIONS READY PASS; P16–P20 pendentes.
+- [docs/README.md](docs/README.md): índice canônico P00–P15, incluindo arquitetura, recuperação, incidentes e dossiê de validação P15.
 - [P12 Final Gate](docs/operations/p12-final-gate.md): arquitetura final, backoffice, RBAC, auditoria, evidências, defer de recovery e limites Git.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
 - [Produto P01](docs/product/first-product-definition.md), [modelo P03](docs/architecture/domain-model.md), [stack P04](docs/architecture/runtime-toolchain-baseline.md) e [P04 exit review](docs/architecture/p04-exit-review.md).
@@ -1850,3 +1850,48 @@ P13-G — Admin Analytics was integrated through PR #32 and implementation merge
 P13-G = **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. Its permanent checkpoint `checkpoint/p13-g-admin-analytics-complete` targets that implementation merge. It added aggregate-only, server-authorized read-only analytics with no schema/migration, PII, ROAS or financial/provider authority expansion.
 
 P13-H — Technical Gate completed local full regression: 74/659 unit, 21/189 isolated MySQL, typecheck, lint, Prisma validate, audit and production build PASS. P13 is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P14 remains the next phase and is not started.
+
+## P15 — implementation candidate / local validation
+
+Date: 2026-09-20
+
+P15-01–P15-08 were implemented on `phase/p15-observability-operational-readiness` from canonical
+parent `ec12362c21682516f4882c7d70fac51974f17072` without dependency, package-lock, Prisma schema or
+migration changes. The candidate consolidates canonical correlation/logging, sanitized
+liveness/readiness/deep health, provider-neutral metrics and local spans, the P11 alert contract,
+service/public status projection, recovery policy, incident lifecycle/runbooks and Gate C evidence.
+
+Final R1 local evidence: 12 files / 51 targeted tests PASS; 2 files / 14 targeted administrative
+MySQL tests PASS; 87 files / 721 unit tests PASS; 22 files / 191 isolated MySQL tests PASS;
+lint, typecheck, Prisma validation, production build and dependency audit PASS; 0 audit
+vulnerabilities; deep operational health `OK` with 5/5 checks; P11 bundle verification and
+non-destructive restore validation PASS; optimized `/api/health` and `/api/readiness` smoke both
+HTTP 200 with minimal bodies and valid correlation headers.
+
+P15 remains `COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION`.
+Gate C is not yet granted. Recovery values remain `PROPOSED RELEASE OBJECTIVE / OWNER APPROVAL
+PENDING / HOSTED VALIDATION P16`. No P15 commit, push, PR, merge, tag/checkpoint or deploy was performed;
+`main` and the P14 checkpoint were not modified. P16 remains NOT STARTED. Hosted collector,
+monitoring/status page, alert delivery, backup scheduling/encryption/off-site replication, hosted
+RPO/RTO proof and rollback validation remain P16; live browser/provider E2E remains P17.
+
+## P15 R1 — post-independent-audit corrections
+
+Date: 2026-09-20
+
+The independent audit returned `PASS WITH FIXES`. R1 replaced checkout and administrative
+correlation generation with the canonical helper while preserving business UUID generation and all
+RBAC/MFA/audit transactions. Readiness now propagates one request correlation through probe,
+diagnostic log, telemetry/span and response; non-HTTP probes generate a fresh canonical ID.
+
+The canonical formatting gate exposed 36 pre-existing P11-oriented files. Exactly that Prettier
+failure set was normalized, with no dependency or schema change. Operational health now imports a
+pure exported observability contracts module rather than checking source text. `/api/readiness` is
+documented as machine/internal, with hosted exposure control as a P16 acceptance requirement.
+
+Final R1 gates: `npm run check` PASS, global format check PASS, Prisma validate PASS, production
+build PASS, dependency audit 0 vulnerabilities and operational health `OK` 5/5.
+
+RPO `<= 24h`, RTO `<= 8h` and retention 7 daily / 4 weekly / 3 monthly remain
+`OWNER APPROVED RELEASE OBJECTIVE / HOSTED VALIDATION REQUIRED IN P16`, never achieved or
+owner-approved production guarantees.

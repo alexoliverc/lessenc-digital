@@ -1,6 +1,8 @@
 import { getDatabaseClient } from "@/infrastructure/database/client";
 import { PrismaCatalogRepository } from "@/infrastructure/database/prisma-catalog-repository";
 import { getP08CommercialEnv } from "@/lib/config/env";
+import { createCorrelationId } from "@/lib/observability/correlation";
+import { logger } from "@/lib/observability/logger";
 import { ResolvePurchasableOffer } from "@/modules/catalog/application/resolve-purchasable-offer";
 import {
   createFailedPublicSalesExperience,
@@ -54,7 +56,12 @@ export async function resolvePublicSalesResolution(): Promise<PublicSalesResolut
       }),
     });
   } catch {
-    console.error("P08_PUBLIC_SALES_RESOLUTION_FAILED");
+    logger.error("public_sales_resolution_failed", {
+      correlationId: createCorrelationId(),
+      surface: "PUBLIC_SITE",
+      outcome: "FAILED",
+      failureCode: "PUBLIC_SALES_RESOLUTION_FAILED",
+    });
 
     return Object.freeze({
       experience: createFailedPublicSalesExperience(),

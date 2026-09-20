@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { listCatalog, listOrders, parseAdminListQuery } from "@/app/admin/admin-query";
 import { changeProductStatus } from "@/modules/administration/infrastructure/change-product-status";
+import { normalizeCorrelationId } from "@/lib/observability/correlation";
 import type { AdminSubject } from "@/modules/administration/infrastructure/admin-subject";
 import { createDatabaseClient } from "./client";
 
@@ -104,6 +105,15 @@ describe("P12 operational backoffice", () => {
         },
       }),
     ).toBe(1);
+    const audit = await db.adminAuditEvent.findFirstOrThrow({
+      where: {
+        actorAdminUserId: ownerId,
+        action: "PRODUCT_STATUS_CHANGED",
+        outcome: "SUCCEEDED",
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(normalizeCorrelationId(audit.correlationId)).toBe(audit.correlationId);
   });
 
   it("denies SUPPORT catalog mutation and audits the denial", async () => {

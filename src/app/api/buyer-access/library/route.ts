@@ -18,27 +18,18 @@ export async function GET(request: NextRequest) {
 
   const sessionEnv = getP11BuyerSessionEnv();
 
-  const sessionService =
-    new HmacBuyerSession(
-      sessionEnv.P11_BUYER_SESSION_SECRET,
-    );
+  const sessionService = new HmacBuyerSession(sessionEnv.P11_BUYER_SESSION_SECRET);
 
-  const validateSession =
-    new ValidateBuyerSession(
-      new PrismaBuyerAccessCredentialRepository(db),
-      sessionService,
-    );
+  const validateSession = new ValidateBuyerSession(
+    new PrismaBuyerAccessCredentialRepository(db),
+    sessionService,
+  );
 
-  const listResources =
-    new RateLimitedBuyerLibraryReader(
-      new ListBuyerDigitalResources(
-        new PrismaResourceAuthorizationRepository(db),
-      ),
-      new FixedWindowBuyerAccessRateLimiter(
-        new PrismaBuyerAccessRateLimitRepository(db),
-      ),
-      new Sha256BuyerAccessRateLimitKey(),
-    );
+  const listResources = new RateLimitedBuyerLibraryReader(
+    new ListBuyerDigitalResources(new PrismaResourceAuthorizationRepository(db)),
+    new FixedWindowBuyerAccessRateLimiter(new PrismaBuyerAccessRateLimitRepository(db)),
+    new Sha256BuyerAccessRateLimitKey(),
+  );
 
   return createBuyerAccessLibraryHandler({
     validateSession,

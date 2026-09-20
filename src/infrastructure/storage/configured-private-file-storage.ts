@@ -33,20 +33,13 @@ export class ConfiguredPrivateFileStorage implements PrivateResourceStorage {
     }
 
     try {
-      const storageEnv =
-        getP11PrivateStorageEnv();
+      const storageEnv = getP11PrivateStorageEnv();
 
-      assertPrivateStorageRootIsPrivate(
-        storageEnv.PRIVATE_FILE_STORAGE_PATH,
-      );
+      assertPrivateStorageRootIsPrivate(storageEnv.PRIVATE_FILE_STORAGE_PATH);
 
-      const storage =
-        new LocalPrivateFileStorage(
-          storageEnv.PRIVATE_FILE_STORAGE_PATH,
-        );
+      const storage = new LocalPrivateFileStorage(storageEnv.PRIVATE_FILE_STORAGE_PATH);
 
-      this.resolvedStorage =
-        storage;
+      this.resolvedStorage = storage;
 
       return storage;
     } catch (error) {
@@ -55,42 +48,26 @@ export class ConfiguredPrivateFileStorage implements PrivateResourceStorage {
       }
 
       if (error instanceof PrivateStorageRootPolicyError) {
-        throw new PrivateResourceStorageError(
-          "STORAGE_ROOT_INVALID",
-        );
+        throw new PrivateResourceStorageError("STORAGE_ROOT_INVALID");
       }
 
       if (
         error instanceof Error &&
-        error.message.startsWith(
-          "Invalid P11 private storage configuration:",
-        )
+        error.message.startsWith("Invalid P11 private storage configuration:")
       ) {
-        throw new PrivateResourceStorageError(
-          "STORAGE_ROOT_INVALID",
-        );
+        throw new PrivateResourceStorageError("STORAGE_ROOT_INVALID");
       }
 
-      throw new PrivateResourceStorageError(
-        "STORAGE_UNAVAILABLE",
-      );
+      throw new PrivateResourceStorageError("STORAGE_UNAVAILABLE");
     }
   }
 
-  async stat(
-    storageKey: string,
-  ): Promise<PrivateResourceMetadata> {
-    return this.resolveStorage().stat(
-      storageKey,
-    );
+  async stat(storageKey: string): Promise<PrivateResourceMetadata> {
+    return this.resolveStorage().stat(storageKey);
   }
 
-  async open(
-    storageKey: string,
-  ): Promise<PrivateResourceBody> {
-    return this.resolveStorage().open(
-      storageKey,
-    );
+  async open(storageKey: string): Promise<PrivateResourceBody> {
+    return this.resolveStorage().open(storageKey);
   }
 }
 

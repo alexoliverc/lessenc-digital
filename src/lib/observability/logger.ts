@@ -1,6 +1,16 @@
+import { OBSERVABILITY_SERVICE_NAME } from "./contracts";
+
 export type LogLevel = "info" | "warn" | "error";
 
 export type LogContext = Readonly<Record<string, unknown>>;
+
+export { OBSERVABILITY_SERVICE_NAME } from "./contracts";
+
+const LOG_SCHEMA_VERSION = 1;
+
+const APPLICATION_ENVIRONMENTS = new Set(["local", "test", "staging", "production"]);
+
+const EVENT_PATTERN = /^[a-z0-9]+(?:[._][a-z0-9]+)*$/u;
 
 const REDACTED_KEYS = new Set([
   "password",
@@ -49,19 +59,14 @@ const REDACTED_KEYS = new Set([
 ]);
 
 function normalizeKey(key: string): string {
-  return key
-    .toLowerCase()
-    .replace(/[^a-z0-9]/gu, "");
+  return key.toLowerCase().replace(/[^a-z0-9]/gu, "");
 }
 
 function shouldRedactKey(key: string): boolean {
   return REDACTED_KEYS.has(normalizeKey(key));
 }
 
-function sanitizeValue(
-  value: unknown,
-  seen: WeakSet<object>,
-): unknown {
+function sanitizeValue(value: unknown, seen: WeakSet<object>): unknown {
   if (
     value === null ||
     typeof value === "string" ||
@@ -75,11 +80,7 @@ function sanitizeValue(
     return value.toString();
   }
 
-  if (
-    typeof value === "undefined" ||
-    typeof value === "function" ||
-    typeof value === "symbol"
-  ) {
+  if (typeof value === "undefined" || typeof value === "function" || typeof value === "symbol") {
     return "[UNSUPPORTED]";
   }
 
@@ -105,18 +106,13 @@ function sanitizeValue(
 
   try {
     if (Array.isArray(value)) {
-      return value.map((entry) =>
-        sanitizeValue(entry, seen),
-      );
+      return value.map((entry) => sanitizeValue(entry, seen));
     }
 
     const sanitized: Record<string, unknown> = {};
 
     for (const [key, entry] of Object.entries(value)) {
-      sanitized[key] =
-        shouldRedactKey(key)
-          ? "[REDACTED]"
-          : sanitizeValue(entry, seen);
+      sanitized[key] = shouldRedactKey(key) ? "[REDACTED]" : sanitizeValue(entry, seen);
     }
 
     return sanitized;
@@ -126,22 +122,26 @@ function sanitizeValue(
 }
 
 function redact(context: LogContext): LogContext {
-  return sanitizeValue(
-    context,
-    new WeakSet<object>(),
-  ) as LogContext;
+  return sanitizeValue(context, new WeakSet<object>()) as LogContext;
 }
 
-function write(
-  level: LogLevel,
-  event: string,
-  context: LogContext = {},
-): void {
+function write(level: LogLevel, event: string, context: LogContext = {}): void {
+  if (!EVENT_PATTERN.test(event)) {
+    throw new Error("INVALID_OBSERVABILITY_EVENT");
+  }
+
+  const applicationEnvironment = APPLICATION_ENVIRONMENTS.has(process.env.APP_ENV ?? "")
+    ? process.env.APP_ENV
+    : "unknown";
+
   const record = {
+    ...redact(context),
+    schemaVersion: LOG_SCHEMA_VERSION,
     timestamp: new Date().toISOString(),
     level,
     event,
-    ...redact(context),
+    service: OBSERVABILITY_SERVICE_NAME,
+    applicationEnvironment,
   };
 
   const serialized = JSON.stringify(record);

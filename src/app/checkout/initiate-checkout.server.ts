@@ -18,12 +18,15 @@ import {
 } from "@/modules/attribution/application/acquisition-http-boundary";
 import { isJourneyActive } from "@/modules/attribution/application/acquisition-policy";
 import type { AcquisitionJourneyRecord } from "@/modules/attribution/application/persistence";
+import { resolveRequestCorrelationId } from "@/lib/observability/correlation";
+import { logger } from "@/lib/observability/logger";
 
 import type { CheckoutInitiationMeasurementContext } from "./checkout.server";
 
 async function resolveCheckoutJourney(
   journeyId: string | null,
   occurredAt: Date,
+  correlationId: string,
 ): Promise<AcquisitionJourneyRecord | null> {
   if (journeyId === null) {
     return null;
@@ -46,7 +49,12 @@ async function resolveCheckoutJourney(
      * Journey lookup is telemetry enrichment only.
      * Checkout remains valid without attribution.
      */
-    console.error("P13_INITIATE_CHECKOUT_JOURNEY_LOOKUP_FAILED");
+    logger.error("initiate_checkout_journey_lookup_failed", {
+      correlationId,
+      surface: "CHECKOUT",
+      outcome: "DEGRADED",
+      failureCode: "JOURNEY_LOOKUP_FAILED",
+    });
 
     return null;
   }
@@ -59,6 +67,7 @@ export async function scheduleCheckoutInitiation(
    * Request APIs must be read before after() executes.
    */
   const [requestHeaders, requestCookies] = await Promise.all([headers(), cookies()]);
+  const correlationId = resolveRequestCorrelationId(requestHeaders);
 
   /*
    * Navigation prefetch does not represent a human
@@ -82,7 +91,7 @@ export async function scheduleCheckoutInitiation(
     currency: measurement.currency,
   });
 
-  const journey = await resolveCheckoutJourney(journeyId, eventInput.occurredAt);
+  const journey = await resolveCheckoutJourney(journeyId, eventInput.occurredAt, correlationId);
 
   /*
    * Analytics persistence is post-response and cannot
@@ -103,7 +112,12 @@ export async function scheduleCheckoutInitiation(
        * No token, cookie value, customer data or
        * commercial identifier is logged.
        */
-      console.error("P13_INITIATE_CHECKOUT_MEASUREMENT_FAILED");
+      logger.error("initiate_checkout_measurement_failed", {
+        correlationId,
+        surface: "CHECKOUT",
+        outcome: "DEGRADED",
+        failureCode: "MEASUREMENT_FAILED",
+      });
     }
   });
 

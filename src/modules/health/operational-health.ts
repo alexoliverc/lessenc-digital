@@ -1,11 +1,6 @@
-export const OPERATIONAL_HEALTH_STATUSES = [
-  "OK",
-  "DEGRADED",
-  "FAILED",
-] as const;
+export const OPERATIONAL_HEALTH_STATUSES = ["OK", "DEGRADED", "FAILED"] as const;
 
-export type OperationalHealthStatus =
-  (typeof OPERATIONAL_HEALTH_STATUSES)[number];
+export type OperationalHealthStatus = (typeof OPERATIONAL_HEALTH_STATUSES)[number];
 
 export const OPERATIONAL_HEALTH_CHECK_NAMES = [
   "APPLICATION_CONTRACT",
@@ -15,97 +10,53 @@ export const OPERATIONAL_HEALTH_CHECK_NAMES = [
   "OBSERVABILITY_CONTRACT",
 ] as const;
 
-export type OperationalHealthCheckName =
-  (typeof OPERATIONAL_HEALTH_CHECK_NAMES)[number];
+export type OperationalHealthCheckName = (typeof OPERATIONAL_HEALTH_CHECK_NAMES)[number];
 
-export type OperationalHealthCheckInput =
-  Readonly<{
-    name: OperationalHealthCheckName;
-    status: OperationalHealthStatus;
-    failureCode?: string;
-  }>;
+export type OperationalHealthCheckInput = Readonly<{
+  name: OperationalHealthCheckName;
+  status: OperationalHealthStatus;
+  failureCode?: string;
+}>;
 
-export type OperationalHealthCheck =
-  Readonly<{
-    name: OperationalHealthCheckName;
-    status: OperationalHealthStatus;
-    failureCode?: string;
-  }>;
+export type OperationalHealthCheck = Readonly<{
+  name: OperationalHealthCheckName;
+  status: OperationalHealthStatus;
+  failureCode?: string;
+}>;
 
-export type OperationalHealthReport =
-  Readonly<{
-    status: OperationalHealthStatus;
-    checks: readonly OperationalHealthCheck[];
-  }>;
+export type OperationalHealthReport = Readonly<{
+  status: OperationalHealthStatus;
+  checks: readonly OperationalHealthCheck[];
+}>;
 
-const FAILURE_CODE_PATTERN =
-  /^[A-Z0-9_]{1,64}$/u;
+const FAILURE_CODE_PATTERN = /^[A-Z0-9_]{1,64}$/u;
 
-const STATUS_PRIORITY:
-  Readonly<
-    Record<
-      OperationalHealthStatus,
-      number
-    >
-  > = Object.freeze({
-    OK: 0,
-    DEGRADED: 1,
-    FAILED: 2,
-  });
+const STATUS_PRIORITY: Readonly<Record<OperationalHealthStatus, number>> = Object.freeze({
+  OK: 0,
+  DEGRADED: 1,
+  FAILED: 2,
+});
 
-function contains<T extends string>(
-  values: readonly T[],
-  candidate: string,
-): candidate is T {
-  return (
-    values as readonly string[]
-  ).includes(candidate);
+function contains<T extends string>(values: readonly T[], candidate: string): candidate is T {
+  return (values as readonly string[]).includes(candidate);
 }
 
-function normalizeCheck(
-  check: OperationalHealthCheckInput,
-): OperationalHealthCheck {
-  if (
-    typeof check !== "object" ||
-    check === null
-  ) {
-    throw new Error(
-      "INVALID_OPERATIONAL_HEALTH_CHECK",
-    );
+function normalizeCheck(check: OperationalHealthCheckInput): OperationalHealthCheck {
+  if (typeof check !== "object" || check === null) {
+    throw new Error("INVALID_OPERATIONAL_HEALTH_CHECK");
   }
 
-  if (
-    typeof check.name !== "string" ||
-    !contains(
-      OPERATIONAL_HEALTH_CHECK_NAMES,
-      check.name,
-    )
-  ) {
-    throw new Error(
-      "INVALID_OPERATIONAL_HEALTH_CHECK_NAME",
-    );
+  if (typeof check.name !== "string" || !contains(OPERATIONAL_HEALTH_CHECK_NAMES, check.name)) {
+    throw new Error("INVALID_OPERATIONAL_HEALTH_CHECK_NAME");
   }
 
-  if (
-    typeof check.status !== "string" ||
-    !contains(
-      OPERATIONAL_HEALTH_STATUSES,
-      check.status,
-    )
-  ) {
-    throw new Error(
-      "INVALID_OPERATIONAL_HEALTH_CHECK_STATUS",
-    );
+  if (typeof check.status !== "string" || !contains(OPERATIONAL_HEALTH_STATUSES, check.status)) {
+    throw new Error("INVALID_OPERATIONAL_HEALTH_CHECK_STATUS");
   }
 
   if (check.status === "OK") {
-    if (
-      typeof check.failureCode !==
-      "undefined"
-    ) {
-      throw new Error(
-        "INVALID_OPERATIONAL_HEALTH_OK_FAILURE_CODE",
-      );
+    if (typeof check.failureCode !== "undefined") {
+      throw new Error("INVALID_OPERATIONAL_HEALTH_OK_FAILURE_CODE");
     }
 
     return Object.freeze({
@@ -114,15 +65,8 @@ function normalizeCheck(
     });
   }
 
-  if (
-    typeof check.failureCode !== "string" ||
-    !FAILURE_CODE_PATTERN.test(
-      check.failureCode,
-    )
-  ) {
-    throw new Error(
-      "INVALID_OPERATIONAL_HEALTH_FAILURE_CODE",
-    );
+  if (typeof check.failureCode !== "string" || !FAILURE_CODE_PATTERN.test(check.failureCode)) {
+    throw new Error("INVALID_OPERATIONAL_HEALTH_FAILURE_CODE");
   }
 
   return Object.freeze({
@@ -133,81 +77,48 @@ function normalizeCheck(
 }
 
 export function evaluateOperationalHealth(
-  input:
-    readonly OperationalHealthCheckInput[],
+  input: readonly OperationalHealthCheckInput[],
 ): OperationalHealthReport {
   if (!Array.isArray(input)) {
-    throw new Error(
-      "INVALID_OPERATIONAL_HEALTH_CHECK_SET",
-    );
+    throw new Error("INVALID_OPERATIONAL_HEALTH_CHECK_SET");
   }
 
-  if (
-    input.length !==
-    OPERATIONAL_HEALTH_CHECK_NAMES.length
-  ) {
-    throw new Error(
-      "INVALID_OPERATIONAL_HEALTH_CHECK_SET",
-    );
+  if (input.length !== OPERATIONAL_HEALTH_CHECK_NAMES.length) {
+    throw new Error("INVALID_OPERATIONAL_HEALTH_CHECK_SET");
   }
 
-  const byName =
-    new Map<
-      OperationalHealthCheckName,
-      OperationalHealthCheck
-    >();
+  const byName = new Map<OperationalHealthCheckName, OperationalHealthCheck>();
 
   for (const candidate of input) {
-    const check =
-      normalizeCheck(candidate);
+    const check = normalizeCheck(candidate);
 
     if (byName.has(check.name)) {
-      throw new Error(
-        "DUPLICATE_OPERATIONAL_HEALTH_CHECK",
-      );
+      throw new Error("DUPLICATE_OPERATIONAL_HEALTH_CHECK");
     }
 
-    byName.set(
-      check.name,
-      check,
-    );
+    byName.set(check.name, check);
   }
 
-  const checks =
-    OPERATIONAL_HEALTH_CHECK_NAMES.map(
-      (name) => {
-        const check =
-          byName.get(name);
+  const checks = OPERATIONAL_HEALTH_CHECK_NAMES.map((name) => {
+    const check = byName.get(name);
 
-        if (!check) {
-          throw new Error(
-            "MISSING_OPERATIONAL_HEALTH_CHECK",
-          );
-        }
+    if (!check) {
+      throw new Error("MISSING_OPERATIONAL_HEALTH_CHECK");
+    }
 
-        return check;
-      },
-    );
+    return check;
+  });
 
-  let status:
-    OperationalHealthStatus =
-    "OK";
+  let status: OperationalHealthStatus = "OK";
 
   for (const check of checks) {
-    if (
-      STATUS_PRIORITY[check.status] >
-      STATUS_PRIORITY[status]
-    ) {
-      status =
-        check.status;
+    if (STATUS_PRIORITY[check.status] > STATUS_PRIORITY[status]) {
+      status = check.status;
     }
   }
 
   return Object.freeze({
     status,
-    checks:
-      Object.freeze(
-        [...checks],
-      ),
+    checks: Object.freeze([...checks]),
   });
 }
