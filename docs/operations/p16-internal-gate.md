@@ -1,7 +1,9 @@
 # P16 Internal Repository Gate
 
-**Phase:** P16 — Staging Deployment  
-**Status:** P16 INTERNAL REPOSITORY IMPLEMENTATION COMPLETE / HOSTED AND EXTERNAL VALIDATION PENDING  
+**Phase:** P16 — Staging Deployment
+
+**Status:** P16 INTERNAL REPOSITORY IMPLEMENTATION COMPLETE / HOSTED AND EXTERNAL VALIDATION PENDING
+
 **Starting baseline:** `11c4a18e4c2b479ebd8155f8a5397e8820e49513`
 
 ## Internal scope delivered
