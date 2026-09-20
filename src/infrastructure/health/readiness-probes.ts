@@ -72,6 +72,27 @@ async function databaseCheck(correlationId: string): Promise<ReadinessCheck> {
 }
 
 async function privateStorageCheck(): Promise<ReadinessCheck> {
+  const applicationEnvironment = process.env.APP_ENV;
+  const driver = process.env.PRIVATE_STORAGE_DRIVER ?? "local-filesystem";
+  if (
+    (applicationEnvironment === "staging" || applicationEnvironment === "production") &&
+    driver !== "hosted"
+  ) {
+    return Object.freeze({
+      name: "PRIVATE_STORAGE",
+      ready: false,
+      failureCode: "STORAGE_ROOT_INVALID",
+    });
+  }
+  if (driver === "hosted") {
+    // Provider selection and its health adapter are an explicit external P16 dependency.
+    return Object.freeze({
+      name: "PRIVATE_STORAGE",
+      ready: false,
+      failureCode: "STORAGE_ROOT_UNAVAILABLE",
+    });
+  }
+
   const root = process.env.PRIVATE_FILE_STORAGE_PATH;
 
   if (typeof root !== "string" || root.trim().length === 0) {

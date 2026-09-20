@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure and P14 — Security Hardening remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as canonical technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets that technical merge and must not be retargeted by the documentation closeout. Gate C — OPERATIONS READY is PASS. No deployment has been performed. P16 remains NOT STARTED.
+**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure and P14 — Security Hardening remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as canonical technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets that technical merge and must not be retargeted by the documentation closeout. Gate C — OPERATIONS READY is PASS. P16 internal repository implementation is complete on its phase branch. No deployment has been performed; hosted/external validation remains pending and P16 is not complete.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1203,7 +1203,7 @@ PASS before release-environment validation.
 
 ## P16 — Staging Deployment
 
-**Status:** PENDENTE
+**Status:** INTERNAL REPOSITORY IMPLEMENTATION COMPLETE / HOSTED VALIDATION PENDING
 
 ### Objective
 
@@ -1254,6 +1254,12 @@ Deployment, infrastructure, DNS and external-effect operations require authoriza
 ### Exit criteria
 
 Staging represents the intended production architecture sufficiently for release validation.
+
+Repository-side preparation includes the staging configuration/preflight contract, guarded
+`prisma migrate deploy`, explicit hosted storage boundary, protected readiness, smoke tooling,
+TEST-only payment configuration checks and recovery/retention planning. These controls do not
+constitute a deployment. Hosted database/storage/provider/HTTPS/monitoring/backup/restore evidence
+remains required before P16 can be declared complete.
 
 The hosted access model for `/api/readiness` is selected and validated as a machine-monitor
 boundary—through infrastructure/reverse-proxy restriction or another explicitly approved control—

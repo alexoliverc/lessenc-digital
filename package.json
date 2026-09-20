@@ -27,7 +27,11 @@
     "db:migrate:dev": "node scripts/p06-db-guard.mjs dev && prisma migrate dev",
     "db:migrate:deploy:test": "node scripts/p06-db-guard.mjs test-deploy && prisma migrate deploy",
     "db:migrate:deploy:fresh": "node scripts/p06-db-guard.mjs fresh-deploy && prisma migrate deploy",
+    "db:migrate:deploy:staging": "node scripts/p16-staging-migration-guard.mjs && prisma migrate deploy",
     "db:status": "node scripts/p06-db-guard.mjs status && prisma migrate status",
+    "ops:p16:preflight": "node scripts/p16-staging-preflight.mjs",
+    "ops:p16:hosted-smoke": "node scripts/p16-hosted-smoke.mjs",
+    "ops:p16:retention-plan": "node scripts/p16-backup-retention-plan.mjs",
     "test:integration": "node scripts/p06-db-guard.mjs test && npm run db:generate && vitest run --config vitest.integration.config.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run format:check"
   },
@@ -59,5 +63,8 @@
     "mariadb": "3.5.4",
     "mysql2": "3.24.4",
     "deepmerge-ts": "8.0.2"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }

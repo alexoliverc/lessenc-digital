@@ -4,6 +4,8 @@ import {
   parseP11BuyerSessionEnv,
   parseP11PrivateStorageEnv,
   parseP13GoogleTagEnv,
+  parseP16ReadinessEnv,
+  parseP16PrivateStorageDriverEnv,
   parseServerEnv,
 } from "./env-schema";
 
@@ -54,5 +56,25 @@ export function getP11PrivateStorageEnv() {
 
   return parseP11PrivateStorageEnv({
     PRIVATE_FILE_STORAGE_PATH: process.env.PRIVATE_FILE_STORAGE_PATH,
+  });
+}
+
+export function getP16ReadinessEnv() {
+  if (typeof window !== "undefined") {
+    throw new Error("P16 readiness configuration is server-only");
+  }
+
+  return parseP16ReadinessEnv({
+    P16_READINESS_TOKEN: process.env.P16_READINESS_TOKEN,
+  });
+}
+
+export function getP16PrivateStorageDriverEnv() {
+  if (typeof window !== "undefined") {
+    throw new Error("P16 private storage configuration is server-only");
+  }
+
+  return parseP16PrivateStorageDriverEnv({
+    PRIVATE_STORAGE_DRIVER: process.env.PRIVATE_STORAGE_DRIVER,
   });
 }

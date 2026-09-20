@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { runReadinessProbe } from "@/infrastructure/health/readiness-probes";
+import { isReadinessRequestAuthorized } from "@/infrastructure/health/readiness-auth";
 import {
   resolveRequestCorrelationId,
   setCorrelationResponseHeader,
@@ -17,10 +18,31 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type ReadinessProbe = (correlationId: string) => Promise<ReadinessReport>;
+type ReadinessAuthorizer = (request: Request) => boolean;
 
-export function createReadinessHandler(probe: ReadinessProbe = runReadinessProbe) {
+export function createReadinessHandler(
+  probe: ReadinessProbe = runReadinessProbe,
+  authorize: ReadinessAuthorizer = isReadinessRequestAuthorized,
+) {
   return async function GET(request: Request): Promise<Response> {
     const correlationId = resolveRequestCorrelationId(request.headers);
+    const headers = new Headers({
+      "Cache-Control": "no-store",
+    });
+    setCorrelationResponseHeader(headers, correlationId);
+
+    const authorized = (() => {
+      try {
+        return authorize(request);
+      } catch {
+        return false;
+      }
+    })();
+
+    if (!authorized) {
+      return NextResponse.json({ status: "not_found" }, { status: 404, headers });
+    }
+
     const span = startOperationalSpan({
       correlationId,
       surface: "HEALTH",
@@ -84,11 +106,6 @@ export function createReadinessHandler(probe: ReadinessProbe = runReadinessProbe
         statusClass: statusClass(status),
       },
     });
-
-    const headers = new Headers({
-      "Cache-Control": "no-store",
-    });
-    setCorrelationResponseHeader(headers, correlationId);
 
     return NextResponse.json(projectPublicReadiness(report), { status, headers });
   };

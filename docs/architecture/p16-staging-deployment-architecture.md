@@ -1,7 +1,7 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** ARCHITECTURE FROZEN / IMPLEMENTATION IN PROGRESS
+**Status:** ARCHITECTURE FROZEN / INTERNAL REPOSITORY IMPLEMENTATION COMPLETE / HOSTED VALIDATION PENDING
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
 **Current P16 working baseline:** `300a5db6755b238606f0aa91e05981b2af121acc`
 **Application hosting:** Hostinger Managed Node / Web App
@@ -240,19 +240,21 @@ Application rollback is distinct from database recovery.
 
 ### P16-F01 — Environment contract drift
 
-`.env.example` is missing `P11_BUYER_SESSION_SECRET`.
+`REMEDIATED`: `.env.example` includes the server-only buyer-session secret name without a value.
 
 ### P16-F02 — Documentation state drift
 
-Canonical summaries still contain historical statements saying P16 has not started and no deployment occurred.
+`REMEDIATED INTERNALLY`: canonical summaries identify P16 as internally in progress while
+preserving the factual statement that no deployment occurred.
 
 ### P16-F03 — Runtime toolchain drift
 
-`package.json` has no Node.js `engines` declaration.
+`REMEDIATED`: `package.json` and the root lockfile declare Node.js `24.x`.
 
 ### P16-F04 — Staging migration guard missing
 
-The current database guard does not support a fail-closed staging migration mode.
+`REMEDIATED IN CODE`: the P16 staging guard precedes `prisma migrate deploy`; hosted execution is
+still pending.
 
 ### P16-F05 — Hosted database validation pending
 
@@ -260,11 +262,13 @@ Database compatibility, TLS and hosted migrations have not yet been proven.
 
 ### P16-F06 — Hosted private-storage adapter missing
 
-The configured physical storage implementation is filesystem-only.
+`BLOCKED EXTERNALLY`: the provider-neutral boundary and hosted/local selection fail closed, but a
+concrete hosted provider decision and adapter remain required.
 
 ### P16-F07 — Hosted readiness access control missing
 
-The readiness response is sanitized but has no hosted machine-access boundary yet.
+`REMEDIATED IN CODE`: server-only bearer authentication denies generic unauthorized requests before
+dependency probes. Hosted validation remains required.
 
 ### P16-F08 — Hosted recovery implementation pending
 

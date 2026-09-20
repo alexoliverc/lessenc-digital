@@ -35,11 +35,19 @@ const p12AdminAuthEnvSchema = z.object({
   P12_ADMIN_AUTH_SECRET: z.string().min(32),
 });
 
+const p16ReadinessEnvSchema = z.object({
+  P16_READINESS_TOKEN: z.string().min(32),
+});
+
 const p11PrivateStorageEnvSchema = z.object({
   PRIVATE_FILE_STORAGE_PATH: z
     .string()
     .min(1)
     .refine((value) => isAbsolute(value), "PRIVATE_FILE_STORAGE_PATH must be absolute"),
+});
+
+const p16PrivateStorageDriverEnvSchema = z.object({
+  PRIVATE_STORAGE_DRIVER: z.enum(["local-filesystem", "hosted"]).default("local-filesystem"),
 });
 
 type ServerEnvInput = {
@@ -68,8 +76,16 @@ type P12AdminAuthEnvInput = {
   P12_ADMIN_AUTH_SECRET?: string | undefined;
 };
 
+type P16ReadinessEnvInput = {
+  P16_READINESS_TOKEN?: string | undefined;
+};
+
 type P11PrivateStorageEnvInput = {
   PRIVATE_FILE_STORAGE_PATH?: string | undefined;
+};
+
+type P16PrivateStorageDriverEnvInput = {
+  PRIVATE_STORAGE_DRIVER?: string | undefined;
 };
 
 export function parseServerEnv(input: ServerEnvInput) {
@@ -132,11 +148,31 @@ export function parseP12AdminAuthEnv(input: P12AdminAuthEnvInput) {
   return Object.freeze(parsed.data);
 }
 
+export function parseP16ReadinessEnv(input: P16ReadinessEnvInput) {
+  const parsed = p16ReadinessEnvSchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(`Invalid P16 readiness configuration: ${z.prettifyError(parsed.error)}`);
+  }
+
+  return Object.freeze(parsed.data);
+}
+
 export function parseP11PrivateStorageEnv(input: P11PrivateStorageEnvInput) {
   const parsed = p11PrivateStorageEnvSchema.safeParse(input);
 
   if (!parsed.success) {
     throw new Error(`Invalid P11 private storage configuration: ${z.prettifyError(parsed.error)}`);
+  }
+
+  return Object.freeze(parsed.data);
+}
+
+export function parseP16PrivateStorageDriverEnv(input: P16PrivateStorageDriverEnvInput) {
+  const parsed = p16PrivateStorageDriverEnvSchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(`Invalid P16 private storage configuration: ${z.prettifyError(parsed.error)}`);
   }
 
   return Object.freeze(parsed.data);

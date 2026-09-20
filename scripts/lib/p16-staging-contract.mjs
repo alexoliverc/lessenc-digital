@@ -1,0 +1,102 @@
+import { isAbsolute } from "node:path";
+import { URL } from "node:url";
+
+export const STAGING_ENVIRONMENT_ID = "lessenc-staging";
+
+export const STAGING_SECRET_NAMES = Object.freeze([
+  "MERCADOPAGO_ACCESS_TOKEN",
+  "MERCADOPAGO_WEBHOOK_SECRET",
+  "P09_SUBMISSION_SECRET",
+  "P10_PAYMENT_CONTINUATION_SECRET",
+  "P11_BUYER_SESSION_SECRET",
+  "P12_ADMIN_AUTH_SECRET",
+  "P16_READINESS_TOKEN",
+]);
+
+function parseDatabaseUrl(raw) {
+  try {
+    const url = new URL(raw);
+    const database = decodeURIComponent(url.pathname.slice(1));
+    if (url.protocol !== "mysql:" || !url.hostname || !url.username || !url.password || !database) {
+      return null;
+    }
+    return { url, database };
+  } catch {
+    return null;
+  }
+}
+
+function isHostedDatabase(target) {
+  return (
+    target !== null &&
+    !["127.0.0.1", "localhost", "::1"].includes(target.url.hostname.toLowerCase()) &&
+    /stag(e|ing)/iu.test(target.database)
+  );
+}
+
+export function validateStagingEnvironment(env) {
+  const failures = [];
+  const requireExact = (name, expected) => {
+    if (env[name] !== expected) failures.push(`${name}_INVALID`);
+  };
+
+  requireExact("APP_ENV", "staging");
+  requireExact("NODE_ENV", "production");
+  requireExact("APP_URL", "https://lessenc.com.br");
+  requireExact("P16_STAGING_ENVIRONMENT_ID", STAGING_ENVIRONMENT_ID);
+  requireExact("PRIVATE_STORAGE_DRIVER", "hosted");
+
+  const migration = parseDatabaseUrl(env.DATABASE_URL);
+  const runtime = parseDatabaseUrl(env.DB_RUNTIME_URL);
+  if (!isHostedDatabase(migration)) failures.push("DATABASE_URL_NOT_UNAMBIGUOUS_STAGING");
+  if (!isHostedDatabase(runtime)) failures.push("DB_RUNTIME_URL_NOT_UNAMBIGUOUS_STAGING");
+  if (migration && runtime) {
+    if (migration.url.href === runtime.url.href)
+      failures.push("DATABASE_PRIVILEGE_BOUNDARY_MISSING");
+    if (migration.url.username === runtime.url.username)
+      failures.push("DATABASE_USERS_MUST_BE_DISTINCT");
+    if (
+      migration.url.hostname !== runtime.url.hostname ||
+      migration.url.port !== runtime.url.port ||
+      migration.database !== runtime.database
+    ) {
+      failures.push("DATABASE_TARGETS_DO_NOT_MATCH");
+    }
+  }
+
+  if (!env.DB_TLS_CA_FILE || !isAbsolute(env.DB_TLS_CA_FILE)) {
+    failures.push("DB_TLS_CA_FILE_MUST_BE_ABSOLUTE");
+  }
+
+  for (const name of STAGING_SECRET_NAMES) {
+    if (typeof env[name] !== "string" || env[name].length < 32) {
+      failures.push(`${name}_MISSING_OR_WEAK`);
+    }
+  }
+
+  if (!env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY?.startsWith("TEST-")) {
+    failures.push("MERCADOPAGO_PUBLIC_KEY_NOT_TEST");
+  }
+  if (!env.MERCADOPAGO_ACCESS_TOKEN?.startsWith("TEST-")) {
+    failures.push("MERCADOPAGO_ACCESS_TOKEN_NOT_TEST");
+  }
+  if (!/^[0-9a-f]{40}$/iu.test(env.P16_RELEASE_COMMIT ?? "")) {
+    failures.push("P16_RELEASE_COMMIT_INVALID");
+  }
+
+  const configuredSecrets = STAGING_SECRET_NAMES.map((name) => env[name]).filter(
+    (value) => typeof value === "string" && value.length >= 32,
+  );
+  if (new Set(configuredSecrets).size !== configuredSecrets.length) {
+    failures.push("STAGING_SECRET_REUSE_FORBIDDEN");
+  }
+
+  return Object.freeze([...new Set(failures)].sort());
+}
+
+export function assertStagingEnvironment(env) {
+  const failures = validateStagingEnvironment(env);
+  if (failures.length > 0) {
+    throw new Error(`P16_STAGING_PREFLIGHT_FAILED:${failures.join(",")}`);
+  }
+}

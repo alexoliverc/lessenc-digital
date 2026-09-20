@@ -9,6 +9,8 @@ import {
   parseP12AdminAuthEnv,
   parseP11PrivateStorageEnv,
   parseP13GoogleTagEnv,
+  parseP16ReadinessEnv,
+  parseP16PrivateStorageDriverEnv,
   parseServerEnv,
 } from "./env-schema";
 
@@ -204,5 +206,39 @@ describe("parseP11PrivateStorageEnv", () => {
         PRIVATE_FILE_STORAGE_PATH: "private/resources",
       }),
     ).toThrow("Invalid P11 private storage configuration");
+  });
+});
+
+describe("parseP16ReadinessEnv", () => {
+  const TOKEN = "p16-readiness-machine-token-32-bytes-minimum";
+
+  it("accepts a dedicated server-only machine token", () => {
+    expect(parseP16ReadinessEnv({ P16_READINESS_TOKEN: TOKEN })).toEqual({
+      P16_READINESS_TOKEN: TOKEN,
+    });
+  });
+
+  it("rejects missing and weak machine tokens", () => {
+    expect(() => parseP16ReadinessEnv({})).toThrow("Invalid P16 readiness configuration");
+    expect(() => parseP16ReadinessEnv({ P16_READINESS_TOKEN: "too-short" })).toThrow(
+      "Invalid P16 readiness configuration",
+    );
+  });
+});
+
+describe("parseP16PrivateStorageDriverEnv", () => {
+  it("defaults to the local adapter and recognizes the unresolved hosted boundary", () => {
+    expect(parseP16PrivateStorageDriverEnv({})).toEqual({
+      PRIVATE_STORAGE_DRIVER: "local-filesystem",
+    });
+    expect(parseP16PrivateStorageDriverEnv({ PRIVATE_STORAGE_DRIVER: "hosted" })).toEqual({
+      PRIVATE_STORAGE_DRIVER: "hosted",
+    });
+  });
+
+  it("rejects arbitrary provider names", () => {
+    expect(() =>
+      parseP16PrivateStorageDriverEnv({ PRIVATE_STORAGE_DRIVER: "public-filesystem" }),
+    ).toThrow("Invalid P16 private storage configuration");
   });
 });

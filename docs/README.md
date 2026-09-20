@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P15
 
-**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897`, PR #43 MERGED, merge técnico canônico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` e checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete`. Gate C — OPERATIONS READY está PASS. Nenhum deploy foi executado e P16 permanece NOT STARTED.
+**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897`, PR #43 MERGED, merge técnico canônico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` e checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete`. Gate C — OPERATIONS READY está PASS. A implementação interna de repositório da P16 está concluída; nenhum deploy foi executado e toda validação hosted/externa permanece pendente.
 
 ## Precedência e classificação das fontes
 
@@ -321,6 +321,18 @@ o [runbook de incidentes](operations/p15-incident-response-runbook.md) e o
 residuais e deferrals P16/P17. As correções R1 do audit PASS WITH FIXES estão implementadas; P15 e
 Gate C ainda dependem do ChatGPT re-review;
 push, PR, merge, checkpoint, deploy e P16 não foram executados.
+
+The paragraph above preserves the pre-integration candidate checkpoint. P15 was later integrated
+and checkpointed as recorded at the top of this index.
+
+## P16 — Staging Deployment — INTERNAL REPOSITORY IMPLEMENTATION COMPLETE
+
+A [arquitetura congelada P16](architecture/p16-staging-deployment-architecture.md), o
+[runbook de staging](operations/p16-staging-runbook.md) e o
+[gate interno](operations/p16-internal-gate.md) define configuration/preflight fail-closed,
+migration deploy guard, storage provider-neutral, protected readiness, hosted smoke, Mercado Pago
+TEST, backup/retention/recovery and rollback boundaries. No hosted deployment or external provider
+validation has been performed.
 
 ## HISTORICAL / SUPERSEDED DOCUMENTS
 

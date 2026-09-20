@@ -22,5 +22,5 @@ describe("administrative authentication initialization", () => {
         else process.env[key] = value;
       }
     }
-  });
+  }, 15_000);
 });

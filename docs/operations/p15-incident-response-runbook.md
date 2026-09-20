@@ -40,12 +40,14 @@ These are classifications, not invented hosted response-time SLOs.
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:3000/api/health
-Invoke-WebRequest http://127.0.0.1:3000/api/readiness -SkipHttpErrorCheck
+$readinessHeaders = @{ Authorization = "Bearer $env:P16_READINESS_TOKEN" }
+Invoke-WebRequest http://127.0.0.1:3000/api/readiness -Headers $readinessHeaders -SkipHttpErrorCheck
 npm run ops:p15:operational-health -- --target-database=lessenc_test
 ```
 
 Use the correct explicitly authorized environment/target. Never print `DB_RUNTIME_URL`, secrets,
-cookies, access tokens or private storage paths in evidence.
+cookies, access tokens or private storage paths in evidence. Missing readiness authorization must
+return a generic denial without probing dependencies.
 
 ## Runbook — application unavailable
 

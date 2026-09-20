@@ -25,7 +25,7 @@ describe("P15 readiness HTTP boundary", () => {
         { name: "PRIVATE_STORAGE", ready: true },
       ]);
     });
-    const handler = createReadinessHandler(probe);
+    const handler = createReadinessHandler(probe, () => true);
 
     const response = await handler(
       new Request("https://lessenc.example/api/readiness", {
@@ -50,7 +50,7 @@ describe("P15 readiness HTTP boundary", () => {
         { name: "PRIVATE_STORAGE", ready: true },
       ]),
     );
-    const handler = createReadinessHandler(probe);
+    const handler = createReadinessHandler(probe, () => true);
 
     const response = await handler(
       new Request("https://lessenc.example/api/readiness", {
@@ -70,16 +70,18 @@ describe("P15 readiness HTTP boundary", () => {
     vi.spyOn(console, "info").mockImplementation(() => undefined);
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    const handler = createReadinessHandler(async () =>
-      evaluateReadiness([
-        { name: "APPLICATION_CONTRACT", ready: true },
-        {
-          name: "DATABASE_CONNECTIVITY",
-          ready: false,
-          failureCode: "DATABASE_UNAVAILABLE",
-        },
-        { name: "PRIVATE_STORAGE", ready: true },
-      ]),
+    const handler = createReadinessHandler(
+      async () =>
+        evaluateReadiness([
+          { name: "APPLICATION_CONTRACT", ready: true },
+          {
+            name: "DATABASE_CONNECTIVITY",
+            ready: false,
+            failureCode: "DATABASE_UNAVAILABLE",
+          },
+          { name: "PRIVATE_STORAGE", ready: true },
+        ]),
+      () => true,
     );
 
     const response = await handler(new Request("https://lessenc.example/api/readiness"));
@@ -88,5 +90,30 @@ describe("P15 readiness HTTP boundary", () => {
     expect(response.status).toBe(503);
     expect(serialized).toBe('{"status":"not_ready"}');
     expect(serialized).not.toContain("DATABASE");
+  });
+
+  it("returns a generic response and never probes dependencies when unauthorized", async () => {
+    const probe = vi.fn();
+    const handler = createReadinessHandler(probe, () => false);
+
+    const response = await handler(new Request("https://lessenc.example/api/readiness"));
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ status: "not_found" });
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get(CORRELATION_RESPONSE_HEADER)).toBeTruthy();
+    expect(probe).not.toHaveBeenCalled();
+  });
+
+  it("fails closed without probing when authorization configuration throws", async () => {
+    const probe = vi.fn();
+    const handler = createReadinessHandler(probe, () => {
+      throw new Error("missing configuration");
+    });
+
+    const response = await handler(new Request("https://lessenc.example/api/readiness"));
+
+    expect(response.status).toBe(404);
+    expect(probe).not.toHaveBeenCalled();
   });
 });

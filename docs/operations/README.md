@@ -68,3 +68,11 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
 - [P15 Backup, Restore and Recovery Policy](./p15-backup-recovery-policy.md) — recovery unit, integrity, encryption/off-site requirements, provisional RPO/RTO and retention objectives, restore safeguards and rollback/recovery separation.
 - [P15 Incident Response and Operational Runbooks](./p15-incident-response-runbook.md) — severity, lifecycle, ownership and actionable runbooks for the required failure classes.
 - [P15 R1 Gate C Candidate](./p15-final-gate.md) — corrected local validation evidence, residual risks, P16/P17 deferrals and Git lifecycle boundary pending ChatGPT re-review.
+
+## P16 staging internal implementation
+
+- [P16 Staging Deployment Runbook](./p16-staging-runbook.md) — fail-closed configuration,
+  migration, protected readiness, hosted smoke, TEST payment, storage, recovery and rollback
+  procedures.
+- [P16 Internal Repository Gate](./p16-internal-gate.md) — internal deliverables, finding
+  disposition and the strict hosted/external stop boundary.

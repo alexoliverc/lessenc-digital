@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getP11PrivateStorageEnv } from "../../lib/config/env";
+import { getP11PrivateStorageEnv, getP16PrivateStorageDriverEnv } from "../../lib/config/env";
 import {
   PrivateResourceStorageError,
   type PrivateResourceBody,
@@ -33,6 +33,19 @@ export class ConfiguredPrivateFileStorage implements PrivateResourceStorage {
     }
 
     try {
+      const driver = getP16PrivateStorageDriverEnv().PRIVATE_STORAGE_DRIVER;
+      const applicationEnvironment = process.env.APP_ENV;
+
+      if (driver === "hosted") {
+        // A concrete provider adapter requires an explicit owner/provider decision.
+        throw new PrivateResourceStorageError("STORAGE_UNAVAILABLE");
+      }
+
+      if (applicationEnvironment === "staging" || applicationEnvironment === "production") {
+        // Never promote the workstation filesystem adapter to hosted authority.
+        throw new PrivateResourceStorageError("STORAGE_UNAVAILABLE");
+      }
+
       const storageEnv = getP11PrivateStorageEnv();
 
       assertPrivateStorageRootIsPrivate(storageEnv.PRIVATE_FILE_STORAGE_PATH);

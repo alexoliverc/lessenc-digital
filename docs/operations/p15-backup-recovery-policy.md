@@ -1,6 +1,6 @@
 # P15 Backup, Restore and Recovery Policy
 
-**Status:** R1 CORRECTED CANDIDATE — OWNER APPROVAL AND HOSTED VALIDATION STILL PENDING
+**Status:** OWNER-APPROVED RELEASE OBJECTIVES / HOSTED VALIDATION STILL PENDING
 
 **Objective governance:** `OWNER APPROVED RELEASE OBJECTIVE / HOSTED VALIDATION REQUIRED IN P16`
 
@@ -33,9 +33,8 @@ Provider selection and key-management implementation remain P16/P18 decisions.
 
 ## Proposed release objectives
 
-Every value in this section is `PROPOSED RELEASE OBJECTIVE / OWNER APPROVED / HOSTED
-VALIDATION P16`. They are proposals to be approved by the owner and measured in staging, not current
-business-loss tolerances or production guarantees.
+Every value in this section is `OWNER APPROVED RELEASE OBJECTIVE / HOSTED VALIDATION P16`. They
+must still be measured in staging and are not achieved production guarantees.
 
 | Objective | Proposed target | Current proof | Required next evidence |
 | --- | --- | --- | --- |
@@ -45,9 +44,8 @@ business-loss tolerances or production guarantees.
 | weekly retention | 4 verified weekly recovery points | policy only | provider lifecycle proof |
 | monthly retention | 3 verified monthly recovery points | policy only | provider lifecycle proof |
 
-The owner must approve or revise these values before they become release policy. If approved values
-cannot be met by P16 evidence, P18 must explicitly revise them or return NO-GO. A local restore time
-must never be relabeled as production RTO.
+If the approved values cannot be met by P16 evidence, P18 must explicitly revise them or return
+NO-GO. A local restore time must never be relabeled as production RTO.
 
 ## Backup schedule policy
 
