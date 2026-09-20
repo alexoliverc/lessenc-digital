@@ -1,6 +1,9 @@
 import { toNextJsHandler } from "better-auth/next-js";
 
+import { readBoundedText } from "@/infrastructure/http/read-bounded-text";
+
 const BASE_PATH = "/api/admin/auth";
+const MAX_AUTH_BODY_BYTES = 8192;
 const ALLOWED = new Map<string, "GET" | "POST">([
   ["/sign-in/email", "POST"],
   ["/get-session", "GET"],
@@ -26,6 +29,27 @@ function sameOriginMutation(request: Request, canonicalOrigin: string): boolean 
   if (!origin || origin !== canonicalOrigin) return false;
   const fetchSite = request.headers.get("sec-fetch-site");
   return !fetchSite || fetchSite === "same-origin";
+}
+
+async function toSafeJsonRequest(request: Request): Promise<Request | null> {
+  const contentType = request.headers.get("content-type") ?? "";
+  if (!contentType.toLowerCase().startsWith("application/json")) return null;
+
+  const declaredLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_AUTH_BODY_BYTES) return null;
+
+  try {
+    const raw = await readBoundedText(request.body, MAX_AUTH_BODY_BYTES);
+    const body: unknown = JSON.parse(raw);
+    if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+    return new Request(request.url, {
+      method: request.method,
+      headers: request.headers,
+      body: raw,
+    });
+  } catch {
+    return null;
+  }
 }
 
 async function safeMfaBody(request: Request, path: string): Promise<boolean> {
@@ -68,22 +92,31 @@ export function createAdminAuthRoute(
     if (request.method === "POST" && !sameOriginMutation(request, canonicalOrigin)) {
       return json(403, { code: "FORBIDDEN" });
     }
-    if (!(await safeMfaBody(request, path))) return json(400, { code: "INVALID_REQUEST" });
+    let routedRequest = request;
+    if (request.method === "POST") {
+      const bounded = await toSafeJsonRequest(request);
+      if (!bounded) return json(400, { code: "INVALID_REQUEST" });
+      routedRequest = bounded;
+    }
+    if (!(await safeMfaBody(routedRequest, path))) return json(400, { code: "INVALID_REQUEST" });
 
     if (path === "/get-session") {
-      const state = await sessionPolicy(request.headers);
+      const state = await sessionPolicy(routedRequest.headers);
       return json(200, { authenticated: state !== null, mfaComplete: state?.mfaComplete ?? false });
     }
     if (path === "/two-factor/enable") {
-      const state = await sessionPolicy(request.headers);
+      const state = await sessionPolicy(routedRequest.headers);
       if (!state || state.mfaComplete) return json(403, { code: "FORBIDDEN" });
     }
     if (path === "/two-factor/generate-backup-codes") {
-      const state = await sessionPolicy(request.headers);
+      const state = await sessionPolicy(routedRequest.headers);
       if (!state?.mfaComplete || !state.fresh) return json(403, { code: "FORBIDDEN" });
     }
 
-    const response = request.method === "GET" ? await next.GET(request) : await next.POST(request);
+    const response =
+      routedRequest.method === "GET"
+        ? await next.GET(routedRequest)
+        : await next.POST(routedRequest);
     if (path === "/sign-in/email" && !response.ok) {
       return response.status === 429
         ? json(429, { code: "RATE_LIMITED" }, response)

@@ -49,6 +49,9 @@ describe("administrative Better Auth HTTP boundary", () => {
   });
 
   it("rejects untrusted Origin and cross-site mutation", async () => {
+    const missing = request("/sign-out");
+    missing.headers.delete("origin");
+    expect((await handler.POST(missing)).status).toBe(403);
     const untrusted = request("/sign-out");
     untrusted.headers.set("origin", "https://attacker.invalid");
     expect((await handler.POST(untrusted)).status).toBe(403);
@@ -56,6 +59,32 @@ describe("administrative Better Auth HTTP boundary", () => {
     crossSite.headers.set("sec-fetch-site", "cross-site");
     expect((await handler.POST(crossSite)).status).toBe(403);
     expect((await handler.POST(request("/sign-out"))).status).toBe(200);
+  });
+
+  it("rejects unsupported methods, unexpected query strings and malformed payloads", async () => {
+    expect((await handler.POST(request("/sign-out?returnTo=/admin"))).status).toBe(404);
+
+    const unsupported = new Request(`${APP_URL}/api/admin/auth/sign-out`, {
+      method: "PUT",
+      headers: { origin: APP_URL, "content-type": "application/json" },
+      body: "{}",
+    });
+    expect((await handler.POST(unsupported)).status).toBe(404);
+
+    expect((await handler.POST(request("/sign-in/email", "POST", "{malformed"))).status).toBe(400);
+
+    const wrongType = request("/sign-in/email");
+    wrongType.headers.set("content-type", "text/plain");
+    expect((await handler.POST(wrongType)).status).toBe(400);
+  });
+
+  it("rejects oversized authentication payloads before Better Auth", async () => {
+    const response = await handler.POST(
+      request("/sign-in/email", "POST", JSON.stringify({ password: "x".repeat(9000) })),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ code: "INVALID_REQUEST" });
   });
 
   it("blocks trusted-device and raw-session responses from second-factor input", async () => {

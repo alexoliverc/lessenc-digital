@@ -10,7 +10,15 @@ const secret = "p10-test-webhook-secret-fixture";
 const original = process.env.MERCADOPAGO_WEBHOOK_SECRET;
 
 function signedRequest(body: string, query = `?type=order&data.id=${id}`): Request {
-  const ts = String(Date.now());
+  return signedRequestAt(body, Date.now(), query);
+}
+
+function signedRequestAt(
+  body: string,
+  timestamp: number,
+  query = `?type=order&data.id=${id}`,
+): Request {
+  const ts = String(timestamp);
   const manifest = `id:${id};request-id:${requestId};ts:${ts};`;
   const digest = createHmac("sha256", secret).update(manifest).digest("hex");
   return new Request(`http://localhost/api/webhooks/mercadopago${query}`, {
@@ -36,6 +44,22 @@ describe("P10 webhook input boundary", () => {
       },
     );
     expect((await POST(request)).status).toBe(401);
+  });
+
+  it("rejects malformed, expired, future and wrong-request-id signatures", async () => {
+    process.env.MERCADOPAGO_WEBHOOK_SECRET = secret;
+    const body = JSON.stringify({ type: "order", data: { id } });
+
+    const malformed = signedRequest(body);
+    malformed.headers.set("x-signature", "invalid");
+    expect((await POST(malformed)).status).toBe(401);
+
+    expect((await POST(signedRequestAt(body, Date.now() - 301_000))).status).toBe(401);
+    expect((await POST(signedRequestAt(body, Date.now() + 301_000))).status).toBe(401);
+
+    const wrongRequestId = signedRequest(body);
+    wrongRequestId.headers.set("x-request-id", "different-request-id");
+    expect((await POST(wrongRequestId)).status).toBe(401);
   });
 
   it("rejects duplicate query values and inconsistent authenticated envelope", async () => {

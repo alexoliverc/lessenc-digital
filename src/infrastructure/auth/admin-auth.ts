@@ -6,13 +6,13 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import { getDatabaseClient } from "@/infrastructure/database/client";
 import { parseP12AdminAuthEnv, parseServerEnv } from "@/lib/config/env-schema";
 
-const serverEnv = parseServerEnv(process.env);
-const adminEnv = parseP12AdminAuthEnv({
-  P12_ADMIN_AUTH_SECRET: process.env.P12_ADMIN_AUTH_SECRET,
-});
-const hosted = serverEnv.APP_ENV === "staging" || serverEnv.APP_ENV === "production";
-
 export function createAdminAuth(database: PrismaClient) {
+  const serverEnv = parseServerEnv(process.env);
+  const adminEnv = parseP12AdminAuthEnv({
+    P12_ADMIN_AUTH_SECRET: process.env.P12_ADMIN_AUTH_SECRET,
+  });
+  const hosted = serverEnv.APP_ENV === "staging" || serverEnv.APP_ENV === "production";
+
   return betterAuth({
     database: prismaAdapter(database, { provider: "mysql" }),
     secret: adminEnv.P12_ADMIN_AUTH_SECRET,
@@ -67,6 +67,10 @@ export function createAdminAuth(database: PrismaClient) {
   });
 }
 
-export const auth = createAdminAuth(getDatabaseClient());
+let singleton: ReturnType<typeof createAdminAuth> | undefined;
 
-export { auth as adminAuth };
+/** Defers secret, TLS and database evaluation until an administrative request needs it. */
+export function getAdminAuth() {
+  singleton ??= createAdminAuth(getDatabaseClient());
+  return singleton;
+}

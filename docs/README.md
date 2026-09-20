@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P13
+# Índice oficial da baseline documental LES-DIG P00–P14
 
-**Estado:** P00–P12 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está IN PROGRESS: P13-A COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED; P13-B–P13-F COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13-G–P13-H permanecem NOT STARTED.
+**Estado:** P00–P13 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 possui um implementation candidate não commitado em `phase/p14-security-hardening`, aguardando auditoria independente; nenhum deploy foi executado.
 
 ## Precedência e classificação das fontes
 
@@ -301,6 +301,14 @@ Google Enhanced Conversions e Meta Advanced Matching permanecem fora do P13 MVP 
 
 ## Operações
 O [índice operacional](operations/README.md) reúne procedimentos do ambiente de desenvolvimento. A [baseline da workstation e VS Code](operations/development-workstation-vscode.md) registra Profile, editor, terminal, Git/SCM, extensões, segurança, performance e recuperação sem redefinir a stack ou os ambientes canônicos da aplicação.
+
+## P14 — Security Hardening — candidate awaiting audit
+
+O [dossiê candidato P14](security/p14-security-hardening-candidate.md) registra P14-01–P14-06,
+as correções R1 de compatibilidade 3DS/CSP e audit completo, cobertura negativa, revisão de
+SQL/SSRF/provider/webhook, dados sensíveis, CI/supply chain, findings e limitações que continuam
+atribuídas a P15–P17. O estado não é COMPLETE, MERGED ou CHECKPOINTED antes da reauditoria
+independente e do lifecycle Git autorizado.
 
 ## HISTORICAL / SUPERSEDED DOCUMENTS
 

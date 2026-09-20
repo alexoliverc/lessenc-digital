@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P12 — Identity, Authentication & Admin is COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 — Analytics, Attribution & Growth Infrastructure is IN PROGRESS. P13-A — Architecture, Privacy & Measurement Contract is COMPLETE / ARCHITECTURE FROZEN R2 / DOCUMENTED / INTEGRATED. P13-B — Attribution Persistence Foundation is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-C — Acquisition Journey & Order Attribution is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-D — Internal Measurement Producers & Consent Boundary is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-E — Canonical Purchase & Financial Reconciliation is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-F — Measurement & Advertising Adapters is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P13-G — Admin Analytics is the next execution block. P13-H remains NOT STARTED. Production deployment remains outside the current P13 scope.
+**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 — Security Hardening has an uncommitted implementation candidate on `phase/p14-security-hardening` and is AWAITING INDEPENDENT AUDIT. No deployment has been performed.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1067,7 +1067,7 @@ The initial P13 MVP does not require:
 ---
 ## P14 — Security Hardening
 
-**Status:** PENDENTE
+**Status:** IMPLEMENTATION CANDIDATE — AWAITING INDEPENDENT AUDIT
 
 ### Objective
 
@@ -1120,6 +1120,11 @@ No critical or high-risk unresolved finding may silently pass into production.
 ### Exit criteria
 
 Security acceptance criteria are satisfied.
+
+The candidate implementation and evidence are recorded in
+[`docs/security/p14-security-hardening-candidate.md`](docs/security/p14-security-hardening-candidate.md).
+This state does not mean COMPLETE, MERGED, CHECKPOINTED or deployed; independent owner/ChatGPT
+audit and the separately authorized Git lifecycle remain pending.
 
 ---
 

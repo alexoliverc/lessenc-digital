@@ -33,6 +33,11 @@ function preservePresentation(
 ): ProviderSnapshot {
   if (canonical.presentation || !created.presentation) return canonical;
 
+  // A 3DS challenge is valid only while the canonical provider snapshot is
+  // action_required/pending_challenge. Never carry a stale challenge URL into
+  // a later or inconsistent provider state.
+  if (created.presentation.kind === "CHALLENGE") return canonical;
+
   return Object.freeze({
     ...canonical,
     presentation: created.presentation,
