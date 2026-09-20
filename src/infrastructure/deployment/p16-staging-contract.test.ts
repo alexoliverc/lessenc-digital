@@ -16,6 +16,14 @@ function validEnvironment(): Record<string, string> {
     DB_RUNTIME_URL: "mysql://runtime:secret@db.example/staging_lessenc",
     DB_TLS_CA_FILE: "C:\\hosted\\ca.pem",
     PRIVATE_STORAGE_DRIVER: "hosted",
+    P16_PRIVATE_STORAGE_PROVIDER: "r2",
+    PRIVATE_STORAGE_S3_ENDPOINT:
+      "https://0123456789abcdef0123456789abcdef.r2.cloudflarestorage.com",
+    PRIVATE_STORAGE_S3_REGION: "auto",
+    PRIVATE_STORAGE_S3_BUCKET: "lessenc-staging-private",
+    PRIVATE_STORAGE_S3_ACCESS_KEY_ID: "synthetic-r2-access-key-id",
+    PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY: unique("r2-secret"),
+    PRIVATE_STORAGE_HEALTHCHECK_KEY: "_health/p16-readiness",
     NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY: "TEST-public-key",
     MERCADOPAGO_ACCESS_TOKEN: `TEST-${unique("access")}`,
     MERCADOPAGO_WEBHOOK_SECRET: unique("webhook"),
@@ -157,5 +165,52 @@ describe("P16 staging configuration contract", () => {
         "P16_DATABASE_MIGRATION_WINDOW_INVALID",
       ]),
     );
+  });
+});
+
+// P16-H3-B2-STAGING-STORAGE-CONTRACT
+describe("P16 hosted private storage staging contract", () => {
+  it("accepts the frozen Cloudflare R2 environment contract", () => {
+    expect(validateStagingEnvironment(validEnvironment())).toEqual([]);
+  });
+
+  it("rejects provider, endpoint, region, bucket, access-key and sentinel drift", () => {
+    const env = validEnvironment();
+
+    env.P16_PRIVATE_STORAGE_PROVIDER = "other";
+    env.PRIVATE_STORAGE_S3_ENDPOINT = "http://storage.example.com";
+    env.PRIVATE_STORAGE_S3_REGION = "us-east-1";
+    env.PRIVATE_STORAGE_S3_BUCKET = "Invalid Bucket";
+    env.PRIVATE_STORAGE_S3_ACCESS_KEY_ID = "short";
+    env.PRIVATE_STORAGE_HEALTHCHECK_KEY = "_health/other";
+
+    expect(validateStagingEnvironment(env)).toEqual(
+      expect.arrayContaining([
+        "P16_PRIVATE_STORAGE_PROVIDER_INVALID",
+        "PRIVATE_STORAGE_S3_ENDPOINT_INVALID",
+        "PRIVATE_STORAGE_S3_REGION_INVALID",
+        "PRIVATE_STORAGE_S3_BUCKET_INVALID",
+        "PRIVATE_STORAGE_S3_ACCESS_KEY_ID_MISSING_OR_INVALID",
+        "PRIVATE_STORAGE_HEALTHCHECK_KEY_INVALID",
+      ]),
+    );
+  });
+
+  it("rejects missing or weak hosted storage secret material", () => {
+    const env = validEnvironment();
+
+    env.PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY = "too-short";
+
+    expect(validateStagingEnvironment(env)).toContain(
+      "PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY_MISSING_OR_WEAK",
+    );
+  });
+
+  it("forbids reuse of the R2 runtime secret with another staging secret", () => {
+    const env = validEnvironment();
+
+    env.PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY = env.P16_READINESS_TOKEN!;
+
+    expect(validateStagingEnvironment(env)).toContain("STAGING_SECRET_REUSE_FORBIDDEN");
   });
 });

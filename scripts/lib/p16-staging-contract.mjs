@@ -16,6 +16,7 @@ export const STAGING_SECRET_NAMES = Object.freeze([
   "P11_BUYER_SESSION_SECRET",
   "P12_ADMIN_AUTH_SECRET",
   "P16_READINESS_TOKEN",
+  "PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY",
 ]);
 
 function parseDatabaseUrl(raw) {
@@ -41,6 +42,33 @@ function isHostedDatabase(target) {
   );
 }
 
+function isCanonicalR2Endpoint(raw) {
+  try {
+    const endpoint = new URL(raw);
+
+    return (
+      endpoint.protocol === "https:" &&
+      endpoint.username === "" &&
+      endpoint.password === "" &&
+      endpoint.pathname === "/" &&
+      endpoint.search === "" &&
+      endpoint.hash === "" &&
+      /^[a-z0-9-]+\.r2\.cloudflarestorage\.com$/iu.test(endpoint.hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isValidR2BucketName(raw) {
+  return (
+    typeof raw === "string" &&
+    raw.length >= 3 &&
+    raw.length <= 63 &&
+    /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])$/u.test(raw)
+  );
+}
+
 export function validateStagingEnvironment(env, options = {}) {
   const failures = [];
   const gate = options.gate ?? "runtime";
@@ -53,6 +81,25 @@ export function validateStagingEnvironment(env, options = {}) {
   requireExact("APP_URL", "https://lessenc.com.br");
   requireExact("P16_STAGING_ENVIRONMENT_ID", STAGING_ENVIRONMENT_ID);
   requireExact("PRIVATE_STORAGE_DRIVER", "hosted");
+  requireExact("P16_PRIVATE_STORAGE_PROVIDER", "r2");
+  requireExact("PRIVATE_STORAGE_S3_REGION", "auto");
+  requireExact("PRIVATE_STORAGE_HEALTHCHECK_KEY", "_health/p16-readiness");
+
+  if (!isCanonicalR2Endpoint(env.PRIVATE_STORAGE_S3_ENDPOINT)) {
+    failures.push("PRIVATE_STORAGE_S3_ENDPOINT_INVALID");
+  }
+
+  if (!isValidR2BucketName(env.PRIVATE_STORAGE_S3_BUCKET)) {
+    failures.push("PRIVATE_STORAGE_S3_BUCKET_INVALID");
+  }
+
+  if (
+    typeof env.PRIVATE_STORAGE_S3_ACCESS_KEY_ID !== "string" ||
+    env.PRIVATE_STORAGE_S3_ACCESS_KEY_ID.length < 16 ||
+    env.PRIVATE_STORAGE_S3_ACCESS_KEY_ID.length > 128
+  ) {
+    failures.push("PRIVATE_STORAGE_S3_ACCESS_KEY_ID_MISSING_OR_INVALID");
+  }
 
   const accessModel = env.P16_DATABASE_ACCESS_MODEL;
   if (!DATABASE_ACCESS_MODELS.includes(accessModel)) {

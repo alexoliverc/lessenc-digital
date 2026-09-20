@@ -219,7 +219,7 @@ That implementation is not accepted as the authoritative hosted digital-asset ar
 
 P16 must provide hosted private storage preserving authorization, private-by-default access, streaming, integrity and recoverability.
 
-The hosted storage provider remains an implementation decision within P16.
+The hosted storage provider for P16 is OWNER APPROVED and frozen as Cloudflare R2 Standard. The application contract remains provider-neutral and the concrete infrastructure adapter will use the S3-compatible API.
 
 ## 10. Health and readiness
 
@@ -392,11 +392,19 @@ The observed Hostinger value `https://staging.lessenc.com.br` conflicts with the
 value `https://lessenc.com.br`. The repository continues to fail closed on the canonical value;
 the Hostinger environment must be corrected externally.
 
-### P16-F06 — Hosted private-storage adapter missing
+### P16-F06 — Cloudflare R2 provider frozen / hosted adapter pending
 
-`BLOCKED EXTERNALLY`: the provider-neutral boundary and hosted/local selection fail closed, but a
-concrete hosted provider decision and adapter remain required.
+`OWNER APPROVED / PROVIDER FROZEN / IMPLEMENTATION PENDING`.
 
+Cloudflare R2 Standard is the canonical hosted private-storage provider for P16.
+
+The provider-neutral application boundary remains `PrivateResourceStorage`. The infrastructure
+implementation will be `S3CompatiblePrivateResourceStorage` and will use the S3-compatible API
+through `@aws-sdk/client-s3`.
+
+Provider approval does not complete this finding. P16-F06 remains open until the adapter,
+environment contract, dedicated private staging bucket, bucket-scoped runtime credentials,
+readiness sentinel and hosted validation are complete.
 ### P16-F07 — Hosted readiness access control missing
 
 `REMEDIATED IN CODE`: server-only bearer authentication denies generic unauthorized requests before
@@ -463,3 +471,153 @@ date. The migration window was returned to `disabled`.
 
 This remediation does not authorize an application deployment. Hosted private storage and the
 remaining P16 hosted operational controls remain separate blockers.
+
+<!-- P16-H3-B1-CLOUDFLARE-R2-FREEZE -->
+
+## P16-H3-B1 — Cloudflare R2 hosted private-storage freeze
+
+**Status:** OWNER APPROVED / ARCHITECTURE FROZEN / IMPLEMENTATION NOT STARTED
+
+The owner approved Cloudflare R2 Standard as the P16 hosted private-storage provider.
+
+### Frozen application boundary
+
+The application remains isolated from the provider through:
+
+`PrivateResourceStorage`
+
+The interface remains:
+
+- `stat(storageKey)` -> private resource metadata;
+- `open(storageKey)` -> `AsyncIterable<Uint8Array>`.
+
+Application/domain code must not depend directly on Cloudflare APIs, AWS SDK types, Node.js
+streams or provider-specific object representations.
+
+### Frozen infrastructure adapter
+
+The hosted infrastructure adapter will be:
+
+`S3CompatiblePrivateResourceStorage`
+
+The P16 physical provider is Cloudflare R2, accessed through its S3-compatible HTTPS API with
+`@aws-sdk/client-s3`.
+
+The adapter name intentionally remains provider-neutral so that a future S3-compatible provider
+change does not require changing the application contract.
+
+### Object operations
+
+The P16 adapter is restricted to the protected-delivery/readiness surface:
+
+- `stat(storageKey)` maps to `HeadObject`;
+- `open(storageKey)` maps to `GetObject`;
+- readiness maps to `HeadObject` against a dedicated sentinel object.
+
+The application adapter must not use bucket administration, object deletion, object writes or
+public object URLs.
+
+The Cloudflare permission class may technically include object listing, but the application
+adapter does not require or intentionally call `ListObjects`/`ListObjectsV2`.
+
+### Private-by-default policy
+
+The staging bucket must remain private.
+
+The following are prohibited for the P16 buyer-delivery path:
+
+- public `r2.dev` access;
+- R2 custom public domain;
+- anonymous bucket/object access;
+- public object URL;
+- presigned buyer-delivery URL;
+- direct browser access to R2.
+
+The canonical buyer flow remains:
+
+`Buyer Session -> rate limit -> C4 authorization -> server-only storageKey -> PrivateResourceStorage -> private R2 object -> backend stream -> protected HTTP response -> append-only delivery audit`
+
+### Runtime least privilege
+
+The application runtime credential must be:
+
+- dedicated to L'Essenc;
+- dedicated to the staging storage boundary;
+- Cloudflare R2 `Object Read only`;
+- scoped to the dedicated L'Essenc staging bucket.
+
+Runtime credentials must not be reused by Smith Sterling or any other project.
+
+Any credential used for provisioning, upload, rotation or administration is operationally
+separate and must never be configured as the application runtime credential.
+
+### Environment contract frozen for implementation
+
+The following variable names are approved for H3-B2/H3-C:
+
+`PRIVATE_STORAGE_DRIVER=hosted`
+
+`P16_PRIVATE_STORAGE_PROVIDER=r2`
+
+`PRIVATE_STORAGE_S3_ENDPOINT`
+
+`PRIVATE_STORAGE_S3_REGION=auto`
+
+`PRIVATE_STORAGE_S3_BUCKET`
+
+`PRIVATE_STORAGE_S3_ACCESS_KEY_ID`
+
+`PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY`
+
+`PRIVATE_STORAGE_HEALTHCHECK_KEY`
+
+Real endpoint identifiers, bucket credentials, Access Key IDs, Secret Access Keys and secret
+values must never be committed to Git or written to canonical documentation.
+
+### Readiness sentinel
+
+The hosted readiness control will perform a read-only `HeadObject` against a dedicated private
+sentinel object whose object key is supplied through `PRIVATE_STORAGE_HEALTHCHECK_KEY`.
+
+The intended canonical key is:
+
+`_health/p16-readiness`
+
+Successful readiness therefore proves the configured runtime can reach the S3-compatible R2
+endpoint, authenticate, target the configured bucket and read metadata for the dedicated private
+sentinel.
+
+No protected ebook bytes are downloaded by the readiness check.
+
+Public readiness output remains sanitized and must not expose endpoint, account identifier,
+bucket, object key, Access Key ID, credential material or provider error detail.
+
+### Smith Sterling isolation
+
+Existing Cloudflare usage by Smith Sterling does not authorize resource or credential reuse.
+
+P16 requires L'Essenc-specific:
+
+- bucket identity;
+- runtime credentials;
+- operational/upload credentials;
+- readiness sentinel.
+
+A separate Cloudflare account is not required by P16, but project-level credentials and storage
+resources must remain isolated.
+
+### Explicit non-actions
+
+This freeze does not:
+
+- create an R2 bucket;
+- create or rotate an API token;
+- install `@aws-sdk/client-s3`;
+- modify runtime code;
+- modify readiness code;
+- upload a sentinel;
+- upload a digital product;
+- connect staging to Cloudflare;
+- deploy the application.
+
+Those actions belong to subsequent H3 gates.

@@ -1919,3 +1919,48 @@ build PASS, dependency audit 0 vulnerabilities and operational health `OK` 5/5.
 RPO `<= 24h`, RTO `<= 8h` and retention 7 daily / 4 weekly / 3 monthly remain
 `OWNER APPROVED RELEASE OBJECTIVE / HOSTED VALIDATION REQUIRED IN P16`, never achieved or
 owner-approved production guarantees.
+
+<!-- P16-H3-B1-CLOUDFLARE-R2 -->
+
+## P16-H3-B1 — Cloudflare R2 hosted private-storage decision
+
+Date: 2026-09-20
+
+Status: OWNER APPROVED / ARCHITECTURE FROZEN / IMPLEMENTATION NOT STARTED
+
+The owner approved Cloudflare R2 Standard as the P16 hosted private-storage provider.
+
+Canonical freeze:
+
+- application abstraction remains `PrivateResourceStorage`;
+- hosted infrastructure adapter: `S3CompatiblePrivateResourceStorage`;
+- SDK target: `@aws-sdk/client-s3`;
+- provider protocol: Cloudflare R2 S3-compatible HTTPS API;
+- staging bucket must remain private;
+- public `r2.dev` access disabled;
+- no R2 public custom domain for protected delivery;
+- no direct browser/object URL;
+- no presigned buyer-delivery URL in P16;
+- runtime Cloudflare credential: dedicated L'Essenc, bucket-scoped `Object Read only`;
+- operational/upload credentials remain separate;
+- Smith Sterling Cloudflare resources and credentials cannot be reused;
+- `stat()` -> `HeadObject`;
+- `open()` -> `GetObject`;
+- readiness -> `HeadObject` on `_health/p16-readiness`;
+- storage keys and provider configuration remain server-only;
+- protected delivery remains backend-proxied and append-only audited.
+
+Approved environment names for subsequent implementation:
+
+- `PRIVATE_STORAGE_DRIVER`;
+- `P16_PRIVATE_STORAGE_PROVIDER`;
+- `PRIVATE_STORAGE_S3_ENDPOINT`;
+- `PRIVATE_STORAGE_S3_REGION`;
+- `PRIVATE_STORAGE_S3_BUCKET`;
+- `PRIVATE_STORAGE_S3_ACCESS_KEY_ID`;
+- `PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY`;
+- `PRIVATE_STORAGE_HEALTHCHECK_KEY`.
+
+H3-B1 creates no bucket, credentials, SDK dependency, sentinel, runtime connection or deployment.
+
+Next implementation gate: H3-B2 environment contract.

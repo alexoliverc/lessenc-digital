@@ -28,7 +28,7 @@
 | P16-F03 runtime toolchain drift | REMEDIATED | hosted runtime observation |
 | P16-F04 staging migration guard missing | REMEDIATED | owner-authorized hosted execution |
 | P16-F05 hosted database validation | CODE READY | provider provisioning, TLS and migration proof |
-| P16-F06 hosted private-storage adapter | BLOCKED EXTERNALLY | provider decision, adapter and credentials |
+| P16-F06 hosted private-storage adapter | OWNER APPROVED / PROVIDER FROZEN / IMPLEMENTATION PENDING | Cloudflare R2 bucket, S3-compatible adapter, isolated read-only runtime credentials, sentinel and hosted proof |
 | P16-F07 hosted readiness access control | REMEDIATED IN CODE | hosted HTTP proof |
 | P16-F08 hosted recovery implementation | PARTIAL / CODE READY | scheduler, encryption, off-site copy and restore drill |
 | P16-F09 hosted observability delivery | APPLICATION CONTRACT READY | external monitor, alert destination and status page |
@@ -156,3 +156,29 @@ Focused validation after remediation:
 
 Application deployment remains NOT EXECUTED. P16 remains incomplete because hosted private storage
 and the remaining hosted operational validation are still pending.
+
+<!-- P16-H3-B1-INTERNAL-GATE -->
+
+## P16-H3-B1 — Hosted private-storage provider freeze
+
+Cloudflare R2 Standard is owner approved as the physical hosted private-storage provider for P16.
+
+Frozen controls:
+
+- application contract remains `PrivateResourceStorage`;
+- infrastructure adapter will be `S3CompatiblePrivateResourceStorage`;
+- Cloudflare integration will use `@aws-sdk/client-s3`;
+- bucket remains private;
+- runtime uses a dedicated L'Essenc bucket-scoped `Object Read only` credential;
+- administrative/upload credentials remain separate;
+- Smith Sterling bucket/token/credentials are not reusable;
+- protected buyer delivery remains backend-proxied;
+- direct/public/presigned buyer access is forbidden for P16;
+- readiness will use read-only `HeadObject` against `_health/p16-readiness`.
+
+H3-B1 performs documentation freeze only.
+
+Adapter implementation, environment schema, SDK installation, external bucket/token provisioning,
+sentinel creation and hosted proof are still pending.
+
+P16 remains incomplete and application deployment remains NOT EXECUTED.

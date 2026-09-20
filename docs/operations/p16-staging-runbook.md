@@ -32,7 +32,7 @@ The staging preflight accepts only this identity:
 | Mercado Pago TEST | `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET`, `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`, `P10_PAYMENT_CONTINUATION_SECRET` | TEST credentials only; public key is the sole intentionally public credential |
 | application secrets | `P09_SUBMISSION_SECRET`, `P11_BUYER_SESSION_SECRET`, `P12_ADMIN_AUTH_SECRET`, `P16_READINESS_TOKEN` | server-only, independently generated, at least 32 characters, never reused |
 | product identity | `P08_PRODUCT_ID`, `P08_OFFER_ID` | canonical persisted staging UUIDs |
-| private storage | `PRIVATE_STORAGE_DRIVER`, provider-specific future configuration | `hosted` in staging; provider adapter/credentials require the selected provider |
+| private storage | `PRIVATE_STORAGE_DRIVER`, `P16_PRIVATE_STORAGE_PROVIDER`, `PRIVATE_STORAGE_S3_ENDPOINT`, `PRIVATE_STORAGE_S3_REGION`, `PRIVATE_STORAGE_S3_BUCKET`, `PRIVATE_STORAGE_S3_ACCESS_KEY_ID`, `PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY`, `PRIVATE_STORAGE_HEALTHCHECK_KEY` | `hosted` + `r2` in staging; bucket private; runtime credential bucket-scoped `Object Read only`; real secret values remain external |
 | optional active analytics | `GTM_CONTAINER_ID` | optional validated GTM identifier; blank keeps browser providers disabled |
 | documented but inactive | `META_PIXEL_ID`, `META_CAPI_ACCESS_TOKEN` | no active runtime reads; do not configure as proof of an integration |
 
@@ -143,14 +143,45 @@ owner/external action.
 
 ## Private storage
 
-The application-level `PrivateResourceStorage` interface remains provider-independent and streams
-`AsyncIterable<Uint8Array>`. `LocalPrivateFileStorage` is accepted only in local/test. Staging and
-production fail closed when it is selected.
+Cloudflare R2 Standard is the owner-approved hosted private-storage provider for P16.
 
-`PRIVATE_STORAGE_DRIVER=hosted` records the required hosted boundary, but no provider is invented.
-Until an explicitly selected provider adapter supplies private-by-default storage, integrity,
-streaming, backup and health operations, protected delivery and readiness remain unavailable.
+The application-level `PrivateResourceStorage` contract remains provider-independent and streams
+`AsyncIterable<Uint8Array>`.
 
+`LocalPrivateFileStorage` remains restricted to local/test use and cannot become authoritative
+storage in staging or production.
+
+The hosted adapter will be `S3CompatiblePrivateResourceStorage`, implemented with
+`@aws-sdk/client-s3` against the Cloudflare R2 S3-compatible endpoint.
+
+Runtime rules:
+
+- `PRIVATE_STORAGE_DRIVER=hosted`;
+- `P16_PRIVATE_STORAGE_PROVIDER=r2`;
+- bucket remains private;
+- public `r2.dev` access remains disabled;
+- no R2 custom public domain is configured for protected delivery;
+- browser receives no R2 URL and no `storageKey`;
+- presigned buyer URLs are not used in P16;
+- application runtime uses a dedicated bucket-scoped Cloudflare `Object Read only` credential;
+- provisioning/upload/admin credentials are separate from runtime credentials;
+- Smith Sterling credentials or buckets must not be reused.
+
+Adapter behavior:
+
+- `stat(storageKey)` -> `HeadObject`;
+- `open(storageKey)` -> `GetObject`;
+- hosted readiness -> `HeadObject` for the dedicated private sentinel.
+
+The canonical readiness sentinel key is `_health/p16-readiness`, supplied through
+`PRIVATE_STORAGE_HEALTHCHECK_KEY`.
+
+The hosted adapter/readiness implementation must normalize provider failures into the existing
+private-storage failure boundary and must not expose endpoint, bucket, key, credentials, account
+identifier or raw provider error detail.
+
+Provider approval is complete. Adapter implementation, environment schema implementation,
+Cloudflare provisioning, sentinel creation and hosted validation remain pending.
 ## Protected readiness and hosted smoke
 
 `GET /api/health` remains public and minimal. `GET /api/readiness` requires:
@@ -244,3 +275,12 @@ absent.
 After an authorized migration, the migration window must be returned to `disabled` before ordinary
 runtime/readiness operation. No application deployment is implied by successful database migration
 or privilege verification.
+
+<!-- P16-H3-B1-RUNBOOK-FREEZE -->
+
+### P16-H3-B1 provider decision
+
+Cloudflare R2 Standard is frozen for P16 hosted private storage.
+
+This is a documentation/architecture decision only. No provider resource, token, SDK dependency,
+sentinel object or staging connection is created by H3-B1.

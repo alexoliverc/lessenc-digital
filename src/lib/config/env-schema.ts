@@ -50,6 +50,39 @@ const p16PrivateStorageDriverEnvSchema = z.object({
   PRIVATE_STORAGE_DRIVER: z.enum(["local-filesystem", "hosted"]).default("local-filesystem"),
 });
 
+const p16HostedPrivateStorageEnvSchema = z.object({
+  P16_PRIVATE_STORAGE_PROVIDER: z.literal("r2"),
+  PRIVATE_STORAGE_S3_ENDPOINT: z
+    .string()
+    .url()
+    .refine((value) => {
+      try {
+        const endpoint = new URL(value);
+
+        return (
+          endpoint.protocol === "https:" &&
+          endpoint.username === "" &&
+          endpoint.password === "" &&
+          endpoint.pathname === "/" &&
+          endpoint.search === "" &&
+          endpoint.hash === "" &&
+          /^[a-z0-9-]+\.r2\.cloudflarestorage\.com$/iu.test(endpoint.hostname)
+        );
+      } catch {
+        return false;
+      }
+    }, "PRIVATE_STORAGE_S3_ENDPOINT must be a canonical Cloudflare R2 HTTPS endpoint"),
+  PRIVATE_STORAGE_S3_REGION: z.literal("auto"),
+  PRIVATE_STORAGE_S3_BUCKET: z
+    .string()
+    .min(3)
+    .max(63)
+    .regex(/^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])$/u),
+  PRIVATE_STORAGE_S3_ACCESS_KEY_ID: z.string().min(16).max(128),
+  PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY: z.string().min(32).max(256),
+  PRIVATE_STORAGE_HEALTHCHECK_KEY: z.literal("_health/p16-readiness"),
+});
+
 type ServerEnvInput = {
   APP_ENV?: string;
   APP_URL?: string;
@@ -86,6 +119,16 @@ type P11PrivateStorageEnvInput = {
 
 type P16PrivateStorageDriverEnvInput = {
   PRIVATE_STORAGE_DRIVER?: string | undefined;
+};
+
+type P16HostedPrivateStorageEnvInput = {
+  P16_PRIVATE_STORAGE_PROVIDER?: string | undefined;
+  PRIVATE_STORAGE_S3_ENDPOINT?: string | undefined;
+  PRIVATE_STORAGE_S3_REGION?: string | undefined;
+  PRIVATE_STORAGE_S3_BUCKET?: string | undefined;
+  PRIVATE_STORAGE_S3_ACCESS_KEY_ID?: string | undefined;
+  PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY?: string | undefined;
+  PRIVATE_STORAGE_HEALTHCHECK_KEY?: string | undefined;
 };
 
 export function parseServerEnv(input: ServerEnvInput) {
@@ -173,6 +216,18 @@ export function parseP16PrivateStorageDriverEnv(input: P16PrivateStorageDriverEn
 
   if (!parsed.success) {
     throw new Error(`Invalid P16 private storage configuration: ${z.prettifyError(parsed.error)}`);
+  }
+
+  return Object.freeze(parsed.data);
+}
+
+export function parseP16HostedPrivateStorageEnv(input: P16HostedPrivateStorageEnvInput) {
+  const parsed = p16HostedPrivateStorageEnvSchema.safeParse(input);
+
+  if (!parsed.success) {
+    throw new Error(
+      `Invalid P16 hosted private storage configuration: ${z.prettifyError(parsed.error)}`,
+    );
   }
 
   return Object.freeze(parsed.data);

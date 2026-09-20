@@ -6,6 +6,7 @@ import {
   parseP13GoogleTagEnv,
   parseP16ReadinessEnv,
   parseP16PrivateStorageDriverEnv,
+  parseP16HostedPrivateStorageEnv,
   parseServerEnv,
 } from "./env-schema";
 
@@ -76,5 +77,22 @@ export function getP16PrivateStorageDriverEnv() {
 
   return parseP16PrivateStorageDriverEnv({
     PRIVATE_STORAGE_DRIVER: process.env.PRIVATE_STORAGE_DRIVER,
+  });
+}
+
+// P16-H3-B2-HOSTED-STORAGE-ENV
+export function getP16HostedPrivateStorageEnv() {
+  if (typeof window !== "undefined") {
+    throw new Error("P16 hosted private storage configuration is server-only");
+  }
+
+  return parseP16HostedPrivateStorageEnv({
+    P16_PRIVATE_STORAGE_PROVIDER: process.env.P16_PRIVATE_STORAGE_PROVIDER,
+    PRIVATE_STORAGE_S3_ENDPOINT: process.env.PRIVATE_STORAGE_S3_ENDPOINT,
+    PRIVATE_STORAGE_S3_REGION: process.env.PRIVATE_STORAGE_S3_REGION,
+    PRIVATE_STORAGE_S3_BUCKET: process.env.PRIVATE_STORAGE_S3_BUCKET,
+    PRIVATE_STORAGE_S3_ACCESS_KEY_ID: process.env.PRIVATE_STORAGE_S3_ACCESS_KEY_ID,
+    PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY: process.env.PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY,
+    PRIVATE_STORAGE_HEALTHCHECK_KEY: process.env.PRIVATE_STORAGE_HEALTHCHECK_KEY,
   });
 }

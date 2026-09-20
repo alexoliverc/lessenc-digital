@@ -11,6 +11,7 @@ import {
   parseP13GoogleTagEnv,
   parseP16ReadinessEnv,
   parseP16PrivateStorageDriverEnv,
+  parseP16HostedPrivateStorageEnv,
   parseServerEnv,
 } from "./env-schema";
 
@@ -240,5 +241,71 @@ describe("parseP16PrivateStorageDriverEnv", () => {
     expect(() =>
       parseP16PrivateStorageDriverEnv({ PRIVATE_STORAGE_DRIVER: "public-filesystem" }),
     ).toThrow("Invalid P16 private storage configuration");
+  });
+});
+
+// P16-H3-B2-HOSTED-STORAGE-ENV-TESTS
+describe("parseP16HostedPrivateStorageEnv", () => {
+  const VALID = Object.freeze({
+    P16_PRIVATE_STORAGE_PROVIDER: "r2",
+    PRIVATE_STORAGE_S3_ENDPOINT:
+      "https://0123456789abcdef0123456789abcdef.r2.cloudflarestorage.com",
+    PRIVATE_STORAGE_S3_REGION: "auto",
+    PRIVATE_STORAGE_S3_BUCKET: "lessenc-staging-private",
+    PRIVATE_STORAGE_S3_ACCESS_KEY_ID: "synthetic-r2-access-key-id",
+    PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY: "synthetic-r2-secret-access-key-01234567890123456789",
+    PRIVATE_STORAGE_HEALTHCHECK_KEY: "_health/p16-readiness",
+  });
+
+  it("accepts the frozen Cloudflare R2 staging contract", () => {
+    expect(parseP16HostedPrivateStorageEnv(VALID)).toEqual(VALID);
+  });
+
+  it.each([
+    {
+      field: "P16_PRIVATE_STORAGE_PROVIDER",
+      value: "s3",
+    },
+    {
+      field: "PRIVATE_STORAGE_S3_ENDPOINT",
+      value: "http://0123456789abcdef0123456789abcdef.r2.cloudflarestorage.com",
+    },
+    {
+      field: "PRIVATE_STORAGE_S3_ENDPOINT",
+      value: "https://storage.example.com",
+    },
+    {
+      field: "PRIVATE_STORAGE_S3_REGION",
+      value: "us-east-1",
+    },
+    {
+      field: "PRIVATE_STORAGE_S3_BUCKET",
+      value: "Invalid Bucket",
+    },
+    {
+      field: "PRIVATE_STORAGE_S3_ACCESS_KEY_ID",
+      value: "short",
+    },
+    {
+      field: "PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY",
+      value: "too-short",
+    },
+    {
+      field: "PRIVATE_STORAGE_HEALTHCHECK_KEY",
+      value: "_health/other",
+    },
+  ])("rejects invalid hosted storage field $field", ({ field, value }) => {
+    expect(() =>
+      parseP16HostedPrivateStorageEnv({
+        ...VALID,
+        [field]: value,
+      }),
+    ).toThrow("Invalid P16 hosted private storage configuration");
+  });
+
+  it("rejects missing hosted storage configuration", () => {
+    expect(() => parseP16HostedPrivateStorageEnv({})).toThrow(
+      "Invalid P16 hosted private storage configuration",
+    );
   });
 });
