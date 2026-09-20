@@ -1,6 +1,10 @@
 import { realpath, stat } from "node:fs/promises";
 
 import { getDatabaseClient } from "@/infrastructure/database/client";
+import {
+  databaseNameFromRuntimeUrl,
+  verifyRuntimeDatabasePrivileges,
+} from "@/infrastructure/database/runtime-database-privileges";
 import { createCorrelationId } from "@/lib/observability/correlation";
 import { logger } from "@/lib/observability/logger";
 import {
@@ -39,13 +43,51 @@ async function databaseCheck(correlationId: string): Promise<ReadinessCheck> {
     const rows = await database.$queryRaw<Array<{ readiness: bigint | number }>>`
       SELECT 1 AS readiness
     `;
-    return Number(rows[0]?.readiness) === 1
-      ? Object.freeze({ name: "DATABASE_CONNECTIVITY", ready: true })
-      : Object.freeze({
+    if (Number(rows[0]?.readiness) !== 1) {
+      return Object.freeze({
+        name: "DATABASE_CONNECTIVITY",
+        ready: false,
+        failureCode: "DATABASE_UNAVAILABLE",
+      });
+    }
+
+    if (process.env.APP_ENV === "staging") {
+      const accessModel = process.env.P16_DATABASE_ACCESS_MODEL;
+      const migrationWindow = process.env.P16_DATABASE_MIGRATION_WINDOW;
+      const databaseName = databaseNameFromRuntimeUrl(process.env.DB_RUNTIME_URL);
+
+      if (
+        !["distinct-users", "hostinger-managed-single-user"].includes(accessModel ?? "") ||
+        migrationWindow !== "disabled" ||
+        databaseName === null
+      ) {
+        return Object.freeze({
           name: "DATABASE_CONNECTIVITY",
           ready: false,
-          failureCode: "DATABASE_UNAVAILABLE",
+          failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
         });
+      }
+
+      const grants = await database.$queryRawUnsafe<Array<Record<string, unknown>>>(
+        "SHOW GRANTS FOR CURRENT_USER()",
+      );
+      const verification = verifyRuntimeDatabasePrivileges(grants, databaseName);
+      if (!verification.safe) {
+        logger.error("readiness_database_privilege_check_failed", {
+          correlationId,
+          surface: "DATABASE",
+          outcome: "FAILED",
+          failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+        });
+        return Object.freeze({
+          name: "DATABASE_CONNECTIVITY",
+          ready: false,
+          failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+        });
+      }
+    }
+
+    return Object.freeze({ name: "DATABASE_CONNECTIVITY", ready: true });
   } catch (error) {
     const prismaCode =
       typeof error === "object" &&

@@ -334,6 +334,11 @@ migration deploy guard, storage provider-neutral, protected readiness, hosted sm
 TEST, backup/retention/recovery and rollback boundaries. No hosted deployment or external provider
 validation has been performed.
 
+P16-HDB-01 adds the owner-approved `P16-DB-DECISION-01`: Hostinger Managed MariaDB may use one
+physical database identity only under the explicit `hostinger-managed-single-user` mode, a guarded
+migration window and conservative post-migration runtime-grant verification. Code adaptation does
+not constitute hosted database validation, migration or P16 completion.
+
 ## HISTORICAL / SUPERSEDED DOCUMENTS
 
 Os documentos [architecture/LES-*-R01.md](architecture/README.md), o [roadmap MVP anterior](LES-ROADMAP-DIG-R01.md) e o [guia local antigo](operations/LOCAL-CONNECTIVITY-R01.md) registram a sequência anterior. São **HISTORICAL / SUPERSEDED**: não estabelecem produto, preço, oferta, ambientes, stack ou próximos gates atuais. O [LES-FLOW-DIG-R01.md](architecture/LES-FLOW-DIG-R01.md) também é **INCOMPLETE** e termina truncado; não completar suas regras por inferência. `CURRENT CANONICAL BASELINE WINS` em toda divergência. O histórico permanece legível como evidência temporal. Os diretórios não têm placeholders vazios.

@@ -17,6 +17,11 @@
 - O brief do owner de 12/09/2026 autorizou a P05 na branch própria a partir de `da59530`. A execução P05 restringe-se ao design system e à fundação UX, sem commit, tag, push ou merge antes da revisão técnica. Não houve alteração de dependências.
 - O brief do owner de 12/09/2026 autorizou a P06 a partir de `c77ff9c`: MySQL 8.4 LTS local isolado, Prisma CLI/Client/adapter MariaDB exatamente 7.10.0, schema, migrations e testes físicos. Os 6 alertas transitivos iniciais foram corrigidos na P06 pelos overrides de mariadb 3.5.4, mysql2 3.24.4 e deepmerge-ts 8.0.2; auditoria P07 confirmou 0 vulnerabilidades. Não há liberação de produção.
 - Ambientes aprovados na nova baseline: LOCAL, TEST, STAGING e PRODUCTION com `APP_ENV` separado de `NODE_ENV`, sem afirmar que tenham sido provisionados.
+- P16-DB-DECISION-01: o owner escolheu Hostinger Managed MariaDB. O modo explícito
+  `hostinger-managed-single-user` preserva `DATABASE_URL` e `DB_RUNTIME_URL` como contextos lógicos
+  separados sobre uma identidade física, compensado por janela de migration fail-closed, rotação
+  externa de privilégios e verificação read-only pós-migration. O modo `distinct-users` continua
+  suportado. TLS/CA, migration e grants efetivos permanecem HOSTED VALIDATION REQUIRED.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
 - Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11, identidade/autenticação/administração P12, analytics P13, Security Hardening P14 e Observability & Operational Readiness P15 permanecem nas respectivas baselines canônicas. P13, P14 e P15 estão COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. O checkpoint técnico permanente da P15 permanece em `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Produção continua fora do escopo atual; P16 está em implementação interna e não está completa.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.

@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const databaseQuery = vi.hoisted(() => vi.fn());
+const databaseQueryUnsafe = vi.hoisted(() => vi.fn());
 
 vi.mock("@/infrastructure/database/client", () => ({
   getDatabaseClient: () => ({
     $queryRaw: databaseQuery,
+    $queryRawUnsafe: databaseQueryUnsafe,
   }),
 }));
 
@@ -34,6 +36,7 @@ describe("P15 readiness diagnostic correlation", () => {
   afterEach(() => {
     vi.restoreAllMocks();
     databaseQuery.mockReset();
+    databaseQueryUnsafe.mockReset();
   });
 
   it("uses the request correlation ID for a database diagnostic failure", async () => {
@@ -54,5 +57,43 @@ describe("P15 readiness diagnostic correlation", () => {
     await runReadinessProbe();
 
     expect(databaseFailureRecord(output.mock.calls).correlationId).toMatch(canonicalUuidPattern);
+  });
+
+  it("fails staging readiness generically when runtime grants remain over-privileged", async () => {
+    const previous = {
+      APP_ENV: process.env.APP_ENV,
+      DB_RUNTIME_URL: process.env.DB_RUNTIME_URL,
+      P16_DATABASE_ACCESS_MODEL: process.env.P16_DATABASE_ACCESS_MODEL,
+      P16_DATABASE_MIGRATION_WINDOW: process.env.P16_DATABASE_MIGRATION_WINDOW,
+      PRIVATE_STORAGE_DRIVER: process.env.PRIVATE_STORAGE_DRIVER,
+    };
+    process.env.APP_ENV = "staging";
+    process.env.DB_RUNTIME_URL = "mysql://hostinger:synthetic@db.invalid/lessenc_staging";
+    process.env.P16_DATABASE_ACCESS_MODEL = "hostinger-managed-single-user";
+    process.env.P16_DATABASE_MIGRATION_WINDOW = "disabled";
+    process.env.PRIVATE_STORAGE_DRIVER = "hosted";
+    databaseQuery.mockResolvedValue([{ readiness: 1 }]);
+    databaseQueryUnsafe.mockResolvedValue([
+      {
+        "Grants for staged@%": "GRANT ALL PRIVILEGES ON `lessenc_staging`.* TO `staged`@`%`",
+      },
+    ]);
+    const output = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      const report = await runReadinessProbe(correlationId);
+      const serialized = JSON.stringify(report);
+
+      expect(report.status).toBe("NOT_READY");
+      expect(serialized).not.toContain("ALL PRIVILEGES");
+      expect(serialized).not.toContain("staged@%");
+      expect(serialized).not.toContain("lessenc_staging");
+      expect(JSON.stringify(output.mock.calls)).not.toContain("ALL PRIVILEGES");
+    } finally {
+      for (const [key, value] of Object.entries(previous)) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+    }
   });
 });

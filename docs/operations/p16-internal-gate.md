@@ -49,7 +49,7 @@
 | optimized staging build | PASS, Next.js 16.3.4, no real DB connection |
 | synthetic staging preflight / migration guard | PASS / PASS; migration not executed |
 | missing-configuration negative preflight / guard | expected fail-closed exit 1 / exit 1 |
-| environment inventory | 21/21 active variables represented; one intentional `NEXT_PUBLIC_` key |
+| environment inventory | 23/23 active variables represented; one intentional `NEXT_PUBLIC_` key |
 | secret/private-key scan | PASS; no real credential/private-key evidence |
 | Prisma schema and migration diff | unchanged |
 | `git diff --check` | PASS |
@@ -61,3 +61,13 @@ Local success never represents hosted deployment or provider validation.
 No Hostinger change, DNS change, hosted migration, provider provisioning, webhook registration,
 real payment, backup deletion, destructive restore, push, PR, merge, tag, release or deployment is
 performed by this internal gate.
+
+## P16-HDB-01 additive adaptation
+
+`P16-DB-DECISION-01` records the owner-selected Hostinger Managed MariaDB single-user model. The
+repository now supports explicit `distinct-users` and `hostinger-managed-single-user` modes,
+requires an enabled migration window only for guarded migration, requires a disabled window for
+runtime, and validates runtime grants conservatively through protected readiness.
+
+This adaptation does not connect to Hostinger and does not prove TLS, effective privileges,
+migration success or runtime readiness in the hosted environment. P16 remains incomplete.

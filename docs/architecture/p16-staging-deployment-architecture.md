@@ -117,6 +117,44 @@ A Hostinger database may only be accepted after compatibility, migration and tra
 
 If it cannot satisfy the frozen requirements, the application may remain on Hostinger while the database uses another compatible hosted provider.
 
+### P16-DB-DECISION-01 — Hostinger managed database access
+
+**Provider:** Hostinger Managed MariaDB
+
+**Access model:** one managed database identity with controlled privilege rotation
+
+**Reason:** the selected Hostinger service exposes one database user for the database
+
+**Status:** OWNER APPROVED / CODE ADAPTATION COMPLETE / HOSTED VALIDATION REQUIRED
+
+P16 supports two explicit access models through `P16_DATABASE_ACCESS_MODEL`:
+
+- `distinct-users`: migration and runtime usernames must differ;
+- `hostinger-managed-single-user`: `DATABASE_URL` and `DB_RUNTIME_URL` remain separate logical
+  configuration names but must carry the same physical username and credential for the same hosted
+  staging database.
+
+Matching usernames never infer the Hostinger mode. An unknown or absent mode fails closed.
+
+The security compensation for the Hostinger model is an explicit migration window plus mandatory
+post-migration runtime privilege verification. `P16_DATABASE_MIGRATION_WINDOW=enabled` is accepted
+only by the migration gate. Ordinary runtime/preflight requires `disabled`.
+
+Privilege elevation and reduction are Hostinger control-plane actions outside the repository:
+
+1. authorize and enable the migration window;
+2. temporarily grant the schema privileges required by `prisma migrate deploy`;
+3. execute the guarded migration;
+4. revoke migration/DDL privileges;
+5. disable the migration window;
+6. validate runtime grants and protected readiness.
+
+Repository runtime behavior demonstrably requires `SELECT`, `INSERT`, `UPDATE` and `DELETE`.
+The runtime verifier permits only those privileges on the exact staging schema plus non-material
+global `USAGE`. It rejects `ALL PRIVILEGES`, global DML, DDL/administrative privileges, `GRANT
+OPTION`, foreign scopes, incomplete DML and uninterpreted role grants. Hosted validation must also
+audit inherited/public grants and prove the effective final privilege posture.
+
 ## 8. Staging migrations
 
 The canonical hosted migration operation is:
@@ -134,6 +172,10 @@ or:
 The current P06 guard has no staging deployment mode.
 
 P16 must implement a fail-closed staging migration guard before hosted staging migrations are executed.
+
+The implemented guard additionally requires `P16_DATABASE_MIGRATION_WINDOW=enabled`. Default and
+runtime configuration use `disabled`; migration authorization is not a credential and is never
+required by ordinary application startup.
 
 ## 9. Private digital storage
 
@@ -259,6 +301,18 @@ still pending.
 ### P16-F05 — Hosted database validation pending
 
 Database compatibility, TLS and hosted migrations have not yet been proven.
+
+### P16-F10 — Hostinger single-user privilege rotation pending
+
+`P16-DB-DECISION-01` is implemented in code. Hostinger privilege elevation, guarded migration,
+privilege reduction, `SHOW GRANTS FOR CURRENT_USER()` proof, inherited/public grant audit and final
+runtime readiness remain hosted actions.
+
+### P16-F11 — Hosted APP_URL drift
+
+The observed Hostinger value `https://staging.lessenc.com.br` conflicts with the canonical P16
+value `https://lessenc.com.br`. The repository continues to fail closed on the canonical value;
+the Hostinger environment must be corrected externally.
 
 ### P16-F06 — Hosted private-storage adapter missing
 

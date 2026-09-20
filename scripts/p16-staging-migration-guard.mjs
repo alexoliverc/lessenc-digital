@@ -4,11 +4,13 @@ import process from "node:process";
 
 import { validateStagingEnvironment } from "./lib/p16-staging-contract.mjs";
 
-const failures = validateStagingEnvironment(process.env).filter(
+const failures = validateStagingEnvironment(process.env, { gate: "migration" }).filter(
   (failure) =>
     failure.startsWith("APP_") ||
     failure.startsWith("NODE_") ||
     failure.startsWith("P16_STAGING_") ||
+    failure.startsWith("P16_DATABASE_") ||
+    failure.startsWith("HOSTINGER_") ||
     failure.startsWith("DATABASE_") ||
     failure.startsWith("DB_RUNTIME_") ||
     failure.startsWith("DB_TLS_"),

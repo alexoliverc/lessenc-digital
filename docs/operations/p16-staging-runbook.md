@@ -24,9 +24,11 @@ The staging preflight accepts only this identity:
 | Class | Variables | Rule |
 | --- | --- | --- |
 | non-secret application identity | `APP_ENV`, `NODE_ENV`, `APP_URL`, `P16_STAGING_ENVIRONMENT_ID`, `P16_RELEASE_COMMIT` | exact staging values; release commit must match `HEAD` |
-| migration database secret | `DATABASE_URL` | MySQL hosted staging target; dedicated migration user |
-| runtime database secret | `DB_RUNTIME_URL` | same hosted staging database; distinct least-privilege runtime user |
+| migration database secret | `DATABASE_URL` | MySQL hosted staging target; logical migration context |
+| runtime database secret | `DB_RUNTIME_URL` | same hosted staging database; logical least-privilege runtime context |
 | database trust material | `DB_TLS_CA_FILE` | absolute readable CA path; hostname verification and `rejectUnauthorized=true` remain mandatory |
+| database access model | `P16_DATABASE_ACCESS_MODEL` | explicit `distinct-users` or `hostinger-managed-single-user`; never inferred from matching usernames |
+| migration window | `P16_DATABASE_MIGRATION_WINDOW` | `disabled` for runtime; command-scoped `enabled` only during an authorized migration window |
 | Mercado Pago TEST | `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET`, `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`, `P10_PAYMENT_CONTINUATION_SECRET` | TEST credentials only; public key is the sole intentionally public credential |
 | application secrets | `P09_SUBMISSION_SECRET`, `P11_BUYER_SESSION_SECRET`, `P12_ADMIN_AUTH_SECRET`, `P16_READINESS_TOKEN` | server-only, independently generated, at least 32 characters, never reused |
 | product identity | `P08_PRODUCT_ID`, `P08_OFFER_ID` | canonical persisted staging UUIDs |
@@ -56,6 +58,9 @@ The build itself does not connect to MySQL or private storage. The operational p
 validate staging identity, runtime metadata, database isolation, TEST payment identity, secret
 strength/non-reuse, CA readability, hosted storage selection and exact release commit.
 
+The runtime preflight requires `P16_DATABASE_MIGRATION_WINDOW=disabled`. It does not elevate
+privileges and does not connect to the database.
+
 ## Database migration
 
 The only staging migration command is:
@@ -66,8 +71,44 @@ npm run db:migrate:deploy:staging
 
 It runs the fail-closed staging guard before `prisma migrate deploy`. The guard rejects local,
 test, production, localhost, non-staging database names, mismatched migration/runtime targets,
-shared database users, missing CA files and ambiguous application identity. It never prints either
-database URL. `prisma migrate reset` and `prisma db push` are not staging procedures.
+an access-model mismatch, a disabled migration window, missing CA files and ambiguous application
+identity. In `distinct-users`, shared usernames are rejected. In
+`hostinger-managed-single-user`, only the same username/credential is accepted. It never prints
+either database URL. `prisma migrate reset` and `prisma db push` are not staging procedures.
+
+### Hostinger managed single-user migration window
+
+The owner-approved `P16-DB-DECISION-01` compensates for Hostinger's one-user model through
+controlled privilege rotation:
+
+1. keep `P16_DATABASE_MIGRATION_WINDOW=disabled` by default;
+2. create and verify the pre-migration recovery point;
+3. externally grant the Hostinger account the minimum migration privileges required by the pending
+   immutable migrations;
+4. set the command-scoped signal to `enabled` for the guarded migration process;
+5. run `npm run db:migrate:deploy:staging`;
+6. externally revoke/reduce CREATE/ALTER/DROP/INDEX and every other migration/administrative grant;
+7. restore the signal to `disabled`;
+8. run the runtime preflight and protected readiness;
+9. capture sanitized evidence that the final grants are safe.
+
+Privilege changes are Hostinger control-plane actions. The repository never attempts to grant or
+revoke privileges itself.
+
+### Runtime least privilege
+
+The codebase audit proves the normal runtime requires `SELECT`, `INSERT`, `UPDATE` and `DELETE`.
+Protected staging readiness executes the read-only statement:
+
+```sql
+SHOW GRANTS FOR CURRENT_USER()
+```
+
+It accepts only those four DML privileges on the exact staging schema plus optional global
+`USAGE`. Broad, missing, foreign, DDL, administrative, role or grant-option results fail closed.
+Neither the readiness response nor application logs include the grant statements. Hosted evidence
+must separately confirm effective/inherited privileges, including `PUBLIC`, because provider
+behavior cannot be proven locally.
 
 Before execution, create and verify an on-demand complete recovery point and confirm application
 rollback compatibility with all pending additive migrations. Hosted migration execution remains an
@@ -95,6 +136,10 @@ Missing, malformed, weakly configured or incorrect authorization returns generic
 `Cache-Control: no-store` and does not execute database or storage probes. The token is hashed to a
 fixed-length digest before timing-safe comparison. Authorized responses remain sanitized to
 `ready` or `not_ready`.
+
+In staging, an authorized readiness request also fails generically when the migration window is
+enabled or the final runtime grants are not conservatively verified. It never returns grant text,
+database identity, username or topology.
 
 After an authorized deployment, run from an independent failure domain:
 
@@ -144,3 +189,7 @@ P16 cannot close until external evidence proves HTTPS/DNS, exact deployed commit
 guarded migration, concrete private storage, Mercado Pago TEST, security headers, independent
 monitoring/alert delivery, backup scheduling/encryption/off-site copy, isolated restore, measured
 RPO/RTO and rollback.
+
+For Hostinger MariaDB this explicitly includes migration privilege elevation, subsequent reduction,
+current-user and inherited/public grant evidence, and correction of the observed hosted
+`APP_URL=https://staging.lessenc.com.br` to the canonical `https://lessenc.com.br`.

@@ -9,6 +9,8 @@ function validEnvironment(): Record<string, string> {
     NODE_ENV: "production",
     APP_URL: "https://lessenc.com.br",
     P16_STAGING_ENVIRONMENT_ID: "lessenc-staging",
+    P16_DATABASE_ACCESS_MODEL: "distinct-users",
+    P16_DATABASE_MIGRATION_WINDOW: "disabled",
     P16_RELEASE_COMMIT: "a".repeat(40),
     DATABASE_URL: "mysql://migrate:secret@db.example/staging_lessenc",
     DB_RUNTIME_URL: "mysql://runtime:secret@db.example/staging_lessenc",
@@ -43,10 +45,116 @@ describe("P16 staging configuration contract", () => {
         "APP_ENV_INVALID",
         "DATABASE_URL_NOT_UNAMBIGUOUS_STAGING",
         "DB_RUNTIME_URL_NOT_UNAMBIGUOUS_STAGING",
-        "DATABASE_PRIVILEGE_BOUNDARY_MISSING",
         "DATABASE_USERS_MUST_BE_DISTINCT",
         "MERCADOPAGO_ACCESS_TOKEN_NOT_TEST",
         "MERCADOPAGO_PUBLIC_KEY_NOT_TEST",
+      ]),
+    );
+  });
+
+  it("preserves the valid legacy distinct-user model", () => {
+    const env = validEnvironment();
+
+    expect(validateStagingEnvironment(env, { gate: "runtime" })).toEqual([]);
+  });
+
+  it("accepts an explicit Hostinger managed single-user runtime model", () => {
+    const env = validEnvironment();
+    env.P16_DATABASE_ACCESS_MODEL = "hostinger-managed-single-user";
+    env.DATABASE_URL = "mysql://hostinger:secret@db.example/lessenc_staging";
+    env.DB_RUNTIME_URL = env.DATABASE_URL;
+
+    expect(validateStagingEnvironment(env, { gate: "runtime" })).toEqual([]);
+  });
+
+  it("never infers Hostinger mode merely because usernames match", () => {
+    const env = validEnvironment();
+    env.DB_RUNTIME_URL = "mysql://migrate:other-secret@db.example/staging_lessenc";
+
+    expect(validateStagingEnvironment(env)).toContain("DATABASE_USERS_MUST_BE_DISTINCT");
+  });
+
+  it("requires the same physical identity in explicit Hostinger mode", () => {
+    const env = validEnvironment();
+    env.P16_DATABASE_ACCESS_MODEL = "hostinger-managed-single-user";
+
+    expect(validateStagingEnvironment(env)).toContain(
+      "HOSTINGER_MANAGED_DATABASE_IDENTITY_MISMATCH",
+    );
+  });
+
+  it("rejects a migration outside an explicit command-scoped window", () => {
+    const env = validEnvironment();
+
+    expect(validateStagingEnvironment(env, { gate: "migration" })).toContain(
+      "P16_DATABASE_MIGRATION_WINDOW_REQUIRED",
+    );
+  });
+
+  it("accepts a fully synthetic Hostinger migration window", () => {
+    const env = validEnvironment();
+    env.P16_DATABASE_ACCESS_MODEL = "hostinger-managed-single-user";
+    env.P16_DATABASE_MIGRATION_WINDOW = "enabled";
+    env.DATABASE_URL = "mysql://hostinger:secret@db.example/lessenc_staging";
+    env.DB_RUNTIME_URL = env.DATABASE_URL;
+
+    expect(validateStagingEnvironment(env, { gate: "migration" })).toEqual([]);
+  });
+
+  it("requires the migration window to be disabled for the ordinary runtime gate", () => {
+    const env = validEnvironment();
+    env.P16_DATABASE_MIGRATION_WINDOW = "enabled";
+
+    expect(validateStagingEnvironment(env, { gate: "runtime" })).toContain(
+      "P16_DATABASE_MIGRATION_WINDOW_MUST_BE_DISABLED",
+    );
+  });
+
+  it.each([
+    {
+      DATABASE_URL: "mysql://migrate:secret@one.example/lessenc_staging",
+      DB_RUNTIME_URL: "mysql://runtime:secret@two.example/lessenc_staging",
+      failure: "DATABASE_TARGETS_DO_NOT_MATCH",
+    },
+    {
+      DATABASE_URL: "mysql://migrate:secret@localhost/lessenc_staging",
+      DB_RUNTIME_URL: "mysql://runtime:secret@localhost/lessenc_staging",
+      failure: "DATABASE_URL_NOT_UNAMBIGUOUS_STAGING",
+    },
+    {
+      DATABASE_URL: "mysql://migrate:secret@db.example/lessenc_staging_prod",
+      DB_RUNTIME_URL: "mysql://runtime:secret@db.example/lessenc_staging_prod",
+      failure: "DATABASE_URL_NOT_UNAMBIGUOUS_STAGING",
+    },
+    {
+      DATABASE_URL: "mysql://migrate:secret@db.example/lessenc_stagingproduction",
+      DB_RUNTIME_URL: "mysql://runtime:secret@db.example/lessenc_stagingproduction",
+      failure: "DATABASE_URL_NOT_UNAMBIGUOUS_STAGING",
+    },
+    {
+      DATABASE_URL: "mysql://migrate:secret@db.example/backstage_lessenc",
+      DB_RUNTIME_URL: "mysql://runtime:secret@db.example/backstage_lessenc",
+      failure: "DATABASE_URL_NOT_UNAMBIGUOUS_STAGING",
+    },
+  ])("rejects unsafe database targets: $failure", ({ DATABASE_URL, DB_RUNTIME_URL, failure }) => {
+    const env = validEnvironment();
+    env.DATABASE_URL = DATABASE_URL;
+    env.DB_RUNTIME_URL = DB_RUNTIME_URL;
+
+    expect(validateStagingEnvironment(env)).toContain(failure);
+  });
+
+  it("rejects missing TLS CA and malformed access control values", () => {
+    const env = validEnvironment();
+    env.DB_TLS_CA_FILE = "relative/ca.pem";
+    env.P16_DATABASE_ACCESS_MODEL = "automatic";
+    env.P16_DATABASE_MIGRATION_WINDOW = "sometimes";
+
+    expect(validateStagingEnvironment(env)).toEqual(
+      expect.arrayContaining([
+        "DB_TLS_CA_FILE_MUST_BE_ABSOLUTE",
+        "P16_DATABASE_ACCESS_MODEL_INVALID",
+        "P16_DATABASE_MIGRATION_WINDOW_INVALID",
       ]),
     );
   });

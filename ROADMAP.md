@@ -1261,6 +1261,12 @@ TEST-only payment configuration checks and recovery/retention planning. These co
 constitute a deployment. Hosted database/storage/provider/HTTPS/monitoring/backup/restore evidence
 remains required before P16 can be declared complete.
 
+P16-HDB-01 records the explicit owner decision to use Hostinger Managed MariaDB with one managed
+database user and controlled privilege rotation. The additive repository contract preserves the
+dual-user mode, permits the Hostinger single-user mode only when explicitly selected, requires a
+migration window for `prisma migrate deploy`, and requires a disabled window plus conservative
+runtime-grant verification afterward. Hosted validation remains pending.
+
 The hosted access model for `/api/readiness` is selected and validated as a machine-monitor
 boundary—through infrastructure/reverse-proxy restriction or another explicitly approved control—
 without turning readiness into a general public diagnostic API. `/api/health` remains public
