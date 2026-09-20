@@ -91,6 +91,48 @@ describe("structured logger security boundary", () => {
     );
   });
 
+  it("redacts credential aliases, identifiers and nested array values", () => {
+    const output = vi
+      .spyOn(console, "info")
+      .mockImplementation(() => undefined);
+
+    logger.info("sensitive_alias_test", {
+      adminSessionId: "admin-session-fixture",
+      refresh_token: "refresh-fixture",
+      P12_ADMIN_AUTH_SECRET: "admin-secret-fixture",
+      META_CAPI_ACCESS_TOKEN: "meta-token-fixture",
+      request: {
+        cookies: "lessenc_buyer=raw-cookie-fixture",
+        userAgent: "browser-fingerprint-fixture",
+        ipAddress: "192.0.2.1",
+      },
+      attempts: [
+        {
+          providerOrderId: "provider-order-fixture",
+          providerPaymentId: "provider-payment-fixture",
+        },
+      ],
+      state: "REVIEW",
+    });
+
+    const serialized = String(output.mock.calls[0]?.[0]);
+    for (const forbidden of [
+      "admin-session-fixture",
+      "refresh-fixture",
+      "admin-secret-fixture",
+      "meta-token-fixture",
+      "raw-cookie-fixture",
+      "browser-fingerprint-fixture",
+      "192.0.2.1",
+      "provider-order-fixture",
+      "provider-payment-fixture",
+    ]) {
+      expect(serialized).not.toContain(forbidden);
+    }
+
+    expect(serialized).toContain('"state":"REVIEW"');
+  });
+
   it("does not serialize arbitrary Error messages", () => {
     const output = vi
       .spyOn(console, "error")

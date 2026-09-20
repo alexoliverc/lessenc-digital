@@ -1,13 +1,13 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { adminAuth } from "@/infrastructure/auth/admin-auth";
+import { getAdminAuth } from "@/infrastructure/auth/admin-auth";
 import { getDatabaseClient } from "@/infrastructure/database/client";
 import { resolveAdminSession } from "@/modules/administration/infrastructure/admin-subject";
 import { EnrollmentForm } from "../../../admin-auth-client";
 export const dynamic = "force-dynamic";
 export default async function EnrollPage() {
   const state = await resolveAdminSession({
-    auth: adminAuth,
+    auth: getAdminAuth(),
     database: getDatabaseClient(),
     headers: await headers(),
   });

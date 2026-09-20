@@ -488,6 +488,46 @@ describe("P10 financial persistence on isolated MySQL", () => {
       ).lastProviderSyncAt,
     ).not.toBeNull();
   });
+
+  it("does not expose a 3DS challenge when provider identity is not associated with the order", async () => {
+    const provider: PaymentProvider = {
+      createPayment: async () =>
+        snapshot({
+          externalReference: randomUUID(),
+          paymentMethod: "CREDIT_CARD",
+          paidAmountMinor: null,
+          status: "PENDING",
+          providerStatus: "action_required",
+          providerStatusDetail: "pending_challenge",
+          presentation: {
+            kind: "CHALLENGE",
+            url: "https://acs-public.tp.mastercard.com/api/v1/browser_Challenges",
+          },
+        }),
+      getSnapshot: async () => {
+        throw new Error("must not reconcile");
+      },
+      searchPayments: async () => {
+        throw new Error("must not search");
+      },
+    };
+    const coordinator = new FinancialCoordinator(repo, provider);
+
+    const result = await coordinator.start(ids.order, "CREDIT_CARD", {
+      token: "card-token-fixture",
+      paymentMethodId: "master",
+      installments: 1,
+      paymentType: "credit_card",
+    });
+
+    expect(result.presentation).toBeNull();
+    expect(result.state).toBe("review_required");
+    expect(await db.payment.findFirstOrThrow({ where: { orderId: ids.order } })).toMatchObject({
+      requiresReview: true,
+      reviewReason: "IDENTITY_OR_AMOUNT_MISMATCH",
+    });
+  });
+
   it("rolls back all financial changes if outbox write fails", async () => {
     const { attempt } = await repo.reserve(ids.order, "PIX");
     await db.outboxEvent.create({

@@ -57,11 +57,43 @@ const FAILED_DETAILS = new Set([
   "cc_rejected_3ds_challenge",
 ]);
 
-function safeHttps(value: unknown): string | undefined {
+function isMercadoPagoHost(hostname: string): boolean {
+  return ["mercadopago.com", "mercadopago.com.br"].some(
+    (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+  );
+}
+
+function safeMercadoPagoHttps(value: unknown): string | undefined {
   if (typeof value !== "string" || value.length > 2048) return undefined;
   try {
     const url = new URL(value);
-    return url.protocol === "https:" && !url.username && !url.password ? url.toString() : undefined;
+    return url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      isMercadoPagoHost(url.hostname)
+      ? url.toString()
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function safeThreeDsChallengeHttps(value: unknown): string | undefined {
+  if (typeof value !== "string" || value.length > 2048) return undefined;
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase().replace(/\.$/u, "");
+    const literalIp = /^\d{1,3}(?:\.\d{1,3}){3}$/u.test(hostname) || /^\[.*\]$/u.test(hostname);
+    return url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      !url.port &&
+      hostname.length > 0 &&
+      hostname !== "localhost" &&
+      !hostname.endsWith(".localhost") &&
+      !literalIp
+      ? url.toString()
+      : undefined;
   } catch {
     return undefined;
   }
@@ -119,7 +151,9 @@ export function normalizeMercadoPagoOrder(raw: unknown): ProviderSnapshot {
     if (!compatible) reviewReason = "INCONSISTENT_STATUS";
   }
   if (!cardinalityValid) reviewReason = "UNEXPECTED_TRANSACTION_COUNT";
-  if (!string(payment?.id) || !string(order.user_id)) reviewReason = "INVALID_FINANCIAL_DATA";
+  if (!string(payment?.id) || !string(order.user_id) || !string(order.external_reference)) {
+    reviewReason = "INVALID_FINANCIAL_DATA";
+  }
   if (!paymentMethod) reviewReason = "UNSUPPORTED_PAYMENT_METHOD";
   if (pair === "action_required/waiting_capture") reviewReason = "UNEXPECTED_CAPTURE_MODE";
   if (order.processing_mode !== "automatic") reviewReason = "INVALID_FINANCIAL_DATA";
@@ -171,7 +205,7 @@ export function normalizeMercadoPagoOrder(raw: unknown): ProviderSnapshot {
       typeof method?.qr_code_base64 === "string" && method.qr_code_base64.length <= 128_000
         ? method.qr_code_base64
         : undefined;
-    const ticketUrl = safeHttps(method?.ticket_url);
+    const ticketUrl = safeMercadoPagoHttps(method?.ticket_url);
     if (qrCode || qrCodeBase64 || ticketUrl)
       presentation = {
         kind: "PIX",
@@ -181,9 +215,11 @@ export function normalizeMercadoPagoOrder(raw: unknown): ProviderSnapshot {
       };
   }
   if (pair === "action_required/pending_challenge") {
-    const url = safeHttps(record(method?.transaction_security)?.url);
-    if (url) presentation = { kind: "CHALLENGE", url };
-    else reviewReason = "INVALID_PRESENTATION";
+    const url = safeThreeDsChallengeHttps(record(method?.transaction_security)?.url);
+    if (!url) reviewReason = "INVALID_PRESENTATION";
+    else if (status === "PENDING" && paymentMethod === "CREDIT_CARD" && reviewReason === null) {
+      presentation = { kind: "CHALLENGE", url };
+    }
   }
   const occurredAt = string(order.last_updated_date) ?? string(order.updated_date);
   const createdAt = string(order.created_date) ?? string(order.date_created);

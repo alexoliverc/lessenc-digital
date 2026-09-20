@@ -6,6 +6,8 @@ import { AdminNav } from "../admin-nav-client";
 import { adminNavigationFor } from "../admin-navigation";
 import "../admin.css";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProtectedAdminLayout({ children }: { children: ReactNode }) {
   const { subject, user } = await requireAdminPage();
   return (

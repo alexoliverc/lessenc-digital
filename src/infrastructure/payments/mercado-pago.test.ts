@@ -42,6 +42,25 @@ function providerOrder(status = "processed", detail = "accredited") {
   };
 }
 
+function providerCardChallenge(url: string) {
+  const raw = providerOrder("action_required", "pending_challenge");
+  return {
+    ...raw,
+    transactions: {
+      payments: [
+        {
+          ...raw.transactions.payments[0],
+          payment_method: {
+            id: "master",
+            type: "credit_card",
+            transaction_security: { url },
+          },
+        },
+      ],
+    },
+  };
+}
+
 describe("P10 continuation capability", () => {
   it("authenticates scope and expiry without PII", () => {
     const service = new HmacPaymentContinuation(secret);
@@ -111,46 +130,97 @@ describe("P10 provider normalization", () => {
     expect(normalizeMercadoPagoOrder(noPaymentId).requiresReview).toBe(true);
   });
 
-  it("keeps automatic capture anomalies in review and exposes HTTPS challenge only", () => {
+  it("keeps automatic capture anomalies in review and accepts provider-originated external ACS", () => {
     const capture = normalizeMercadoPagoOrder(providerOrder("action_required", "waiting_capture"));
     expect(capture.status).toBe("PENDING");
     expect(capture.reviewReason).toBe("UNEXPECTED_CAPTURE_MODE");
-    const raw = providerOrder("action_required", "pending_challenge");
-    const card = {
+
+    expect(
+      normalizeMercadoPagoOrder(
+        providerCardChallenge("https://acs-public.tp.mastercard.com/api/v1/browser_Challenges"),
+      ).presentation,
+    ).toEqual({
+      kind: "CHALLENGE",
+      url: "https://acs-public.tp.mastercard.com/api/v1/browser_Challenges",
+    });
+  });
+
+  it.each([
+    "http://issuer.example/challenge",
+    "javascript:alert(1)",
+    "data:text/html,challenge",
+    "https://user:password@issuer.example/challenge",
+    "https://localhost/challenge",
+    "https://127.0.0.1/challenge",
+    "https://[::1]/challenge",
+    "https://10.0.0.1/challenge",
+    "https://169.254.1.1/challenge",
+    "https://172.16.0.1/challenge",
+    "https://192.168.1.1/challenge",
+    "https://[fe80::1]/challenge",
+    "not a URL",
+  ])("rejects invalid or local 3DS challenge URL %s", (url) => {
+    const snapshot = normalizeMercadoPagoOrder(providerCardChallenge(url));
+
+    expect(snapshot.reviewReason).toBe("INVALID_PRESENTATION");
+    expect(snapshot.presentation).toBeNull();
+  });
+
+  it("does not expose a challenge outside the canonical provider state and identifiers", () => {
+    const challenge = providerCardChallenge("https://issuer.example/challenge");
+    const invalidState = {
+      ...challenge,
+      status: "processed",
+      status_detail: "accredited",
+      transactions: {
+        payments: [
+          {
+            ...challenge.transactions.payments[0],
+            status: "processed",
+            status_detail: "accredited",
+          },
+        ],
+      },
+    };
+    const missingAssociation = { ...challenge, external_reference: undefined };
+
+    expect(normalizeMercadoPagoOrder(invalidState).presentation).toBeNull();
+    expect(normalizeMercadoPagoOrder(missingAssociation)).toMatchObject({
+      presentation: null,
+      requiresReview: true,
+      reviewReason: "INVALID_FINANCIAL_DATA",
+    });
+  });
+
+  it("exposes PIX ticket URLs only from Mercado Pago HTTPS hosts", () => {
+    const raw = providerOrder("action_required", "waiting_transfer");
+    const payment = raw.transactions.payments[0]!;
+    const withTicket = (ticketUrl: string) => ({
       ...raw,
       transactions: {
         payments: [
           {
-            ...raw.transactions.payments[0],
+            ...payment,
             payment_method: {
-              id: "visa",
-              type: "credit_card",
-              transaction_security: { url: "https://www.mercadopago.com/challenge" },
+              ...payment.payment_method,
+              ticket_url: ticketUrl,
             },
           },
         ],
       },
-    };
-    expect(normalizeMercadoPagoOrder(card).presentation).toEqual({
-      kind: "CHALLENGE",
-      url: "https://www.mercadopago.com/challenge",
     });
-    const unsafe = {
-      ...card,
-      transactions: {
-        payments: [
-          {
-            ...card.transactions.payments[0],
-            payment_method: {
-              id: "visa",
-              type: "credit_card",
-              transaction_security: { url: "http://localhost/challenge" },
-            },
-          },
-        ],
-      },
-    };
-    expect(normalizeMercadoPagoOrder(unsafe).reviewReason).toBe("INVALID_PRESENTATION");
+
+    expect(
+      normalizeMercadoPagoOrder(withTicket("https://www.mercadopago.com.br/payments/instructions"))
+        .presentation,
+    ).toMatchObject({
+      kind: "PIX",
+      ticketUrl: "https://www.mercadopago.com.br/payments/instructions",
+    });
+    expect(
+      normalizeMercadoPagoOrder(withTicket("https://attacker.example/payments/instructions"))
+        .presentation,
+    ).not.toHaveProperty("ticketUrl");
   });
 
   it("keeps partial refund and chargeback in review", () => {

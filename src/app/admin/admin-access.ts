@@ -1,13 +1,14 @@
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
-import { adminAuth } from "@/infrastructure/auth/admin-auth";
+import { getAdminAuth } from "@/infrastructure/auth/admin-auth";
 import { getDatabaseClient } from "@/infrastructure/database/client";
 import { resolveAdminSession } from "@/modules/administration/infrastructure/admin-subject";
 import { adminPageDecision } from "./admin-page-decision";
 
 export async function requireAdminPage(permission?: string, hideUnauthorized = false) {
   const database = getDatabaseClient();
+  const adminAuth = getAdminAuth();
   const state = await resolveAdminSession({ auth: adminAuth, database, headers: await headers() });
   const decision = adminPageDecision(state, permission);
   if (decision === "LOGIN") redirect("/admin/login");
