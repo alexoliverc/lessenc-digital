@@ -1,6 +1,5 @@
-import { randomUUID } from "node:crypto";
-
 import type { AdminRole, Prisma, PrismaClient } from "@/generated/prisma/client";
+import { createCorrelationId } from "@/lib/observability/correlation";
 import { AdminAccessDenied, requireAdminPermission, type AdminSubject } from "./admin-subject";
 
 type AuditMetadata = Readonly<{
@@ -62,7 +61,7 @@ export async function recordAdminDenial(input: {
       targetType: input.targetType ?? null,
       targetId: input.targetId ?? null,
       outcome: "DENIED",
-      correlationId: input.correlationId ?? randomUUID(),
+      correlationId: input.correlationId ?? createCorrelationId(),
       metadata: sanitizeAdminAuditMetadata({ reasonCode: input.reasonCode }),
     },
   });
@@ -82,7 +81,7 @@ export async function runCriticalAdminMutation<T>(input: {
 }): Promise<T> {
   requireAdminPermission(input.subject, input.permission, { fresh: input.fresh ?? false });
   const metadata = sanitizeAdminAuditMetadata(input.metadata ?? {});
-  const correlationId = input.correlationId ?? randomUUID();
+  const correlationId = input.correlationId ?? createCorrelationId();
   return input.database.$transaction(async (transaction) => {
     // Lock the authoritative identity, session and factor before validating the mutation.
     await transaction.$queryRaw`SELECT id FROM admin_users WHERE id = ${input.subject.adminUserId} FOR UPDATE`;

@@ -148,16 +148,13 @@ export function createBuyerAccessExchangeHandler(dependencies: ExchangeHandlerDe
       return response;
     } catch (error) {
       if (error instanceof BuyerAccessRateLimitExceeded) {
-        p11Observability.warn(
-          "buyer_access_rate_limited",
-          {
-            correlationId,
-            surface: "BUYER_ACCESS_EXCHANGE",
-            outcome: "DENIED",
-            failureCode: "RATE_LIMIT_EXCEEDED",
-            retryAfterSeconds: error.retryAfterSeconds,
-          },
-        );
+        p11Observability.warn("buyer_access_rate_limited", {
+          correlationId,
+          surface: "BUYER_ACCESS_EXCHANGE",
+          outcome: "DENIED",
+          failureCode: "RATE_LIMIT_EXCEEDED",
+          retryAfterSeconds: error.retryAfterSeconds,
+        });
 
         return NextResponse.json(
           {
@@ -174,16 +171,13 @@ export function createBuyerAccessExchangeHandler(dependencies: ExchangeHandlerDe
       }
 
       if (error instanceof BuyerAccessRateLimitUnavailable) {
-        p11Observability.error(
-          "buyer_access_limiter_unavailable",
-          {
-            correlationId,
-            surface: "RATE_LIMIT",
-            scope: error.scope,
-            outcome: "FAILED",
-            failureCode: "RATE_LIMIT_UNAVAILABLE",
-          },
-        );
+        p11Observability.error("buyer_access_limiter_unavailable", {
+          correlationId,
+          surface: "RATE_LIMIT",
+          scope: error.scope,
+          outcome: "FAILED",
+          failureCode: "RATE_LIMIT_UNAVAILABLE",
+        });
 
         return NextResponse.json(
           {
@@ -197,15 +191,12 @@ export function createBuyerAccessExchangeHandler(dependencies: ExchangeHandlerDe
       }
 
       if (error instanceof Error && error.message === "ACCESS_INVALID") {
-        p11Observability.warn(
-          "buyer_access_invalid",
-          {
-            correlationId,
-            surface: "BUYER_ACCESS_EXCHANGE",
-            outcome: "DENIED",
-            failureCode: "ACCESS_INVALID",
-          },
-        );
+        p11Observability.warn("buyer_access_invalid", {
+          correlationId,
+          surface: "BUYER_ACCESS_EXCHANGE",
+          outcome: "DENIED",
+          failureCode: "ACCESS_INVALID",
+        });
 
         return NextResponse.json(
           {

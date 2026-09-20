@@ -1,31 +1,25 @@
 import console from "node:console";
-import {
-  readFileSync,
-} from "node:fs";
-import {
-  realpath,
-  stat,
-} from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import { realpath, stat } from "node:fs/promises";
 import process from "node:process";
-import {
-  checkServerIdentity,
-} from "node:tls";
-import {
-  URL,
-} from "node:url";
+import { checkServerIdentity } from "node:tls";
+import { URL } from "node:url";
 
 import mariadb from "mariadb";
 
-import {
-  getHealthStatus,
-} from "../src/modules/health/health.ts";
-import {
-  evaluateOperationalHealth,
-} from "../src/modules/health/operational-health.ts";
+import { getHealthStatus } from "../src/modules/health/health.ts";
+import { evaluateOperationalHealth } from "../src/modules/health/operational-health.ts";
 import {
   assertPrivateStorageRootIsPrivate,
   PrivateStorageRootPolicyError,
 } from "../src/infrastructure/storage/private-storage-root-policy.ts";
+import {
+  CORRELATION_RESPONSE_HEADER,
+  OBSERVABILITY_SERVICE_NAME,
+  OPERATIONAL_METRIC_DEFINITIONS,
+  P11_OBSERVABILITY_EVENTS,
+  P11_OBSERVABILITY_SURFACES,
+} from "../src/lib/observability/contracts.ts";
 
 const REQUIRED_OBSERVABILITY_EVENTS = [
   "buyer_access_rate_limited",
@@ -42,31 +36,28 @@ const REQUIRED_OBSERVABILITY_EVENTS = [
   "rate_limit_stale_buckets_detected",
 ];
 
+const REQUIRED_OPERATIONAL_METRICS = [
+  "http_requests_total",
+  "http_request_duration_ms",
+  "operational_failures_total",
+  "payment_operations_total",
+  "webhook_operations_total",
+  "delivery_operations_total",
+  "rate_limit_decisions_total",
+  "storage_failures_total",
+  "operational_jobs_total",
+  "readiness_evaluations_total",
+];
+
 function argumentValue(name) {
-  const prefix =
-    `--${name}=`;
+  const prefix = `--${name}=`;
 
-  const entry =
-    process.argv
-      .slice(2)
-      .find(
-        (argument) =>
-          argument.startsWith(
-            prefix,
-          ),
-      );
+  const entry = process.argv.slice(2).find((argument) => argument.startsWith(prefix));
 
-  return entry
-    ? entry.slice(
-        prefix.length,
-      )
-    : undefined;
+  return entry ? entry.slice(prefix.length) : undefined;
 }
 
-function failed(
-  name,
-  failureCode,
-) {
+function failed(name, failureCode) {
   return Object.freeze({
     name,
     status: "FAILED",
@@ -74,10 +65,7 @@ function failed(
   });
 }
 
-function degraded(
-  name,
-  failureCode,
-) {
+function degraded(name, failureCode) {
   return Object.freeze({
     name,
     status: "DEGRADED",
@@ -94,253 +82,134 @@ function healthy(name) {
 
 function applicationCheck() {
   try {
-    const status =
-      getHealthStatus();
+    const status = getHealthStatus();
 
-    if (
-      !status ||
-      status.status !== "ok" ||
-      Object.keys(status).length !== 1
-    ) {
-      return failed(
-        "APPLICATION_CONTRACT",
-        "APPLICATION_CONTRACT_INVALID",
-      );
+    if (!status || status.status !== "ok" || Object.keys(status).length !== 1) {
+      return failed("APPLICATION_CONTRACT", "APPLICATION_CONTRACT_INVALID");
     }
 
-    return healthy(
-      "APPLICATION_CONTRACT",
-    );
+    return healthy("APPLICATION_CONTRACT");
   } catch {
-    return failed(
-      "APPLICATION_CONTRACT",
-      "APPLICATION_CONTRACT_INVALID",
-    );
+    return failed("APPLICATION_CONTRACT", "APPLICATION_CONTRACT_INVALID");
   }
 }
 
 function observabilityCheck() {
   try {
-    const source =
-      readFileSync(
-        new URL(
-          "../src/lib/observability/p11-observability.ts",
-          import.meta.url,
-        ),
-        "utf8",
-      );
-
     if (
-      !source.includes(
-        '"BACKUP_RESTORE"',
-      )
+      !P11_OBSERVABILITY_SURFACES.includes("BACKUP_RESTORE") ||
+      OBSERVABILITY_SERVICE_NAME !== "lessenc-digital" ||
+      CORRELATION_RESPONSE_HEADER !== "x-correlation-id"
     ) {
-      return failed(
-        "OBSERVABILITY_CONTRACT",
-        "OBSERVABILITY_CONTRACT_INVALID",
-      );
+      return failed("OBSERVABILITY_CONTRACT", "OBSERVABILITY_CONTRACT_INVALID");
     }
 
-    for (
-      const event
-      of REQUIRED_OBSERVABILITY_EVENTS
-    ) {
-      if (
-        !source.includes(
-          `"${event}"`,
-        )
-      ) {
-        return failed(
-          "OBSERVABILITY_CONTRACT",
-          "OBSERVABILITY_CONTRACT_INVALID",
-        );
+    for (const event of REQUIRED_OBSERVABILITY_EVENTS) {
+      if (!P11_OBSERVABILITY_EVENTS.includes(event)) {
+        return failed("OBSERVABILITY_CONTRACT", "OBSERVABILITY_CONTRACT_INVALID");
       }
     }
 
-    return healthy(
-      "OBSERVABILITY_CONTRACT",
-    );
+    for (const metric of REQUIRED_OPERATIONAL_METRICS) {
+      if (!Object.hasOwn(OPERATIONAL_METRIC_DEFINITIONS, metric)) {
+        return failed("OBSERVABILITY_CONTRACT", "OBSERVABILITY_CONTRACT_INVALID");
+      }
+    }
+
+    return healthy("OBSERVABILITY_CONTRACT");
   } catch {
-    return failed(
-      "OBSERVABILITY_CONTRACT",
-      "OBSERVABILITY_CONTRACT_INVALID",
-    );
+    return failed("OBSERVABILITY_CONTRACT", "OBSERVABILITY_CONTRACT_INVALID");
   }
 }
 
 async function storageCheck() {
-  const root =
-    process.env
-      .PRIVATE_FILE_STORAGE_PATH;
+  const root = process.env.PRIVATE_FILE_STORAGE_PATH;
 
-  if (
-    typeof root !== "string" ||
-    root.trim().length === 0
-  ) {
-    return failed(
-      "PRIVATE_STORAGE",
-      "STORAGE_ROOT_INVALID",
-    );
+  if (typeof root !== "string" || root.trim().length === 0) {
+    return failed("PRIVATE_STORAGE", "STORAGE_ROOT_INVALID");
   }
 
   try {
-    assertPrivateStorageRootIsPrivate(
-      root,
-      process.cwd(),
-    );
+    assertPrivateStorageRootIsPrivate(root, process.cwd());
   } catch (error) {
-    if (
-      error instanceof
-      PrivateStorageRootPolicyError
-    ) {
-      return failed(
-        "PRIVATE_STORAGE",
-        "STORAGE_ROOT_INVALID",
-      );
+    if (error instanceof PrivateStorageRootPolicyError) {
+      return failed("PRIVATE_STORAGE", "STORAGE_ROOT_INVALID");
     }
 
-    return failed(
-      "PRIVATE_STORAGE",
-      "STORAGE_ROOT_INVALID",
-    );
+    return failed("PRIVATE_STORAGE", "STORAGE_ROOT_INVALID");
   }
 
   try {
-    const canonicalRoot =
-      await realpath(root);
+    const canonicalRoot = await realpath(root);
 
-    const metadata =
-      await stat(
-        canonicalRoot,
-      );
+    const metadata = await stat(canonicalRoot);
 
     if (!metadata.isDirectory()) {
-      return failed(
-        "PRIVATE_STORAGE",
-        "STORAGE_ROOT_INVALID",
-      );
+      return failed("PRIVATE_STORAGE", "STORAGE_ROOT_INVALID");
     }
 
-    return healthy(
-      "PRIVATE_STORAGE",
-    );
+    return healthy("PRIVATE_STORAGE");
   } catch {
-    return degraded(
-      "PRIVATE_STORAGE",
-      "STORAGE_ROOT_UNAVAILABLE",
-    );
+    return degraded("PRIVATE_STORAGE", "STORAGE_ROOT_UNAVAILABLE");
   }
 }
 
 function databaseConfiguration() {
-  const rawUrl =
-    process.env.DB_RUNTIME_URL;
+  const rawUrl = process.env.DB_RUNTIME_URL;
 
-  const caFile =
-    process.env.DB_TLS_CA_FILE;
+  const caFile = process.env.DB_TLS_CA_FILE;
 
-  const appEnv =
-    process.env.APP_ENV;
+  const appEnv = process.env.APP_ENV;
 
   if (
     typeof rawUrl !== "string" ||
     rawUrl.length === 0 ||
     typeof caFile !== "string" ||
     caFile.length === 0 ||
-    ![
-      "local",
-      "test",
-      "staging",
-      "production",
-    ].includes(appEnv ?? "")
+    !["local", "test", "staging", "production"].includes(appEnv ?? "")
   ) {
-    throw new Error(
-      "INVALID_DATABASE_CONFIGURATION",
-    );
+    throw new Error("INVALID_DATABASE_CONFIGURATION");
   }
 
   let url;
 
   try {
-    url =
-      new URL(rawUrl);
+    url = new URL(rawUrl);
   } catch {
-    throw new Error(
-      "INVALID_DATABASE_CONFIGURATION",
-    );
+    throw new Error("INVALID_DATABASE_CONFIGURATION");
   }
 
-  const database =
-    decodeURIComponent(
-      url.pathname.slice(1),
-    );
+  const database = decodeURIComponent(url.pathname.slice(1));
 
-  if (
-    url.protocol !== "mysql:" ||
-    !url.hostname ||
-    !url.username ||
-    !url.password ||
-    !database
-  ) {
-    throw new Error(
-      "INVALID_DATABASE_CONFIGURATION",
-    );
+  if (url.protocol !== "mysql:" || !url.hostname || !url.username || !url.password || !database) {
+    throw new Error("INVALID_DATABASE_CONFIGURATION");
   }
 
-  const expectedDatabase =
-    argumentValue(
-      "target-database",
-    );
+  const expectedDatabase = argumentValue("target-database");
 
   if (
-    typeof expectedDatabase !==
-      "string" ||
+    typeof expectedDatabase !== "string" ||
     expectedDatabase.length === 0 ||
     expectedDatabase !== database
   ) {
-    throw new Error(
-      "OPERATIONAL_HEALTH_TARGET_MISMATCH",
-    );
+    throw new Error("OPERATIONAL_HEALTH_TARGET_MISMATCH");
   }
 
   const localCertificate =
-    ["local", "test"].includes(
-      appEnv,
-    ) &&
-    [
-      "127.0.0.1",
-      "localhost",
-    ].includes(
-      url.hostname,
-    ) &&
+    ["local", "test"].includes(appEnv) &&
+    ["127.0.0.1", "localhost"].includes(url.hostname) &&
     url.port === "3307";
 
   return Object.freeze({
-    host:
-      url.hostname,
-    port:
-      Number(
-        url.port || 3306,
-      ),
-    user:
-      decodeURIComponent(
-        url.username,
-      ),
-    password:
-      decodeURIComponent(
-        url.password,
-      ),
+    host: url.hostname,
+    port: Number(url.port || 3306),
+    user: decodeURIComponent(url.username),
+    password: decodeURIComponent(url.password),
     database,
     ssl: {
-      ca:
-        readFileSync(
-          caFile,
-        ),
+      ca: readFileSync(caFile),
       rejectUnauthorized: true,
-      checkServerIdentity:
-        localCertificate
-          ? () => undefined
-          : checkServerIdentity,
+      checkServerIdentity: localCertificate ? () => undefined : checkServerIdentity,
     },
   });
 }
@@ -349,46 +218,27 @@ async function databaseChecks() {
   let pool;
 
   try {
-    const configuration =
-      databaseConfiguration();
+    const configuration = databaseConfiguration();
 
-    pool =
-      mariadb.createPool({
-        ...configuration,
-        timezone: "Z",
-        connectionLimit: 1,
-      });
+    pool = mariadb.createPool({
+      ...configuration,
+      timezone: "Z",
+      connectionLimit: 1,
+    });
 
-    const connectivityRows =
-      await pool.query(
-        "SELECT 1 AS operational_health",
-      );
+    const connectivityRows = await pool.query("SELECT 1 AS operational_health");
 
-    if (
-      Number(
-        connectivityRows[0]
-          ?.operational_health,
-      ) !== 1
-    ) {
+    if (Number(connectivityRows[0]?.operational_health) !== 1) {
       return Object.freeze({
-        database:
-          failed(
-            "DATABASE_CONNECTIVITY",
-            "DATABASE_UNAVAILABLE",
-          ),
-        rateLimit:
-          failed(
-            "RATE_LIMIT_RETENTION",
-            "DATABASE_UNAVAILABLE",
-          ),
+        database: failed("DATABASE_CONNECTIVITY", "DATABASE_UNAVAILABLE"),
+        rateLimit: failed("RATE_LIMIT_RETENTION", "DATABASE_UNAVAILABLE"),
       });
     }
 
     let staleRows;
 
     try {
-      staleRows =
-        await pool.query(`
+      staleRows = await pool.query(`
           SELECT COUNT(*) AS stale_count
           FROM buyer_access_rate_limit_buckets
           WHERE window_start <
@@ -396,70 +246,31 @@ async function databaseChecks() {
         `);
     } catch {
       return Object.freeze({
-        database:
-          healthy(
-            "DATABASE_CONNECTIVITY",
-          ),
-        rateLimit:
-          failed(
-            "RATE_LIMIT_RETENTION",
-            "RATE_LIMIT_RETENTION_UNAVAILABLE",
-          ),
+        database: healthy("DATABASE_CONNECTIVITY"),
+        rateLimit: failed("RATE_LIMIT_RETENTION", "RATE_LIMIT_RETENTION_UNAVAILABLE"),
       });
     }
 
-    const staleCount =
-      Number(
-        staleRows[0]
-          ?.stale_count,
-      );
+    const staleCount = Number(staleRows[0]?.stale_count);
 
-    if (
-      !Number.isSafeInteger(
-        staleCount,
-      ) ||
-      staleCount < 0
-    ) {
+    if (!Number.isSafeInteger(staleCount) || staleCount < 0) {
       return Object.freeze({
-        database:
-          healthy(
-            "DATABASE_CONNECTIVITY",
-          ),
-        rateLimit:
-          failed(
-            "RATE_LIMIT_RETENTION",
-            "RATE_LIMIT_RETENTION_UNAVAILABLE",
-          ),
+        database: healthy("DATABASE_CONNECTIVITY"),
+        rateLimit: failed("RATE_LIMIT_RETENTION", "RATE_LIMIT_RETENTION_UNAVAILABLE"),
       });
     }
 
     return Object.freeze({
-      database:
-        healthy(
-          "DATABASE_CONNECTIVITY",
-        ),
+      database: healthy("DATABASE_CONNECTIVITY"),
       rateLimit:
         staleCount > 0
-          ? degraded(
-              "RATE_LIMIT_RETENTION",
-              "RATE_LIMIT_STALE_BUCKETS_DETECTED",
-            )
-          : healthy(
-              "RATE_LIMIT_RETENTION",
-            ),
+          ? degraded("RATE_LIMIT_RETENTION", "RATE_LIMIT_STALE_BUCKETS_DETECTED")
+          : healthy("RATE_LIMIT_RETENTION"),
     });
   } catch {
     return Object.freeze({
-      database:
-        failed(
-          "DATABASE_CONNECTIVITY",
-          "DATABASE_UNAVAILABLE",
-        ),
-      rateLimit:
-        failed(
-          "RATE_LIMIT_RETENTION",
-          "DATABASE_UNAVAILABLE",
-        ),
+      database: failed("DATABASE_CONNECTIVITY", "DATABASE_UNAVAILABLE"),
+      rateLimit: failed("RATE_LIMIT_RETENTION", "DATABASE_UNAVAILABLE"),
     });
   } finally {
     if (pool) {
@@ -469,14 +280,7 @@ async function databaseChecks() {
 }
 
 export async function runOperationalHealthProbe() {
-  const [
-    database,
-    storage,
-  ] =
-    await Promise.all([
-      databaseChecks(),
-      storageCheck(),
-    ]);
+  const [database, storage] = await Promise.all([databaseChecks(), storageCheck()]);
 
   return evaluateOperationalHealth([
     applicationCheck(),
@@ -487,14 +291,8 @@ export async function runOperationalHealthProbe() {
   ]);
 }
 
-const report =
-  await runOperationalHealthProbe();
+const report = await runOperationalHealthProbe();
 
-console.log(
-  JSON.stringify(report),
-);
+console.log(JSON.stringify(report));
 
-process.exitCode =
-  report.status === "FAILED"
-    ? 1
-    : 0;
+process.exitCode = report.status === "FAILED" ? 1 : 0;

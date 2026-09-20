@@ -39,9 +39,12 @@ describe("Catalog persistence error boundary", () => {
         context: { operation: "catalog-read" },
       });
 
-      expect(diagnostic).toHaveBeenCalledExactlyOnceWith(
-        '{"event":"catalog.read.failed","code":"PERSISTENCE_UNAVAILABLE"}',
-      );
+      expect(diagnostic).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(String(diagnostic.mock.calls[0]?.[0]))).toMatchObject({
+        event: "catalog_read_failed",
+        code: "PERSISTENCE_UNAVAILABLE",
+        service: "lessenc-digital",
+      });
 
       expect(diagnostic.mock.calls.flat().join(" ")).not.toContain("credentials");
     } finally {
@@ -68,9 +71,13 @@ describe("Catalog persistence error boundary", () => {
         context: { operation: "catalog-read" },
       });
 
-      expect(diagnostic).toHaveBeenCalledExactlyOnceWith(
-        '{"event":"catalog.read.failed","code":"PERSISTENCE_UNAVAILABLE","prismaCode":"P2024"}',
-      );
+      expect(diagnostic).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(String(diagnostic.mock.calls[0]?.[0]))).toMatchObject({
+        event: "catalog_read_failed",
+        code: "PERSISTENCE_UNAVAILABLE",
+        prismaCode: "P2024",
+        service: "lessenc-digital",
+      });
 
       const logged = diagnostic.mock.calls.flat().join(" ");
 

@@ -12,51 +12,32 @@ type CounterRow = Readonly<{
 const HASH_PATTERN = /^[a-f0-9]{64}$/u;
 
 export class PrismaBuyerAccessRateLimitRepository
-  implements
-    BuyerAccessRateLimitRepository,
-    BuyerAccessRateLimitMaintenanceRepository
+  implements BuyerAccessRateLimitRepository, BuyerAccessRateLimitMaintenanceRepository
 {
   constructor(private readonly db: PrismaClient) {}
 
-  async countStaleBefore(
-    cutoff: Date,
-  ): Promise<number> {
-    if (
-      !Number.isFinite(
-        cutoff.getTime(),
-      )
-    ) {
-      throw new Error(
-        "INVALID_RATE_LIMIT_CLEANUP_CUTOFF",
-      );
+  async countStaleBefore(cutoff: Date): Promise<number> {
+    if (!Number.isFinite(cutoff.getTime())) {
+      throw new Error("INVALID_RATE_LIMIT_CLEANUP_CUTOFF");
     }
 
-    return this.db
-      .buyerAccessRateLimitBucket
-      .count({
-        where: {
-          windowStart: {
-            lt: cutoff,
-          },
+    return this.db.buyerAccessRateLimitBucket.count({
+      where: {
+        windowStart: {
+          lt: cutoff,
         },
-      });
+      },
+    });
   }
 
-  async deleteStaleBatchBefore(
-    cutoff: Date,
-    limit: number,
-  ): Promise<number> {
+  async deleteStaleBatchBefore(cutoff: Date, limit: number): Promise<number> {
     if (
-      !Number.isFinite(
-        cutoff.getTime(),
-      ) ||
+      !Number.isFinite(cutoff.getTime()) ||
       !Number.isSafeInteger(limit) ||
       limit < 1 ||
       limit > 5_000
     ) {
-      throw new Error(
-        "INVALID_RATE_LIMIT_CLEANUP_INPUT",
-      );
+      throw new Error("INVALID_RATE_LIMIT_CLEANUP_INPUT");
     }
 
     return this.db.$executeRaw`
@@ -81,8 +62,7 @@ export class PrismaBuyerAccessRateLimitRepository
       throw new Error("INVALID_RATE_LIMIT_INPUT");
     }
 
-    const counterCap =
-      input.limit + 1;
+    const counterCap = input.limit + 1;
 
     return this.db.$transaction(
       async (tx) => {
@@ -134,14 +114,9 @@ export class PrismaBuyerAccessRateLimitRepository
           throw new Error("RATE_LIMIT_COUNTER_NOT_FOUND");
         }
 
-        const requestCount =
-          Number(rows[0]?.request_count);
+        const requestCount = Number(rows[0]?.request_count);
 
-        if (
-          !Number.isSafeInteger(requestCount) ||
-          requestCount < 1 ||
-          requestCount > counterCap
-        ) {
+        if (!Number.isSafeInteger(requestCount) || requestCount < 1 || requestCount > counterCap) {
           throw new Error("INVALID_RATE_LIMIT_COUNTER");
         }
 

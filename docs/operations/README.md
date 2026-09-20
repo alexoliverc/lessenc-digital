@@ -61,3 +61,10 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
 - [P13-F Final Gate](./p13-f-final-gate.md) — GTM + Google Consent Mode, GA4, Google Ads, Meta Pixel, Meta CAPI policy block, provider-neutral dispatch and final P13-F regression evidence.
 - [P13-G Final Gate](./p13-g-final-gate.md) — server-protected read-only Admin Analytics, canonical Purchase revenue, First/Last Touch temporal reporting and RBAC evidence.
 - [P13-H Final Gate](./p13-h-final-gate.md) — complete P13 technical validation, regressions, security/privacy boundaries and final lifecycle closure.
+
+## P15 operational-readiness candidate
+
+- [P15 architecture](../architecture/p15-observability-operational-readiness.md) — canonical correlation, structured logging, liveness/readiness/deep-health separation, provider-neutral telemetry, alerting, service health and sanitized public status projection.
+- [P15 Backup, Restore and Recovery Policy](./p15-backup-recovery-policy.md) — recovery unit, integrity, encryption/off-site requirements, provisional RPO/RTO and retention objectives, restore safeguards and rollback/recovery separation.
+- [P15 Incident Response and Operational Runbooks](./p15-incident-response-runbook.md) — severity, lifecycle, ownership and actionable runbooks for the required failure classes.
+- [P15 R1 Gate C Candidate](./p15-final-gate.md) — corrected local validation evidence, residual risks, P16/P17 deferrals and Git lifecycle boundary pending ChatGPT re-review.

@@ -5,6 +5,7 @@ import { type CatalogOffer, type ProductStatus } from "../../modules/catalog/dom
 import { ApplicationError } from "../../shared/application-error";
 import { assertNever } from "../../shared/assert-never";
 import { Money } from "../../shared/money";
+import { logger } from "../../lib/observability/logger";
 
 function mapProductStatus(status: StoredProductStatus): ProductStatus {
   switch (status) {
@@ -34,7 +35,7 @@ function logPersistenceUnavailable(prismaCode?: string): void {
           prismaCode,
         };
 
-  console.error(JSON.stringify(diagnostic));
+  logger.error("catalog_read_failed", diagnostic);
 }
 
 function isKnownUnavailableRequestError(error: Prisma.PrismaClientKnownRequestError): boolean {

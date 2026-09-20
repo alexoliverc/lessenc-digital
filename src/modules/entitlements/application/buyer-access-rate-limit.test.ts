@@ -7,8 +7,7 @@ import {
   type BuyerAccessRateLimitRepository,
 } from "./buyer-access-rate-limit";
 
-const HASH =
-  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+const HASH = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
 class FixedClock implements Clock {
   constructor(private readonly value: Date) {}
@@ -39,14 +38,10 @@ describe("FixedWindowBuyerAccessRateLimiter", () => {
       new FixedClock(new Date("2026-09-13T16:00:05.000Z")),
     );
 
-    const result = await limiter.consume(
-      "EXCHANGE_GLOBAL",
-      HASH,
-      {
-        limit: 5,
-        windowSeconds: 60,
-      },
-    );
+    const result = await limiter.consume("EXCHANGE_GLOBAL", HASH, {
+      limit: 5,
+      windowSeconds: 60,
+    });
 
     expect(result).toEqual({
       allowed: true,
@@ -66,14 +61,10 @@ describe("FixedWindowBuyerAccessRateLimiter", () => {
       new FixedClock(new Date("2026-09-13T16:00:05.250Z")),
     );
 
-    const result = await limiter.consume(
-      "EXCHANGE_GLOBAL",
-      HASH,
-      {
-        limit: 5,
-        windowSeconds: 60,
-      },
-    );
+    const result = await limiter.consume("EXCHANGE_GLOBAL", HASH, {
+      limit: 5,
+      windowSeconds: 60,
+    });
 
     expect(result.allowed).toBe(false);
     expect(result.remaining).toBe(0);
@@ -82,22 +73,14 @@ describe("FixedWindowBuyerAccessRateLimiter", () => {
 
   it("passes the exact fixed-window start and observation time to persistence", async () => {
     const repository = new StubRepository(1);
-    const observedAt =
-      new Date("2026-09-13T16:01:59.999Z");
+    const observedAt = new Date("2026-09-13T16:01:59.999Z");
 
-    const limiter = new FixedWindowBuyerAccessRateLimiter(
-      repository,
-      new FixedClock(observedAt),
-    );
+    const limiter = new FixedWindowBuyerAccessRateLimiter(repository, new FixedClock(observedAt));
 
-    await limiter.consume(
-      "LIBRARY_CREDENTIAL",
-      HASH,
-      {
-        limit: 10,
-        windowSeconds: 60,
-      },
-    );
+    await limiter.consume("LIBRARY_CREDENTIAL", HASH, {
+      limit: 10,
+      windowSeconds: 60,
+    });
 
     expect(repository.inputs).toHaveLength(1);
 
@@ -118,14 +101,10 @@ describe("FixedWindowBuyerAccessRateLimiter", () => {
       new FixedClock(new Date("2026-09-13T16:00:59.999Z")),
     );
 
-    await first.consume(
-      "DOWNLOAD_CREDENTIAL",
-      HASH,
-      {
-        limit: 2,
-        windowSeconds: 60,
-      },
-    );
+    await first.consume("DOWNLOAD_CREDENTIAL", HASH, {
+      limit: 2,
+      windowSeconds: 60,
+    });
 
     const secondRepository = new StubRepository(1);
 
@@ -134,26 +113,14 @@ describe("FixedWindowBuyerAccessRateLimiter", () => {
       new FixedClock(new Date("2026-09-13T16:01:00.000Z")),
     );
 
-    await second.consume(
-      "DOWNLOAD_CREDENTIAL",
-      HASH,
-      {
-        limit: 2,
-        windowSeconds: 60,
-      },
-    );
+    await second.consume("DOWNLOAD_CREDENTIAL", HASH, {
+      limit: 2,
+      windowSeconds: 60,
+    });
 
-    expect(
-      firstRepository.inputs[0]?.windowStart,
-    ).toEqual(
-      new Date("2026-09-13T16:00:00.000Z"),
-    );
+    expect(firstRepository.inputs[0]?.windowStart).toEqual(new Date("2026-09-13T16:00:00.000Z"));
 
-    expect(
-      secondRepository.inputs[0]?.windowStart,
-    ).toEqual(
-      new Date("2026-09-13T16:01:00.000Z"),
-    );
+    expect(secondRepository.inputs[0]?.windowStart).toEqual(new Date("2026-09-13T16:01:00.000Z"));
   });
 
   it("rejects an unsupported runtime scope", async () => {
@@ -163,14 +130,10 @@ describe("FixedWindowBuyerAccessRateLimiter", () => {
     );
 
     await expect(
-      limiter.consume(
-        "INVALID" as never,
-        HASH,
-        {
-          limit: 1,
-          windowSeconds: 60,
-        },
-      ),
+      limiter.consume("INVALID" as never, HASH, {
+        limit: 1,
+        windowSeconds: 60,
+      }),
     ).rejects.toThrow("INVALID_RATE_LIMIT_SCOPE");
   });
 
@@ -181,14 +144,10 @@ describe("FixedWindowBuyerAccessRateLimiter", () => {
     );
 
     await expect(
-      limiter.consume(
-        "EXCHANGE_GLOBAL",
-        "raw-secret-must-not-be-a-bucket-key",
-        {
-          limit: 1,
-          windowSeconds: 60,
-        },
-      ),
+      limiter.consume("EXCHANGE_GLOBAL", "raw-secret-must-not-be-a-bucket-key", {
+        limit: 1,
+        windowSeconds: 60,
+      }),
     ).rejects.toThrow("INVALID_RATE_LIMIT_BUCKET");
   });
 
@@ -199,14 +158,10 @@ describe("FixedWindowBuyerAccessRateLimiter", () => {
     );
 
     await expect(
-      limiter.consume(
-        "EXCHANGE_GLOBAL",
-        HASH,
-        {
-          limit: 0,
-          windowSeconds: 60,
-        },
-      ),
+      limiter.consume("EXCHANGE_GLOBAL", HASH, {
+        limit: 0,
+        windowSeconds: 60,
+      }),
     ).rejects.toThrow("INVALID_RATE_LIMIT_POLICY");
   });
 
@@ -217,14 +172,10 @@ describe("FixedWindowBuyerAccessRateLimiter", () => {
     );
 
     await expect(
-      limiter.consume(
-        "EXCHANGE_GLOBAL",
-        HASH,
-        {
-          limit: 5,
-          windowSeconds: 0,
-        },
-      ),
+      limiter.consume("EXCHANGE_GLOBAL", HASH, {
+        limit: 5,
+        windowSeconds: 0,
+      }),
     ).rejects.toThrow("INVALID_RATE_LIMIT_POLICY");
   });
 });

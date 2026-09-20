@@ -66,17 +66,14 @@ export function createBuyerAccessLibraryHandler(dependencies: BuyerLibraryHandle
       );
     } catch (error) {
       if (error instanceof BuyerAccessRateLimitExceeded) {
-        p11Observability.warn(
-          "buyer_access_rate_limited",
-          {
-            correlationId,
-            surface: "BUYER_LIBRARY",
-            scope: "LIBRARY_CREDENTIAL",
-            outcome: "DENIED",
-            failureCode: "RATE_LIMIT_EXCEEDED",
-            retryAfterSeconds: error.retryAfterSeconds,
-          },
-        );
+        p11Observability.warn("buyer_access_rate_limited", {
+          correlationId,
+          surface: "BUYER_LIBRARY",
+          scope: "LIBRARY_CREDENTIAL",
+          outcome: "DENIED",
+          failureCode: "RATE_LIMIT_EXCEEDED",
+          retryAfterSeconds: error.retryAfterSeconds,
+        });
 
         return NextResponse.json(
           {
@@ -93,16 +90,13 @@ export function createBuyerAccessLibraryHandler(dependencies: BuyerLibraryHandle
       }
 
       if (error instanceof BuyerAccessRateLimitUnavailable) {
-        p11Observability.error(
-          "buyer_access_limiter_unavailable",
-          {
-            correlationId,
-            surface: "RATE_LIMIT",
-            scope: error.scope,
-            outcome: "FAILED",
-            failureCode: "RATE_LIMIT_UNAVAILABLE",
-          },
-        );
+        p11Observability.error("buyer_access_limiter_unavailable", {
+          correlationId,
+          surface: "RATE_LIMIT",
+          scope: error.scope,
+          outcome: "FAILED",
+          failureCode: "RATE_LIMIT_UNAVAILABLE",
+        });
 
         return NextResponse.json(
           {
@@ -119,18 +113,15 @@ export function createBuyerAccessLibraryHandler(dependencies: BuyerLibraryHandle
         error instanceof Error &&
         (error.message === "SESSION_INVALID" || error.message === "RESOURCE_NOT_AVAILABLE")
       ) {
-        p11Observability.warn(
-          "buyer_access_invalid",
-          {
-            correlationId,
-            surface: "BUYER_LIBRARY",
-            outcome: "DENIED",
-            failureCode:
-              error.message === "RESOURCE_NOT_AVAILABLE"
-                ? "RESOURCE_NOT_AVAILABLE"
-                : "SESSION_INVALID",
-          },
-        );
+        p11Observability.warn("buyer_access_invalid", {
+          correlationId,
+          surface: "BUYER_LIBRARY",
+          outcome: "DENIED",
+          failureCode:
+            error.message === "RESOURCE_NOT_AVAILABLE"
+              ? "RESOURCE_NOT_AVAILABLE"
+              : "SESSION_INVALID",
+        });
 
         return NextResponse.json(
           {

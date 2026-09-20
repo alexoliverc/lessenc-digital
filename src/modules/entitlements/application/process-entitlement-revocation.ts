@@ -12,30 +12,22 @@ export interface EntitlementRevocationRepository {
 export class ProcessEntitlementRevocation {
   constructor(private readonly repository: EntitlementRevocationRepository) {}
 
-  execute(
-    eventId: string,
-  ): Promise<EntitlementRevocationProcessResult> {
+  execute(eventId: string): Promise<EntitlementRevocationProcessResult> {
     if (!eventId.trim()) {
       throw new Error("INVALID_OUTBOX_EVENT_ID");
     }
 
-    const correlationId =
-      createP11CorrelationId();
+    const correlationId = createP11CorrelationId();
 
-    return this.repository
-      .processRefundCompleted(eventId)
-      .catch((error: unknown) => {
-        p11Observability.error(
-          "entitlement_revocation_failed",
-          {
-            correlationId,
-            surface: "ENTITLEMENT_REVOCATION",
-            outcome: "FAILED",
-            failureCode: "ENTITLEMENT_REVOCATION_FAILED",
-          },
-        );
-
-        throw error;
+    return this.repository.processRefundCompleted(eventId).catch((error: unknown) => {
+      p11Observability.error("entitlement_revocation_failed", {
+        correlationId,
+        surface: "ENTITLEMENT_REVOCATION",
+        outcome: "FAILED",
+        failureCode: "ENTITLEMENT_REVOCATION_FAILED",
       });
+
+      throw error;
+    });
   }
 }

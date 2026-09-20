@@ -1,4 +1,6 @@
 import { ProviderError } from "./payment-provider";
+import { createCorrelationId } from "../../../lib/observability/correlation";
+import { logger } from "../../../lib/observability/logger";
 import type {
   CreateProviderPayment,
   PaymentMethod,
@@ -112,7 +114,12 @@ export class FinancialCoordinator {
        * Analytics is a post-commit projection. Its failure
        * must never roll back or reinterpret financial truth.
        */
-      console.error("P13_CANONICAL_PURCHASE_PROJECTION_FAILED");
+      logger.error("canonical_purchase_projection_failed", {
+        correlationId: createCorrelationId(),
+        surface: "PAYMENTS",
+        outcome: "DEGRADED",
+        failureCode: "CANONICAL_PURCHASE_PROJECTION_FAILED",
+      });
     }
   }
 

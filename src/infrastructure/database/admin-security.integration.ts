@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { changeAdminRole } from "@/modules/administration/infrastructure/change-admin-role";
 import { resetAdminMfa } from "@/modules/administration/infrastructure/reset-admin-mfa";
 import { runCriticalAdminMutation } from "@/modules/administration/infrastructure/admin-audit";
+import { normalizeCorrelationId } from "@/lib/observability/correlation";
 import {
   resolveAdminSubject,
   type AdminSubject,
@@ -304,6 +305,11 @@ describe("P12 authoritative admin session and audit", () => {
         where: { actorAdminUserId: ownerId, action: "ADMIN_ROLE_CHANGED", outcome: "SUCCEEDED" },
       }),
     ).toBe(1);
+    const roleAudit = await db.adminAuditEvent.findFirstOrThrow({
+      where: { actorAdminUserId: ownerId, action: "ADMIN_ROLE_CHANGED", outcome: "SUCCEEDED" },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(normalizeCorrelationId(roleAudit.correlationId)).toBe(roleAudit.correlationId);
   });
 
   it("rolls a critical mutation back when mandatory audit persistence fails", async () => {
@@ -370,5 +376,10 @@ describe("P12 authoritative admin session and audit", () => {
         where: { actorAdminUserId: ownerId, action: "ADMIN_MFA_RESET", outcome: "SUCCEEDED" },
       }),
     ).toBe(1);
+    const mfaAudit = await db.adminAuditEvent.findFirstOrThrow({
+      where: { actorAdminUserId: ownerId, action: "ADMIN_MFA_RESET", outcome: "SUCCEEDED" },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(normalizeCorrelationId(mfaAudit.correlationId)).toBe(mfaAudit.correlationId);
   });
 });

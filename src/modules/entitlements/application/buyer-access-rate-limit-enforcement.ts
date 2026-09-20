@@ -60,13 +60,9 @@ export class BuyerAccessRateLimitExceeded extends Error {
 export class BuyerAccessRateLimitUnavailable extends Error {
   readonly scope: BuyerAccessRateLimitScope;
 
-  constructor(
-    scope: BuyerAccessRateLimitScope,
-    options: ErrorOptions,
-  ) {
+  constructor(scope: BuyerAccessRateLimitScope, options: ErrorOptions) {
     super(
-      options.cause instanceof Error &&
-        options.cause.message.trim()
+      options.cause instanceof Error && options.cause.message.trim()
         ? options.cause.message
         : "RATE_LIMIT_UNAVAILABLE",
       options,
@@ -105,24 +101,15 @@ async function enforce(
   let decision: BuyerAccessRateLimitDecision;
 
   try {
-    decision = await limiter.consume(
-      scope,
-      bucketHash,
-      policy,
-    );
+    decision = await limiter.consume(scope, bucketHash, policy);
   } catch (error) {
-    throw new BuyerAccessRateLimitUnavailable(
-      scope,
-      {
-        cause: error,
-      },
-    );
+    throw new BuyerAccessRateLimitUnavailable(scope, {
+      cause: error,
+    });
   }
 
   if (!decision.allowed) {
-    throw new BuyerAccessRateLimitExceeded(
-      decision.retryAfterSeconds,
-    );
+    throw new BuyerAccessRateLimitExceeded(decision.retryAfterSeconds);
   }
 }
 
@@ -147,9 +134,7 @@ export class RateLimitedBuyerAccessExchangeExecutor {
     private readonly hasher: BuyerAccessRateLimitKeyHasher,
   ) {}
 
-  async execute(
-    rawCredential: unknown,
-  ): Promise<Readonly<{ sessionToken: string }>> {
+  async execute(rawCredential: unknown): Promise<Readonly<{ sessionToken: string }>> {
     await enforce(
       this.limiter,
       this.hasher,
@@ -197,10 +182,7 @@ export class RateLimitedProtectedDownloadPreparer {
     private readonly hasher: BuyerAccessRateLimitKeyHasher,
   ) {}
 
-  async execute(
-    subject: BuyerSubject,
-    resourceId: unknown,
-  ): Promise<PreparedProtectedDelivery> {
+  async execute(subject: BuyerSubject, resourceId: unknown): Promise<PreparedProtectedDelivery> {
     await enforce(
       this.limiter,
       this.hasher,
@@ -209,9 +191,6 @@ export class RateLimitedProtectedDownloadPreparer {
       BUYER_ACCESS_RATE_LIMIT_POLICIES.DOWNLOAD_CREDENTIAL,
     );
 
-    return this.inner.execute(
-      subject,
-      resourceId,
-    );
+    return this.inner.execute(subject, resourceId);
   }
 }

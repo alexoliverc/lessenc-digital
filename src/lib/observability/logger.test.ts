@@ -1,10 +1,4 @@
-import {
-  afterEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { logger } from "./logger";
 
@@ -14,87 +8,90 @@ describe("structured logger security boundary", () => {
   });
 
   it("emits structured JSON with level, event, timestamp and safe context", () => {
-    const output = vi
-      .spyOn(console, "info")
-      .mockImplementation(() => undefined);
+    const output = vi.spyOn(console, "info").mockImplementation(() => undefined);
 
     logger.info("test_event", {
-      correlationId:
-        "11111111-1111-4111-8111-111111111111",
+      correlationId: "11111111-1111-4111-8111-111111111111",
       state: "READY",
     });
 
     expect(output).toHaveBeenCalledTimes(1);
 
-    const record = JSON.parse(
-      String(output.mock.calls[0]?.[0]),
-    ) as Record<string, unknown>;
+    const record = JSON.parse(String(output.mock.calls[0]?.[0])) as Record<string, unknown>;
 
     expect(record.level).toBe("info");
     expect(record.event).toBe("test_event");
-    expect(record.correlationId).toBe(
-      "11111111-1111-4111-8111-111111111111",
-    );
+    expect(record.schemaVersion).toBe(1);
+    expect(record.service).toBe("lessenc-digital");
+    expect(record.applicationEnvironment).toBe("test");
+    expect(record.correlationId).toBe("11111111-1111-4111-8111-111111111111");
     expect(record.state).toBe("READY");
-    expect(typeof record.timestamp).toBe(
-      "string",
-    );
+    expect(typeof record.timestamp).toBe("string");
+  });
+
+  it("protects reserved envelope fields from caller context", () => {
+    const output = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    logger.warn("reserved_fields_test", {
+      schemaVersion: 999,
+      timestamp: "attacker-time",
+      level: "info",
+      event: "forged_event",
+      service: "forged-service",
+      applicationEnvironment: "production",
+    });
+
+    const record = JSON.parse(String(output.mock.calls[0]?.[0])) as Record<string, unknown>;
+
+    expect(record.schemaVersion).toBe(1);
+    expect(record.timestamp).not.toBe("attacker-time");
+    expect(record.level).toBe("warn");
+    expect(record.event).toBe("reserved_fields_test");
+    expect(record.service).toBe("lessenc-digital");
+    expect(record.applicationEnvironment).toBe("test");
+  });
+
+  it("rejects free-form event names", () => {
+    expect(() => logger.info("unsafe event with spaces")).toThrow("INVALID_OBSERVABILITY_EVENT");
   });
 
   it("redacts sensitive keys recursively and case-insensitively", () => {
-    const output = vi
-      .spyOn(console, "warn")
-      .mockImplementation(() => undefined);
+    const output = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
     logger.warn("security_test", {
       Authorization: "Bearer raw-secret",
       nested: {
-        P11_BUYER_SESSION_SECRET:
-          "session-secret",
+        P11_BUYER_SESSION_SECRET: "session-secret",
         accessToken: "provider-token",
       },
     });
 
-    const record = JSON.parse(
-      String(output.mock.calls[0]?.[0]),
-    ) as Record<string, unknown>;
+    const record = JSON.parse(String(output.mock.calls[0]?.[0])) as Record<string, unknown>;
 
-    expect(record.Authorization).toBe(
-      "[REDACTED]",
-    );
+    expect(record.Authorization).toBe("[REDACTED]");
 
     expect(record.nested).toEqual({
-      P11_BUYER_SESSION_SECRET:
-        "[REDACTED]",
+      P11_BUYER_SESSION_SECRET: "[REDACTED]",
       accessToken: "[REDACTED]",
     });
   });
 
   it("redacts email fields", () => {
-    const output = vi
-      .spyOn(console, "info")
-      .mockImplementation(() => undefined);
+    const output = vi.spyOn(console, "info").mockImplementation(() => undefined);
 
     logger.info("privacy_test", {
       email: "buyer@example.test",
-      customerEmail:
-        "customer@example.test",
+      customerEmail: "customer@example.test",
     });
 
-    const record = JSON.parse(
-      String(output.mock.calls[0]?.[0]),
-    ) as Record<string, unknown>;
+    const record = JSON.parse(String(output.mock.calls[0]?.[0])) as Record<string, unknown>;
 
     expect(record.email).toBe("[REDACTED]");
-    expect(record.customerEmail).toBe(
-      "[REDACTED]",
-    );
+    expect(record.customerEmail).toBe("[REDACTED]");
   });
 
   it("redacts credential aliases, identifiers and nested array values", () => {
-    const output = vi
-      .spyOn(console, "info")
-      .mockImplementation(() => undefined);
+    const output = vi.spyOn(console, "info").mockImplementation(() => undefined);
 
     logger.info("sensitive_alias_test", {
       adminSessionId: "admin-session-fixture",
@@ -134,27 +131,17 @@ describe("structured logger security boundary", () => {
   });
 
   it("does not serialize arbitrary Error messages", () => {
-    const output = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
+    const output = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     logger.error("failure_test", {
-      error: new Error(
-        "DATABASE_URL=mysql://secret",
-      ),
+      error: new Error("DATABASE_URL=mysql://secret"),
     });
 
-    const serialized = String(
-      output.mock.calls[0]?.[0],
-    );
+    const serialized = String(output.mock.calls[0]?.[0]);
 
-    expect(serialized).not.toContain(
-      "mysql://secret",
-    );
+    expect(serialized).not.toContain("mysql://secret");
 
-    const record = JSON.parse(
-      serialized,
-    ) as Record<string, unknown>;
+    const record = JSON.parse(serialized) as Record<string, unknown>;
 
     expect(record.error).toEqual({
       name: "Error",
@@ -162,12 +149,9 @@ describe("structured logger security boundary", () => {
   });
 
   it("handles circular context without throwing", () => {
-    const output = vi
-      .spyOn(console, "info")
-      .mockImplementation(() => undefined);
+    const output = vi.spyOn(console, "info").mockImplementation(() => undefined);
 
-    const circular: Record<string, unknown> =
-      {};
+    const circular: Record<string, unknown> = {};
 
     circular.self = circular;
 
@@ -177,12 +161,8 @@ describe("structured logger security boundary", () => {
       }),
     ).not.toThrow();
 
-    const serialized = String(
-      output.mock.calls[0]?.[0],
-    );
+    const serialized = String(output.mock.calls[0]?.[0]);
 
-    expect(serialized).toContain(
-      "[CIRCULAR]",
-    );
+    expect(serialized).toContain("[CIRCULAR]");
   });
 });

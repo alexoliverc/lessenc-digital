@@ -44,34 +44,24 @@ export class RevokeBuyerAccessCredential {
     orderId: string,
     expectedCredentialId: string,
   ): Promise<RevokeBuyerAccessCredentialResult> {
-    const normalizedOrderId = requireUuid(
-      orderId,
-      "INVALID_BUYER_ACCESS_ORDER_ID",
-    );
+    const normalizedOrderId = requireUuid(orderId, "INVALID_BUYER_ACCESS_ORDER_ID");
 
     const normalizedCredentialId = requireUuid(
       expectedCredentialId,
       "INVALID_BUYER_ACCESS_CREDENTIAL_ID",
     );
 
-    const correlationId =
-      createP11CorrelationId();
+    const correlationId = createP11CorrelationId();
 
     try {
-      return await this.repository.revoke(
-        normalizedOrderId,
-        normalizedCredentialId,
-      );
+      return await this.repository.revoke(normalizedOrderId, normalizedCredentialId);
     } catch (error) {
-      p11Observability.error(
-        "credential_recovery_failed",
-        {
-          correlationId,
-          surface: "CREDENTIAL_RECOVERY",
-          outcome: "FAILED",
-          failureCode: "CREDENTIAL_REVOCATION_FAILED",
-        },
-      );
+      p11Observability.error("credential_recovery_failed", {
+        correlationId,
+        surface: "CREDENTIAL_RECOVERY",
+        outcome: "FAILED",
+        failureCode: "CREDENTIAL_REVOCATION_FAILED",
+      });
 
       throw error;
     }
@@ -95,19 +85,16 @@ export class ReissueBuyerAccessCredential {
       "INVALID_BUYER_ACCESS_CREDENTIAL_ID",
     );
 
-    const correlationId =
-      createP11CorrelationId();
+    const correlationId = createP11CorrelationId();
 
     try {
-      const material =
-        this.secretService.issue();
+      const material = this.secretService.issue();
 
-      const persisted =
-        await this.repository.reissue(
-          normalizedOrderId,
-          normalizedCredentialId,
-          material.secretHash,
-        );
+      const persisted = await this.repository.reissue(
+        normalizedOrderId,
+        normalizedCredentialId,
+        material.secretHash,
+      );
 
       return Object.freeze({
         credentialId: persisted.credentialId,
@@ -115,15 +102,12 @@ export class ReissueBuyerAccessCredential {
         rawCredential: material.rawCredential,
       });
     } catch (error) {
-      p11Observability.error(
-        "credential_recovery_failed",
-        {
-          correlationId,
-          surface: "CREDENTIAL_RECOVERY",
-          outcome: "FAILED",
-          failureCode: "CREDENTIAL_REISSUE_FAILED",
-        },
-      );
+      p11Observability.error("credential_recovery_failed", {
+        correlationId,
+        surface: "CREDENTIAL_RECOVERY",
+        outcome: "FAILED",
+        failureCode: "CREDENTIAL_REISSUE_FAILED",
+      });
 
       throw error;
     }

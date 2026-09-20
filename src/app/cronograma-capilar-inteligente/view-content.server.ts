@@ -19,6 +19,8 @@ import {
   parseAcquisitionObservedAt,
 } from "@/modules/attribution/application/acquisition-http-boundary";
 import type { AcquisitionJourneyRecord } from "@/modules/attribution/application/persistence";
+import { resolveRequestCorrelationId } from "@/lib/observability/correlation";
+import { logger } from "@/lib/observability/logger";
 
 import type { PublicSalesMeasurementContext } from "./public-sales.server";
 
@@ -35,6 +37,7 @@ export async function schedulePublicSalesViewContent(
    * Component render lifecycle, before after() runs.
    */
   const requestHeaders = await headers();
+  const correlationId = resolveRequestCorrelationId(requestHeaders);
 
   const eventId = normalizeMeasurementEventId(
     requestHeaders.get(VIEW_CONTENT_EVENT_REQUEST_HEADER),
@@ -80,7 +83,12 @@ export async function schedulePublicSalesViewContent(
        * No raw request data, identifiers, URLs,
        * referrers or customer data are logged.
        */
-      console.error("P13_VIEW_CONTENT_MEASUREMENT_FAILED");
+      logger.error("view_content_measurement_failed", {
+        correlationId,
+        surface: "PUBLIC_SITE",
+        outcome: "DEGRADED",
+        failureCode: "MEASUREMENT_FAILED",
+      });
     }
   });
 

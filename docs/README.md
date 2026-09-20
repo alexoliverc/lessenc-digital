@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P14
+# Índice oficial da baseline documental LES-DIG P00–P15
 
-**Estado:** P00–P14 implementadas. Gate A PASS. Gate B PASS / COMMERCE CORE READY. P11 está COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED. P12 está COMPLETE / PASS / DOCUMENTED / INTEGRATED. P13 está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P14 está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED através da PR #36, merge canônico `dfd4977a7c1db00314b613b5d695e166a62d614f` e checkpoint permanente `checkpoint/p14-security-hardening-complete`. P15 permanece NOT STARTED. Nenhum deploy foi executado.
+**Estado:** P00–P14 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / AWAITING GIT INTEGRATION. Gate C — OPERATIONS READY está PASS. P15 ainda não está integrada nem checkpointed. Nenhum deploy foi executado e P16 permanece NOT STARTED.
 
 ## Precedência e classificação das fontes
 
@@ -310,6 +310,17 @@ sensíveis, CI/supply chain, findings, hosted CI e limitações que continuam at
 A P14 está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. O checkpoint permanente
 `checkpoint/p14-security-hardening-complete` permanece fixo no merge técnico `dfd4977a7c1db00314b613b5d695e166a62d614f`
 e não deve ser movido por este closeout documental.
+
+## P15 — Observability & Operational Readiness — R1 CORRECTED CANDIDATE
+
+A [arquitetura P15](architecture/p15-observability-operational-readiness.md) consolida correlação,
+logging estruturado, liveness/readiness/health, métricas e spans locais provider-neutral, alertas,
+service health e projeção pública sanitizada. A [política de backup e recuperação](operations/p15-backup-recovery-policy.md),
+o [runbook de incidentes](operations/p15-incident-response-runbook.md) e o
+[dossiê do Gate C](operations/p15-final-gate.md) registram os contratos, evidências locais, riscos
+residuais e deferrals P16/P17. As correções R1 do audit PASS WITH FIXES estão implementadas; P15 e
+Gate C ainda dependem do ChatGPT re-review;
+push, PR, merge, checkpoint, deploy e P16 não foram executados.
 
 ## HISTORICAL / SUPERSEDED DOCUMENTS
 

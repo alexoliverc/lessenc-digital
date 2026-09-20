@@ -8,25 +8,41 @@ import {
   ACQUISITION_OBSERVED_AT_REQUEST_HEADER,
 } from "./modules/attribution/application/acquisition-http-boundary";
 import { config, proxy } from "./proxy";
+import {
+  CORRELATION_RESPONSE_HEADER,
+  INTERNAL_CORRELATION_REQUEST_HEADER,
+} from "./lib/observability/correlation";
 
 describe("P13-C Next.js acquisition proxy", () => {
-  it("is narrowly matched only to the public sales acquisition path", () => {
+  it("covers application requests while excluding static framework assets", () => {
     expect(config.matcher).toEqual([
       {
-        source: "/cronograma-capilar-inteligente",
-        missing: [
-          {
-            type: "header",
-            key: "next-router-prefetch",
-          },
-          {
-            type: "header",
-            key: "purpose",
-            value: "prefetch",
-          },
-        ],
+        source: "/((?!_next/static|_next/image|favicon.ico).*)",
       },
     ]);
+  });
+
+  it("replaces client correlation input with a server-generated request and response value", () => {
+    const response = proxy(
+      new NextRequest("https://lessenc.example/api/health", {
+        headers: {
+          [CORRELATION_RESPONSE_HEADER]: "11111111-1111-4111-8111-111111111111",
+          [INTERNAL_CORRELATION_REQUEST_HEADER]: "22222222-2222-4222-8222-222222222222",
+        },
+      }),
+    );
+
+    const correlationId = response.headers.get(CORRELATION_RESPONSE_HEADER);
+    const upstreamCorrelationId = response.headers.get(
+      `x-middleware-request-${INTERNAL_CORRELATION_REQUEST_HEADER}`,
+    );
+
+    expect(correlationId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu,
+    );
+    expect(upstreamCorrelationId).toBe(correlationId);
+    expect(correlationId).not.toBe("11111111-1111-4111-8111-111111111111");
+    expect(correlationId).not.toBe("22222222-2222-4222-8222-222222222222");
   });
 
   it("issues an HttpOnly first-party cookie for a new acquisition journey", () => {

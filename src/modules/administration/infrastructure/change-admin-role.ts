@@ -1,6 +1,5 @@
-import { randomUUID } from "node:crypto";
-
 import type { AdminRole, PrismaClient } from "@/generated/prisma/client";
+import { createCorrelationId } from "@/lib/observability/correlation";
 import { recordAdminDenial, runCriticalAdminMutation } from "./admin-audit";
 import { AdminAccessDenied, type AdminSubject } from "./admin-subject";
 
@@ -11,7 +10,7 @@ export async function changeAdminRole(input: {
   newRole: AdminRole;
   correlationId?: string;
 }): Promise<{ id: string; role: AdminRole }> {
-  const correlationId = input.correlationId ?? randomUUID();
+  const correlationId = input.correlationId ?? createCorrelationId();
   try {
     return await runCriticalAdminMutation({
       database: input.database,
