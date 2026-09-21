@@ -338,5 +338,27 @@ write, deletion, listing or bucket-management path exists.
 H3-C validation used synthetic SDK responses only. Real Cloudflare credentials, bucket access and
 provider network validation remain pending.
 
-Hosted readiness remains intentionally unchanged and fail-closed until H3-D implements the
-private `_health/p16-readiness` sentinel probe.
+At H3-C closeout, hosted readiness remained fail-closed pending the separate H3-D implementation
+recorded below.
+
+<!-- P16-H3-D-R2-PRIVATE-READINESS-SENTINEL -->
+
+### P16-H3-D — Private readiness sentinel procedure
+
+H3-D is implemented and synthetically validated. When `PRIVATE_STORAGE_DRIVER=hosted`, an
+authorized readiness request validates the complete hosted storage contract and performs one
+metadata-only `HeadObject` for the exact key `_health/p16-readiness`.
+
+Operational prerequisites still pending outside Git:
+
+- provision the private R2 bucket and bucket-scoped read-only runtime credential;
+- create the exact private sentinel object `_health/p16-readiness`;
+- keep public `r2.dev`, public custom domains and presigned delivery disabled;
+- configure the frozen hosted variables without printing or committing their values;
+- invoke `/api/readiness` only through the existing private bearer-authenticated path;
+- record real provider evidence without endpoint, account, bucket, key or credential disclosure.
+
+No sentinel content is downloaded. Any configuration, object, bucket, credential, network, TLS or
+provider failure must remain `not_ready` with the generic storage failure boundary. Do not use a
+successful public response as proof until the real Cloudflare provider check has been executed and
+recorded separately.

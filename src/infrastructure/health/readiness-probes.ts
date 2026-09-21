@@ -11,12 +11,26 @@ import {
   assertPrivateStorageRootIsPrivate,
   PrivateStorageRootPolicyError,
 } from "@/infrastructure/storage/private-storage-root-policy";
+import type { HostedPrivateStorageReadinessProbe } from "@/infrastructure/storage/hosted-private-storage-readiness";
 import { getHealthStatus } from "@/modules/health/health";
 import {
   evaluateReadiness,
   type ReadinessCheck,
   type ReadinessReport,
 } from "@/modules/health/readiness";
+
+type HostedPrivateStorageResolver = () => Promise<HostedPrivateStorageReadinessProbe>;
+
+export type ReadinessProbeDependencies = Readonly<{
+  resolveHostedPrivateStorage?: HostedPrivateStorageResolver;
+}>;
+
+async function resolveConfiguredHostedPrivateStorage(): Promise<HostedPrivateStorageReadinessProbe> {
+  const { createConfiguredHostedPrivateStorageReadinessProbe } =
+    await import("@/infrastructure/storage/hosted-private-storage-readiness");
+
+  return createConfiguredHostedPrivateStorageReadinessProbe();
+}
 
 function applicationCheck(): ReadinessCheck {
   try {
@@ -146,7 +160,10 @@ async function databaseCheck(correlationId: string): Promise<ReadinessCheck> {
   }
 }
 
-async function privateStorageCheck(): Promise<ReadinessCheck> {
+async function privateStorageCheck(
+  correlationId: string,
+  resolveHostedPrivateStorage: HostedPrivateStorageResolver,
+): Promise<ReadinessCheck> {
   const applicationEnvironment = process.env.APP_ENV;
   const driver = process.env.PRIVATE_STORAGE_DRIVER ?? "local-filesystem";
   if (
@@ -160,12 +177,26 @@ async function privateStorageCheck(): Promise<ReadinessCheck> {
     });
   }
   if (driver === "hosted") {
-    // Provider selection and its health adapter are an explicit external P16 dependency.
-    return Object.freeze({
-      name: "PRIVATE_STORAGE",
-      ready: false,
-      failureCode: "STORAGE_ROOT_UNAVAILABLE",
-    });
+    try {
+      const readinessProbe = await resolveHostedPrivateStorage();
+
+      await readinessProbe.check();
+
+      return Object.freeze({ name: "PRIVATE_STORAGE", ready: true });
+    } catch {
+      logger.error("readiness_private_storage_probe_failed", {
+        correlationId,
+        surface: "STORAGE",
+        outcome: "FAILED",
+        failureCode: "STORAGE_ROOT_UNAVAILABLE",
+      });
+
+      return Object.freeze({
+        name: "PRIVATE_STORAGE",
+        ready: false,
+        failureCode: "STORAGE_ROOT_UNAVAILABLE",
+      });
+    }
   }
 
   const root = process.env.PRIVATE_FILE_STORAGE_PATH;
@@ -204,10 +235,13 @@ async function privateStorageCheck(): Promise<ReadinessCheck> {
 
 export async function runReadinessProbe(
   correlationId: string = createCorrelationId(),
+  dependencies: ReadinessProbeDependencies = {},
 ): Promise<ReadinessReport> {
+  const resolveHostedPrivateStorage =
+    dependencies.resolveHostedPrivateStorage ?? resolveConfiguredHostedPrivateStorage;
   const [database, privateStorage] = await Promise.all([
     databaseCheck(correlationId),
-    privateStorageCheck(),
+    privateStorageCheck(correlationId, resolveHostedPrivateStorage),
   ]);
 
   return evaluateReadiness([applicationCheck(), database, privateStorage]);

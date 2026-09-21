@@ -2048,3 +2048,28 @@ No real Cloudflare R2 access has occurred.
 
 Hosted readiness remains outside H3-C and is deferred to H3-D using the frozen
 `_health/p16-readiness` sentinel.
+
+<!-- P16-H3-D-R2-PRIVATE-READINESS-SENTINEL -->
+
+## P16-H3-D — Private R2 readiness sentinel implemented
+
+Date: 2026-09-20
+
+Status: IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATION PENDING
+
+H3-D adds a dedicated infrastructure-only readiness probe with a single `check()` operation. For
+the frozen hosted configuration it issues metadata-only `HeadObject` against the exact private
+sentinel `_health/p16-readiness`. It has no `GetObject` or content-returning surface.
+
+The dedicated operational probe preserves the H3-C protected-delivery contract and buyer
+storage-key parser unchanged. Hosted configuration, absent sentinel, bucket, authentication,
+authorization, network/TLS and unexpected provider failures all fail closed as generic
+`STORAGE_ROOT_UNAVAILABLE`, without raw provider detail in public output or structured logs.
+
+Readiness authorization remains before database/storage execution. Local/test behavior remains
+intact, and local filesystem remains rejected as staging/production authority.
+
+Synthetic focused validation: 10 files and 88 tests PASS. The full quality gate passes with 97
+files and 854 tests, plus lint, typecheck, formatting, optimized staging build and a zero-finding
+production dependency audit. Real Cloudflare R2 access, real sentinel creation, hosted provider
+validation and deployment remain pending.

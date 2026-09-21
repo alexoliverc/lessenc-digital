@@ -28,7 +28,7 @@
 | P16-F03 runtime toolchain drift | REMEDIATED | hosted runtime observation |
 | P16-F04 staging migration guard missing | REMEDIATED | owner-authorized hosted execution |
 | P16-F05 hosted database validation | CODE READY | provider provisioning, TLS and migration proof |
-| P16-F06 hosted private-storage adapter | OWNER APPROVED / PROVIDER FROZEN / IMPLEMENTATION PENDING | Cloudflare R2 bucket, S3-compatible adapter, isolated read-only runtime credentials, sentinel and hosted proof |
+| P16-F06 hosted private-storage adapter | CODE READY / SYNTHETICALLY VALIDATED | Cloudflare R2 bucket, isolated read-only runtime credentials, real sentinel and hosted proof |
 | P16-F07 hosted readiness access control | REMEDIATED IN CODE | hosted HTTP proof |
 | P16-F08 hosted recovery implementation | PARTIAL / CODE READY | scheduler, encryption, off-site copy and restore drill |
 | P16-F09 hosted observability delivery | APPLICATION CONTRACT READY | external monitor, alert destination and status page |
@@ -249,9 +249,35 @@ Still pending:
 
 - real Cloudflare R2 provisioning and credential configuration;
 - private sentinel creation;
-- H3-D readiness integration;
+- real hosted readiness validation;
 - hosted provider verification;
 - staging deployment;
 - final P16 operational evidence.
 
 H3-C does not authorize a staging deploy by itself.
+
+<!-- P16-H3-D-R2-PRIVATE-READINESS-SENTINEL -->
+
+## P16-H3-D — Private readiness sentinel current state
+
+Status:
+
+`IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATION PENDING`
+
+Verified in code:
+
+- hosted readiness resolves a dedicated infrastructure metadata probe;
+- the probe has only `check()` and issues `HeadObject` for `_health/p16-readiness`;
+- no `GetObject`, content download, write, delete, list or bucket operation exists in the probe;
+- any configuration/provider/sentinel failure fails closed through
+  `STORAGE_ROOT_UNAVAILABLE`;
+- public readiness and structured logs disclose no provider-private detail;
+- readiness authentication still rejects before dependency probes;
+- local/test behavior remains available;
+- local filesystem remains forbidden as staging/production storage authority;
+- the H3-C buyer delivery contract and storage-key parser remain unchanged.
+
+Synthetic focused evidence: 88 tests passing across 10 files. Full quality evidence: 854 tests
+passing across 97 files, lint/typecheck/formatting/build passing and zero production dependency
+vulnerabilities. Real Cloudflare R2 access, sentinel creation and hosted validation remain pending.
+P16 remains incomplete and deployment is not authorized by H3-D.

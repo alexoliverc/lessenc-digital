@@ -971,9 +971,45 @@ No real Cloudflare R2 request was executed.
 
 ### Remaining boundary
 
-H3-C does not complete hosted readiness.
+At H3-C closeout, hosted readiness was not yet complete.
 
 `PRIVATE_STORAGE_HEALTHCHECK_KEY=_health/p16-readiness` remains reserved for H3-D.
 
-H3-D must implement and validate the private readiness sentinel independently before hosted
-storage can participate in the P16 readiness contract.
+The following H3-D gate implements and synthetically validates that independent sentinel path;
+real hosted validation is still required before it becomes operational evidence.
+
+<!-- P16-H3-D-R2-PRIVATE-READINESS-SENTINEL -->
+
+## P16-H3-D — R2 private readiness sentinel
+
+**Current status:** IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATION PENDING
+
+Hosted readiness now resolves a dedicated infrastructure-only metadata probe. The probe validates
+the frozen hosted configuration and issues exactly one `HeadObject` for
+`_health/p16-readiness`. Its interface exposes only `check()`; it has no content-returning method
+and cannot issue `GetObject`.
+
+This operational sentinel path is deliberately separate from the protected-delivery
+`PrivateResourceStorage` contract. The buyer resource-key parser and the H3-C `stat()` -> `open()`
+contract therefore remain unchanged and cannot treat the reserved `_health` namespace as buyer
+content.
+
+Any invalid hosted configuration, missing sentinel, unavailable bucket, authentication or
+authorization rejection, network/TLS failure, unexpected provider response or probe failure maps
+to the existing generic `PRIVATE_STORAGE` / `STORAGE_ROOT_UNAVAILABLE` readiness failure. Public
+readiness remains only `ready` or `not_ready`; endpoint, bucket, sentinel key, credentials,
+provider metadata and raw provider errors are not returned or logged.
+
+The existing authorization boundary is unchanged: an unauthorized `/api/readiness` request is
+rejected before database or storage probes execute. Local/test filesystem behavior is preserved,
+and local filesystem authority remains prohibited in staging and production.
+
+H3-D validation uses only synthetic SDK responses. Creation of the real private sentinel and
+validation against Cloudflare R2 remain pending operational evidence.
+
+Validated evidence at the H3-D pre-commit boundary:
+
+- focused readiness/storage/auth suite: 10 files and 88 tests passing;
+- full repository suite: 97 files and 854 tests passing;
+- lint, typecheck, formatting and optimized staging build passing;
+- production dependency audit reporting zero vulnerabilities.
