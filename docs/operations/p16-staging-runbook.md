@@ -284,3 +284,59 @@ Cloudflare R2 Standard is frozen for P16 hosted private storage.
 
 This is a documentation/architecture decision only. No provider resource, token, SDK dependency,
 sentinel object or staging connection is created by H3-B1.
+
+<!-- P16-H3-C-B-R2-ADAPTER-IMPLEMENTATION-FREEZE -->
+
+### P16-H3-C-B — Hosted adapter implementation contract
+
+The Cloudflare R2 delivery adapter remains server-only and backend-proxied.
+
+Implementation is frozen as:
+
+`PrivateResourceStorage -> S3CompatiblePrivateResourceStorage -> HeadObject/GetObject -> Cloudflare R2`
+
+The existing storage-key policy will be shared by the local and hosted adapters.
+
+The hosted runtime adapter is read-only. It performs no object upload, deletion, listing,
+bucket administration or presigned URL generation.
+
+GetObject remains streamed. Whole-object buffering is forbidden.
+
+HeadObject metadata is used only to produce the bounded application metadata and, when available,
+to bind the following GetObject with `IfMatch` for object-consistency hardening.
+
+Provider configuration remains lazy and is not evaluated merely by constructing the Buyer Access
+route.
+
+Readiness is not changed by H3-C and remains a separate H3-D gate.
+
+<!-- P16-H3-C-D2-R2-ADAPTER-IMPLEMENTATION-CLOSEOUT -->
+
+### P16-H3-C-D2 — Hosted R2 adapter implementation status
+
+H3-C is implemented and synthetically validated.
+
+Current runtime delivery path:
+
+`PrivateResourceStorage -> ConfiguredPrivateFileStorage -> S3CompatiblePrivateResourceStorage -> Cloudflare R2 S3 API`
+
+Implemented runtime operations are restricted to:
+
+- `HeadObject`;
+- `GetObject`.
+
+The hosted resolver remains lazy. Merely constructing the protected-download route does not
+parse the hosted storage credentials and does not issue an R2 request.
+
+The same adapter instance is reused for the protected-delivery `stat()` -> `open()` sequence.
+
+The shared logical storage-key validator is consumed by both Local and S3-compatible adapters.
+
+The hosted runtime remains read-only and backend-proxied. No presigned URL, public object URL,
+write, deletion, listing or bucket-management path exists.
+
+H3-C validation used synthetic SDK responses only. Real Cloudflare credentials, bucket access and
+provider network validation remain pending.
+
+Hosted readiness remains intentionally unchanged and fail-closed until H3-D implements the
+private `_health/p16-readiness` sentinel probe.

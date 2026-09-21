@@ -1964,3 +1964,87 @@ Approved environment names for subsequent implementation:
 H3-B1 creates no bucket, credentials, SDK dependency, sentinel, runtime connection or deployment.
 
 Next implementation gate: H3-B2 environment contract.
+
+<!-- P16-H3-C-B-R2-ADAPTER-IMPLEMENTATION-FREEZE -->
+
+## P16-H3-C-B — Hosted R2 adapter implementation freeze
+
+Date: 2026-09-20
+
+Status: DESIGN FROZEN / IMPLEMENTATION NOT STARTED
+
+H3-C-A confirmed the existing provider-neutral application boundary can be retained unchanged.
+
+Frozen implementation:
+
+- `PrivateResourceStorage` remains unchanged;
+- logical storage-key validation is extracted from `LocalPrivateFileStorage` into one shared
+  infrastructure policy used by Local and S3-compatible storage;
+- hosted adapter: `S3CompatiblePrivateResourceStorage`;
+- SDK: `@aws-sdk/client-s3`;
+- `stat()` -> `HeadObject`;
+- `open()` -> `GetObject`;
+- streamed output remains `AsyncIterable<Uint8Array>`;
+- no whole-resource buffering;
+- HeadObject ETag is used as GetObject `IfMatch` when available;
+- known object absence -> `RESOURCE_NOT_FOUND`;
+- provider/infrastructure/credential/network/bucket/conditional/unknown failures ->
+  `STORAGE_UNAVAILABLE`;
+- filesystem-specific root/escape error semantics are not synthesized by R2;
+- configured hosted resolution remains lazy and per protected-delivery request;
+- AWS/Cloudflare types do not cross the infrastructure boundary;
+- no writes, deletes, list operations, bucket administration, public URLs or presigned URLs;
+- H3-D owns hosted readiness integration.
+
+No SDK installation, code change, Cloudflare access or deployment is authorized by this freeze.
+
+<!-- P16-H3-C-D2-R2-ADAPTER-IMPLEMENTATION-CLOSEOUT -->
+
+## P16-H3-C — Hosted R2 adapter implemented
+
+Date: 2026-09-20
+
+Status: IMPLEMENTED / SYNTHETICALLY VALIDATED / PROVIDER ACCESS PENDING
+
+H3-C implementation is complete at the local runtime/code level.
+
+Implemented:
+
+- exact dependency `@aws-sdk/client-s3@3.1136.0`;
+- shared `private-storage-key.ts` policy;
+- Local adapter migrated to the shared key policy;
+- `S3CompatiblePrivateResourceStorage`;
+- `HeadObject` for `stat()`;
+- incremental `GetObject` for `open()`;
+- ETag -> `IfMatch` object-consistency hardening;
+- canonical error normalization;
+- lazy hosted resolution in `ConfiguredPrivateFileStorage`;
+- server-only endpoint, region, bucket and credentials;
+- reuse of one hosted adapter instance across `stat()` and `open()`.
+
+Security boundaries preserved:
+
+- `PrivateResourceStorage` application contract unchanged;
+- no AWS SDK types outside infrastructure/storage;
+- no public/private-resource URL exposure;
+- no presigned URLs;
+- no whole-resource buffering;
+- no Put/Delete/List/bucket-management operations;
+- local filesystem rejected as staging/production authority;
+- no raw provider exception detail exposed.
+
+Validation:
+
+- 49 focused H3-C storage tests PASS;
+- full quality gate PASS;
+- 96 test files PASS;
+- 841 tests PASS;
+- formatting PASS;
+- `npm audit --omit=dev --audit-level=high` reports zero vulnerabilities.
+
+H3-C validation used synthetic provider responses only.
+
+No real Cloudflare R2 access has occurred.
+
+Hosted readiness remains outside H3-C and is deferred to H3-D using the frozen
+`_health/p16-readiness` sentinel.

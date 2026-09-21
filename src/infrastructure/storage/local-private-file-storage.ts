@@ -9,10 +9,7 @@ import {
   type PrivateResourceMetadata,
   type PrivateResourceStorage,
 } from "../../modules/entitlements/application/private-resource-storage";
-
-const MAX_STORAGE_KEY_LENGTH = 512;
-
-const STORAGE_KEY_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]*$/u;
+import { parsePrivateStorageKey } from "./private-storage-key";
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error && "code" in error;
@@ -22,37 +19,6 @@ function isInsideRoot(root: string, candidate: string): boolean {
   const child = relative(root, candidate);
 
   return child.length > 0 && child !== ".." && !child.startsWith(`..${sep}`) && !isAbsolute(child);
-}
-
-function parseStorageKey(storageKey: unknown): readonly string[] {
-  if (
-    typeof storageKey !== "string" ||
-    storageKey.length === 0 ||
-    storageKey.length > MAX_STORAGE_KEY_LENGTH ||
-    storageKey.includes("\u0000") ||
-    storageKey.includes("\\") ||
-    storageKey.startsWith("/") ||
-    /^[A-Za-z]:/u.test(storageKey)
-  ) {
-    throw new PrivateResourceStorageError("INVALID_STORAGE_KEY");
-  }
-
-  const segments = storageKey.split("/");
-
-  if (
-    segments.length === 0 ||
-    segments.some(
-      (segment) =>
-        segment.length === 0 ||
-        segment === "." ||
-        segment === ".." ||
-        !STORAGE_KEY_SEGMENT.test(segment),
-    )
-  ) {
-    throw new PrivateResourceStorageError("INVALID_STORAGE_KEY");
-  }
-
-  return Object.freeze([...segments]);
 }
 
 export class LocalPrivateFileStorage implements PrivateResourceStorage {
@@ -75,7 +41,7 @@ export class LocalPrivateFileStorage implements PrivateResourceStorage {
   }
 
   private async resolveResourcePath(storageKey: string): Promise<string> {
-    const segments = parseStorageKey(storageKey);
+    const { segments } = parsePrivateStorageKey(storageKey);
 
     const root = await this.canonicalRoot();
 

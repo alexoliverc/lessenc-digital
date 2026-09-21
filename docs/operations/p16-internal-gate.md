@@ -182,3 +182,76 @@ Adapter implementation, environment schema, SDK installation, external bucket/to
 sentinel creation and hosted proof are still pending.
 
 P16 remains incomplete and application deployment remains NOT EXECUTED.
+
+<!-- P16-H3-C-B-R2-ADAPTER-IMPLEMENTATION-FREEZE -->
+
+## P16-H3-C-B — R2 adapter implementation freeze
+
+Status:
+
+`DESIGN FROZEN / IMPLEMENTATION NOT STARTED`
+
+Frozen H3-C acceptance boundary:
+
+- `PrivateResourceStorage` application contract unchanged;
+- shared logical storage-key validation;
+- `HeadObject` implements `stat()`;
+- `GetObject` implements `open()`;
+- AWS SDK types stay inside infrastructure;
+- streamed body remains `AsyncIterable<Uint8Array>`;
+- no whole-object buffering;
+- ETag/IfMatch protects the HeadObject -> GetObject transition when ETag is available;
+- known missing object -> `RESOURCE_NOT_FOUND`;
+- infrastructure/provider failures -> `STORAGE_UNAVAILABLE`;
+- hosted resolution remains lazy;
+- local filesystem remains prohibited in hosted authority;
+- no Put/Delete/List/bucket administration;
+- no presigned or public object delivery;
+- H3-C does not make hosted readiness READY.
+
+SDK installation, code implementation and synthetic adapter tests remain pending.
+Cloudflare credentials and real provider access remain pending.
+
+<!-- P16-H3-C-D2-R2-ADAPTER-IMPLEMENTATION-CLOSEOUT -->
+
+## P16-H3-C — Hosted private-resource adapter current state
+
+Status:
+
+`IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATION PENDING`
+
+Verified:
+
+- `@aws-sdk/client-s3@3.1136.0` installed exactly;
+- shared provider-independent storage-key validation implemented;
+- local adapter consumes shared storage-key validation;
+- `S3CompatiblePrivateResourceStorage` implemented;
+- `HeadObject` implements `stat()`;
+- `GetObject` implements incremental `open()`;
+- ETag -> `IfMatch` consistency guard implemented;
+- missing object normalization implemented;
+- provider/infrastructure failure normalization implemented;
+- raw provider failure detail remains private;
+- configured hosted resolver implemented;
+- hosted resolution remains lazy;
+- adapter reused across `stat()` -> `open()`;
+- local filesystem remains forbidden as staging/production authority;
+- AWS/S3 types remain inside infrastructure;
+- application `PrivateResourceStorage` contract unchanged;
+- no write/delete/list/bucket administration;
+- no public or presigned object delivery;
+- no whole-object buffering;
+- focused H3-C tests: 49 passing;
+- full repository tests: 841 passing across 96 files;
+- dependency audit: zero vulnerabilities.
+
+Still pending:
+
+- real Cloudflare R2 provisioning and credential configuration;
+- private sentinel creation;
+- H3-D readiness integration;
+- hosted provider verification;
+- staging deployment;
+- final P16 operational evidence.
+
+H3-C does not authorize a staging deploy by itself.

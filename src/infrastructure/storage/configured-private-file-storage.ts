@@ -1,6 +1,12 @@
 import "server-only";
 
-import { getP11PrivateStorageEnv, getP16PrivateStorageDriverEnv } from "../../lib/config/env";
+import { S3Client } from "@aws-sdk/client-s3";
+
+import {
+  getP11PrivateStorageEnv,
+  getP16HostedPrivateStorageEnv,
+  getP16PrivateStorageDriverEnv,
+} from "../../lib/config/env";
 import {
   PrivateResourceStorageError,
   type PrivateResourceBody,
@@ -12,22 +18,24 @@ import {
   assertPrivateStorageRootIsPrivate,
   PrivateStorageRootPolicyError,
 } from "./private-storage-root-policy";
+import { S3CompatiblePrivateResourceStorage } from "./s3-compatible-private-resource-storage";
 
 /*
- * Configuration and filesystem resolution are intentionally lazy.
+ * Configuration and physical storage resolution are intentionally lazy.
  *
- * Constructing the HTTP route must not touch the private filesystem
- * or disclose storage configuration state before Buyer Access
- * authentication / authorization reaches the delivery boundary.
+ * Constructing the HTTP route must not parse hosted credentials,
+ * touch the local filesystem or issue provider requests before
+ * Buyer Access authentication / authorization reaches the delivery
+ * boundary.
  *
- * A new adapter is created per request. Once successfully resolved
- * inside that request, the same LocalPrivateFileStorage instance is
- * reused for stat() and open().
+ * A new resolver is created per protected-delivery request. Once the
+ * concrete adapter has been resolved, that same adapter is reused for
+ * stat() and open().
  */
 export class ConfiguredPrivateFileStorage implements PrivateResourceStorage {
-  private resolvedStorage: LocalPrivateFileStorage | null = null;
+  private resolvedStorage: PrivateResourceStorage | null = null;
 
-  private resolveStorage(): LocalPrivateFileStorage {
+  private resolveStorage(): PrivateResourceStorage {
     if (this.resolvedStorage !== null) {
       return this.resolvedStorage;
     }
@@ -37,12 +45,32 @@ export class ConfiguredPrivateFileStorage implements PrivateResourceStorage {
       const applicationEnvironment = process.env.APP_ENV;
 
       if (driver === "hosted") {
-        // A concrete provider adapter requires an explicit owner/provider decision.
-        throw new PrivateResourceStorageError("STORAGE_UNAVAILABLE");
+        const hosted = getP16HostedPrivateStorageEnv();
+
+        const client = new S3Client({
+          endpoint: hosted.PRIVATE_STORAGE_S3_ENDPOINT,
+          region: hosted.PRIVATE_STORAGE_S3_REGION,
+          credentials: {
+            accessKeyId: hosted.PRIVATE_STORAGE_S3_ACCESS_KEY_ID,
+            secretAccessKey: hosted.PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY,
+          },
+        });
+
+        const storage = new S3CompatiblePrivateResourceStorage({
+          client,
+          bucket: hosted.PRIVATE_STORAGE_S3_BUCKET,
+        });
+
+        this.resolvedStorage = storage;
+
+        return storage;
       }
 
       if (applicationEnvironment === "staging" || applicationEnvironment === "production") {
-        // Never promote the workstation filesystem adapter to hosted authority.
+        /*
+         * Hosted environments must never fall back to workstation or
+         * host-local filesystem authority.
+         */
         throw new PrivateResourceStorageError("STORAGE_UNAVAILABLE");
       }
 
@@ -71,6 +99,10 @@ export class ConfiguredPrivateFileStorage implements PrivateResourceStorage {
         throw new PrivateResourceStorageError("STORAGE_ROOT_INVALID");
       }
 
+      /*
+       * Hosted configuration/provider-construction details must never
+       * escape this infrastructure boundary.
+       */
       throw new PrivateResourceStorageError("STORAGE_UNAVAILABLE");
     }
   }
@@ -88,7 +120,9 @@ export function createConfiguredPrivateFileStorage(): PrivateResourceStorage {
   /*
    * IMPORTANT:
    * this function must remain side-effect free regarding storage.
-   * No env parsing, realpath, stat, open, or filesystem access here.
+   *
+   * No environment parsing, S3 request, filesystem realpath/stat/open
+   * or provider network access is permitted here.
    */
   return new ConfiguredPrivateFileStorage();
 }

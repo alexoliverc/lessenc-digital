@@ -621,3 +621,359 @@ This freeze does not:
 - deploy the application.
 
 Those actions belong to subsequent H3 gates.
+
+<!-- P16-H3-C-B-R2-ADAPTER-IMPLEMENTATION-FREEZE -->
+
+## P16-H3-C-B — R2 / S3-compatible adapter implementation freeze
+
+**Status:** IMPLEMENTATION DESIGN FROZEN / SDK NOT INSTALLED / PROVIDER NOT ACCESSED
+
+H3-C-A confirmed that the existing application boundary is already suitable for hosted
+object storage:
+
+`PrivateResourceStorage`
+
+The contract remains unchanged:
+
+- `stat(storageKey)` returns `PrivateResourceMetadata`;
+- `open(storageKey)` returns `AsyncIterable<Uint8Array>`.
+
+No AWS SDK, Cloudflare or Node stream type may cross into the application/domain contract.
+
+### Planned infrastructure files
+
+H3-C implementation is frozen around these responsibilities:
+
+`src/infrastructure/storage/private-storage-key.ts`
+
+Canonical provider-independent validation of the logical `storageKey`. The exact safety policy
+currently embedded in `LocalPrivateFileStorage` will be extracted without weakening it. Both the
+local filesystem adapter and the S3-compatible adapter must consume the same parser.
+
+`src/infrastructure/storage/s3-compatible-private-resource-storage.ts`
+
+Implementation of `PrivateResourceStorage` over an injected S3-compatible `S3Client`.
+
+`src/infrastructure/storage/s3-compatible-private-resource-storage.test.ts`
+
+Network-free unit contract for HeadObject/GetObject, error normalization, key validation,
+streaming and object-consistency behavior.
+
+`src/infrastructure/storage/configured-private-file-storage.ts`
+
+Remains the lazy application-facing resolver. It will resolve the hosted driver only when
+`stat()` or `open()` is reached after the existing Buyer Access authorization boundary.
+
+### Cloudflare R2 client construction
+
+The hosted path will construct an AWS SDK v3 `S3Client` with only:
+
+- endpoint from `PRIVATE_STORAGE_S3_ENDPOINT`;
+- region from `PRIVATE_STORAGE_S3_REGION`, frozen as `auto`;
+- Access Key ID from the server-only hosted-storage configuration;
+- Secret Access Key from the server-only hosted-storage configuration.
+
+The implementation does not require public R2 URLs, `forcePathStyle`, region redirects,
+presigned-URL packages or browser credentials.
+
+### Shared storage-key policy
+
+The existing local adapter already rejects:
+
+- empty keys;
+- keys longer than 512 characters;
+- NUL bytes;
+- backslashes;
+- absolute paths;
+- Windows drive paths;
+- empty path segments;
+- `.` segments;
+- `..` segments;
+- characters outside the current bounded segment grammar.
+
+H3-C extracts this exact policy into one infrastructure helper. The policy must not be weakened
+during extraction.
+
+R2 receives only a key that has passed this canonical parser.
+
+### stat(storageKey)
+
+`stat()` maps to `HeadObject`.
+
+The adapter must:
+
+1. validate the storage key before any SDK call;
+2. send only `Bucket` and `Key`;
+3. require `ContentLength` to be a non-negative safe integer;
+4. return only `{ sizeBytes }` to the application;
+5. retain the returned ETag internally for the immediately related object access when available;
+6. never expose bucket, endpoint, ETag, provider metadata or storage key to the application.
+
+### open(storageKey)
+
+`open()` maps to `GetObject`.
+
+The adapter must:
+
+1. validate the storage key before any SDK call;
+2. send `Bucket` and `Key`;
+3. when a HeadObject ETag snapshot is available from the same adapter/request, send it through
+   `IfMatch`;
+4. fail closed if the object changed between metadata acquisition and GetObject;
+5. require a response body that can be consumed as an async iterable;
+6. expose only `AsyncIterable<Uint8Array>`;
+7. stream incrementally without `transformToByteArray()`, `arrayBuffer()`, full buffering or
+   whole-object concatenation.
+
+Buffers yielded by the Node.js SDK satisfy `Uint8Array`. Any unexpected streamed chunk shape
+fails closed.
+
+### Stream lifecycle
+
+The hosted body wrapper must preserve backpressure and must release the underlying iterator on
+consumer cancellation or completion whenever `return()` is available.
+
+Provider errors produced after HTTP delivery begins are normalized internally and continue
+through the existing `STREAM_FAILED` delivery-audit boundary. Raw R2/AWS error text must not be
+logged or sent to the buyer.
+
+### Object consistency
+
+The metadata/body transition is hardened against object replacement.
+
+When HeadObject provides an ETag, GetObject uses `IfMatch` with that ETag. A failed precondition
+or inconsistent provider result is treated as `STORAGE_UNAVAILABLE`.
+
+If both HeadObject and GetObject expose a content length, a disagreement also fails closed.
+
+This protection remains internal to the infrastructure adapter and does not change
+`PrivateResourceStorage`.
+
+### Error normalization
+
+Hosted object storage must map failures only into the existing canonical storage error model.
+
+`INVALID_STORAGE_KEY`:
+local validation rejected the logical object key before provider access.
+
+`RESOURCE_NOT_FOUND`:
+known object-missing responses such as S3 `NoSuchKey` / object `NotFound`.
+
+`STORAGE_UNAVAILABLE`:
+authentication failure, authorization failure, NoSuchBucket, signature failure, endpoint/DNS/TLS
+failure, timeout, network failure, 5xx, conditional-object mismatch, malformed metadata, missing
+body, unsupported body shape or any unknown provider failure.
+
+`RESOURCE_NOT_FILE`, `STORAGE_ESCAPE_DETECTED`, `STORAGE_ROOT_INVALID` and
+`STORAGE_ROOT_UNAVAILABLE` remain filesystem/root-specific semantics and are not synthesized by
+the R2 adapter.
+
+A generic HTTP 404 must not blindly become `RESOURCE_NOT_FOUND` when provider identity indicates
+a missing bucket or other infrastructure failure.
+
+### Configured storage resolution
+
+`ConfiguredPrivateFileStorage` changes its internal cached type from
+`LocalPrivateFileStorage | null` to `PrivateResourceStorage | null`.
+
+For `PRIVATE_STORAGE_DRIVER=hosted` it will:
+
+- parse `getP16HostedPrivateStorageEnv()` lazily;
+- require the frozen R2 contract;
+- construct the S3-compatible adapter;
+- cache that adapter for the request;
+- use the same adapter instance for `stat()` and `open()`.
+
+Local/test behavior remains unchanged.
+
+Local filesystem remains forbidden as staging or production authority.
+
+### Explicitly forbidden operations
+
+The runtime adapter must not call:
+
+- PutObject;
+- DeleteObject;
+- DeleteObjects;
+- CopyObject;
+- CreateBucket;
+- DeleteBucket;
+- ListBuckets;
+- ListObjects;
+- ListObjectsV2;
+- ACL operations;
+- presigned URL generation.
+
+The runtime surface is read-only and bounded to HeadObject and GetObject.
+
+### H3-C test freeze
+
+The implementation test suite must prove at minimum:
+
+- safe key -> HeadObject -> correct `sizeBytes`;
+- invalid key -> `INVALID_STORAGE_KEY` with zero SDK calls;
+- missing object on HeadObject -> `RESOURCE_NOT_FOUND`;
+- provider/auth/network/bucket errors -> `STORAGE_UNAVAILABLE`;
+- malformed or unsafe ContentLength -> `STORAGE_UNAVAILABLE`;
+- GetObject returns an incremental multi-chunk `AsyncIterable<Uint8Array>`;
+- open does not buffer the complete object;
+- missing GetObject body -> `STORAGE_UNAVAILABLE`;
+- missing object during GetObject -> `RESOURCE_NOT_FOUND`;
+- unexpected stream failure does not expose raw provider detail;
+- ETag from HeadObject becomes GetObject `IfMatch`;
+- precondition/object drift fails closed;
+- configured hosted storage remains lazy;
+- route construction still performs no storage/provider access;
+- local filesystem remains blocked in staging.
+
+H3-C does not change the readiness probe. Hosted readiness remains fail-closed until H3-D.
+
+<!-- P16-H3-C-D2-R2-ADAPTER-IMPLEMENTATION-CLOSEOUT -->
+
+## P16-H3-C-D2 — R2 / S3-compatible adapter implementation closeout
+
+**Current status:** IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER ACCESS PENDING
+
+The H3-C-B design freeze remains the historical design authority for this implementation.
+H3-C-C1, H3-C-C2 and H3-C-D1 subsequently implemented and reconciled that design.
+
+### Implemented dependency
+
+The hosted private-resource adapter now uses:
+
+`@aws-sdk/client-s3@3.1136.0`
+
+The exact dependency is recorded in both `package.json` and `package-lock.json`.
+
+No additional presigning, upload, bucket-administration or browser SDK package was introduced.
+
+### Implemented shared storage-key policy
+
+The provider-independent logical storage-key policy now lives in:
+
+`src/infrastructure/storage/private-storage-key.ts`
+
+`LocalPrivateFileStorage` and `S3CompatiblePrivateResourceStorage` both consume the same
+validation policy.
+
+The extraction preserved the established protections against:
+
+- empty or overlong keys;
+- NUL bytes;
+- backslashes;
+- absolute paths;
+- Windows drive paths;
+- empty segments;
+- `.` and `..` path traversal segments;
+- characters outside the bounded segment grammar.
+
+The application-facing `PrivateResourceStorage` contract was not changed.
+
+### Implemented S3-compatible adapter
+
+The following infrastructure adapter now exists:
+
+`src/infrastructure/storage/s3-compatible-private-resource-storage.ts`
+
+Implemented operations:
+
+- `stat(storageKey)` -> `HeadObject`;
+- `open(storageKey)` -> `GetObject`;
+- response body -> incremental `AsyncIterable<Uint8Array>`.
+
+The adapter does not perform complete-object buffering.
+
+When `HeadObject` supplies an ETag, the immediately related `GetObject` uses that value through
+`IfMatch`.
+
+The metadata snapshot is single-use and internal to the adapter.
+
+If both metadata operations expose content length and the values disagree, the adapter fails
+closed.
+
+### Implemented error normalization
+
+The hosted adapter normalizes known object absence to:
+
+`RESOURCE_NOT_FOUND`
+
+Known infrastructure/provider failures remain:
+
+`STORAGE_UNAVAILABLE`
+
+In particular:
+
+- `NoSuchKey` -> `RESOURCE_NOT_FOUND`;
+- `NoSuchBucket` -> `STORAGE_UNAVAILABLE`;
+- conditional/object-version mismatch -> `STORAGE_UNAVAILABLE`;
+- authentication, authorization, network, endpoint, malformed metadata/body and unknown provider
+  failures -> `STORAGE_UNAVAILABLE`.
+
+A bare unknown HTTP 404 is not automatically interpreted as a missing buyer resource.
+
+Raw provider exception text is not exposed through the storage error contract.
+
+### Implemented configured hosted resolution
+
+`ConfiguredPrivateFileStorage` now resolves the hosted driver lazily.
+
+For `PRIVATE_STORAGE_DRIVER=hosted` it:
+
+1. evaluates the validated P16 hosted-storage environment only when storage is first used;
+2. constructs the server-only `S3Client`;
+3. constructs `S3CompatiblePrivateResourceStorage`;
+4. caches that adapter;
+5. reuses the same adapter for `stat()` and `open()`.
+
+Creating `ConfiguredPrivateFileStorage` itself remains storage-side-effect free.
+
+The hosted S3 client uses only the validated server-side:
+
+- endpoint;
+- region;
+- bucket;
+- Access Key ID;
+- Secret Access Key.
+
+No R2/AWS type crosses into the application contract.
+
+### Preserved prohibitions
+
+The H3-C implementation contains no runtime:
+
+- PutObject;
+- DeleteObject;
+- DeleteObjects;
+- CopyObject;
+- ListObjects/ListObjectsV2;
+- bucket creation/deletion;
+- presigned URL generation;
+- public object delivery;
+- complete-resource buffering.
+
+Local filesystem authority remains rejected for staging and production.
+
+### Synthetic validation evidence
+
+H3-C-D1 reconciled the complete implementation with:
+
+- 49 focused storage tests passing;
+- 4 focused test files passing;
+- full quality gate passing;
+- 96 total test files passing;
+- 841 total tests passing;
+- formatting passing;
+- production dependency audit reporting zero vulnerabilities.
+
+All provider interactions in H3-C validation were synthetic/mocked.
+
+No real Cloudflare R2 request was executed.
+
+### Remaining boundary
+
+H3-C does not complete hosted readiness.
+
+`PRIVATE_STORAGE_HEALTHCHECK_KEY=_health/p16-readiness` remains reserved for H3-D.
+
+H3-D must implement and validate the private readiness sentinel independently before hosted
+storage can participate in the P16 readiness contract.
