@@ -1,7 +1,7 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** ARCHITECTURE FROZEN / INTERNAL REPOSITORY IMPLEMENTATION COMPLETE / HOSTED VALIDATION PENDING
+**Status:** ARCHITECTURE FROZEN / INTERNAL IMPLEMENTATION COMPLETE / REAL DB AND R2 VALIDATED / DEPLOYMENT PENDING
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
 **Current P16 working baseline:** `300a5db6755b238606f0aa91e05981b2af121acc`
 **Application hosting:** Hostinger Managed Node / Web App
@@ -219,7 +219,7 @@ That implementation is not accepted as the authoritative hosted digital-asset ar
 
 P16 must provide hosted private storage preserving authorization, private-by-default access, streaming, integrity and recoverability.
 
-The hosted storage provider for P16 is OWNER APPROVED and frozen as Cloudflare R2 Standard. The application contract remains provider-neutral and the concrete infrastructure adapter will use the S3-compatible API.
+The hosted storage provider for P16 is OWNER APPROVED and frozen as Cloudflare R2 Standard. The application contract remains provider-neutral and the concrete infrastructure adapter uses the S3-compatible API.
 
 ## 10. Health and readiness
 
@@ -382,9 +382,9 @@ Hostinger retains `DELETE HISTORY` and `SHOW CREATE ROUTINE` as provider-managed
 individually exposed by hPanel. H2-M1 reconciles those exact exceptions with continuous fail-closed
 readiness controls requiring zero system-versioned tables and zero stored routines.
 
-The database lifecycle portion of P16-F10 is therefore validated. Full application readiness remains
-pending because hosted private storage and the remaining P16 hosted operational dependencies are not
-yet complete.
+The database lifecycle portion of P16-F10 is therefore validated. Real private-storage provisioning
+and controlled local application/provider validation were subsequently completed in H3-E. Full
+deployed application readiness remains pending with the other P16 hosted operational dependencies.
 
 ### P16-F11 — Hosted APP_URL drift
 
@@ -392,19 +392,20 @@ The observed Hostinger value `https://staging.lessenc.com.br` conflicts with the
 value `https://lessenc.com.br`. The repository continues to fail closed on the canonical value;
 the Hostinger environment must be corrected externally.
 
-### P16-F06 — Cloudflare R2 provider frozen / hosted adapter pending
+### P16-F06 — Cloudflare R2 private storage validated locally
 
-`OWNER APPROVED / PROVIDER FROZEN / IMPLEMENTATION PENDING`.
+`OWNER APPROVED / IMPLEMENTED / REAL PROVIDER VALIDATED LOCALLY / DEPLOYMENT PENDING`.
 
 Cloudflare R2 Standard is the canonical hosted private-storage provider for P16.
 
 The provider-neutral application boundary remains `PrivateResourceStorage`. The infrastructure
-implementation will be `S3CompatiblePrivateResourceStorage` and will use the S3-compatible API
-through `@aws-sdk/client-s3`.
+implementation is `S3CompatiblePrivateResourceStorage` and uses the S3-compatible API through
+`@aws-sdk/client-s3`.
 
-Provider approval does not complete this finding. P16-F06 remains open until the adapter,
-environment contract, dedicated private staging bucket, bucket-scoped runtime credentials,
-readiness sentinel and hosted validation are complete.
+The adapter, environment contract, dedicated private staging bucket, bucket-scoped runtime
+credentials and readiness sentinel are complete. Direct real-provider validation and controlled
+local validation through the actual H3-C/H3-D application paths pass. Deployed/hosted HTTP proof
+remains pending; this evidence does not claim production validation.
 ### P16-F07 — Hosted readiness access control missing
 
 `REMEDIATED IN CODE`: server-only bearer authentication denies generic unauthorized requests before
@@ -832,7 +833,7 @@ H3-C does not change the readiness probe. Hosted readiness remains fail-closed u
 
 ## P16-H3-C-D2 — R2 / S3-compatible adapter implementation closeout
 
-**Current status:** IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER ACCESS PENDING
+**Current status:** IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATED LOCALLY
 
 The H3-C-B design freeze remains the historical design authority for this implementation.
 H3-C-C1, H3-C-C2 and H3-C-D1 subsequently implemented and reconciled that design.
@@ -965,9 +966,9 @@ H3-C-D1 reconciled the complete implementation with:
 - formatting passing;
 - production dependency audit reporting zero vulnerabilities.
 
-All provider interactions in H3-C validation were synthetic/mocked.
-
-No real Cloudflare R2 request was executed.
+All provider interactions in the original H3-C-D1 validation were synthetic/mocked. No real
+Cloudflare R2 request was executed in that gate. H3-E-C subsequently validated the same configured
+factory and adapter path against real R2 from a controlled local process.
 
 ### Remaining boundary
 
@@ -975,14 +976,15 @@ At H3-C closeout, hosted readiness was not yet complete.
 
 `PRIVATE_STORAGE_HEALTHCHECK_KEY=_health/p16-readiness` remains reserved for H3-D.
 
-The following H3-D gate implements and synthetically validates that independent sentinel path;
-real hosted validation is still required before it becomes operational evidence.
+The following H3-D gate implemented and synthetically validated that independent sentinel path.
+H3-E-C subsequently supplied bounded real-provider application evidence; deployed/hosted HTTP
+validation remains pending.
 
 <!-- P16-H3-D-R2-PRIVATE-READINESS-SENTINEL -->
 
 ## P16-H3-D — R2 private readiness sentinel
 
-**Current status:** IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATION PENDING
+**Current status:** IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATED LOCALLY
 
 Hosted readiness now resolves a dedicated infrastructure-only metadata probe. The probe validates
 the frozen hosted configuration and issues exactly one `HeadObject` for
@@ -1004,8 +1006,10 @@ The existing authorization boundary is unchanged: an unauthorized `/api/readines
 rejected before database or storage probes execute. Local/test filesystem behavior is preserved,
 and local filesystem authority remains prohibited in staging and production.
 
-H3-D validation uses only synthetic SDK responses. Creation of the real private sentinel and
-validation against Cloudflare R2 remain pending operational evidence.
+The original H3-D implementation gate used only synthetic SDK responses. Subsequent H3-E evidence
+created and verified the real private sentinel, exercised the production H3-D factory against R2
+from a controlled local process and validated the authenticated readiness composition. Deployment
+and deployed/hosted HTTP evidence remain pending.
 
 Validated evidence at the H3-D pre-commit boundary:
 
@@ -1013,3 +1017,67 @@ Validated evidence at the H3-D pre-commit boundary:
 - full repository suite: 97 files and 854 tests passing;
 - lint, typecheck, formatting and optimized staging build passing;
 - production dependency audit reporting zero vulnerabilities.
+
+<!-- P16-H3-E-REAL-R2-EVIDENCE-CLOSEOUT -->
+
+## P16-H3-E — Real R2 provisioning and application evidence
+
+**Current status:** H3-E-A COMPLETE / H3-E-B COMPLETE / H3-E-C COMPLETE / DEPLOYMENT PENDING
+
+H3-E-A was pre-provisioning only. It froze the intended bucket name
+`lessenc-digital-staging-private`, default jurisdiction, Automatic location, Standard storage
+class, privacy requirements, separate runtime/operational credential roles and the later
+provisioning/validation procedure. No real Cloudflare/R2 provider contact occurred during H3-E-A:
+it created no bucket or object, used no real credential and validated no provider access. The real
+bucket and object state were established and reconciled only by the subsequent H3-E-B sequence.
+The following three exposure facts are OWNER-CONFIRMED Cloudflare dashboard evidence, not
+independent API/provider proof: the resulting bucket is private, its public `r2.dev` URL is
+disabled and it has no custom domain.
+
+The first H3-E-B attempt failed closed at `SECURE_INPUT / FAIL`. Its remote state remained unknown,
+no state was inferred from absent evidence and provisioning was not repeated blindly.
+
+H3-E-B-R1 used only the runtime read-only identity and established that
+`validation/p16-h3e-readonly.txt` and `_health/p16-readiness` were `PRESENT_AND_EXACT`, yielding
+`REMOTE_STATE / FULLY_PROVISIONED` without write, delete, list or presigned-URL operations.
+H3-E-B-R2 then proved separate credential identities and authorization scopes: runtime real read
+passed, its conditional write was denied with `403 / AccessDenied`, and the operational identity's
+conditional write reached `412 / PreconditionFailed`. The false precondition prevented effective
+mutation, both objects remained exact and no delete, list or presigning occurred. The repository
+remained byte-identical during both reconciliations.
+
+The runtime identity is bucket-scoped `Object Read only`. The distinct, bucket-scoped operational
+identity has `Object Read & Write` and is not application runtime configuration. The application
+continues to expose only backend-proxied `HeadObject`/`GetObject`; it has no application
+`PutObject`, `DeleteObject`, `ListObjects` or presigning capability.
+
+H3-E-C passed real configuration through the canonical parser with `APP_ENV=staging`, hosted
+driver, `r2` provider, `auto` region and exact healthcheck key. The production H3-D factory issued
+real sentinel `HeadObject` without sentinel `GetObject` and made `PRIVATE_STORAGE` ready.
+`runReadinessProbe()` combined that real R2 result with a synthetically isolated database and
+returned global `READY`.
+
+The actual H3-C factory chain—`createConfiguredPrivateFileStorage()`,
+`ConfiguredPrivateFileStorage` and `S3CompatiblePrivateResourceStorage`—performed real
+controlled-object `HeadObject` through `stat()` and streaming `GetObject` through `open()`. The
+ETag/IfMatch consistency path and exact controlled body passed. The shared buyer-content key policy
+rejected `_health/p16-readiness`, keeping the readiness sentinel outside the buyer namespace.
+
+Authorized local in-process readiness returned `200 / {"status":"ready"}`. Unauthorized readiness
+returned `404 / {"status":"not_found"}` with zero provider calls, proving authentication precedes
+provider access. Public output remained sanitized, a synthetic provider failure projected only
+`not_ready`, and the captured credential-output leakage check passed.
+
+H3-E-C made exactly three real sentinel `HeadObject` calls—direct H3-D probe, readiness composition
+and authorized HTTP readiness—one controlled-object `HeadObject` for H3-C `stat()` and one
+controlled-object streaming `GetObject` for H3-C `open()`. It made no write, delete, list,
+presigned-URL or sentinel-body-read operation.
+
+`_health/p16-readiness` intentionally exists as a zero-byte operational sentinel.
+`validation/p16-h3e-readonly.txt` intentionally exists as controlled staging validation
+infrastructure. Neither is buyer/product content.
+
+Evidence levels are not interchangeable: pre-existing H3-C/H3-D suites are synthetic; H3-E-B is
+direct real-provider validation; H3-E-C is real application-level provider validation and local
+in-process HTTP validation. Deployed/hosted HTTP and production are not validated. No application
+deployment has been executed, so P16 remains incomplete.

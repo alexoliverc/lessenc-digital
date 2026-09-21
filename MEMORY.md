@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 20/09/2026
+**Última atualização:** 21/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. A implementação interna de repositório da P16 está concluída; nenhum deploy foi executado e toda validação hosted/externa permanece pendente.
-**Estado atual:** P16 — Staging Deployment possui arquitetura congelada e implementação interna concluída a partir de `11c4a18e4c2b479ebd8155f8a5397e8820e49513`. O repositório prepara configuração staging fail-closed, guard de `prisma migrate deploy`, fronteira explícita de storage hosted, readiness autenticado, smoke hosted, Mercado Pago TEST e retenção/recuperação. Provedor de storage, infraestrutura/credenciais, deploy e provas hosted continuam pendentes. P16 não está COMPLETE.
+**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. A implementação interna de repositório da P16 está concluída. O banco hosted e o R2 privado possuem evidência real delimitada, mas nenhum deploy da aplicação foi executado e a validação HTTP deployed/hosted permanece pendente.
+**Estado atual:** P16 — Staging Deployment possui arquitetura congelada e implementação interna concluída a partir de `11c4a18e4c2b479ebd8155f8a5397e8820e49513`. O repositório prepara configuração staging fail-closed, guard de `prisma migrate deploy`, fronteira explícita de storage hosted, readiness autenticado, smoke hosted, Mercado Pago TEST e retenção/recuperação. O R2 privado de staging foi provisionado e validado diretamente e pelos caminhos reais H3-C/H3-D da aplicação em execução local controlada. Deploy, HTTP deployed/hosted e as demais provas operacionais externas continuam pendentes. P16 não está COMPLETE.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -2004,7 +2004,7 @@ No SDK installation, code change, Cloudflare access or deployment is authorized 
 
 Date: 2026-09-20
 
-Status: IMPLEMENTED / SYNTHETICALLY VALIDATED / PROVIDER ACCESS PENDING
+Status: IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATED LOCALLY
 
 H3-C implementation is complete at the local runtime/code level.
 
@@ -2042,12 +2042,13 @@ Validation:
 - formatting PASS;
 - `npm audit --omit=dev --audit-level=high` reports zero vulnerabilities.
 
-H3-C validation used synthetic provider responses only.
+The original H3-C validation used synthetic provider responses only and made no real Cloudflare R2
+request. H3-E-C subsequently validated the same configured factory and adapter path against real R2
+from a controlled local process.
 
-No real Cloudflare R2 access has occurred.
-
-Hosted readiness remains outside H3-C and is deferred to H3-D using the frozen
-`_health/p16-readiness` sentinel.
+At H3-C closeout, hosted readiness remained outside H3-C and was deferred to H3-D using the frozen
+`_health/p16-readiness` sentinel. H3-D was later implemented and H3-E-C supplied its bounded real
+application/provider evidence.
 
 <!-- P16-H3-D-R2-PRIVATE-READINESS-SENTINEL -->
 
@@ -2055,7 +2056,7 @@ Hosted readiness remains outside H3-C and is deferred to H3-D using the frozen
 
 Date: 2026-09-20
 
-Status: IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATION PENDING
+Status: IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATED LOCALLY
 
 H3-D adds a dedicated infrastructure-only readiness probe with a single `check()` operation. For
 the frozen hosted configuration it issues metadata-only `HeadObject` against the exact private
@@ -2071,5 +2072,74 @@ intact, and local filesystem remains rejected as staging/production authority.
 
 Synthetic focused validation: 10 files and 88 tests PASS. The full quality gate passes with 97
 files and 854 tests, plus lint, typecheck, formatting, optimized staging build and a zero-finding
-production dependency audit. Real Cloudflare R2 access, real sentinel creation, hosted provider
-validation and deployment remain pending.
+production dependency audit. Subsequent H3-E evidence validated the production H3-D factory and
+the real private sentinel against R2 from a controlled local process. Application deployment and
+deployed/hosted HTTP validation remain pending.
+
+<!-- P16-H3-E-REAL-R2-EVIDENCE-CLOSEOUT -->
+
+## P16-H3-E — Real Cloudflare R2 evidence closeout
+
+Date: 2026-09-21
+
+Status: H3-E-A COMPLETE / H3-E-B COMPLETE / H3-E-C COMPLETE / DEPLOYMENT PENDING
+
+H3-E-A passed only the pre-provisioning gate. It froze the intended staging bucket name
+`lessenc-digital-staging-private`, default jurisdiction, Automatic location, Standard storage
+class, privacy requirements, separate runtime/operational credential roles and the later
+provisioning/validation procedure. No real Cloudflare/R2 provider contact occurred during H3-E-A:
+it created no bucket or object, used no real credential and validated no provider access. The real
+bucket and object state were established and reconciled only in the subsequent H3-E-B sequence.
+The following three exposure facts are OWNER-CONFIRMED Cloudflare dashboard evidence, not
+independent API/provider proof: the resulting bucket is private, its public `r2.dev` URL is
+disabled and it has no custom domain.
+
+The initial H3-E-B operational attempt failed closed at `SECURE_INPUT / FAIL`. Remote state was
+treated as unknown, provisioning was not repeated blindly and no provider state was inferred from
+missing evidence.
+
+H3-E-B-R1 reconciled the provider with the runtime read-only credential only; the operational
+credential was not requested. Both `validation/p16-h3e-readonly.txt` and
+`_health/p16-readiness` were `PRESENT_AND_EXACT`, establishing `REMOTE_STATE / FULLY_PROVISIONED`
+without write, delete, list or presigned-URL operations. The repository remained byte-identical.
+
+H3-E-B-R2 proved that runtime and operational credential identities are distinct. Real runtime
+read access passed; a runtime conditional write attempt was rejected with `403 / AccessDenied`,
+while the separately supplied operational credential reached `412 / PreconditionFailed` on the
+same conditional-write barrier. The false precondition prevented effective mutation. Both objects
+remained exact; no delete, list or presigned-URL operation occurred, and the repository remained
+byte-identical. The runtime credential is bucket-scoped `Object Read only`; the separate,
+bucket-scoped operational identity has `Object Read & Write` and is not configured at runtime.
+
+H3-E-C supplied real R2 configuration to the canonical parser with `APP_ENV=staging`, hosted
+driver, `r2` provider, `auto` region and the exact healthcheck key. The production H3-D factory
+verified `_health/p16-readiness` using real `HeadObject`, without `GetObject` on the sentinel, and
+reported `PRIVATE_STORAGE` ready. `runReadinessProbe()` combined a synthetically isolated database
+with real R2 and returned global `READY`.
+
+The real H3-C application path used `createConfiguredPrivateFileStorage()`,
+`ConfiguredPrivateFileStorage` and `S3CompatiblePrivateResourceStorage`: `stat()` performed real
+`HeadObject`, `open()` performed streaming real `GetObject`, the ETag/IfMatch consistency path
+succeeded and the controlled body was exact. The buyer-content key policy rejected
+`_health/p16-readiness`, preserving separation between the operational sentinel and buyer content.
+
+Local in-process readiness returned `200 / {"status":"ready"}` when authorized and
+`404 / {"status":"not_found"}` when unauthorized. The unauthorized path made zero provider calls,
+proving authentication precedes provider access. Public output remained sanitized; a synthetic
+provider failure projected only `not_ready`, and the captured credential-output leakage check
+passed.
+
+Exact real H3-E-C provider operations were three sentinel `HeadObject` calls—direct H3-D probe,
+readiness composition and authorized HTTP readiness—plus one controlled-object `HeadObject` for
+H3-C `stat()` and one controlled-object streaming `GetObject` for H3-C `open()`. There was no
+write, delete, list, presigned URL or sentinel-body read.
+
+The two intentional staging objects are `_health/p16-readiness`, a zero-byte operational sentinel,
+and `validation/p16-h3e-readonly.txt`, a controlled validation object. Neither is buyer/product
+content. Application runtime capability remains backend-proxied and limited to `HeadObject` and
+`GetObject`; it has no `PutObject`, `DeleteObject`, `ListObjects` or presigning capability.
+
+Evidence boundaries remain explicit: earlier H3-C/H3-D tests are synthetic; H3-E-B is direct real
+provider validation; H3-E-C is real application-level provider validation plus local in-process
+HTTP validation. Deployed/hosted HTTP and production remain unvalidated. Application deployment
+has not been executed, and P16 remains incomplete.

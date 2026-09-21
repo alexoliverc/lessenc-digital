@@ -2,7 +2,7 @@
 
 **Phase:** P16 — Staging Deployment
 
-**Status:** P16 INTERNAL REPOSITORY IMPLEMENTATION COMPLETE / HOSTED AND EXTERNAL VALIDATION PENDING
+**Status:** P16 INTERNAL IMPLEMENTATION COMPLETE / REAL DB AND R2 VALIDATED / DEPLOYED AND EXTERNAL OPERATIONS PENDING
 
 **Starting baseline:** `11c4a18e4c2b479ebd8155f8a5397e8820e49513`
 
@@ -28,7 +28,7 @@
 | P16-F03 runtime toolchain drift | REMEDIATED | hosted runtime observation |
 | P16-F04 staging migration guard missing | REMEDIATED | owner-authorized hosted execution |
 | P16-F05 hosted database validation | CODE READY | provider provisioning, TLS and migration proof |
-| P16-F06 hosted private-storage adapter | CODE READY / SYNTHETICALLY VALIDATED | Cloudflare R2 bucket, isolated read-only runtime credentials, real sentinel and hosted proof |
+| P16-F06 hosted private-storage adapter | REAL PROVIDER + APPLICATION VALIDATED LOCALLY | deployed/hosted HTTP proof |
 | P16-F07 hosted readiness access control | REMEDIATED IN CODE | hosted HTTP proof |
 | P16-F08 hosted recovery implementation | PARTIAL / CODE READY | scheduler, encryption, off-site copy and restore drill |
 | P16-F09 hosted observability delivery | APPLICATION CONTRACT READY | external monitor, alert destination and status page |
@@ -77,8 +77,9 @@ effective privileges, migration success or runtime readiness. Subsequent P16 hos
 since proved database TLS, completed all eight hosted migrations, reconciled effective runtime
 privileges and validated the provider-specific privilege constraint.
 
-Full application readiness is still not proven because hosted private storage and the remaining P16
-hosted operational dependencies remain incomplete. P16 therefore remains incomplete.
+Database and private-storage provider readiness now have bounded real evidence. Full deployed
+application readiness is still not proven because deployed/hosted HTTP and the remaining P16 hosted
+operational dependencies remain incomplete. P16 therefore remains incomplete.
 
 `P16-HDB-01-FIX01` makes release binding an independent migration-guard control: the configured
 40-hex release commit must equal the current Git `HEAD`, and inability to resolve `HEAD` fails
@@ -154,7 +155,7 @@ Focused validation after remediation:
 - `git diff --check` passed;
 - code/test scope remained exactly four files before this documentation reconciliation.
 
-Application deployment remains NOT EXECUTED. P16 remains incomplete because hosted private storage
+Application deployment remains NOT EXECUTED. P16 remains incomplete because deployed/hosted HTTP
 and the remaining hosted operational validation are still pending.
 
 <!-- P16-H3-B1-INTERNAL-GATE -->
@@ -178,8 +179,10 @@ Frozen controls:
 
 H3-B1 performs documentation freeze only.
 
-Adapter implementation, environment schema, SDK installation, external bucket/token provisioning,
-sentinel creation and hosted proof are still pending.
+At H3-B1, adapter implementation, environment schema, SDK installation, external bucket/token
+provisioning, sentinel creation and hosted proof were still pending. H3-C/H3-D later completed and
+synthetically validated the application paths; H3-E then supplied bounded real-provider and local
+application evidence.
 
 P16 remains incomplete and application deployment remains NOT EXECUTED.
 
@@ -209,8 +212,10 @@ Frozen H3-C acceptance boundary:
 - no presigned or public object delivery;
 - H3-C does not make hosted readiness READY.
 
-SDK installation, code implementation and synthetic adapter tests remain pending.
-Cloudflare credentials and real provider access remain pending.
+At this design-freeze gate, SDK installation, code implementation, synthetic adapter tests,
+Cloudflare credentials and real provider access were pending. The implementation and synthetic
+tests were later completed by H3-C/H3-D; bounded real-provider and local application evidence was
+later supplied by H3-E.
 
 <!-- P16-H3-C-D2-R2-ADAPTER-IMPLEMENTATION-CLOSEOUT -->
 
@@ -218,7 +223,7 @@ Cloudflare credentials and real provider access remain pending.
 
 Status:
 
-`IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATION PENDING`
+`IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATED LOCALLY`
 
 Verified:
 
@@ -245,12 +250,17 @@ Verified:
 - full repository tests: 841 passing across 96 files;
 - dependency audit: zero vulnerabilities.
 
+Completed after H3-C through H3-D/H3-E:
+
+- real Cloudflare R2 provisioning and separated credential configuration;
+- private sentinel creation;
+- direct provider validation;
+- real application-level H3-C/H3-D validation;
+- local in-process authenticated readiness HTTP validation.
+
 Still pending:
 
-- real Cloudflare R2 provisioning and credential configuration;
-- private sentinel creation;
-- real hosted readiness validation;
-- hosted provider verification;
+- deployed/hosted HTTP validation;
 - staging deployment;
 - final P16 operational evidence.
 
@@ -262,7 +272,7 @@ H3-C does not authorize a staging deploy by itself.
 
 Status:
 
-`IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATION PENDING`
+`IMPLEMENTED / SYNTHETICALLY VALIDATED / REAL PROVIDER VALIDATED LOCALLY`
 
 Verified in code:
 
@@ -279,5 +289,79 @@ Verified in code:
 
 Synthetic focused evidence: 88 tests passing across 10 files. Full quality evidence: 854 tests
 passing across 97 files, lint/typecheck/formatting/build passing and zero production dependency
-vulnerabilities. Real Cloudflare R2 access, sentinel creation and hosted validation remain pending.
-P16 remains incomplete and deployment is not authorized by H3-D.
+vulnerabilities. Subsequent H3-E evidence verified the real sentinel through the production H3-D
+factory and the authenticated local readiness path. Deployed/hosted HTTP remains pending. P16
+remains incomplete and deployment is not authorized by H3-D.
+
+<!-- P16-H3-E-REAL-R2-EVIDENCE-CLOSEOUT -->
+
+## P16-H3-E — Real-provider evidence closeout
+
+Status:
+
+`H3-E-A COMPLETE / H3-E-B COMPLETE / H3-E-C COMPLETE / DEPLOYMENT PENDING`
+
+H3-E-A passed pre-provisioning only. It froze the intended staging bucket name
+`lessenc-digital-staging-private`, default jurisdiction, Automatic location, Standard storage
+class, privacy requirements, separate runtime/operational credential roles and the later
+provisioning/validation procedure. No real Cloudflare/R2 provider contact occurred during H3-E-A:
+it created no bucket or object, used no real credential and validated no provider access. The real
+bucket and object state were established and reconciled only by the subsequent H3-E-B sequence.
+The following three exposure facts are OWNER-CONFIRMED Cloudflare dashboard evidence, not
+independent API/provider proof: the resulting bucket is private, its public `r2.dev` URL is
+disabled and it has no custom domain.
+
+The initial H3-E-B attempt failed closed at `SECURE_INPUT / FAIL`. Remote state was classified as
+unknown; provisioning was not repeated blindly and absent evidence was not converted into an
+assumption of provider state.
+
+H3-E-B-R1 used the runtime read-only credential only. The operational credential was not requested.
+The controlled validation object and sentinel were both `PRESENT_AND_EXACT`, and remote state was
+`FULLY_PROVISIONED`. There was no write, delete, list or presigning, and the repository remained
+byte-identical.
+
+H3-E-B-R2 proved distinct runtime and operational credential identities. Runtime real read access
+passed, its conditional write was rejected with `403 / AccessDenied`, and the operational
+identity's conditional write reached `412 / PreconditionFailed`. The false conditional barrier
+prevented effective mutation; both objects remained exact. No delete, list or presigning occurred,
+real-provider validation passed and the repository remained byte-identical.
+
+The runtime identity is bucket-scoped `Object Read only`, with proven real read and denied effective
+write. The separate operational identity is bucket-scoped `Object Read & Write` and is not runtime
+configuration. Application runtime remains backend-proxied and limited to `HeadObject` and
+`GetObject`, without application `PutObject`, `DeleteObject`, `ListObjects` or presigning.
+
+H3-E-C validated the real R2 configuration through the canonical parser under `APP_ENV=staging`,
+hosted driver, `r2` provider, `auto` region and the exact sentinel key. The production H3-D factory
+used real R2 `HeadObject`, made no sentinel `GetObject` and reported `PRIVATE_STORAGE` ready.
+`runReadinessProbe()` combined real R2 with a synthetically isolated database and returned global
+`READY`.
+
+The production H3-C construction path used `createConfiguredPrivateFileStorage()`,
+`ConfiguredPrivateFileStorage` and `S3CompatiblePrivateResourceStorage`. `stat()` performed real
+`HeadObject`; `open()` performed streaming real `GetObject`; the ETag/IfMatch consistency path and
+controlled body passed. The buyer-content key policy rejected `_health/p16-readiness`.
+
+Local in-process HTTP evidence returned `200 / {"status":"ready"}` when authorized and
+`404 / {"status":"not_found"}` when unauthorized. The unauthorized request caused zero provider
+access, proving authentication before provider probing. Output remained sanitized; a synthetic
+provider failure exposed only `not_ready`, and the captured credential-output leak check passed.
+
+Exact H3-E-C real operations were three sentinel `HeadObject` calls, one controlled-object
+`HeadObject` and one controlled-object streaming `GetObject`. There was no write, delete, list,
+presigned URL or sentinel-body read.
+
+Two intentional infrastructure objects exist: `_health/p16-readiness`, the zero-byte operational
+sentinel, and `validation/p16-h3e-readonly.txt`, the controlled staging validation object. Neither
+is buyer/product content.
+
+Evidence classification remains strict:
+
+- earlier H3-C/H3-D tests: synthetic validation;
+- H3-E-B: direct real-provider validation;
+- H3-E-C application paths: real application-level provider validation;
+- H3-E-C HTTP path: local in-process HTTP validation;
+- deployed/hosted HTTP: not yet validated;
+- production: not validated.
+
+Application deployment has not been executed. P16 remains incomplete.
