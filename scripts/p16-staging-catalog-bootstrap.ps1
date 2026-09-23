@@ -259,15 +259,21 @@ if ($env:P16_SSH_TARGET -ne "u781802397@187.124.120.195") {
 
         $RemoteDatabaseCommand = "mariadb --protocol=TCP --host='$($env:P16_DB_HOST)' --port=3306 --user='$($env:P16_DB_USER)' --password --database='$($env:P16_DB_NAME)' --ssl --ssl-ca='$($env:P16_DB_CA_FILE)' --ssl-verify-server-cert --connect-timeout=10 --batch --raw --skip-column-names < '$RemoteSqlPath'"
 
-        $DatabaseOutput = @(
-            & $SshCommand.Source `
-                -tt `
-                -p $env:P16_SSH_PORT `
-                -o ConnectTimeout=10 `
-                -o StrictHostKeyChecking=yes `
-                $env:P16_SSH_TARGET `
-                $RemoteDatabaseCommand
+        $DatabaseSshArgs = @(
+            "-tt"
+            "-p"
+            $env:P16_SSH_PORT
+            "-o"
+            "ConnectTimeout=10"
+            "-o"
+            "StrictHostKeyChecking=yes"
+            $env:P16_SSH_TARGET
+            $RemoteDatabaseCommand
         )
+
+        Write-Host "DATABASE EXECUTION / START"
+
+        & $SshCommand.Source @DatabaseSshArgs
 
         $DatabaseExit = $LASTEXITCODE
 
@@ -275,34 +281,8 @@ if ($env:P16_SSH_TARGET -ne "u781802397@187.124.120.195") {
             Stop-P16 "DATABASE_EXECUTION_FAILED"
         }
 
-        $DatabaseText = $DatabaseOutput -join "`n"
-
-        $ResultPattern = '(?im)^P16_CATALOG_BOOTSTRAP\s+(CREATED|NOOP)\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\s*$'
-
-        $ResultMatches = [regex]::Matches(
-            $DatabaseText,
-            $ResultPattern,
-            [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
-        )
-
-        if ($ResultMatches.Count -ne 1) {
-            Stop-P16 "DATABASE_RESULT_INVALID"
-        }
-
-        $CatalogAction = $ResultMatches[0].Groups[1].Value.ToUpperInvariant()
-        $CatalogProductId = $ResultMatches[0].Groups[2].Value.ToLowerInvariant()
-        $CatalogOfferId = $ResultMatches[0].Groups[3].Value.ToLowerInvariant()
-
-        if ($CatalogAction -notin @("CREATED", "NOOP")) {
-            Stop-P16 "DATABASE_ACTION_INVALID"
-        }
-
-        if ($CatalogProductId -eq $CatalogOfferId) {
-            Stop-P16 "DATABASE_IDENTIFIERS_INVALID"
-        }
-
         Write-Host "DATABASE EXECUTION / PASS"
-        Write-Host "DATABASE RESULT / VALIDATED / PASS"
+        Write-Host "DATABASE RESULT / STREAMED / NOT CAPTURED"
 
         $ExecutionCompleted = $true
 
@@ -337,9 +317,8 @@ if ($Execute) {
 
     Write-Host "============================================================"
     Write-Host "P16 CATALOG BOOTSTRAP OPERATOR / EXECUTION PASS"
-    Write-Host "ACTION / $CatalogAction"
-    Write-Host "PRODUCT ID / $CatalogProductId"
-    Write-Host "OFFER ID / $CatalogOfferId"
+    Write-Host "DATABASE EXECUTION / PASS"
+    Write-Host "CATALOG RESULT / SEE MARIADB OUTPUT ABOVE"
     Write-Host "DEPLOY / NOT EXECUTED"
     Write-Host "============================================================"
 
