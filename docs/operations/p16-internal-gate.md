@@ -14,7 +14,7 @@
 - explicit provider-neutral private-storage selection with local filesystem forbidden in hosted
   environments;
 - reproducible build/release metadata contract and hosted smoke tooling;
-- Mercado Pago TEST-only preflight while preserving P10 financial authority;
+- Mercado Pago explicit TEST-set attestation plus credential-shape preflight while preserving P10 financial authority; hosted sandbox proof remains required;
 - machine-authenticated readiness with no unauthorized dependency probes;
 - read-only 7 daily / 4 weekly / 3 monthly retention planning;
 - hosted deployment, recovery and rollback runbook.

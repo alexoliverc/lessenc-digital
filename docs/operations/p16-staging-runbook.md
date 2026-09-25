@@ -29,7 +29,7 @@ The staging preflight accepts only this identity:
 | database trust material | `DB_TLS_CA_FILE` | absolute readable CA path; hostname verification and `rejectUnauthorized=true` remain mandatory |
 | database access model | `P16_DATABASE_ACCESS_MODEL` | explicit `distinct-users` or `hostinger-managed-single-user`; never inferred from matching usernames |
 | migration window | `P16_DATABASE_MIGRATION_WINDOW` | `disabled` for runtime; command-scoped `enabled` only during an authorized migration window |
-| Mercado Pago TEST | `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET`, `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`, `P10_PAYMENT_CONTINUATION_SECRET` | TEST credentials only; public key is the sole intentionally public credential |
+| Mercado Pago TEST | `P16_MERCADOPAGO_CREDENTIAL_SET`, `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET`, `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`, `P10_PAYMENT_CONTINUATION_SECRET` | `P16_MERCADOPAGO_CREDENTIAL_SET=test`; credentials must come from the Mercado Pago TEST set; `APP_USR-` validates credential shape only and does not prove sandbox authority; public key is the sole intentionally public credential |
 | application secrets | `P09_SUBMISSION_SECRET`, `P11_BUYER_SESSION_SECRET`, `P12_ADMIN_AUTH_SECRET`, `P16_READINESS_TOKEN` | server-only, independently generated, at least 32 characters, never reused |
 | product identity | `P08_PRODUCT_ID`, `P08_OFFER_ID` | canonical persisted staging UUIDs |
 | private storage | `PRIVATE_STORAGE_DRIVER`, `P16_PRIVATE_STORAGE_PROVIDER`, `PRIVATE_STORAGE_S3_ENDPOINT`, `PRIVATE_STORAGE_S3_REGION`, `PRIVATE_STORAGE_S3_BUCKET`, `PRIVATE_STORAGE_S3_ACCESS_KEY_ID`, `PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY`, `PRIVATE_STORAGE_HEALTHCHECK_KEY` | `hosted` + `r2` in staging; bucket private; runtime credential bucket-scoped `Object Read only`; real secret values remain external |
@@ -212,7 +212,7 @@ no-store and the required hosted security headers. It never prints the readiness
 
 ## Mercado Pago TEST
 
-The preflight permits only TEST-shaped access/public keys. Existing P10 boundaries remain:
+The preflight requires `P16_MERCADOPAGO_CREDENTIAL_SET=test` and validates the current `APP_USR-` access/public-key shape. `APP_USR-` is format validation only and does not independently prove sandbox authority. Hosted Mercado Pago TEST validation remains mandatory before P16 closeout. Existing P10 boundaries remain:
 authenticated raw-body webhook verification, bounded timestamp tolerance, request-id validation,
 duplicate/malformed input rejection, idempotent persistence, replay-safe state transitions,
 server-side payment authority, failure isolation and sanitized logging. Hosted validation still

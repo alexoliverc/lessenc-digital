@@ -24,8 +24,9 @@ function validEnvironment(): Record<string, string> {
     PRIVATE_STORAGE_S3_ACCESS_KEY_ID: "synthetic-r2-access-key-id",
     PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY: unique("r2-secret"),
     PRIVATE_STORAGE_HEALTHCHECK_KEY: "_health/p16-readiness",
-    NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY: "TEST-public-key",
-    MERCADOPAGO_ACCESS_TOKEN: `TEST-${unique("access")}`,
+    P16_MERCADOPAGO_CREDENTIAL_SET: "test",
+    NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY: "APP_USR-public-test-key",
+    MERCADOPAGO_ACCESS_TOKEN: `APP_USR-${unique("access")}`,
     MERCADOPAGO_WEBHOOK_SECRET: unique("webhook"),
     P09_SUBMISSION_SECRET: unique("p09"),
     P10_PAYMENT_CONTINUATION_SECRET: unique("p10"),
@@ -40,11 +41,12 @@ describe("P16 staging configuration contract", () => {
     expect(validateStagingEnvironment(validEnvironment())).toEqual([]);
   });
 
-  it("rejects local, production-like, shared-credential and non-TEST targets", () => {
+  it("rejects local, production-like, shared-credential and non-test attestation", () => {
     const env = validEnvironment();
     env.APP_ENV = "production";
     env.DATABASE_URL = "mysql://same:secret@localhost/lessenc_prod";
     env.DB_RUNTIME_URL = env.DATABASE_URL;
+    env.P16_MERCADOPAGO_CREDENTIAL_SET = "production";
     env.MERCADOPAGO_ACCESS_TOKEN = "APP_USR-production-shaped-token-value";
     env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY = "APP_USR-public";
 
@@ -54,8 +56,7 @@ describe("P16 staging configuration contract", () => {
         "DATABASE_URL_NOT_UNAMBIGUOUS_STAGING",
         "DB_RUNTIME_URL_NOT_UNAMBIGUOUS_STAGING",
         "DATABASE_USERS_MUST_BE_DISTINCT",
-        "MERCADOPAGO_ACCESS_TOKEN_NOT_TEST",
-        "MERCADOPAGO_PUBLIC_KEY_NOT_TEST",
+        "P16_MERCADOPAGO_CREDENTIAL_SET_INVALID",
       ]),
     );
   });
@@ -163,6 +164,18 @@ describe("P16 staging configuration contract", () => {
         "DB_TLS_CA_FILE_MUST_BE_ABSOLUTE",
         "P16_DATABASE_ACCESS_MODEL_INVALID",
         "P16_DATABASE_MIGRATION_WINDOW_INVALID",
+      ]),
+    );
+  });
+  it("rejects malformed Mercado Pago credential shapes independently of test attestation", () => {
+    const env = validEnvironment();
+    env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY = "TEST-public-key";
+    env.MERCADOPAGO_ACCESS_TOKEN = "TEST-malformed-access-token-012345678901234567890123456789";
+
+    expect(validateStagingEnvironment(env)).toEqual(
+      expect.arrayContaining([
+        "MERCADOPAGO_PUBLIC_KEY_INVALID",
+        "MERCADOPAGO_ACCESS_TOKEN_INVALID",
       ]),
     );
   });

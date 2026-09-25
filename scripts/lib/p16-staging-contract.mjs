@@ -153,11 +153,14 @@ export function validateStagingEnvironment(env, options = {}) {
     }
   }
 
-  if (!env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY?.startsWith("TEST-")) {
-    failures.push("MERCADOPAGO_PUBLIC_KEY_NOT_TEST");
+  if (env.P16_MERCADOPAGO_CREDENTIAL_SET !== "test") {
+    failures.push("P16_MERCADOPAGO_CREDENTIAL_SET_INVALID");
   }
-  if (!env.MERCADOPAGO_ACCESS_TOKEN?.startsWith("TEST-")) {
-    failures.push("MERCADOPAGO_ACCESS_TOKEN_NOT_TEST");
+  if (!/^APP_USR-[A-Za-z0-9-]+$/u.test(env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY ?? "")) {
+    failures.push("MERCADOPAGO_PUBLIC_KEY_INVALID");
+  }
+  if (!/^APP_USR-[A-Za-z0-9-]+$/u.test(env.MERCADOPAGO_ACCESS_TOKEN ?? "")) {
+    failures.push("MERCADOPAGO_ACCESS_TOKEN_INVALID");
   }
   if (!/^[0-9a-f]{40}$/iu.test(env.P16_RELEASE_COMMIT ?? "")) {
     failures.push("P16_RELEASE_COMMIT_INVALID");

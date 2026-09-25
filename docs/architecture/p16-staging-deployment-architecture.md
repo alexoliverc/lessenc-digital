@@ -255,10 +255,11 @@ Administrative account bootstrap remains a separately controlled operation.
 
 ## 12. Mercado Pago
 
-P16 uses Mercado Pago TEST credentials only.
+P16 uses Mercado Pago TEST credentials only. Static preflight requires `P16_MERCADOPAGO_CREDENTIAL_SET=test` and validates the observed `APP_USR-` credential shape, but the prefix is not treated as proof of sandbox authority. P16-05 hosted validation remains the operational proof before closeout.
 
 Relevant configuration includes:
 
+- `P16_MERCADOPAGO_CREDENTIAL_SET`
 - `MERCADOPAGO_ACCESS_TOKEN`
 - `MERCADOPAGO_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`
