@@ -86,7 +86,14 @@ export function createAdminAuthRoute(
     const path = url.pathname.startsWith(`${BASE_PATH}/`)
       ? url.pathname.slice(BASE_PATH.length)
       : "";
-    if (url.origin !== canonicalOrigin || url.search || ALLOWED.get(path) !== request.method) {
+    /*
+     * Managed reverse proxies may expose their upstream origin through request.url.
+     * Route identity is therefore derived from the pathname/method allowlist.
+     *
+     * State-changing requests remain bound to the canonical public origin by
+     * sameOriginMutation() below.
+     */
+    if (url.search || ALLOWED.get(path) !== request.method) {
       return json(404, { code: "NOT_FOUND" });
     }
     if (request.method === "POST" && !sameOriginMutation(request, canonicalOrigin)) {

@@ -61,6 +61,45 @@ describe("administrative Better Auth HTTP boundary", () => {
     expect((await handler.POST(request("/sign-out"))).status).toBe(200);
   });
 
+  it("accepts reverse-proxy request URLs while preserving canonical Origin enforcement", async () => {
+    const proxiedSession = new Request("http://internal-proxy.invalid/api/admin/auth/get-session", {
+      method: "GET",
+      headers: { "content-type": "application/json" },
+    });
+
+    const sessionResponse = await handler.GET(proxiedSession);
+
+    expect(sessionResponse.status).toBe(200);
+    await expect(sessionResponse.json()).resolves.toEqual({
+      authenticated: true,
+      mfaComplete: true,
+    });
+
+    const trustedMutation = new Request("http://internal-proxy.invalid/api/admin/auth/sign-out", {
+      method: "POST",
+      headers: {
+        origin: APP_URL,
+        "sec-fetch-site": "same-origin",
+        "content-type": "application/json",
+      },
+      body: "{}",
+    });
+
+    expect((await handler.POST(trustedMutation)).status).toBe(200);
+
+    const untrustedMutation = new Request("http://internal-proxy.invalid/api/admin/auth/sign-out", {
+      method: "POST",
+      headers: {
+        origin: "https://attacker.invalid",
+        "sec-fetch-site": "cross-site",
+        "content-type": "application/json",
+      },
+      body: "{}",
+    });
+
+    expect((await handler.POST(untrustedMutation)).status).toBe(403);
+  });
+
   it("rejects unsupported methods, unexpected query strings and malformed payloads", async () => {
     expect((await handler.POST(request("/sign-out?returnTo=/admin"))).status).toBe(404);
 
