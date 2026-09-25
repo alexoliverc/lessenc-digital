@@ -3,6 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import {
+  completeEnrollment,
+  createTotpVerificationPayload,
+  EnrollmentSetup,
+  parseEnrollmentData,
+  TOTP_VERIFICATION_PATH,
+  type EnrollmentData,
+} from "./admin-enrollment-setup";
+
 async function post(path: string, body: Record<string, unknown>) {
   return fetch(`/api/admin/auth${path}`, {
     method: "POST",
@@ -87,35 +96,35 @@ export function MfaForm() {
 
 export function EnrollmentForm() {
   const router = useRouter();
-  const [uri, setUri] = useState("");
-  const [codes, setCodes] = useState<string[]>([]);
+  const [enrollment, setEnrollment] = useState<EnrollmentData | null>(null);
   const [message, setMessage] = useState("");
   async function enable(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setMessage("");
     const password = new FormData(event.currentTarget).get("password");
     const response = await post("/two-factor/enable", { password, method: "totp" });
     if (!response.ok) {
       setMessage("Não foi possível iniciar a configuração.");
       return;
     }
-    const data = (await response.json()) as { totpURI?: string; backupCodes?: string[] };
-    setUri(data.totpURI ?? "");
-    setCodes(data.backupCodes ?? []);
+    const data = parseEnrollmentData(await response.json());
+    if (!data) {
+      setMessage("Não foi possível iniciar a configuração.");
+      return;
+    }
+    setEnrollment(data);
   }
   async function verify(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const code = new FormData(event.currentTarget).get("code");
-    const response = await post("/two-factor/verify-totp", { code, trustDevice: false });
+    const response = await post(TOTP_VERIFICATION_PATH, createTotpVerificationPayload(code));
     if (!response.ok) {
       setMessage("Código inválido. Confira o autenticador.");
       return;
     }
-    setCodes([]);
-    setUri("");
-    router.replace("/admin");
-    router.refresh();
+    completeEnrollment(() => setEnrollment(null), router);
   }
-  if (!uri)
+  if (!enrollment)
     return (
       <form className="admin-auth-form" onSubmit={enable}>
         <label>
@@ -126,32 +135,7 @@ export function EnrollmentForm() {
         <button type="submit">Configurar autenticador</button>
       </form>
     );
-  return (
-    <div className="admin-enrollment">
-      <p>
-        Adicione esta configuração ao seu aplicativo TOTP. Ela será exibida apenas durante esta
-        inscrição.
-      </p>
-      <code>{uri}</code>
-      <h2>Códigos de recuperação</h2>
-      <p>Guarde-os agora em local seguro. Cada código funciona uma vez.</p>
-      <ul>
-        {codes.map((code) => (
-          <li key={code}>
-            <code>{code}</code>
-          </li>
-        ))}
-      </ul>
-      <form className="admin-auth-form" onSubmit={verify}>
-        <label>
-          Código do autenticador
-          <input name="code" inputMode="numeric" autoComplete="one-time-code" required />
-        </label>
-        {message && <p role="alert">{message}</p>}
-        <button type="submit">Concluir configuração</button>
-      </form>
-    </div>
-  );
+  return <EnrollmentSetup enrollment={enrollment} message={message} onVerify={verify} />;
 }
 
 export function LogoutButton() {
