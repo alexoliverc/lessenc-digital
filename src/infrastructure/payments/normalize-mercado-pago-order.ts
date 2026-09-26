@@ -157,7 +157,11 @@ export function normalizeMercadoPagoOrder(raw: unknown): ProviderSnapshot {
   if (!paymentMethod) reviewReason = "UNSUPPORTED_PAYMENT_METHOD";
   if (pair === "action_required/waiting_capture") reviewReason = "UNEXPECTED_CAPTURE_MODE";
   if (order.processing_mode !== "automatic") reviewReason = "INVALID_FINANCIAL_DATA";
-  if (order.capture_mode !== undefined && order.capture_mode !== "automatic") {
+  if (
+    order.capture_mode !== undefined &&
+    order.capture_mode !== "automatic" &&
+    !(paymentMethod === "PIX" && order.capture_mode === "automatic_async")
+  ) {
     reviewReason = "UNEXPECTED_CAPTURE_MODE";
   }
 

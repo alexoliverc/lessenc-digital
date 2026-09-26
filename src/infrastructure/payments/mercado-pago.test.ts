@@ -113,6 +113,26 @@ describe("P10 provider normalization", () => {
     expect(normalizeMercadoPagoOrder(raw).status).toBe(expected);
   });
 
+  it("accepts automatic_async only for Pix provider capture semantics", () => {
+    const pix = normalizeMercadoPagoOrder({
+      ...providerOrder(),
+      capture_mode: "automatic_async",
+    });
+
+    expect(pix.status).toBe("APPROVED");
+    expect(pix.requiresReview).toBe(false);
+    expect(pix.reviewReason).toBeNull();
+
+    const card = providerCardChallenge("https://issuer.example/challenge");
+
+    const cardAsync = normalizeMercadoPagoOrder({
+      ...card,
+      capture_mode: "automatic_async",
+    });
+
+    expect(cardAsync.requiresReview).toBe(true);
+    expect(cardAsync.reviewReason).toBe("UNEXPECTED_CAPTURE_MODE");
+  });
   it("requires currency evidence even when the order is approved", () => {
     const raw = providerOrder();
     const snapshot = normalizeMercadoPagoOrder({ ...raw, currency: undefined });
@@ -254,6 +274,7 @@ describe("P10 Orders API HTTP boundary", () => {
         id: "pix",
         type: "bank_transfer",
       });
+      expect(payload).not.toHaveProperty("capture_mode");
       return new Response(JSON.stringify(providerOrder()), { status: 201 });
     });
     const adapter = new MercadoPagoAdapter("test-access-token-fixture", transport as typeof fetch);
@@ -313,6 +334,57 @@ describe("P10 Orders API HTTP boundary", () => {
     expect(result.presentation?.kind).toBe("PIX");
   });
 
+  it("recovers verified BRL currency for Pix automatic_async canonical snapshots", async () => {
+    const complete = {
+      ...providerOrder("processed", "accredited"),
+      capture_mode: "automatic_async",
+    };
+    const canonicalWithoutCurrency = {
+      ...complete,
+      currency: undefined,
+    };
+
+    let count = 0;
+
+    const transport = vi.fn(async (url: string | URL | Request, request?: RequestInit) => {
+      count += 1;
+
+      if (count === 1) {
+        expect(request?.method).toBe("GET");
+        expect(String(url)).toContain(`/v1/orders/${complete.id}`);
+
+        return new Response(JSON.stringify(canonicalWithoutCurrency), {
+          status: 200,
+        });
+      }
+
+      expect(request?.method).toBe("GET");
+      expect(String(url)).toContain("/v1/orders?");
+      expect(String(url)).toContain(`external_reference=${orderId}`);
+
+      return new Response(
+        JSON.stringify({
+          data: [complete],
+          paging: { total_pages: 1 },
+        }),
+        { status: 200 },
+      );
+    });
+
+    const adapter = new MercadoPagoAdapter("test-access-token-fixture", transport as typeof fetch);
+
+    const result = await adapter.getSnapshot(complete.id);
+
+    expect(count).toBe(2);
+
+    expect(result).toMatchObject({
+      status: "APPROVED",
+      currency: "BRL",
+      paymentMethod: "PIX",
+      requiresReview: false,
+      reviewReason: null,
+    });
+  });
   it("carries provider order identity when canonical GET fails after successful create", async () => {
     const complete = providerOrder("action_required", "waiting_transfer");
     const incomplete = {

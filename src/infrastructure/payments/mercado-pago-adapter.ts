@@ -144,13 +144,13 @@ export class MercadoPagoAdapter implements PaymentProvider {
     const body = JSON.stringify({
       type: "online",
       processing_mode: "automatic",
-      capture_mode: "automatic",
       external_reference: input.orderId,
       total_amount: amount,
       payer: { email: input.payerEmail },
       transactions: { payments: [{ amount, payment_method: paymentMethod }] },
       ...(input.paymentMethod === "CREDIT_CARD"
         ? {
+            capture_mode: "automatic",
             config: {
               online: {
                 transaction_security: { validation: "on_fraud_risk", liability_shift: "required" },
@@ -215,7 +215,9 @@ export class MercadoPagoAdapter implements PaymentProvider {
       !snapshot.paymentAmountMinor ||
       !snapshot.paymentMethod ||
       order?.processing_mode !== "automatic" ||
-      (order.capture_mode !== undefined && order.capture_mode !== "automatic")
+      (order.capture_mode !== undefined &&
+        order.capture_mode !== "automatic" &&
+        !(snapshot.paymentMethod === "PIX" && order.capture_mode === "automatic_async"))
     )
       return snapshot;
     const created = Date.parse(snapshot.createdAt);
