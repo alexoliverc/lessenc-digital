@@ -24,8 +24,19 @@ function grantStatement(row: Readonly<Record<string, unknown>>): string | null {
   return values.length === 1 ? (values[0] ?? null) : null;
 }
 
-function normalizeScope(scope: string): string {
-  return scope.replaceAll("`", "").trim();
+function normalizeScope(scope: string): string | null {
+  const trimmed = scope.trim();
+
+  if (trimmed === "*.*") return trimmed;
+
+  const unquoted = trimmed.match(/^([A-Za-z0-9_-]+)\.\*$/u);
+  if (unquoted) return `${unquoted[1]}.*`;
+
+  const quoted = trimmed.match(/^`((?:[A-Za-z0-9_-]|\\_)+)`\.\*$/u);
+  if (!quoted) return null;
+
+  const database = (quoted[1] ?? "").replaceAll("\\_", "_");
+  return `${database}.*`;
 }
 
 /**

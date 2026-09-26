@@ -21,6 +21,63 @@ describe("P16-HDB runtime privilege verification", () => {
     ).toEqual({ safe: true, failureCode: null });
   });
 
+  it("accepts MySQL-escaped underscores in quoted database grant scopes", () => {
+    expect(
+      verifyRuntimeDatabasePrivileges(
+        [
+          row("GRANT USAGE ON *.* TO `staged`@`%`"),
+          row("GRANT SELECT, INSERT, UPDATE, DELETE ON `lessenc\\_staging`.* TO `staged`@`%`"),
+        ],
+        "lessenc_staging",
+        "distinct-users",
+      ),
+    ).toEqual({ safe: true, failureCode: null });
+
+    expect(
+      verifyRuntimeDatabasePrivileges(
+        [
+          row("GRANT USAGE ON *.* TO `staged`@`%`"),
+          row(
+            "GRANT SELECT, INSERT, UPDATE, DELETE, DELETE HISTORY, SHOW CREATE ROUTINE ON `lessenc\\_staging`.* TO `staged`@`%`",
+          ),
+        ],
+        "lessenc_staging",
+        "hostinger-managed-single-user",
+      ),
+    ).toEqual({ safe: true, failureCode: null });
+  });
+
+  it("rejects unsupported database-scope escape sequences", () => {
+    expect(
+      verifyRuntimeDatabasePrivileges(
+        [
+          row("GRANT USAGE ON *.* TO `staged`@`%`"),
+          row("GRANT SELECT, INSERT, UPDATE, DELETE ON `lessenc\\xstaging`.* TO `staged`@`%`"),
+        ],
+        "lessenc_staging",
+        "distinct-users",
+      ),
+    ).toEqual({
+      safe: false,
+      failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+    });
+  });
+
+  it("still rejects a foreign schema after valid underscore unescaping", () => {
+    expect(
+      verifyRuntimeDatabasePrivileges(
+        [
+          row("GRANT USAGE ON *.* TO `staged`@`%`"),
+          row("GRANT SELECT, INSERT, UPDATE, DELETE ON `other\\_staging`.* TO `staged`@`%`"),
+        ],
+        "lessenc_staging",
+        "distinct-users",
+      ),
+    ).toEqual({
+      safe: false,
+      failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+    });
+  });
   it.each([
     "ALL PRIVILEGES",
     "CREATE",
