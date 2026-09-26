@@ -1,6 +1,6 @@
 # P16 Staging Deployment Runbook
 
-**Status:** INTERNAL IMPLEMENTATION / REAL R2 LOCAL VALIDATION COMPLETE / DEPLOYED VALIDATION REQUIRED
+**Status:** P16-01–P16-05 COMPLETE / P16-06 INTERNAL CANDIDATE / EXTERNAL OBSERVABILITY PROOF REQUIRED
 
 This runbook prepares a reproducible staging release without treating repository preparation as a
 deployment. No command in this document authorizes Hostinger, DNS, provider, migration, payment,
@@ -221,10 +221,46 @@ Production credentials are prohibited in P16.
 
 ## Monitoring, alerts and service health
 
-Use an external liveness monitor for `/api/health` and a protected monitor for `/api/readiness`.
-The readiness token must be stored as a provider secret and excluded from URLs, logs and status
-pages. Alert delivery, incident integration and the public status page consume the provider-neutral
-P15 contracts; selecting and provisioning those services remains external.
+The repository contract creates the canonical monitor plan from the HTTPS staging root. It permits
+no base-path, user information, query string or fragment, preventing a readiness token from being
+placed in a URL.
+
+Configure, after explicit owner/provider authorization:
+
+| Monitor | URL | Authentication | Accepted result |
+| --- | --- | --- | --- |
+| public liveness | `https://lessenc.com.br/api/health` | none | HTTP 200 and exact `{"status":"ok"}` |
+| protected readiness | `https://lessenc.com.br/api/readiness` | `Authorization: Bearer` supplied from provider secret storage | HTTP 200 `ready` or HTTP 503 `not_ready`; unauthenticated HTTP 404 |
+
+The provider secret value must remain exclusively in provider secret storage and server-side
+application configuration. Store the reference as `P16_READINESS_TOKEN`; never place its value in
+a URL, query string, HTML, browser JavaScript, logs, incident notes or the public status page.
+
+The monitor/alert provider must be independent from the application failure domain. A later hosted
+validation must preserve evidence for:
+
+```text
+signal
+-> deterministic P15 evaluation
+-> firing envelope
+-> deduplication
+-> destination delivery
+-> acknowledgement or bounded delivery evidence
+```
+
+The provider-neutral alert envelope contains only the rule ID, sanitized service component,
+severity, abstract owner, stable deduplication key, occurrence count and UTC evaluation time. It
+contains no credentials, PII, provider payment IDs, database/storage detail or mutation authority.
+
+Incident destinations remain unselected. `OWNER_ON_CALL`, `OPERATIONS`, `COMMERCE_OPERATIONS` and
+`SECURITY` are routing responsibilities, not claims that paging currently exists.
+
+`status.lessenc.com.br` remains the planned public-status origin. Its future publisher may consume
+only the sanitized service-health projection. It must not consume or republish raw readiness,
+failure codes, topology, database/R2 detail, provider IDs, correlations, secrets or stack traces.
+
+Provider selection, account/provisioning, real destination delivery, status hosting, DNS and TLS
+all require a separate owner decision. No such external action is performed by this runbook.
 
 ## Backup, retention, restore and rollback
 
@@ -244,10 +280,12 @@ the approved artifact; it is not a schema rollback or data restore.
 
 ## Required hosted evidence
 
-P16 cannot close until external evidence proves HTTPS/DNS, exact deployed commit, hosted DB/TLS,
-guarded migration, concrete private storage, Mercado Pago TEST, security headers, independent
-monitoring/alert delivery, backup scheduling/encryption/off-site copy, isolated restore, measured
-RPO/RTO and rollback.
+P16-01 through P16-05 have supplied the hosted architecture/configuration/database/storage,
+reproducible deployment and Mercado Pago TEST evidence recorded by the current phase authority.
+P16 still cannot close until the remaining external evidence proves independent monitoring and
+alert delivery, incident notification, hosted status architecture according to the owner decision,
+P16-07 security controls and P16-08 backup scheduling/encryption/off-site copy, isolated restore,
+measured RPO/RTO and rollback.
 
 For Hostinger MariaDB this explicitly includes migration privilege elevation, subsequent reduction,
 current-user and inherited/public grant evidence, and correction of the observed hosted

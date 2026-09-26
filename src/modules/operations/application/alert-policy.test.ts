@@ -76,10 +76,63 @@ describe("P15 alert, ownership and SLI policy", () => {
     expect(exchange.deduplicationKey).toBe(
       "P15-RATE-LIMIT-429-RECURRENCE:BUYER_ACCESS_DELIVERY:BUYER_ACCESS_EXCHANGE:EXCHANGE_CREDENTIAL",
     );
+    expect(exchange.partition).toEqual({
+      surface: "BUYER_ACCESS_EXCHANGE",
+      scope: "EXCHANGE_CREDENTIAL",
+    });
   });
 
   it("keeps production SLO targets open until staging provides a baseline", () => {
     expect(P15_SLI_CATALOG.length).toBeGreaterThanOrEqual(4);
     expect(P15_SLI_CATALOG.every((sli) => sli.target === "OPEN_STAGING_BASELINE")).toBe(true);
+  });
+
+  it("fails closed for invalid alert signal fields", () => {
+    const rule = P15_ALERT_RULES[0]!;
+    const now = new Date("2026-09-26T12:00:00.000Z");
+
+    for (const signal of [
+      { event: "unsafe event", occurredAt: now },
+      { event: rule.event, failureCode: "secret=value", occurredAt: now },
+      { event: rule.event, occurredAt: new Date("invalid") },
+      { event: rule.event, occurredAt: now, scope: "EXCHANGE_GLOBAL" },
+      {
+        event: rule.event,
+        occurredAt: now,
+        surface: "PRIVATE_STORAGE",
+        scope: "EXCHANGE_CREDENTIAL",
+      },
+    ]) {
+      expect(() => evaluateAlertWindow(rule, [signal as never], now)).toThrow(
+        "INVALID_ALERT_SIGNAL",
+      );
+    }
+  });
+
+  it("fails closed for non-canonical alert partition combinations", () => {
+    const rule = P15_ALERT_RULES[0]!;
+    const now = new Date("2026-09-26T12:00:00.000Z");
+
+    expect(() =>
+      evaluateAlertWindow(rule, [], now, {
+        surface: "PRIVATE_STORAGE",
+        scope: "EXCHANGE_CREDENTIAL",
+      }),
+    ).toThrow("INVALID_ALERT_PARTITION");
+  });
+
+  it("fails closed for invalid rule routing fields", () => {
+    const now = new Date("2026-09-26T12:00:00.000Z");
+    const rule = P15_ALERT_RULES[0]!;
+
+    for (const invalid of [
+      { ...rule, severity: "URGENT" },
+      { ...rule, owner: "EXTERNAL_PROVIDER" },
+      { ...rule, component: "DATABASE" },
+    ]) {
+      expect(() => evaluateAlertWindow(invalid as never, [], now)).toThrow(
+        "INVALID_ALERT_RULE_ROUTING",
+      );
+    }
   });
 });

@@ -1,9 +1,9 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** ARCHITECTURE FROZEN / INTERNAL IMPLEMENTATION COMPLETE / REAL DB AND R2 VALIDATED / DEPLOYMENT PENDING
+**Status:** P16-01–P16-05 COMPLETE / P16-06 INTERNAL IMPLEMENTATION CANDIDATE / EXTERNAL OBSERVABILITY PROOF PENDING
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
-**Current P16 working baseline:** `300a5db6755b238606f0aa91e05981b2af121acc`
+**Current P16 working baseline and hosted release:** `acd03ada8a452fdb68c0da9c812f95b981f8f05d`
 **Application hosting:** Hostinger Managed Node / Web App
 **Current staging hostname:** `https://lessenc.com.br`
 
@@ -62,13 +62,16 @@ The P16 implementation branch is:
 
 `phase/p16-staging-deployment`
 
-The currently proven hosted build commit is:
+The current hosted staging release commit is:
 
-`300a5db6755b238606f0aa91e05981b2af121acc`
+`acd03ada8a452fdb68c0da9c812f95b981f8f05d`
 
-That commit has already demonstrated successful dependency installation, Prisma Client generation, Next.js compilation, TypeScript validation, static generation and hosted build completion.
+That commit has demonstrated the reproducible hosted release path and completed P16-05 Mercado Pago
+TEST validation. It preserves the earlier hosted build evidence for dependency installation, Prisma
+Client generation, Next.js compilation, TypeScript validation and static generation.
 
-This does not yet prove complete staging readiness.
+This does not yet prove complete P16 staging readiness. P16-06 observability delivery, P16-07
+hosted security and P16-08 recovery evidence remain separate gates.
 
 ## 5. Runtime toolchain
 
@@ -255,7 +258,7 @@ Administrative account bootstrap remains a separately controlled operation.
 
 ## 12. Mercado Pago
 
-P16 uses Mercado Pago TEST credentials only. Static preflight requires `P16_MERCADOPAGO_CREDENTIAL_SET=test` and validates the observed `APP_USR-` credential shape, but the prefix is not treated as proof of sandbox authority. P16-05 hosted validation remains the operational proof before closeout.
+P16 uses Mercado Pago TEST credentials only. Static preflight requires `P16_MERCADOPAGO_CREDENTIAL_SET=test` and validates the observed `APP_USR-` credential shape, but the prefix is not treated as proof of sandbox authority. P16-05 subsequently supplied the hosted operational proof.
 
 Relevant configuration includes:
 
@@ -267,7 +270,9 @@ Relevant configuration includes:
 
 Production Mercado Pago credentials are prohibited during P16.
 
-Hosted TEST validation belongs to P16-05.
+P16-05 is COMPLETE / PASS. Its evidence includes hosted Pix presentation, persisted provider
+references, an expected pending/action-required state, an HTTP 200 TEST webhook and idempotent
+duplicate handling. No real payment or production credential was used.
 
 ## 13. HTTP security
 
@@ -287,9 +292,48 @@ Source-code configuration alone is not sufficient evidence.
 
 P15 supplied the application-side observability foundation.
 
-P16 must provide hosted operational validation including external liveness monitoring, protected readiness monitoring, alert delivery and hosted service-health evidence.
+P16-06 preserves the following topology:
+
+```text
+application
+-> canonical structured logs / metrics / completed local spans
+-> provider-neutral monitoring and alert contracts
+-> future external collector / monitor / alert provider
+-> future incident destination
+-> sanitized public status projection
+```
+
+The repository now defines a provider-neutral hosted monitoring plan for exactly:
+
+- public `GET https://lessenc.com.br/api/health`, HTTP 200 and exact
+  `{"status":"ok"}`;
+- protected `GET https://lessenc.com.br/api/readiness`, with bearer authentication supplied only
+  from the provider secret reference `P16_READINESS_TOKEN`, HTTP 200 `ready` or HTTP 503
+  `not_ready`; unauthorized remains HTTP 404.
+
+Monitor URLs must be HTTPS roots without user information, query strings or fragments. A readiness
+token is never accepted in a URL or serialized into the monitoring plan.
+
+The alert-delivery foundation accepts only a firing result from the deterministic P15 rules and
+projects a bounded envelope with rule, public component, severity, abstract owner, stable
+deduplication key, occurrence count and UTC evaluation time. A future provider adapter receives no
+Payment, Order, Entitlement, database or mutation capability. No provider adapter or live
+destination is selected or configured by P16-06.
+
+The public-status foundation remains the existing sanitized service-health projection for Website,
+Checkout, Payments, Buyer Access / Digital Delivery and Admin. `status.lessenc.com.br` is only the
+planned public origin; there is no DNS/TLS/hosting/publication action in this gate, and raw readiness
+is never a public-status data source.
+
+P16 must still provide hosted operational validation including independent external liveness,
+protected readiness monitoring, real alert delivery, acknowledgement/evidence, incident routing
+and hosted service-health evidence.
 
 External monitoring must not depend exclusively on the same failure domain as the application.
+
+Numerical SLO targets remain `OPEN_STAGING_BASELINE` until hosted samples exist. Monitoring,
+logging, alerts and status projections remain evidence only and cannot mutate financial,
+commercial, entitlement or authorization state.
 
 ## 15. Backup and recovery
 
@@ -418,7 +462,11 @@ Hosted backup scheduling, retention and measured restore evidence remain pending
 
 ### P16-F09 — Hosted observability delivery pending
 
-External monitoring and real alert delivery remain pending.
+`REPOSITORY FOUNDATION IMPLEMENTED / EXTERNAL PROOF PENDING`: monitor configuration, safe secret
+reference, deterministic alert-delivery envelope, incident-routing metadata and sanitized public
+status projection exist without a provider dependency. External collector/monitor selection,
+independent probe execution, real delivery, acknowledgement evidence, incident destination,
+status-page provisioning and DNS/TLS remain pending owner/provider decisions.
 
 ## 17. Execution sequence
 

@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 21/09/2026
+**Última atualização:** 26/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. A implementação interna de repositório da P16 está concluída. O banco hosted e o R2 privado possuem evidência real delimitada, mas nenhum deploy da aplicação foi executado e a validação HTTP deployed/hosted permanece pendente.
-**Estado atual:** P16 — Staging Deployment possui arquitetura congelada e implementação interna concluída a partir de `11c4a18e4c2b479ebd8155f8a5397e8820e49513`. O repositório prepara configuração staging fail-closed, guard de `prisma migrate deploy`, fronteira explícita de storage hosted, readiness autenticado, smoke hosted, Mercado Pago TEST e retenção/recuperação. O R2 privado de staging foi provisionado e validado diretamente e pelos caminhos reais H3-C/H3-D da aplicação em execução local controlada. Deploy, HTTP deployed/hosted e as demais provas operacionais externas continuam pendentes. P16 não está COMPLETE.
+**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. P16-01–P16-05 estão COMPLETE. A release hosted de staging atual é `acd03ada8a452fdb68c0da9c812f95b981f8f05d`. P16-06 possui candidato interno local; as provas externas de monitoramento, alert delivery, incident notification e status público permanecem pendentes.
+**Estado atual:** P16 — Staging Deployment está em P16-06 — Hosted Observability, Alerting & Service Health. A base preserva configuração staging fail-closed, migration guard, banco hosted, R2 privado, readiness autenticado, release reproduzível e Mercado Pago TEST hosted. O candidato P16-06 adiciona apenas contratos provider-neutral para monitoramento e entrega de alerta/incidente, validação fail-closed e documentação; nenhum provider, destino, DNS/TLS, status page ou novo deploy foi configurado. P16 não está COMPLETE.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -2143,3 +2143,30 @@ Evidence boundaries remain explicit: earlier H3-C/H3-D tests are synthetic; H3-E
 provider validation; H3-E-C is real application-level provider validation plus local in-process
 HTTP validation. Deployed/hosted HTTP and production remain unvalidated. Application deployment
 has not been executed, and P16 remains incomplete.
+
+<!-- P16-06-HOSTED-OBSERVABILITY-INTERNAL-CANDIDATE -->
+
+## P16-06 — Hosted Observability internal candidate
+
+Date: 2026-09-26
+
+Status: `INTERNAL IMPLEMENTATION / PASS / HOSTED PROOF PENDING`
+
+The current branch/release baseline is
+`acd03ada8a452fdb68c0da9c812f95b981f8f05d`. P16-01 through P16-05 are complete under the latest
+owner authority. P16-06 preserves the P15 observability contracts and adds a provider-neutral,
+fail-closed repository foundation for:
+
+- public liveness monitoring at `/api/health`;
+- protected bearer-authenticated readiness monitoring at `/api/readiness`;
+- prevention of readiness-token transport in URLs;
+- deterministic validation of alert signals;
+- a bounded firing/deduplication/delivery envelope and delivery port for a future provider;
+- incident routing metadata using the frozen abstract owners;
+- the existing sanitized service-health projection for the planned `status.lessenc.com.br` origin.
+
+No observability provider, account, API token, destination, webhook, DNS, TLS, status-page host or
+external monitor was selected or provisioned. No database/storage/payment mutation, migration,
+dependency change or deployment was performed. P16-06 remains subject to ChatGPT review and later
+hosted evidence for independent liveness, protected readiness, real delivery/acknowledgement,
+incident notification and public-status provisioning according to the owner decision.

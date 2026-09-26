@@ -42,6 +42,15 @@ export type AlertRule = Readonly<{
   component: "WEBSITE" | "CHECKOUT" | "PAYMENTS" | "BUYER_ACCESS_DELIVERY" | "ADMIN";
 }>;
 
+export type AlertEvaluation = Readonly<{
+  firing: boolean;
+  count: number;
+  deduplicationKey: string;
+  severity: AlertSeverity;
+  owner: AlertOwner;
+  partition?: AlertPartition;
+}>;
+
 const FAILURE_CODE_PATTERN = /^[A-Z0-9_]{1,64}$/u;
 const EVENT_PATTERN = /^[a-z0-9]+(?:_[a-z0-9]+)*$/u;
 const RULE_ID_PATTERN = /^P15-[A-Z0-9-]{1,48}$/u;
@@ -62,6 +71,22 @@ const ALERT_PARTITION_SCOPES = [
   "LIBRARY_CREDENTIAL",
   "DOWNLOAD_CREDENTIAL",
 ] as const;
+const ALERT_COMPONENTS = [
+  "WEBSITE",
+  "CHECKOUT",
+  "PAYMENTS",
+  "BUYER_ACCESS_DELIVERY",
+  "ADMIN",
+] as const;
+
+const ALERT_SCOPE_SURFACES: Readonly<
+  Record<NonNullable<AlertSignal["scope"]>, readonly NonNullable<AlertSignal["surface"]>[]>
+> = Object.freeze({
+  EXCHANGE_GLOBAL: Object.freeze(["BUYER_ACCESS_EXCHANGE", "RATE_LIMIT"] as const),
+  EXCHANGE_CREDENTIAL: Object.freeze(["BUYER_ACCESS_EXCHANGE", "RATE_LIMIT"] as const),
+  LIBRARY_CREDENTIAL: Object.freeze(["BUYER_LIBRARY", "RATE_LIMIT"] as const),
+  DOWNLOAD_CREDENTIAL: Object.freeze(["PROTECTED_DOWNLOAD", "RATE_LIMIT"] as const),
+});
 
 export const P15_ALERT_RULES: readonly AlertRule[] = Object.freeze([
   {
@@ -227,12 +252,19 @@ export const P15_SLI_CATALOG = Object.freeze([
   }),
 ]);
 
-function validateRule(rule: AlertRule): void {
+export function assertValidAlertRule(rule: AlertRule): void {
   if (!RULE_ID_PATTERN.test(rule.id) || !EVENT_PATTERN.test(rule.event)) {
     throw new Error("INVALID_ALERT_RULE_IDENTITY");
   }
   if (rule.failureCode !== undefined && !FAILURE_CODE_PATTERN.test(rule.failureCode)) {
     throw new Error("INVALID_ALERT_RULE_FAILURE_CODE");
+  }
+  if (
+    !ALERT_SEVERITIES.includes(rule.severity) ||
+    !ALERT_OWNERS.includes(rule.owner) ||
+    !ALERT_COMPONENTS.includes(rule.component)
+  ) {
+    throw new Error("INVALID_ALERT_RULE_ROUTING");
   }
   if (
     !Number.isSafeInteger(rule.threshold) ||
@@ -245,41 +277,82 @@ function validateRule(rule: AlertRule): void {
   }
 }
 
+function isCanonicalAlertPartition(partition: AlertPartition): boolean {
+  return (
+    ALERT_PARTITION_SURFACES.includes(partition.surface) &&
+    (partition.scope === undefined ||
+      (ALERT_PARTITION_SCOPES.includes(partition.scope) &&
+        ALERT_SCOPE_SURFACES[partition.scope].includes(partition.surface)))
+  );
+}
+
+function canonicalAlertPartition(partition?: AlertPartition): AlertPartition | undefined {
+  if (partition === undefined) return undefined;
+
+  if (
+    partition === null ||
+    typeof partition !== "object" ||
+    !isCanonicalAlertPartition(partition)
+  ) {
+    throw new Error("INVALID_ALERT_PARTITION");
+  }
+
+  return Object.freeze({
+    surface: partition.surface,
+    ...(partition.scope === undefined ? {} : { scope: partition.scope }),
+  });
+}
+
+export function deriveAlertDeduplicationKey(rule: AlertRule, partition?: AlertPartition): string {
+  assertValidAlertRule(rule);
+  const canonicalPartition = canonicalAlertPartition(partition);
+
+  return [rule.id, rule.component, canonicalPartition?.surface, canonicalPartition?.scope]
+    .filter((value) => value !== undefined)
+    .join(":");
+}
+
+function validateSignal(signal: AlertSignal): void {
+  if (
+    typeof signal.event !== "string" ||
+    !EVENT_PATTERN.test(signal.event) ||
+    (signal.failureCode !== undefined && !FAILURE_CODE_PATTERN.test(signal.failureCode)) ||
+    !(signal.occurredAt instanceof Date) ||
+    !Number.isFinite(signal.occurredAt.getTime()) ||
+    (signal.surface !== undefined && !ALERT_PARTITION_SURFACES.includes(signal.surface)) ||
+    (signal.scope !== undefined && !ALERT_PARTITION_SCOPES.includes(signal.scope)) ||
+    (signal.scope !== undefined && signal.surface === undefined) ||
+    (signal.surface !== undefined &&
+      !isCanonicalAlertPartition({
+        surface: signal.surface,
+        ...(signal.scope === undefined ? {} : { scope: signal.scope }),
+      }))
+  ) {
+    throw new Error("INVALID_ALERT_SIGNAL");
+  }
+}
+
 export function evaluateAlertWindow(
   rule: AlertRule,
   signals: readonly AlertSignal[],
   evaluatedAt: Date,
   partition?: AlertPartition,
-): Readonly<{
-  firing: boolean;
-  count: number;
-  deduplicationKey: string;
-  severity: AlertSeverity;
-  owner: AlertOwner;
-}> {
-  validateRule(rule);
+): AlertEvaluation {
+  assertValidAlertRule(rule);
   if (!(evaluatedAt instanceof Date) || !Number.isFinite(evaluatedAt.getTime())) {
     throw new Error("INVALID_ALERT_EVALUATION_TIME");
   }
-  if (
-    partition !== undefined &&
-    (!ALERT_PARTITION_SURFACES.includes(partition.surface) ||
-      (partition.scope !== undefined && !ALERT_PARTITION_SCOPES.includes(partition.scope)))
-  ) {
-    throw new Error("INVALID_ALERT_PARTITION");
-  }
+  const canonicalPartition = canonicalAlertPartition(partition);
 
   const windowStart = evaluatedAt.getTime() - rule.windowSeconds * 1000;
   const count = signals.filter((signal) => {
-    if (!(signal.occurredAt instanceof Date) || !Number.isFinite(signal.occurredAt.getTime())) {
-      throw new Error("INVALID_ALERT_SIGNAL_TIME");
-    }
+    validateSignal(signal);
     return (
       signal.event === rule.event &&
       (rule.failureCode === undefined || signal.failureCode === rule.failureCode) &&
-      (partition === undefined ||
-        (signal.surface === partition.surface &&
-          (partition.scope === undefined || signal.scope === partition.scope))) &&
+      (canonicalPartition === undefined ||
+        (signal.surface === canonicalPartition.surface &&
+          (canonicalPartition.scope === undefined || signal.scope === canonicalPartition.scope))) &&
       signal.occurredAt.getTime() > windowStart &&
       signal.occurredAt.getTime() <= evaluatedAt.getTime()
     );
@@ -288,10 +361,9 @@ export function evaluateAlertWindow(
   return Object.freeze({
     firing: count >= rule.threshold,
     count,
-    deduplicationKey: [rule.id, rule.component, partition?.surface, partition?.scope]
-      .filter((value) => value !== undefined)
-      .join(":"),
+    deduplicationKey: deriveAlertDeduplicationKey(rule, canonicalPartition),
     severity: rule.severity,
     owner: rule.owner,
+    ...(canonicalPartition === undefined ? {} : { partition: canonicalPartition }),
   });
 }

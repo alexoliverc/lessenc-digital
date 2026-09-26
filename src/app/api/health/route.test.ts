@@ -21,6 +21,7 @@ describe("public liveness HTTP boundary", () => {
     const body = JSON.stringify(await response.json());
     expect(body).toBe('{"status":"ok"}');
     expect(response.headers.get("x-correlation-id")).toBe(correlationId);
+    expect(response.headers.get("cache-control")).toBe("no-store");
     expect(body).not.toContain("DATABASE");
   });
 });
