@@ -79,6 +79,51 @@ describe("P16-HDB runtime privilege verification", () => {
     });
   });
   it.each([
+    [
+      "unsupported scope syntax",
+      "GRANT SELECT, INSERT, UPDATE, DELETE ON `lessenc\\xstaging`.* TO `staged`@`%`",
+      "SCOPE_FORMAT_UNSUPPORTED",
+    ],
+    [
+      "foreign database scope",
+      "GRANT SELECT, INSERT, UPDATE, DELETE ON `other_staging`.* TO `staged`@`%`",
+      "SCOPE_NOT_EXPECTED_DATABASE",
+    ],
+    [
+      "unexpected privilege",
+      "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE ON `lessenc_staging`.* TO `staged`@`%`",
+      "PRIVILEGE_NOT_ALLOWED",
+    ],
+    [
+      "missing required runtime privilege",
+      "GRANT SELECT, INSERT, UPDATE ON `lessenc_staging`.* TO `staged`@`%`",
+      "REQUIRED_PRIVILEGES_MISSING",
+    ],
+    [
+      "unsupported grant statement",
+      "GRANT `runtime_role` TO `staged`@`%`",
+      "STATEMENT_FORMAT_UNSUPPORTED",
+    ],
+  ] as const)("reports only sanitized diagnostic reason for %s", (_case, grant, expectedReason) => {
+    let observedReason: string | null = null;
+
+    const result = verifyRuntimeDatabasePrivileges(
+      [row("GRANT USAGE ON *.* TO `staged`@`%`"), row(grant)],
+      "lessenc_staging",
+      "distinct-users",
+      (reason) => {
+        observedReason = reason;
+      },
+    );
+
+    expect(result).toEqual({
+      safe: false,
+      failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+    });
+    expect(observedReason).toBe(expectedReason);
+  });
+
+  it.each([
     "ALL PRIVILEGES",
     "CREATE",
     "ALTER",

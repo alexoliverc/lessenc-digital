@@ -12,6 +12,18 @@ export type RuntimePrivilegeVerification = Readonly<{
   failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE" | null;
 }>;
 
+export type RuntimePrivilegeDiagnosticReason =
+  | "INPUT_INVALID"
+  | "ROW_SHAPE_INVALID"
+  | "GRANT_OPTION_PRESENT"
+  | "STATEMENT_FORMAT_UNSUPPORTED"
+  | "PRIVILEGE_LIST_INVALID"
+  | "GLOBAL_SCOPE_NOT_USAGE"
+  | "SCOPE_FORMAT_UNSUPPORTED"
+  | "SCOPE_NOT_EXPECTED_DATABASE"
+  | "PRIVILEGE_NOT_ALLOWED"
+  | "REQUIRED_PRIVILEGES_MISSING";
+
 function unsafe(): RuntimePrivilegeVerification {
   return Object.freeze({
     safe: false,
@@ -47,13 +59,19 @@ export function verifyRuntimeDatabasePrivileges(
   rows: readonly Readonly<Record<string, unknown>>[],
   expectedDatabase: string,
   accessModel: RuntimeDatabaseAccessModel,
+  diagnosticSink?: (reason: RuntimePrivilegeDiagnosticReason) => void,
 ): RuntimePrivilegeVerification {
+  const fail = (reason: RuntimePrivilegeDiagnosticReason): RuntimePrivilegeVerification => {
+    diagnosticSink?.(reason);
+    return unsafe();
+  };
+
   if (
     rows.length === 0 ||
     !/^[A-Za-z0-9_-]+$/u.test(expectedDatabase) ||
     (accessModel !== "distinct-users" && accessModel !== "hostinger-managed-single-user")
   ) {
-    return unsafe();
+    return fail("INPUT_INVALID");
   }
 
   const allowedRuntimePrivileges = new Set(REQUIRED_RUNTIME_PRIVILEGES);
@@ -68,29 +86,51 @@ export function verifyRuntimeDatabasePrivileges(
 
   for (const row of rows) {
     const statement = grantStatement(row);
-    if (statement === null || /\bWITH\s+GRANT\s+OPTION\b/iu.test(statement)) return unsafe();
+
+    if (statement === null) {
+      return fail("ROW_SHAPE_INVALID");
+    }
+
+    if (/\bWITH\s+GRANT\s+OPTION\b/iu.test(statement)) {
+      return fail("GRANT_OPTION_PRESENT");
+    }
 
     const match = statement.match(/^GRANT\s+(.+?)\s+ON\s+(.+?)\s+TO\s+/iu);
-    if (!match) return unsafe();
+
+    if (!match) {
+      return fail("STATEMENT_FORMAT_UNSUPPORTED");
+    }
 
     const privileges = (match[1] ?? "")
       .split(",")
       .map((privilege) => privilege.trim().replace(/\s+/gu, " ").toUpperCase());
+
     const scope = normalizeScope(match[2] ?? "");
 
     if (privileges.length === 0 || privileges.some((privilege) => privilege.length === 0)) {
-      return unsafe();
+      return fail("PRIVILEGE_LIST_INVALID");
     }
 
     if (scope === "*.*") {
-      if (privileges.length !== 1 || privileges[0] !== "USAGE") return unsafe();
+      if (privileges.length !== 1 || privileges[0] !== "USAGE") {
+        return fail("GLOBAL_SCOPE_NOT_USAGE");
+      }
+
       continue;
     }
 
-    if (scope !== `${expectedDatabase}.*`) return unsafe();
+    if (scope === null) {
+      return fail("SCOPE_FORMAT_UNSUPPORTED");
+    }
+
+    if (scope !== `${expectedDatabase}.*`) {
+      return fail("SCOPE_NOT_EXPECTED_DATABASE");
+    }
 
     for (const privilege of privileges) {
-      if (!allowedRuntimePrivileges.has(privilege)) return unsafe();
+      if (!allowedRuntimePrivileges.has(privilege)) {
+        return fail("PRIVILEGE_NOT_ALLOWED");
+      }
 
       if (REQUIRED_RUNTIME_PRIVILEGES.has(privilege)) {
         observedRuntimePrivileges.add(privilege);
@@ -102,7 +142,7 @@ export function verifyRuntimeDatabasePrivileges(
     observedRuntimePrivileges.size !== REQUIRED_RUNTIME_PRIVILEGES.size ||
     [...REQUIRED_RUNTIME_PRIVILEGES].some((privilege) => !observedRuntimePrivileges.has(privilege))
   ) {
-    return unsafe();
+    return fail("REQUIRED_PRIVILEGES_MISSING");
   }
 
   return Object.freeze({ safe: true, failureCode: null });
