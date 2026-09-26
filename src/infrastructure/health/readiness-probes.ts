@@ -21,6 +21,19 @@ import {
 
 type HostedPrivateStorageResolver = () => Promise<HostedPrivateStorageReadinessProbe>;
 
+function runtimeGrantRowShape(row: Readonly<Record<string, unknown>>) {
+  const values = Object.values(row);
+  const stringValueCount = values.filter((value) => typeof value === "string").length;
+  const binaryValueCount = values.filter((value) => value instanceof Uint8Array).length;
+
+  return Object.freeze({
+    fieldCount: values.length,
+    stringValueCount,
+    binaryValueCount,
+    otherValueCount: values.length - stringValueCount - binaryValueCount,
+  });
+}
+
 export type ReadinessProbeDependencies = Readonly<{
   resolveHostedPrivateStorage?: HostedPrivateStorageResolver;
 }>;
@@ -92,6 +105,9 @@ async function databaseCheck(correlationId: string): Promise<ReadinessCheck> {
           surface: "DATABASE",
           outcome: "FAILED",
           failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+          diagnosticStage: "GRANT_VERIFICATION",
+          grantRowCount: grants.length,
+          grantRowShape: grants.map(runtimeGrantRowShape),
         });
         return Object.freeze({
           name: "DATABASE_CONNECTIVITY",
@@ -124,6 +140,9 @@ async function databaseCheck(correlationId: string): Promise<ReadinessCheck> {
             surface: "DATABASE",
             outcome: "FAILED",
             failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
+            diagnosticStage: "PROVIDER_TARGET_SURFACE",
+            systemVersionedTableCount: versionedTableCount,
+            storedRoutineCount,
           });
           return Object.freeze({
             name: "DATABASE_CONNECTIVITY",
