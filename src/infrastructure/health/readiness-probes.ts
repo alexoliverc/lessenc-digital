@@ -1,9 +1,10 @@
+import { createHash } from "node:crypto";
 import { realpath, stat } from "node:fs/promises";
 
 import { getDatabaseClient } from "@/infrastructure/database/client";
 import {
   databaseNameFromRuntimeUrl,
-  type RuntimePrivilegeDiagnosticReason,
+  type RuntimePrivilegeDiagnostic,
   verifyRuntimeDatabasePrivileges,
 } from "@/infrastructure/database/runtime-database-privileges";
 import { createCorrelationId } from "@/lib/observability/correlation";
@@ -99,16 +100,18 @@ async function databaseCheck(correlationId: string): Promise<ReadinessCheck> {
       const grants = await database.$queryRawUnsafe<Array<Record<string, unknown>>>(
         "SHOW GRANTS FOR CURRENT_USER()",
       );
-      let privilegeDiagnosticReason: RuntimePrivilegeDiagnosticReason | null = null;
+      const privilegeDiagnostics: RuntimePrivilegeDiagnostic[] = [];
 
       const verification = verifyRuntimeDatabasePrivileges(
         grants,
         databaseName,
         accessModel,
-        (reason) => {
-          privilegeDiagnosticReason = reason;
+        (diagnostic) => {
+          privilegeDiagnostics.push(diagnostic);
         },
       );
+
+      const privilegeDiagnostic = privilegeDiagnostics[0];
 
       if (!verification.safe) {
         logger.error("readiness_database_privilege_check_failed", {
@@ -117,7 +120,14 @@ async function databaseCheck(correlationId: string): Promise<ReadinessCheck> {
           outcome: "FAILED",
           failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
           diagnosticStage: "GRANT_VERIFICATION",
-          diagnosticReason: privilegeDiagnosticReason ?? "UNCLASSIFIED",
+          diagnosticReason: privilegeDiagnostic?.reason ?? "UNCLASSIFIED",
+          ...(privilegeDiagnostic?.unexpectedPrivilege
+            ? {
+                unexpectedPrivilegeFingerprint: createHash("sha256")
+                  .update(privilegeDiagnostic.unexpectedPrivilege, "utf8")
+                  .digest("hex"),
+              }
+            : {}),
           grantRowCount: grants.length,
           grantRowShape: grants.map(runtimeGrantRowShape),
         });

@@ -91,7 +91,10 @@ describe("P15 readiness diagnostic correlation", () => {
       expect(serialized).not.toContain("ALL PRIVILEGES");
       expect(serialized).not.toContain("staged@%");
       expect(serialized).not.toContain("lessenc_staging");
-      expect(JSON.stringify(output.mock.calls)).not.toContain("ALL PRIVILEGES");
+      const logs = JSON.stringify(output.mock.calls);
+
+      expect(logs).not.toContain("ALL PRIVILEGES");
+      expect(logs).toContain("unexpectedPrivilegeFingerprint");
     } finally {
       for (const [key, value] of Object.entries(previous)) {
         if (value === undefined) delete process.env[key];
