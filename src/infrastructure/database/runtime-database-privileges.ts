@@ -24,11 +24,6 @@ export type RuntimePrivilegeDiagnosticReason =
   | "PRIVILEGE_NOT_ALLOWED"
   | "REQUIRED_PRIVILEGES_MISSING";
 
-export type RuntimePrivilegeDiagnostic = Readonly<{
-  reason: RuntimePrivilegeDiagnosticReason;
-  unexpectedPrivilege?: string;
-}>;
-
 function unsafe(): RuntimePrivilegeVerification {
   return Object.freeze({
     safe: false,
@@ -64,18 +59,10 @@ export function verifyRuntimeDatabasePrivileges(
   rows: readonly Readonly<Record<string, unknown>>[],
   expectedDatabase: string,
   accessModel: RuntimeDatabaseAccessModel,
-  diagnosticSink?: (diagnostic: RuntimePrivilegeDiagnostic) => void,
+  diagnosticSink?: (reason: RuntimePrivilegeDiagnosticReason) => void,
 ): RuntimePrivilegeVerification {
-  const fail = (
-    reason: RuntimePrivilegeDiagnosticReason,
-    unexpectedPrivilege?: string,
-  ): RuntimePrivilegeVerification => {
-    diagnosticSink?.(
-      Object.freeze({
-        reason,
-        ...(unexpectedPrivilege ? { unexpectedPrivilege } : {}),
-      }),
-    );
+  const fail = (reason: RuntimePrivilegeDiagnosticReason): RuntimePrivilegeVerification => {
+    diagnosticSink?.(reason);
     return unsafe();
   };
 
@@ -142,11 +129,7 @@ export function verifyRuntimeDatabasePrivileges(
 
     for (const privilege of privileges) {
       if (!allowedRuntimePrivileges.has(privilege)) {
-        const sanitizedUnexpectedPrivilege = /^[A-Z][A-Z ]{0,63}$/u.test(privilege)
-          ? privilege
-          : undefined;
-
-        return fail("PRIVILEGE_NOT_ALLOWED", sanitizedUnexpectedPrivilege);
+        return fail("PRIVILEGE_NOT_ALLOWED");
       }
 
       if (REQUIRED_RUNTIME_PRIVILEGES.has(privilege)) {

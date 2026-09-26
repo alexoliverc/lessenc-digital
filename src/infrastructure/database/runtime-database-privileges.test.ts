@@ -111,8 +111,8 @@ describe("P16-HDB runtime privilege verification", () => {
       [row("GRANT USAGE ON *.* TO `staged`@`%`"), row(grant)],
       "lessenc_staging",
       "distinct-users",
-      (diagnostic) => {
-        observedReason = diagnostic.reason;
+      (reason) => {
+        observedReason = reason;
       },
     );
 
@@ -121,57 +121,6 @@ describe("P16-HDB runtime privilege verification", () => {
       failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
     });
     expect(observedReason).toBe(expectedReason);
-  });
-
-  it("reports only the normalized rejected privilege token", () => {
-    let observedDiagnostic: Readonly<{
-      reason: string;
-      unexpectedPrivilege?: string;
-    }> | null = null;
-
-    const result = verifyRuntimeDatabasePrivileges(
-      [
-        row("GRANT USAGE ON *.* TO `staged`@`%`"),
-        row(
-          "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE VIEW ON `lessenc_staging`.* TO `staged`@`%`",
-        ),
-      ],
-      "lessenc_staging",
-      "hostinger-managed-single-user",
-      (diagnostic) => {
-        observedDiagnostic = diagnostic;
-      },
-    );
-
-    expect(result).toEqual({
-      safe: false,
-      failureCode: "DATABASE_RUNTIME_PRIVILEGES_UNSAFE",
-    });
-
-    expect(observedDiagnostic).toEqual({
-      reason: "PRIVILEGE_NOT_ALLOWED",
-      unexpectedPrivilege: "CREATE VIEW",
-    });
-  });
-
-  it("does not expose an unexpected privilege token outside the strict safe alphabet", () => {
-    let unexpectedPrivilege: string | undefined;
-
-    verifyRuntimeDatabasePrivileges(
-      [
-        row("GRANT USAGE ON *.* TO `staged`@`%`"),
-        row(
-          "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE-VIEW ON `lessenc_staging`.* TO `staged`@`%`",
-        ),
-      ],
-      "lessenc_staging",
-      "hostinger-managed-single-user",
-      (diagnostic) => {
-        unexpectedPrivilege = diagnostic.unexpectedPrivilege;
-      },
-    );
-
-    expect(unexpectedPrivilege).toBeUndefined();
   });
 
   it.each([
