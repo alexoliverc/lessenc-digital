@@ -1,7 +1,7 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** P16-01–P16-07 COMPLETE / P16-08–P16-09 REMAINING
+**Status:** P16-01–P16-07 COMPLETE / P16-08 ISOLATED REPOSITORY CANDIDATE / P16-09 REMAINING
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
 **P16-06 validated hosted application release:** `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`
 **Repository baseline:** the current branch `HEAD`; documentation-only integration does not redefine which application release received P16-06 hosted validation unless that later commit is separately deployed and reconciled.
@@ -71,8 +71,15 @@ Hostinger automatically deployed that commit with `COMPLETED / PASS`. It contain
 hosted release path, the completed P16-05 Mercado Pago TEST baseline and the P16-06 hosted
 observability foundation.
 
-This does not prove complete P16 staging readiness. P16-06 and P16-07 are hosted validated, while
-P16-08 recovery evidence and P16-09 final gate remain separate and pending.
+This does not prove complete P16 staging readiness. P16-06 and P16-07 are hosted validated; P16-08
+has an isolated, local-synthetic repository candidate whose hosted recovery evidence remains
+pending; and P16-09 remains separate and pending.
+
+The P16-08 recovery design and its strict local-versus-hosted evidence boundary are defined in
+[`p16-backup-recovery-candidate.md`](../operations/p16-backup-recovery-candidate.md). The v2
+recovery unit is additive to frozen P11 evidence and couples an encrypted database dump, exact
+migration/release/environment identity and an encrypted private-storage snapshot under one
+machine-verifiable manifest. It does not grant provider, deploy, restore or deletion authority.
 
 ## 5. Runtime toolchain
 

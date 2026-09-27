@@ -1,6 +1,6 @@
 # P16 Staging Deployment Runbook
 
-**Status:** P16-01–P16-07 COMPLETE / P16-08–P16-09 REMAINING
+**Status:** P16-01–P16-07 COMPLETE / P16-08 ISOLATED REPOSITORY CANDIDATE / P16-09 REMAINING
 
 This runbook prepares a reproducible staging release without treating repository preparation as a
 deployment. No command in this document authorizes Hostinger, DNS, provider, migration, payment,
@@ -319,19 +319,26 @@ must re-prove the redirect. The application remains the sole route-sensitive CSP
 
 ## Backup, retention, restore and rollback
 
-The recovery unit remains database dump + private storage + Prisma migration hashes + integrity
-manifest. The P11/P15 bundle generator and verifier remain the local reference implementation.
+The frozen P11/P15 v1 bundle remains historical local evidence. The additive P16-08 v2 repository
+candidate is specified by
+[`p16-backup-recovery-candidate.md`](./p16-backup-recovery-candidate.md): encrypted database and
+private-storage artifacts, exact migration/release/environment identity, integrity verification,
+isolated-only restore instructions and explicit evidence scope.
 
 The approved release objectives are RPO <= 24 hours, RTO <= 8 hours and retention of 7 daily, 4
 weekly and 3 monthly recovery points. `npm run ops:p16:retention-plan` reads a metadata index from
-`P16_BACKUP_INDEX_FILE` and produces a read-only keep/delete-candidate plan. It never deletes a
-backup. Provider lifecycle configuration must apply deletion only after independent bundle
-verification and authorization.
+`P16_BACKUP_INDEX_FILE` and produces a deterministic `PLAN_ONLY` union of `keep` and
+`notRetained`. It rejects malformed/future data and never deletes a backup. `notRetained` is not
+deletion authority. Provider lifecycle mutation requires independent verification and explicit
+authorization.
 
-`npm run ops:p15:restore-validate -- --bundle <path>` remains non-destructive. A hosted restore must
-first target an isolated staging destination and prove manifest/checksum, migration history,
+`npm run ops:p16:backup-preflight`, `ops:p16:backup-database`, `ops:p16:backup`,
+`ops:p16:backup-verify`, `ops:p16:restore-isolated`, `ops:p16:measure-rpo`,
+`ops:p16:measure-rto` and `ops:p16:rollback-plan` implement the repository contract. Local restore
+only reconstructs verified artifacts in a new filesystem target and is marked `LOCAL_SYNTHETIC`.
+A hosted restore must target a new isolated database/storage namespace and prove migration history,
 database semantics, storage integrity and application behavior. Application rollback changes only
-the approved artifact; it is not a schema rollback or data restore.
+an approved compatible artifact; it is not schema rollback or data restore.
 
 ## Required hosted evidence
 

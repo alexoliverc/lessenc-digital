@@ -3,7 +3,7 @@
 **Última atualização:** 27/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
 **Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. P16-01–P16-07 estão COMPLETE. A release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`. P16-06 e P16-07 estão `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`.
-**Estado atual:** P16-07 — Hosted Security Validation foi encerrada após remediação e revalidação dos dois findings externos. `P16-07-F01 / HIGH` permanece no histórico como exposição visual do readiness token, agora `REMEDIATED / PASS` por rotação coordenada Hostinger/Grafana e monitor recorrente verde. `P16-07-F02 / MEDIUM` permanece no histórico como override CSP do Force HTTPS, agora `REMEDIATED / PASS` com SSL/CDN/DNS preservados, redirect HTTP -> HTTPS manual no `.htaccess`, Force HTTPS desabilitado e CSP route-sensitive novamente sob autoridade da aplicação no origin e edge. Ver [dossiê P16-07](docs/security/p16-hosted-security-validation.md). P16 não está COMPLETE; a candidata P16-08 permanece isolada e não integrada, e P16-09 não foi iniciada.
+**Estado atual:** P16-07 — Hosted Security Validation foi encerrada após remediação e revalidação dos dois findings externos. `P16-07-F01 / HIGH` permanece no histórico como exposição visual do readiness token, agora `REMEDIATED / PASS` por rotação coordenada Hostinger/Grafana e monitor recorrente verde. `P16-07-F02 / MEDIUM` permanece no histórico como override CSP do Force HTTPS, agora `REMEDIATED / PASS` com SSL/CDN/DNS preservados, redirect HTTP -> HTTPS manual no `.htaccess`, Force HTTPS desabilitado e CSP route-sensitive novamente sob autoridade da aplicação no origin e edge. Ver [dossiê P16-07](docs/security/p16-hosted-security-validation.md). P16 não está COMPLETE; P16-08 possui um candidato de repositório isolado, com validação local/sintética e sem evidência hosted ou integração canônica; ver [candidato P16-08](docs/operations/p16-backup-recovery-candidate.md). P16-09 não foi iniciada.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -41,6 +41,12 @@
   alcançou o estado das migrations, o mesmo endpoint por IP foi rejeitado com `P1011`/evidência TLS
   e o hostname canônico passou novamente. O build staging sintético também passou. Nenhum
   `prisma migrate deploy` ou mutation hosted foi executado.
+- P16-08 preserva os objetivos aprovados RPO <= 24 horas, RTO <= 8 horas e retenção 7 diária/4
+  semanal/3 mensal. O candidato isolado adiciona recovery unit v2 cifrada, dump staging fail-closed,
+  manifesto ligado a migrations/release/ambiente, retenção estritamente `PLAN_ONLY`, restore local
+  somente em `lessenc-recovery-test`, medição com escopo de evidência e rollback de aplicação sem
+  restore de dados ou reversão de schema. RPO/RTO hosted permanecem `UNKNOWN`; backup real,
+  exportação R2 e exercício físico/aplicacional de restore não foram executados.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
 - Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11, identidade/autenticação/administração P12, analytics P13, Security Hardening P14 e Observability & Operational Readiness P15 permanecem nas respectivas baselines canônicas. P13, P14 e P15 estão COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. O checkpoint técnico permanente da P15 permanece em `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Produção continua fora do escopo atual; P16 está em implementação interna e não está completa.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.
@@ -50,7 +56,7 @@
 ## Onde encontrar as decisões
 
 - [ROADMAP.md](ROADMAP.md): fases P00–P20; P13/P14/P15 encerradas; P15 COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; Gate C — OPERATIONS READY PASS; P16–P20 pendentes.
-- [docs/README.md](docs/README.md): índice canônico P00–P15, incluindo arquitetura, recuperação, incidentes e dossiê de validação P15.
+- [docs/README.md](docs/README.md): índice canônico P00–P16, incluindo arquitetura, recuperação, incidentes e candidatos de validação P16.
 - [P12 Final Gate](docs/operations/p12-final-gate.md): arquitetura final, backoffice, RBAC, auditoria, evidências, defer de recovery e limites Git.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
 - [Produto P01](docs/product/first-product-definition.md), [modelo P03](docs/architecture/domain-model.md), [stack P04](docs/architecture/runtime-toolchain-baseline.md) e [P04 exit review](docs/architecture/p04-exit-review.md).

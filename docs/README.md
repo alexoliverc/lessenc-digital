@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P15
+# Índice oficial da baseline documental LES-DIG P00–P16
 
-**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897`, PR #43 MERGED, merge técnico canônico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` e checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete`. Gate C — OPERATIONS READY está PASS. P16-01–P16-07 estão COMPLETE e a release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`; P16-07 está COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED. P16 não está completa; P16-08 e P16-09 permanecem.
+**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897`, PR #43 MERGED, merge técnico canônico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` e checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete`. Gate C — OPERATIONS READY está PASS. P16-01–P16-07 estão COMPLETE e a release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`; P16-07 está COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED. P16 não está completa; P16-08 possui somente um candidato de repositório isolado, ainda sem evidência hosted ou integração canônica, e P16-09 permanece pendente.
 
 ## Precedência e classificação das fontes
 
@@ -338,7 +338,7 @@ Grafana Cloud para readiness protegido recorrente, além de recovery e auto-reso
 O [dossiê P16-07](security/p16-hosted-security-validation.md) registra os controles aprovados, os
 negativos hosted e a remediação dos dois findings externos: rotação coordenada do readiness em
 Hostinger/Grafana e remoção do override CSP do Force HTTPS, preservando redirect, SSL, CDN e DNS.
-Recovery P16-08 permanece isolada/não integrada e o gate final P16-09 não foi iniciado.
+O [candidato P16-08](operations/p16-backup-recovery-candidate.md) implementa e valida localmente o backup cifrado v2, manifesto, dump guardado, retenção 7/4/3, restore isolado, medição RPO/RTO e rollback plan-only. Ele não contém evidência hosted, não foi integrado à branch P16 canônica e não fecha P16-08. O gate final P16-09 permanece pendente.
 
 P16-HDB-01 adds the owner-approved `P16-DB-DECISION-01`: Hostinger Managed MariaDB may use one
 physical database identity only under the explicit `hostinger-managed-single-user` mode, a guarded

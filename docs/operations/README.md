@@ -76,3 +76,7 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
   procedures.
 - [P16 Internal Repository Gate](./p16-internal-gate.md) — internal deliverables, finding
   disposition and the strict hosted/external stop boundary.
+- [P16-08 Backup and Recovery Candidate](./p16-backup-recovery-candidate.md) — isolated repository
+  candidate for encrypted recovery units, guarded database dumps, deterministic 7/4/3 retention,
+  integrity verification, isolated local restore, RPO/RTO evidence classification and plan-only
+  application rollback. Hosted execution remains pending.
