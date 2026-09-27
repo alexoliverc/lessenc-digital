@@ -234,6 +234,8 @@ Validation on the isolated candidate branch produced:
 - `git diff --check`: PASS;
 - staged high-risk secret-pattern scan: PASS.
 
-The build used only synthetic test/local configuration. No hosted database, R2, Hostinger,
-Mercado Pago or production operation was executed. The evidence above qualifies the repository
-candidate for independent review, not P16-08 completion.
+The build used explicit synthetic overrides for its database, authentication and private-storage
+inputs. Next.js reported the existing `.env.local` in its normal environment inventory; that file
+was not inspected or altered, and no value from it was printed. The build performed no hosted
+database, R2, Hostinger, Mercado Pago or production operation. The evidence above qualifies the
+repository candidate for independent review, not P16-08 completion.
