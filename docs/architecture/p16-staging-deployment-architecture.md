@@ -1,7 +1,7 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** P16-01–P16-07 COMPLETE / P16-08 ISOLATED REPOSITORY CANDIDATE / P16-09 REMAINING
+**Status:** P16-01–P16-07 COMPLETE / P16-08 INTEGRATED WITH PARTIAL HOSTED EVIDENCE / P16-09 REMAINING
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
 **P16-06 validated hosted application release:** `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`
 **Repository baseline:** the current branch `HEAD`; documentation-only integration does not redefine which application release received P16-06 hosted validation unless that later commit is separately deployed and reconciled.
@@ -1179,3 +1179,30 @@ direct real-provider validation; H3-E-C is real application-level provider valid
 in-process HTTP validation. At the H3-E closeout, deployment and deployed HTTP were not yet
 validated. P16-06 later supplied owner-verified Hostinger deployment and recurring deployed
 readiness evidence. Production and complete P16 readiness remain unauthorized/unvalidated.
+
+## P16-08 partial hosted recovery topology
+
+The 27/09/2026 exercise established this bounded recovery topology without altering the live
+staging database or application configuration:
+
+```text
+Hostinger deployed release 45b45e7
+  -> real MariaDB dump evidence (mechanism-only; original volume unencrypted)
+  -> read-only Cloudflare R2 source inventory/export
+  -> Windows EFS owner/SYSTEM work root
+  -> canonical encrypted bundle v2 + HMAC-SHA256
+       -> DPAPI CurrentUser key custody (separate from bundle)
+       -> private Google Drive encrypted copy (independent failure domain)
+       -> local synthetic exact restore, then plaintext cleanup
+  -> isolated private R2 recovery bucket with exact object restore
+```
+
+The isolated R2 target is `lessenc-digital-recovery-test-p1608`; public `r2.dev` access is disabled
+and no custom domain is attached. The source bucket remains unchanged. Google Drive holds only the
+already-encrypted bundle and is private/not shared. No database URL, R2 credential, encryption key
+or bearer token was persisted in Git or documentation.
+
+This topology is intentionally incomplete. It does not supply a new database dump created under
+encrypted working storage, an isolated hosted MariaDB import, a temporary recovery application or
+authoritative automated RPO/RTO evidence. It therefore augments the architecture with real partial
+evidence but does not change the P16-08 completion gate.

@@ -1,6 +1,6 @@
 # P16 Staging Deployment Runbook
 
-**Status:** P16-01–P16-07 COMPLETE / P16-08 ISOLATED REPOSITORY CANDIDATE / P16-09 REMAINING
+**Status:** P16-01–P16-07 COMPLETE / P16-08 INTEGRATED WITH PARTIAL HOSTED EVIDENCE / P16-09 REMAINING
 
 This runbook prepares a reproducible staging release without treating repository preparation as a
 deployment. No command in this document authorizes Hostinger, DNS, provider, migration, payment,
@@ -340,13 +340,28 @@ A hosted restore must target a new isolated database/storage namespace and prove
 database semantics, storage integrity and application behavior. Application rollback changes only
 an approved compatible artifact; it is not schema rollback or data restore.
 
+The 27/09/2026 partial hosted exercise used deployed release `45b45e7`, an EFS work root restricted
+to owner/SYSTEM and separate DPAPI key custody. It proved read-only export of the two-object R2
+source, v2/HMAC bundle creation and verification for real mechanism data, exact local restore,
+private Google Drive round-trip of the encrypted bundle and exact object restore into the isolated
+private bucket `lessenc-digital-recovery-test-p1608`. Source R2 objects were not mutated and no
+delete/sync ran. The off-R2 object is explicitly named `NONFINAL-MECHANISM`: the database dump used
+by it originated on an unencrypted volume and cannot be promoted to the final recovery point.
+
+Retention ran only as `PLAN_ONLY`; one verified point was retained under the 7/4/3 policy. Existing
+account cron jobs were proven unrelated to the L'Essenc database/storage and provide no scheduler
+authority. Raw RPO and local RTO diagnostics remain non-authoritative. A final run still requires a
+new dump created under encrypted working storage, isolated hosted MariaDB restore, migration and
+semantic validation, a recovery application environment and authoritative hosted RPO/RTO.
+
 ## Required hosted evidence
 
 P16-01 through P16-06 have supplied the hosted architecture/configuration/database/storage,
 reproducible deployment, Mercado Pago TEST and observability evidence recorded by the current phase
 authority. P16-06 and P16-07 are `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`. P16 still cannot
-close until P16-08 backup scheduling/encryption/off-site copy, isolated restore and measured
-RPO/RTO/rollback, and P16-09 final technical gate are complete.
+close until the remaining P16-08 database/application restore, scheduled-backup, authoritative
+RPO/RTO and rollback gates, and the P16-09 final technical gate are complete. The partial hosted
+storage/off-site evidence is not completion authority.
 
 For Hostinger MariaDB this explicitly includes migration privilege elevation, subsequent reduction,
 current-user and inherited/public grant evidence, and correction of the observed hosted

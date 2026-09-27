@@ -1,33 +1,40 @@
 # P16-08 — Backup, Restore, RPO/RTO, Retention & Rollback Candidate
 
-**Status:** P16-08 FIXED CANDIDATE / READY FOR INDEPENDENT RE-REVIEW
+**Status:** P16-08 INTEGRATED / PARTIAL HOSTED RECOVERY EVIDENCE / NOT COMPLETE
 
-**Isolated branch:** `phase/p16-08-backup-recovery`
+**Canonical branch:** `phase/p16-staging-deployment`
+
+**Integrated implementation release:** `45b45e7fc21c919e97f3ef8f84785888e5e32aa4`
 
 **R1 review baseline:** `fa70d7d3de9833394d6c4af3b99678949edc6b93`
 
 **Recovery objectives:** RPO <= 24 hours; RTO <= 8 hours; 7 daily, 4 weekly and 3 monthly points
 
 **Canonical boundary:** P16-07 is COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED in the current
-P16 baseline. This P16-08 fixed candidate does not reinterpret P16-07 and does not close P16-08.
+P16 baseline. The P16-08 tooling is integrated and deployed, but the partial exercise below does
+not reinterpret P16-07 and does not close P16-08.
 
-This document defines the repository-side P16-08 candidate. It does not prove that a hosted backup
-has run, that R2 has been exported, that retention has been scheduled, or that a controlled hosted
-restore has passed. It authorizes no deploy, provider mutation, live deletion or staging restore.
+This document defines the repository-side P16-08 contract and records only the provider evidence
+actually obtained on 27/09/2026. The first real database dump proves the guarded dump mechanism but
+was created on an unencrypted volume and is not the final recovery point. The subsequent exercise
+proved encrypted working storage, real R2 export, a v2 bundle, independent off-R2 copy and isolated
+storage restore, but it could not create the mandated new matching database dump. It authorizes no
+live deletion or restore over staging.
 
 ## Evidence classification
 
 | Capability | Repository/local evidence | Hosted/provider evidence |
 | --- | --- | --- |
-| database guard and dump process | MariaDB-family preflight and synthetic PASS | real client/provider compatibility NOT EXECUTED |
-| encrypted recovery unit v2 | HKDF-separated encryption/authentication and synthetic PASS | NOT EXECUTED |
-| manifest verification | canonical HMAC and artifact binding synthetic PASS | NOT EXECUTED |
-| private-storage export | consumes a synthetic filesystem export | real R2 export NOT EXECUTED |
-| retention 7/4/3 | deterministic planner PASS | schedule/lifecycle/delete NOT EXECUTED |
-| isolated restore | encrypted artifacts restored to a new local target | physical DB/R2/app exercise NOT EXECUTED |
-| RPO <= 24 h | calculation contract PASS | status UNKNOWN — no hosted backup evidence |
-| RTO <= 8 h | local timing machinery PASS | status UNKNOWN — no hosted restore evidence |
-| application rollback | compatibility planner PASS | deployment/rollback NOT EXECUTED |
+| database guard and dump process | MariaDB-family preflight and synthetic PASS | real guarded dump PASS as mechanism evidence; new encrypted recovery-point dump BLOCKED |
+| encrypted recovery unit v2 | HKDF-separated encryption/authentication and synthetic PASS | real-data mechanism bundle PASS; not the final recovery point |
+| manifest verification | canonical HMAC and artifact binding synthetic PASS | independent verification PASS for the mechanism bundle |
+| private-storage export | filesystem export contract PASS | real R2 source export PASS under EFS; source unchanged |
+| off-R2 copy | provider-boundary contract | private Google Drive round-trip PASS for the encrypted mechanism bundle |
+| retention 7/4/3 | deterministic planner PASS | PLAN_ONLY PASS on one verified point; required history/schedule unproven |
+| isolated restore | encrypted artifacts restored to a new local target | local exact restore PASS and isolated R2 restore PASS; isolated MariaDB/app NOT EXECUTED |
+| RPO <= 24 h | calculation contract PASS | status UNKNOWN — diagnostic age is not authoritative scheduler evidence |
+| RTO <= 8 h | local timing machinery PASS | status UNKNOWN — no hosted database/application recovery interval |
+| application rollback | compatible plan-only result PASS | hosted deployment/rollback NOT EXECUTED |
 
 ## Canonical recovery unit v2
 
@@ -225,6 +232,74 @@ OS permission-denial injection is not portable on the Windows validation host an
 The code preserves unexpected filesystem errors and the hosted exercise must include denied
 read/write identities without destructive injection.
 
+## Hosted recovery exercise — 27/09/2026
+
+The canonical branch and deployed Hostinger build resolved to
+`45b45e7fc21c919e97f3ef8f84785888e5e32aa4`. The current migration-set SHA-256 was
+`aea9e926e4910ccccf2e254465a5078b3eac0fcb2ed7a33aeab8a15dddce4567`. Public health returned
+`200 / {"status":"ok"}` with `Cache-Control: no-store`; the public home route returned 200.
+Unauthenticated readiness remained fail-closed as 404/no-store.
+
+The owner-created real MariaDB dump `p16-08-20260927T222851383Z` remains mechanism evidence only.
+It used MariaDB 11.8.6 against the hosted MariaDB 11.8.9 service over verified TLS, completed in
+10,078 ms, produced 54,580 bytes and SHA-256
+`5a1c2931629fe08d8c92eaca6b3e541c4d7c09eafc69fe84b87498713b35726a`, and recorded
+`SINGLE_TRANSACTION_NO_LOCKS`, `TLS_VERIFIED` and the deployed release. Because its plaintext was
+created on an unencrypted C: volume, it is explicitly excluded from the final closeout point.
+
+A new empty work root was created outside Git with Windows EFS and an inheritance-disabled ACL
+granting only the current Windows owner and SYSTEM. BitLocker/VHDX was not available without an
+elevated administrator token, so EFS was used as the least-impact Windows encryption equivalent and
+verified with an encrypted child probe before any provider payload was written.
+
+The real source R2 namespace was exported read-only into that EFS root. Before/after inventory
+remained exactly two objects and 22 total bytes. Local MD5 values matched the provider ETags, local
+SHA-256 values were independently recorded, and both source objects retained their original
+21/09/2026 last-modified timestamps. The source bucket retained disabled `r2.dev`, zero custom
+domains and no source-object mutation.
+
+The canonical CLI then created and independently verified a real-data **non-final mechanism
+bundle** for the earlier dump. The manifest is version 2 and HMAC-SHA256 authenticated under key ID
+`p16-08-mechanism-20260927-k1`; its five files total 60,572 bytes. The 32-byte master key was never
+printed or placed in the bundle: it is held separately as a Windows DPAPI CurrentUser blob under an
+owner/SYSTEM-only ACL. Canonical isolated restore produced exact database and storage hashes, was
+classified `LOCAL_SYNTHETIC`, and measured 47 ms. Its restored plaintext directory was deleted
+after validation.
+
+Only the already-encrypted bundle was archived for the independent copy. The ZIP contains no
+plaintext `.sql`, is 58,145 bytes and has SHA-256
+`e61d027a5af337d083b2e3ec0caf7ca9ef682dde5f4c3ec6514596209d6a2cdf`. It was uploaded to a private,
+not-shared Google Drive folder outside the Cloudflare failure domain. Provider inventory reported
+the exact byte count and download capability; a full download round-trip reproduced the exact
+SHA-256.
+
+Storage restoration was also exercised against the new isolated R2 bucket
+`lessenc-digital-recovery-test-p1608`. Both restored objects have the exact source sizes, ETags and
+contents. The target has disabled `r2.dev` and zero custom domains; the staging source inventory
+remained unchanged. No R2 delete or sync operation occurred, and the isolated target remains for
+audit.
+
+The retention planner ran in `PLAN_ONLY` for the one verified database point and preserved the
+approved 7 daily / 4 weekly / 3 monthly UTC policy with one `keep` and zero `notRetained`. This
+proves planner execution, not historical retention coverage. Eight existing Hostinger cron entries
+were audited: their script names and outputs did not reference the L'Essenc staging database,
+bucket or workload, so they are not accepted as P16-08 scheduler evidence. The raw RPO calculator
+reported an age of 1,919,267 ms and local assessment PASS, but correctly retained hosted status
+`UNKNOWN` because no authoritative automated observation exists.
+
+The rollback planner accepted current release `45b45e7` and prior release `a6959bb` because their
+migration sets are identical and emitted `APPLICATION_ROLLBACK_PLAN_ONLY`, with database restore
+and schema rollback both false. No hosted deploy or rollback occurred.
+
+The remaining blocker is exact: the current process, repository files, authenticated Hostinger
+environment-variable API and surviving same-user processes expose no usable `DATABASE_URL` or
+`DB_RUNTIME_URL`; Hostinger masks stored values. Resetting the live staging user's password cannot
+be made safe because the API requires a full environment replacement whose other values are also
+masked. Consequently the mandated new dump under encrypted working storage, isolated hosted
+MariaDB import, migration/semantic checks, temporary recovery application, authoritative RPO/RTO
+and hosted rollback rehearsal remain unproven. Creating a separate isolated Hostinger database is
+also a provider write that requires the Hostinger connector's immediate write confirmation.
+
 ## Exact hosted evidence required to close P16-08
 
 P16-08 remains open until an authorized independent exercise supplies all of the following:
@@ -248,9 +323,11 @@ P16-08 remains open until an authorized independent exercise supplies all of the
     with database/data restoration remaining separate;
 13. sanitized audit evidence, failure/cleanup records and independent review.
 
-Until then, hosted RPO and RTO are `UNKNOWN`, retention scheduling and provider protection are
-unproven. The repair may be labeled **P16-08 FIXED CANDIDATE / READY FOR INDEPENDENT RE-REVIEW**;
-P16-08 itself is not complete.
+The 27/09/2026 exercise partially satisfies items 1, 3–6, 8–9 and 12, but none is allowed to mask
+the absent new database point or the lack of isolated database/application validation. Hosted RPO
+and RTO remain `UNKNOWN`; scheduled coverage, final same-recovery-point protection, physical
+MariaDB restore and recovery-application probes remain unproven. The exact status is **P16-08
+INTEGRATED / PARTIAL HOSTED RECOVERY EVIDENCE / NOT COMPLETE**.
 
 ## Repository validation evidence
 
@@ -268,5 +345,20 @@ Validation on the isolated candidate branch produced:
 The build used explicit synthetic overrides for its database, authentication and private-storage
 inputs. Next.js reported the existing `.env.local` in its normal environment inventory; that file
 was not inspected or altered, and no value from it was printed. The build performed no hosted
-database, R2, Hostinger, Mercado Pago or production operation. The evidence above qualifies the
-repository candidate for independent review, not P16-08 completion.
+database, R2, Hostinger, Mercado Pago or production operation. The later hosted exercise is
+recorded separately above and also does not qualify P16-08 for completion.
+
+Closeout documentation validation on the canonical branch produced:
+
+- focused recovery/retention/staging-contract/release-binding suite: 4 files / 94 tests PASS;
+- `APP_ENV=test`, `NODE_ENV=test` full `npm run check`: lint/typecheck/Prisma generate PASS,
+  100 test files / 955 tests PASS and format check PASS;
+- optimized staging production build: PASS with local P06 database configuration, process-only
+  synthetic secrets and an ephemeral EFS private-storage directory removed afterward;
+- `npm audit --audit-level=low`: 0 vulnerabilities;
+- `git diff --check` and changed-content secret scan: PASS.
+
+An initial `npm run check` invocation without explicit `APP_ENV` was rejected by three test files
+because the shell context resolved the application environment as unknown. It was not counted as a
+product failure; the complete gate was rerun in the repository's canonical test environment and
+passed as recorded above.
