@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P15
 
-**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897`, PR #43 MERGED, merge técnico canônico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` e checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete`. Gate C — OPERATIONS READY está PASS. P16-01–P16-05 estão COMPLETE e a release hosted atual é `acd03ada8a452fdb68c0da9c812f95b981f8f05d`; P16-06 possui candidato interno, mas monitoramento independente, entrega real de alertas/incidentes e status público permanecem pendentes. P16 não está completa.
+**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897`, PR #43 MERGED, merge técnico canônico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` e checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete`. Gate C — OPERATIONS READY está PASS. P16-01–P16-06 estão COMPLETE e a release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`; P16-06 está COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED. P16-07 é a próxima subfase. P16 não está completa.
 
 ## Precedência e classificação das fontes
 
@@ -325,15 +325,17 @@ push, PR, merge, checkpoint, deploy e P16 não foram executados.
 The paragraph above preserves the pre-integration candidate checkpoint. P15 was later integrated
 and checkpointed as recorded at the top of this index.
 
-## P16 — Staging Deployment — P16-01–P16-05 COMPLETE / P16-06 INTERNAL CANDIDATE
+## P16 — Staging Deployment — P16-01–P16-06 COMPLETE / P16-07 NEXT
 
 A [arquitetura congelada P16](architecture/p16-staging-deployment-architecture.md), o
 [runbook de staging](operations/p16-staging-runbook.md) e o
 [gate interno](operations/p16-internal-gate.md) definem configuration/preflight fail-closed,
 migration deploy guard, storage provider-neutral, protected readiness, hosted smoke, Mercado Pago
 TEST, observability provider-neutral, backup/retention/recovery and rollback boundaries. A release
-hosted e a validação Mercado Pago TEST pertencem a P16-04/P16-05 já encerradas. Provas reais de
-monitoramento/alerta/incidente/status, segurança hosted e recovery continuam pendentes.
+hosted e a validação Mercado Pago TEST pertencem a P16-04/P16-05 já encerradas. A P16-06 registra
+evidência owner-verified de Better Stack para liveness público, incidente/notificação/status e de
+Grafana Cloud para readiness protegido recorrente, além de recovery e auto-resolution reais. A
+segurança hosted P16-07, recovery P16-08 e gate final P16-09 continuam pendentes.
 
 P16-HDB-01 adds the owner-approved `P16-DB-DECISION-01`: Hostinger Managed MariaDB may use one
 physical database identity only under the explicit `hostinger-managed-single-user` mode, a guarded

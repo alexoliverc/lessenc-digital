@@ -2,8 +2,8 @@
 
 **Última atualização:** 26/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. P16-01–P16-05 estão COMPLETE. A release hosted de staging atual é `acd03ada8a452fdb68c0da9c812f95b981f8f05d`. P16-06 possui candidato interno local; as provas externas de monitoramento, alert delivery, incident notification e status público permanecem pendentes.
-**Estado atual:** P16 — Staging Deployment está em P16-06 — Hosted Observability, Alerting & Service Health. A base preserva configuração staging fail-closed, migration guard, banco hosted, R2 privado, readiness autenticado, release reproduzível e Mercado Pago TEST hosted. O candidato P16-06 adiciona apenas contratos provider-neutral para monitoramento e entrega de alerta/incidente, validação fail-closed e documentação; nenhum provider, destino, DNS/TLS, status page ou novo deploy foi configurado. P16 não está COMPLETE.
+**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. P16-01–P16-06 estão COMPLETE. A release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`. P16-06 está `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`, com evidência owner-verified de liveness público, readiness protegido recorrente, alerta/incidente real controlado, notificação, acknowledgement, recovery e status público.
+**Estado atual:** P16 — Staging Deployment avança para P16-07 — Hosted Security Validation. A base preserva configuração staging fail-closed, migration guard, banco hosted, R2 privado, readiness autenticado, release reproduzível, Mercado Pago TEST hosted e observabilidade hosted validada. P16-06 combinou contratos provider-neutral com Better Stack para liveness/status/incidente e Grafana Cloud Synthetic Monitoring para readiness protegido, sem transferir autoridade de pagamentos, pedidos, entitlements, autenticação, banco, storage ou Mercado Pago ao monitoramento. P16 não está COMPLETE; P16-07, P16-08 e P16-09 permanecem.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -2073,8 +2073,9 @@ intact, and local filesystem remains rejected as staging/production authority.
 Synthetic focused validation: 10 files and 88 tests PASS. The full quality gate passes with 97
 files and 854 tests, plus lint, typecheck, formatting, optimized staging build and a zero-finding
 production dependency audit. Subsequent H3-E evidence validated the production H3-D factory and
-the real private sentinel against R2 from a controlled local process. Application deployment and
-deployed/hosted HTTP validation remain pending.
+the real private sentinel against R2 from a controlled local process. P16-06 later supplied
+owner-verified deployed/hosted HTTP readiness evidence through the recurring authenticated Grafana
+check; complete P16 application readiness remains pending P16-07 through P16-09.
 
 <!-- P16-H3-E-REAL-R2-EVIDENCE-CLOSEOUT -->
 
@@ -2082,7 +2083,7 @@ deployed/hosted HTTP validation remain pending.
 
 Date: 2026-09-21
 
-Status: H3-E-A COMPLETE / H3-E-B COMPLETE / H3-E-C COMPLETE / DEPLOYMENT PENDING
+Status: H3-E-A COMPLETE / H3-E-B COMPLETE / H3-E-C COMPLETE / DEPLOYED READINESS LATER PASSED IN P16-06
 
 H3-E-A passed only the pre-provisioning gate. It froze the intended staging bucket name
 `lessenc-digital-staging-private`, default jurisdiction, Automatic location, Standard storage
@@ -2141,20 +2142,21 @@ content. Application runtime capability remains backend-proxied and limited to `
 
 Evidence boundaries remain explicit: earlier H3-C/H3-D tests are synthetic; H3-E-B is direct real
 provider validation; H3-E-C is real application-level provider validation plus local in-process
-HTTP validation. Deployed/hosted HTTP and production remain unvalidated. Application deployment
-has not been executed, and P16 remains incomplete.
+HTTP validation. At the H3-E closeout, application deployment and deployed HTTP were still pending.
+P16-06 later supplied owner-verified Hostinger deployment and recurring deployed readiness evidence;
+production and complete P16 readiness remain unauthorized/unvalidated.
 
-<!-- P16-06-HOSTED-OBSERVABILITY-INTERNAL-CANDIDATE -->
+<!-- P16-06-HOSTED-OBSERVABILITY-HOSTED-CLOSEOUT -->
 
-## P16-06 — Hosted Observability internal candidate
+## P16-06 — Hosted Observability hosted closeout
 
 Date: 2026-09-26
 
-Status: `INTERNAL IMPLEMENTATION / PASS / HOSTED PROOF PENDING`
+Status: `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`
 
-The current branch/release baseline is
-`acd03ada8a452fdb68c0da9c812f95b981f8f05d`. P16-01 through P16-05 are complete under the latest
-owner authority. P16-06 preserves the P15 observability contracts and adds a provider-neutral,
+The P16-06 implementation commit and validated hosted application release are
+`5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`. P16-01 through P16-06 are complete under the latest
+owner authority. P16-06 preserves the P15 observability contracts and provides a provider-neutral,
 fail-closed repository foundation for:
 
 - public liveness monitoring at `/api/health`;
@@ -2163,10 +2165,19 @@ fail-closed repository foundation for:
 - deterministic validation of alert signals;
 - a bounded firing/deduplication/delivery envelope and delivery port for a future provider;
 - incident routing metadata using the frozen abstract owners;
-- the existing sanitized service-health projection for the planned `status.lessenc.com.br` origin.
+- the existing sanitized service-health projection for the public `status.lessenc.com.br` origin.
 
-No observability provider, account, API token, destination, webhook, DNS, TLS, status-page host or
-external monitor was selected or provisioned. No database/storage/payment mutation, migration,
-dependency change or deployment was performed. P16-06 remains subject to ChatGPT review and later
-hosted evidence for independent liveness, protected readiness, real delivery/acknowledgement,
-incident notification and public-status provisioning according to the owner decision.
+Owner-verified hosted evidence records Hostinger deployment PASS for that release; public health
+HTTP 200 with exact `ok` and unauthenticated readiness HTTP 404, both `no-store`; one permanent
+Better Stack public-liveness monitor; recurring Grafana Cloud protected readiness HTTP 200 `ready`
+with provider-secret retrieval and redacted authorization; a controlled real Better Stack incident
+after a successful Better Stack test alert, with real e-mail delivery, human acknowledgement,
+recovery detection and automatic resolution; cleanup of the temporary monitor; and
+`status.lessenc.com.br` online over HTTPS, backed only by the real Website liveness monitor. The
+readiness secret value is not documented and remains a staging-only credential that must be rotated
+before production authorization.
+
+Observability remains evidence, never business or infrastructure authority. No monitoring action
+mutated application, database, R2, Mercado Pago, payment, order, entitlement or authentication
+state. P16 remains incomplete. P16-07 Hosted Security Validation is next, followed by P16-08 and
+P16-09; production remains unauthorized.

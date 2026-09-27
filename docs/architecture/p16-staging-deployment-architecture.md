@@ -1,9 +1,10 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** P16-01–P16-05 COMPLETE / P16-06 INTERNAL IMPLEMENTATION CANDIDATE / EXTERNAL OBSERVABILITY PROOF PENDING
+**Status:** P16-01–P16-06 COMPLETE / P16-06 PASS / DOCUMENTED / HOSTED VALIDATED / P16-07 NEXT
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
-**Current P16 working baseline and hosted release:** `acd03ada8a452fdb68c0da9c812f95b981f8f05d`
+**P16-06 validated hosted application release:** `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`
+**Repository baseline:** the current branch `HEAD`; documentation-only integration does not redefine which application release received P16-06 hosted validation unless that later commit is separately deployed and reconciled.
 **Application hosting:** Hostinger Managed Node / Web App
 **Current staging hostname:** `https://lessenc.com.br`
 
@@ -62,16 +63,16 @@ The P16 implementation branch is:
 
 `phase/p16-staging-deployment`
 
-The current hosted staging release commit is:
+The P16-06 validated hosted application release commit is:
 
-`acd03ada8a452fdb68c0da9c812f95b981f8f05d`
+`5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`
 
-That commit has demonstrated the reproducible hosted release path and completed P16-05 Mercado Pago
-TEST validation. It preserves the earlier hosted build evidence for dependency installation, Prisma
-Client generation, Next.js compilation, TypeScript validation and static generation.
+Hostinger automatically deployed that commit with `COMPLETED / PASS`. It contains the reproducible
+hosted release path, the completed P16-05 Mercado Pago TEST baseline and the P16-06 hosted
+observability foundation.
 
-This does not yet prove complete P16 staging readiness. P16-06 observability delivery, P16-07
-hosted security and P16-08 recovery evidence remain separate gates.
+This does not prove complete P16 staging readiness. P16-06 is hosted validated, while P16-07 hosted
+security, P16-08 recovery evidence and P16-09 final gate remain separate and pending.
 
 ## 5. Runtime toolchain
 
@@ -298,8 +299,9 @@ P16-06 preserves the following topology:
 application
 -> canonical structured logs / metrics / completed local spans
 -> provider-neutral monitoring and alert contracts
--> future external collector / monitor / alert provider
--> future incident destination
+-> Better Stack public liveness / incident / public status
+-> Grafana Cloud protected readiness
+-> e-mail incident destination
 -> sanitized public status projection
 ```
 
@@ -316,24 +318,51 @@ token is never accepted in a URL or serialized into the monitoring plan.
 
 The alert-delivery foundation accepts only a firing result from the deterministic P15 rules and
 projects a bounded envelope with rule, public component, severity, abstract owner, stable
-deduplication key, occurrence count and UTC evaluation time. A future provider adapter receives no
-Payment, Order, Entitlement, database or mutation capability. No provider adapter or live
-destination is selected or configured by P16-06.
+deduplication key, occurrence count and UTC evaluation time. Provider adapters receive no Payment,
+Order, Entitlement, database or mutation capability.
 
-The public-status foundation remains the existing sanitized service-health projection for Website,
-Checkout, Payments, Buyer Access / Digital Delivery and Admin. `status.lessenc.com.br` is only the
-planned public origin; there is no DNS/TLS/hosting/publication action in this gate, and raw readiness
-is never a public-status data source.
+The application-side canonical public-service model remains the sanitized service-health projection
+for Website, Checkout, Payments, Buyer Access / Digital Delivery and Admin. The hosted P16-06 status
+implementation does not directly consume that projection. `status.lessenc.com.br` is currently a
+Better Stack status page with one public `Website` resource backed by the permanent
+`L'ESSENC Public Liveness` monitor for `https://lessenc.com.br/api/health`.
 
-P16 must still provide hosted operational validation including independent external liveness,
-protected readiness monitoring, real alert delivery, acknowledgement/evidence, incident routing
-and hosted service-health evidence.
+P16-06 does not claim a direct service-health-projection-to-Better-Stack integration. Raw protected
+readiness is never a public-status source. Future public components must use sanitized, backed
+operational signals and must not be published as Checkout, Payments, Buyer Access / Digital Delivery
+or Admin until real monitored evidence exists for those components.
+
+Owner-verified P16-06 hosted evidence records:
+
+- Hostinger deployment `COMPLETED / PASS` for commit
+  `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`;
+- public hosted health HTTP 200 with exact `{"status":"ok"}` and `Cache-Control: no-store`;
+- unauthenticated hosted readiness HTTP 404 with exact `{"status":"not_found"}` and
+  `Cache-Control: no-store`;
+- one permanent Better Stack monitor, `L'ESSENC Public Liveness`, checking `/api/health` every
+  three minutes with keyword validation, e-mail notifications and one linked public status page;
+- Better Stack test-alert e-mail delivery PASS;
+- recurring Grafana Cloud Synthetic Monitoring check `lessenc-protected-readiness` from Calgary,
+  retrieving secret reference `p16-readiness-token`, sending a redacted bearer header and proving
+  HTTP 200, exact `{"status":"ready"}` and `Cache-Control: no-store` at 100% for the observed run;
+- a controlled real Better Stack incident created from an expected HTTP 404 at
+  `/__p16-controlled-alert-probe__`, with separate real monitor-failure e-mail delivery and human
+  acknowledgement;
+- recovery after switching the temporary monitor to `/api/health`, followed by automatic incident
+  resolution and deletion of the temporary monitor;
+- `status.lessenc.com.br` online over HTTPS with HTTP 200, using CNAME
+  `statuspage.betteruptime.com`, TTL 300, and owner-verified public-resolver checks through
+  `1.1.1.1` and `8.8.8.8`.
 
 External monitoring must not depend exclusively on the same failure domain as the application.
 
 Numerical SLO targets remain `OPEN_STAGING_BASELINE` until hosted samples exist. Monitoring,
 logging, alerts and status projections remain evidence only and cannot mutate financial,
 commercial, entitlement or authorization state.
+
+No readiness-token value is recorded. The provider logs showed only
+`Bearer ***SECRET_REDACTED***`. The token remains staging-only and must be rotated before production
+authorization. Production remains unauthorized.
 
 ## 15. Backup and recovery
 
@@ -439,7 +468,7 @@ the Hostinger environment must be corrected externally.
 
 ### P16-F06 — Cloudflare R2 private storage validated locally
 
-`OWNER APPROVED / IMPLEMENTED / REAL PROVIDER VALIDATED LOCALLY / DEPLOYMENT PENDING`.
+`OWNER APPROVED / IMPLEMENTED / REAL PROVIDER VALIDATED LOCALLY / DEPLOYED READINESS VALIDATED IN P16-06`.
 
 Cloudflare R2 Standard is the canonical hosted private-storage provider for P16.
 
@@ -449,24 +478,27 @@ implementation is `S3CompatiblePrivateResourceStorage` and uses the S3-compatibl
 
 The adapter, environment contract, dedicated private staging bucket, bucket-scoped runtime
 credentials and readiness sentinel are complete. Direct real-provider validation and controlled
-local validation through the actual H3-C/H3-D application paths pass. Deployed/hosted HTTP proof
-remains pending; this evidence does not claim production validation.
-### P16-F07 — Hosted readiness access control missing
+local validation through the actual H3-C/H3-D application paths pass. P16-06 later supplied
+deployed/hosted HTTP readiness proof; this evidence does not claim production validation or hosted
+protected buyer-delivery validation.
+### P16-F07 — Hosted readiness access control
 
-`REMEDIATED IN CODE`: server-only bearer authentication denies generic unauthorized requests before
-dependency probes. Hosted validation remains required.
+`REMEDIATED / HOSTED VALIDATED`: server-only bearer authentication denies generic unauthorized
+requests before dependency probes. Owner-verified hosted evidence records unauthenticated HTTP 404
+and recurring externally authenticated HTTP 200 `ready`, with a redacted bearer header and no-store.
 
 ### P16-F08 — Hosted recovery implementation pending
 
 Hosted backup scheduling, retention and measured restore evidence remain pending.
 
-### P16-F09 — Hosted observability delivery pending
+### P16-F09 — Hosted observability delivery
 
-`REPOSITORY FOUNDATION IMPLEMENTED / EXTERNAL PROOF PENDING`: monitor configuration, safe secret
-reference, deterministic alert-delivery envelope, incident-routing metadata and sanitized public
-status projection exist without a provider dependency. External collector/monitor selection,
-independent probe execution, real delivery, acknowledgement evidence, incident destination,
-status-page provisioning and DNS/TLS remain pending owner/provider decisions.
+`COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`: the repository foundation is deployed; Better
+Stack public liveness and Grafana protected readiness run externally; the readiness secret remains
+redacted; a controlled real incident produced e-mail delivery, human acknowledgement, recovery and
+automatic resolution; the temporary monitor was deleted; and `status.lessenc.com.br` is online over
+HTTPS with one backed Website resource. P16-07, P16-08 and P16-09 remain pending, so P16 is not
+complete.
 
 ## 17. Execution sequence
 
@@ -1026,8 +1058,8 @@ At H3-C closeout, hosted readiness was not yet complete.
 `PRIVATE_STORAGE_HEALTHCHECK_KEY=_health/p16-readiness` remains reserved for H3-D.
 
 The following H3-D gate implemented and synthetically validated that independent sentinel path.
-H3-E-C subsequently supplied bounded real-provider application evidence; deployed/hosted HTTP
-validation remains pending.
+H3-E-C subsequently supplied bounded real-provider application evidence. P16-06 later supplied
+owner-verified deployed/hosted HTTP readiness evidence.
 
 <!-- P16-H3-D-R2-PRIVATE-READINESS-SENTINEL -->
 
@@ -1057,8 +1089,9 @@ and local filesystem authority remains prohibited in staging and production.
 
 The original H3-D implementation gate used only synthetic SDK responses. Subsequent H3-E evidence
 created and verified the real private sentinel, exercised the production H3-D factory against R2
-from a controlled local process and validated the authenticated readiness composition. Deployment
-and deployed/hosted HTTP evidence remain pending.
+from a controlled local process and validated the authenticated readiness composition. P16-06 later
+supplied owner-verified deployed/hosted HTTP evidence through recurring authenticated Grafana
+readiness; complete P16 application readiness remains pending P16-07 through P16-09.
 
 Validated evidence at the H3-D pre-commit boundary:
 
@@ -1071,7 +1104,7 @@ Validated evidence at the H3-D pre-commit boundary:
 
 ## P16-H3-E — Real R2 provisioning and application evidence
 
-**Current status:** H3-E-A COMPLETE / H3-E-B COMPLETE / H3-E-C COMPLETE / DEPLOYMENT PENDING
+**Current status:** H3-E-A COMPLETE / H3-E-B COMPLETE / H3-E-C COMPLETE / DEPLOYED READINESS LATER PASSED IN P16-06
 
 H3-E-A was pre-provisioning only. It froze the intended bucket name
 `lessenc-digital-staging-private`, default jurisdiction, Automatic location, Standard storage
@@ -1128,5 +1161,6 @@ infrastructure. Neither is buyer/product content.
 
 Evidence levels are not interchangeable: pre-existing H3-C/H3-D suites are synthetic; H3-E-B is
 direct real-provider validation; H3-E-C is real application-level provider validation and local
-in-process HTTP validation. Deployed/hosted HTTP and production are not validated. No application
-deployment has been executed, so P16 remains incomplete.
+in-process HTTP validation. At the H3-E closeout, deployment and deployed HTTP were not yet
+validated. P16-06 later supplied owner-verified Hostinger deployment and recurring deployed
+readiness evidence. Production and complete P16 readiness remain unauthorized/unvalidated.

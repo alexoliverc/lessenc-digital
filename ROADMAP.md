@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure and P14 — Security Hardening remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as canonical technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets that technical merge and must not be retargeted by the documentation closeout. Gate C — OPERATIONS READY is PASS. P16-01 through P16-05 are COMPLETE; the current hosted staging release is `acd03ada8a452fdb68c0da9c812f95b981f8f05d`. P16-06 has an internal repository candidate while independent monitoring, real alert/incident delivery and public-status provisioning remain pending. P16 is not complete.
+**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure and P14 — Security Hardening remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as canonical technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets that technical merge and must not be retargeted by the documentation closeout. Gate C — OPERATIONS READY is PASS. P16-01 through P16-06 are COMPLETE; the P16-06 validated hosted application release is `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`. P16-06 is COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED. P16-07 — Hosted Security Validation is next. P16 is not complete.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1203,7 +1203,7 @@ PASS before release-environment validation.
 
 ## P16 — Staging Deployment
 
-**Status:** P16-01–P16-05 COMPLETE / P16-06 INTERNAL IMPLEMENTATION CANDIDATE / EXTERNAL PROOF PENDING
+**Status:** P16-01–P16-06 COMPLETE / P16-06 HOSTED VALIDATED / P16-07 NEXT
 
 ### Objective
 
@@ -1259,9 +1259,11 @@ Repository-side preparation includes the staging configuration/preflight contrac
 `prisma migrate deploy`, explicit hosted storage boundary, protected readiness, smoke tooling,
 TEST-only payment configuration checks, provider-neutral hosted observability and
 recovery/retention planning. P16-04 supplied the reproducible hosted release and P16-05 supplied
-Mercado Pago TEST hosted validation. Independent monitoring, real alert/incident delivery, public
-status provisioning, remaining hosted security and recovery evidence are still required before P16
-can be declared complete.
+Mercado Pago TEST hosted validation. P16-06 supplied owner-verified hosted evidence for independent
+public liveness, recurring protected readiness, controlled real alert/incident delivery, e-mail
+notification, acknowledgement, recovery/auto-resolution and the HTTPS public status origin. P16-07
+hosted security, P16-08 recovery evidence and P16-09 final gate remain required before P16 can be
+declared complete.
 
 P16-HDB-01 records the explicit owner decision to use Hostinger Managed MariaDB with one managed
 database user and controlled privilege rotation. The additive repository contract preserves the

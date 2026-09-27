@@ -1,6 +1,6 @@
 # P16 Staging Deployment Runbook
 
-**Status:** P16-01–P16-05 COMPLETE / P16-06 INTERNAL CANDIDATE / EXTERNAL OBSERVABILITY PROOF REQUIRED
+**Status:** P16-01–P16-06 COMPLETE / P16-06 PASS / DOCUMENTED / HOSTED VALIDATED / P16-07 NEXT
 
 This runbook prepares a reproducible staging release without treating repository preparation as a
 deployment. No command in this document authorizes Hostinger, DNS, provider, migration, payment,
@@ -182,7 +182,8 @@ identifier or raw provider error detail.
 
 Provider approval, adapter/environment implementation, Cloudflare provisioning, sentinel creation,
 direct real-provider validation and controlled local validation through the real application paths
-are complete. Deployed/hosted HTTP validation remains pending.
+are complete. P16-06 later supplied deployed/hosted HTTP readiness evidence through the recurring
+authenticated Grafana check. This does not replace P17 protected buyer-delivery validation.
 ## Protected readiness and hosted smoke
 
 `GET /api/health` remains public and minimal. `GET /api/readiness` requires:
@@ -210,6 +211,12 @@ npm run ops:p16:hosted-smoke
 The smoke checks public liveness, denial of unauthenticated readiness, authenticated readiness,
 no-store and the required hosted security headers. It never prints the readiness token.
 
+For the P16-06 hosted release, the owner-verified PowerShell smoke executed only public health and
+unauthenticated readiness: health returned HTTP 200 `{"status":"ok"}`, readiness returned HTTP 404
+`{"status":"not_found"}`, and both returned `Cache-Control: no-store`. Authenticated readiness was
+not executed from PowerShell in that smoke; the recurring external Grafana check below supplies the
+authenticated proof.
+
 ## Mercado Pago TEST
 
 The preflight requires `P16_MERCADOPAGO_CREDENTIAL_SET=test` and validates the current `APP_USR-` access/public-key shape. `APP_USR-` is format validation only and does not independently prove sandbox authority. Hosted Mercado Pago TEST validation remains mandatory before P16 closeout. Existing P10 boundaries remain:
@@ -225,7 +232,7 @@ The repository contract creates the canonical monitor plan from the HTTPS stagin
 no base-path, user information, query string or fragment, preventing a readiness token from being
 placed in a URL.
 
-Configure, after explicit owner/provider authorization:
+The canonical monitored surfaces are:
 
 | Monitor | URL | Authentication | Accepted result |
 | --- | --- | --- | --- |
@@ -236,8 +243,8 @@ The provider secret value must remain exclusively in provider secret storage and
 application configuration. Store the reference as `P16_READINESS_TOKEN`; never place its value in
 a URL, query string, HTML, browser JavaScript, logs, incident notes or the public status page.
 
-The monitor/alert provider must be independent from the application failure domain. A later hosted
-validation must preserve evidence for:
+The monitor/alert provider must be independent from the application failure domain. Hosted
+validation preserves evidence for:
 
 ```text
 signal
@@ -252,15 +259,55 @@ The provider-neutral alert envelope contains only the rule ID, sanitized service
 severity, abstract owner, stable deduplication key, occurrence count and UTC evaluation time. It
 contains no credentials, PII, provider payment IDs, database/storage detail or mutation authority.
 
-Incident destinations remain unselected. `OWNER_ON_CALL`, `OPERATIONS`, `COMMERCE_OPERATIONS` and
-`SECURITY` are routing responsibilities, not claims that paging currently exists.
+`OWNER_ON_CALL`, `OPERATIONS`, `COMMERCE_OPERATIONS` and `SECURITY` remain abstract routing
+responsibilities. P16-06 proves real e-mail delivery for the controlled Better Stack monitor
+incident; it does not claim that every abstract application owner has a separately configured
+paging destination.
 
-`status.lessenc.com.br` remains the planned public-status origin. Its future publisher may consume
-only the sanitized service-health projection. It must not consume or republish raw readiness,
-failure codes, topology, database/R2 detail, provider IDs, correlations, secrets or stack traces.
+`status.lessenc.com.br` is the canonical public-status origin. The application retains the sanitized
+service-health projection as its canonical public-service model, but the current P16-06 Better Stack
+status page does not directly consume that projection. Its single public `Website` resource is backed
+by `L'ESSENC Public Liveness`, which monitors `https://lessenc.com.br/api/health`.
 
-Provider selection, account/provisioning, real destination delivery, status hosting, DNS and TLS
-all require a separate owner decision. No such external action is performed by this runbook.
+P16-06 therefore does not claim a direct service-health-projection-to-Better-Stack integration.
+Future public components must be backed by sanitized operational evidence before publication. Raw
+protected readiness, failure codes, topology, database/R2 detail, provider IDs, correlations,
+secrets and stack traces must never be republished on the public status page.
+
+### P16-06 owner-verified hosted evidence
+
+- Hostinger automatically deployed branch `phase/p16-staging-deployment` at commit
+  `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`; deployment status was `COMPLETED / PASS`.
+- Better Stack permanent monitor `L'ESSENC Public Liveness` checks
+  `https://lessenc.com.br/api/health` every three minutes, is `UP`, has keyword health validation
+  active, sends notifications by e-mail and is linked to one public status page.
+- Better Stack test-alert e-mail delivery passed.
+- Only that one permanent Better Stack monitor remained after controlled-test cleanup.
+- Grafana Cloud Synthetic Monitoring recurring scripted check `lessenc-protected-readiness` runs
+  from Calgary against `https://lessenc.com.br/api/readiness`.
+- Grafana retrieved secret reference `p16-readiness-token`; application configuration continues to
+  use `P16_READINESS_TOKEN`. The value is not documented. Logged authorization was only
+  `Bearer ***SECRET_REDACTED***`.
+- The observed recurring readiness execution passed secret retrieval, GET, HTTP 200, exact
+  `{"status":"ready"}` and `Cache-Control: no-store`; the three assertions were 100% for the
+  observed run and recurring execution remained active.
+- A temporary Better Stack monitor deliberately checked
+  `https://lessenc.com.br/__p16-controlled-alert-probe__`; the expected HTTP 404 created a real
+  monitor-detected incident, delivered a separate real monitor-failure e-mail notification and
+  received human acknowledgement.
+- Changing that temporary monitor to `https://lessenc.com.br/api/health` produced recovery
+  detection and automatic incident resolution. The temporary monitor was then deleted.
+- No application, database, R2, Mercado Pago, payment, entitlement or production state was
+  deliberately broken for the controlled incident.
+- `status.lessenc.com.br` is online with HTTPS HTTP 200. DNS is CNAME
+  `statuspage.betteruptime.com` with TTL 300, owner-verified through public resolvers `1.1.1.1` and
+  `8.8.8.8`.
+- The Better Stack status page contains exactly one public resource, `Website`, backed by
+  `L'ESSENC Public Liveness`. Do not invent public resources without real backing monitors.
+
+Monitoring is evidence, not authority. It cannot mutate payments, orders, entitlements,
+authentication authority, database state, private-storage state or Mercado Pago state. The
+staging readiness token must be rotated before production authorization.
 
 ## Backup, retention, restore and rollback
 
@@ -280,12 +327,11 @@ the approved artifact; it is not a schema rollback or data restore.
 
 ## Required hosted evidence
 
-P16-01 through P16-05 have supplied the hosted architecture/configuration/database/storage,
-reproducible deployment and Mercado Pago TEST evidence recorded by the current phase authority.
-P16 still cannot close until the remaining external evidence proves independent monitoring and
-alert delivery, incident notification, hosted status architecture according to the owner decision,
-P16-07 security controls and P16-08 backup scheduling/encryption/off-site copy, isolated restore,
-measured RPO/RTO and rollback.
+P16-01 through P16-06 have supplied the hosted architecture/configuration/database/storage,
+reproducible deployment, Mercado Pago TEST and observability evidence recorded by the current phase
+authority. P16-06 is `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`. P16 still cannot close until
+P16-07 security controls, P16-08 backup scheduling/encryption/off-site copy, isolated restore and
+measured RPO/RTO/rollback, and P16-09 final technical gate are complete.
 
 For Hostinger MariaDB this explicitly includes migration privilege elevation, subsequent reduction,
 current-user and inherited/public grant evidence, and correction of the observed hosted
@@ -376,7 +422,8 @@ write, deletion, listing or bucket-management path exists.
 
 The original H3-C implementation gate used synthetic SDK responses only. Subsequent H3-E-C
 validation exercised the actual configured application storage factory against real R2 from a
-controlled local process. Deployed/hosted HTTP validation remains pending.
+controlled local process. P16-06 later proved the deployed readiness composition; hosted protected
+buyer delivery remains a distinct P17 validation surface.
 
 At H3-C closeout, hosted readiness remained fail-closed pending the separate H3-D implementation
 recorded below.
@@ -402,8 +449,8 @@ Completed operational prerequisites outside Git:
 
 No sentinel content is downloaded. Any configuration, object, bucket, credential, network, TLS or
 provider failure must remain `not_ready` with the generic storage failure boundary. Real provider
-and local in-process HTTP evidence is recorded below; deployed/hosted HTTP evidence remains
-pending.
+and local in-process HTTP evidence is recorded below. P16-06 later added owner-verified recurring
+deployed/hosted HTTP readiness evidence without exposing provider detail.
 
 <!-- P16-H3-E-REAL-R2-EVIDENCE-CLOSEOUT -->
 
@@ -468,5 +515,6 @@ is buyer/product content.
 
 Keep the evidence layers distinct: prior H3-C/H3-D suites are synthetic; H3-E-B is direct
 real-provider validation; H3-E-C covers real application-level provider behavior and local
-in-process HTTP. Deployed/hosted HTTP and production remain unvalidated. Do not deploy until a
-separate owner-authorized gate explicitly permits it. P16 remains incomplete.
+in-process HTTP. At the H3-E closeout, deployment and deployed HTTP were still pending. P16-06 later
+supplied owner-verified Hostinger deployment and recurring deployed readiness evidence. Production,
+hosted protected buyer delivery and complete P16 readiness remain unauthorized/unvalidated.
