@@ -6,7 +6,8 @@
   implementação P14-01–P14-06, correções R1/R2, evidências, findings, hosted CI, merge canônico,
   checkpoint permanente e limites explicitamente deferidos a P15–P17.
 - [P16-07 Hosted Security Validation](p16-hosted-security-validation.md): inventário, TLS/headers,
-  auth/readiness, disclosure, isolamento, negativos controlados e dois blockers externos de staging.
+  auth/readiness, disclosure, isolamento, negativos controlados e remediação dos dois findings
+  externos de staging; COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED.
 - [Revisão histórica extensa](../architecture/LES-SEC-DIG-R01.md): referência anterior, válida apenas onde compatível com a decisão LES-DIG P00–P04.
 
 Documentação não representa implementação ou conformidade atestada.

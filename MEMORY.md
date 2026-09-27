@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 26/09/2026
+**Última atualização:** 27/09/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. P16-01–P16-06 estão COMPLETE. A release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`. P16-06 está `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`, com evidência owner-verified de liveness público, readiness protegido recorrente, alerta/incidente real controlado, notificação, acknowledgement, recovery e status público.
-**Estado atual:** P16-07 — Hosted Security Validation está `BLOCKED`: o código, TLS, negações hospedadas, isolamento e disclosure passaram no escopo executável, mas a rotação coordenada do `P16_READINESS_TOKEN` historicamente exposto exige acesso interativo a Hostinger e Grafana, e a borda Hostinger substitui o CSP completo do artefato por `upgrade-insecure-requests`. Ver [dossiê P16-07](docs/security/p16-hosted-security-validation.md). P16 não está COMPLETE; P16-08 e P16-09 não foram iniciadas.
+**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. P16-01–P16-07 estão COMPLETE. A release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`. P16-06 e P16-07 estão `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`.
+**Estado atual:** P16-07 — Hosted Security Validation foi encerrada após remediação e revalidação dos dois findings externos. `P16-07-F01 / HIGH` permanece no histórico como exposição visual do readiness token, agora `REMEDIATED / PASS` por rotação coordenada Hostinger/Grafana e monitor recorrente verde. `P16-07-F02 / MEDIUM` permanece no histórico como override CSP do Force HTTPS, agora `REMEDIATED / PASS` com SSL/CDN/DNS preservados, redirect HTTP -> HTTPS manual no `.htaccess`, Force HTTPS desabilitado e CSP route-sensitive novamente sob autoridade da aplicação no origin e edge. Ver [dossiê P16-07](docs/security/p16-hosted-security-validation.md). P16 não está COMPLETE; a candidata P16-08 permanece isolada e não integrada, e P16-09 não foi iniciada.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -2179,5 +2179,29 @@ before production authorization.
 
 Observability remains evidence, never business or infrastructure authority. No monitoring action
 mutated application, database, R2, Mercado Pago, payment, order, entitlement or authentication
-state. P16 remains incomplete. P16-07 Hosted Security Validation is next, followed by P16-08 and
-P16-09; production remains unauthorized.
+state. At this P16-06 checkpoint, P16 remained incomplete and P16-07 was next; the later P16-07
+closeout below supersedes only that sequencing statement.
+
+<!-- P16-07-HOSTED-SECURITY-CLOSEOUT -->
+
+## P16-07 — Hosted Security Validation closeout
+
+Date: 2026-09-27
+
+Status: `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`
+
+The owner rotated the historically exposed staging readiness token atomically in Hostinger and
+Grafana without revealing it; the recurring protected readiness check returned green with 100%
+uptime/reachability. Independent negative probes remained fail-closed at generic 404/no-store, and
+the Hostinger API exposed only the configured key with a masked value.
+
+Hostinger support identified Force HTTPS as the source of the server-level CSP replacement. The
+owner preserved SSL, CDN, DNS and Passenger/Node routing, added the conditional HTTP -> HTTPS 301 at
+the beginning of hosted `.htaccess`, added no CSP there and disabled Force HTTPS. Direct origin and
+public edge then returned exactly one complete route-sensitive application CSP, while HTTP redirect,
+HSTS and the remaining security headers passed. Hosted `.htaccess` is not Git-managed and its
+functional redirect must be rechecked after every Node.js deployment.
+
+F01 remains recorded as `HIGH / REMEDIATED / PASS`; F02 as `MEDIUM / REMEDIATED / PASS`; F03 as
+`INFO / ACCEPTED`; and F04 as `PASS`. P16 remains incomplete. P16-08 remains isolated and not
+integrated, P16-09 remains pending, and production remains unauthorized.

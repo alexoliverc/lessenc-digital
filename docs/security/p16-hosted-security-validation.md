@@ -1,33 +1,27 @@
 # P16-07 — Hosted Security Validation
 
-**Estado:** BLOCKED — external secret rotation and hosted CSP reconciliation require owner access
+**Estado:** P16-07 COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED
 
-**Data da validação:** 26/09/2026
+**Datas da validação:** 26–27/09/2026
 
 **Branch:** `phase/p16-staging-deployment`
 
-**Baseline de abertura:** `e1c65db1838417a9f945d4fe1c8061f6366afcda`
+**Baseline da reconciliação final:** `50601497899d11bd8fc01a4ae51fcb8402fe13c0`
 
 **`origin/main` preservado:** `300a5db6755b238606f0aa91e05981b2af121acc`
 
 ## Resultado
 
-P16-07-01 a P16-07-06 foram executadas até o limite disponível por código e acesso público
-read-only. Os controles de aplicação, TLS, negações hospedadas, isolamento de staging, exposição
-pública e dependências passaram nas verificações executadas. A fase não pode encerrar P16-07-07
-como PASS porque dois controles exigem acesso interativo externo indisponível:
+P16-07-01 a P16-07-07 estão concluídas. Os dois findings externos preservados abaixo foram
+remediados e revalidados: o readiness token historicamente exposto foi rotacionado de forma
+coordenada na Hostinger e no Grafana, e a aplicação voltou a ser a autoridade única do CSP após a
+remoção do override de Force HTTPS. TLS, headers, negações, isolamento de staging, bundles públicos,
+dependências e gates completos passaram.
 
-1. rotacionar o `P16_READINESS_TOKEN` de staging já comprometido por exposição visual histórica e
-   reconciliar atomicamente Hostinger e Grafana Cloud;
-2. remover a substituição hospedada que reduz o CSP completo da aplicação a
-   `upgrade-insecure-requests` e confirmar a política final na borda.
+`P16-07 COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`
 
-Status obrigatório:
-
-`P16-07 / BLOCKED / EXTERNAL SECRET ROTATION REQUIRES OWNER ACTION`
-
-P16 continua incompleta. Produção, `main`, pagamentos reais e as fases P16-08/P16-09 permanecem
-fora desta execução.
+P16 continua incompleta. Produção e `main` permanecem fora desta execução; P16-08 continua isolada
+e ainda não integrada, e P16-09 não foi iniciada.
 
 ## P16-07-01 — Security surface inventory
 
@@ -54,8 +48,8 @@ Controles classificados:
   ausência dos nomes de segredos nos bundles inspecionados;
 - **IMPLEMENTED + TESTED LOCALLY:** RBAC, MFA/TOTP, sessão/freshness, IDOR/entitlement,
   anti-replay do webhook, rate limits, error normalization, staging preflight e release binding;
-- **PARTIAL / REQUIRES REMEDIATION:** CSP final na borda;
-- **BLOCKED EXTERNALLY:** rotação do readiness e prova autenticada com o segredo substituto;
+- **HOSTED REMEDIATED + PROVEN:** CSP completo no origin e edge, com exatamente um header por
+  resposta, e rotação coordenada do readiness confirmada pelo owner;
 - **NOT APPLICABLE:** CORS público amplo e open redirect não são usados como mecanismos de
   autorização nas superfícies inventariadas.
 
@@ -76,15 +70,13 @@ Evidência hospedada read-only:
 - `X-Powered-By` ausente;
 - endpoints sensíveis observados retornaram `no-store`/`private` conforme o contrato.
 
-O finding P16-07-F02 impede PASS. O `routes-manifest.json` do build staging contém o CSP completo,
-incluindo `default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`,
-`script-src-attr 'none'`, allowlists explícitas e ausência de `unsafe-eval`. Entretanto, `/`,
-`/checkout/payment`, `/admin/login` e `/api/health` devolveram na borda somente:
-
-`Content-Security-Policy: upgrade-insecure-requests`
-
-Isso demonstra substituição após o artefato da aplicação. Alterar o gerador de CSP para produzir o
-mesmo valor novamente não corrige a camada que o sobrescreve.
+Na condição histórica de 26/09, a borda substituía o CSP completo por apenas
+`upgrade-insecure-requests`. O suporte Hostinger confirmou Force HTTPS como causa. O owner preservou
+SSL, CDN, DNS e as regras Passenger/Node, inseriu o redirect HTTP -> HTTPS no início do `.htaccess`,
+não adicionou CSP ao arquivo e desabilitou Force HTTPS. Na revalidação de 27/09, origin direto e
+edge retornaram HTTP 200 e exatamente um CSP completo em `/`, `/checkout/payment`, `/admin/login`,
+`/api/health` e 404 seguro. A raiz restringe `frame-src` aos hosts Mercado Pago; somente o checkout
+usa `frame-src https:` para o 3DS. O CSP continua pertencendo à aplicação.
 
 Os headers `Server: hcdn`, `platform: hostinger` e `panel: hpanel` são exposição INFO controlada
 pelo provedor. Nenhuma versão de Node, Next.js ou dependência foi exposta.
@@ -102,8 +94,11 @@ pelo provedor. Nenhuma versão de Node, Next.js ou dependência foi exposta.
 - RBAC e fresh-auth são avaliados no servidor; UI e respostas de provider não concedem autoridade;
 - readiness sem bearer e com bearer aleatório retornou o mesmo 404 genérico, antes de executar
   dependências;
-- a prova autenticada histórica P16-06 continua válida para a release então observada, mas não pode
-  ser reutilizada como prova da rotação exigida por P16-07.
+- o owner confirmou a troca atômica do segredo nos dois stores e o check recorrente
+  `lessenc-protected-readiness` verde, com uptime e reachability em 100%; a API Hostinger confirmou
+  apenas a presença mascarada de `P16_READINESS_TOKEN`, sem revelar seu valor;
+- a reconciliação independente manteve readiness sem bearer e com bearer sintético inválido em 404
+  genérico/no-store. O segredo anterior ou atual não foi recuperado, impresso ou persistido.
 
 Nenhuma identidade OWNER foi alterada, recriada ou usada nos testes.
 
@@ -113,7 +108,8 @@ Nenhuma identidade OWNER foi alterada, recriada ou usada nos testes.
 - `.env` e `.env.*` estão ignorados;
 - nenhuma chave privada ou credencial de formato real foi encontrada no conteúdo rastreado
   inspecionado; atribuições localizadas pertencem a `.env.example` ou testes sintéticos;
-- 3 páginas públicas e 10 assets JavaScript, total de 704.571 bytes, foram varridos em memória:
+- na reconciliação final, 3 páginas públicas e 10 assets JavaScript, total de 656.070 bytes de JS,
+  foram varridos em memória:
   zero nomes de segredo server-only, zero chave privada e zero sourcemap referenciado;
 - health, readiness, admin, buyer access, webhook e pagamentos retornam respostas sanitizadas;
 - logger possui redaction estrutural para authorization, cookie, set-cookie, tokens e secrets;
@@ -138,9 +134,11 @@ O contrato executável exige fail-closed:
 
 Os testes de contrato cobrem rejeição de produção/local, credencial compartilhada, migration
 window indevida, banco divergente, TLS inválido, R2 drift, segredo fraco/reutilizado e release
-divergente. P16-06 provou essa configuração no deploy então validado. O acesso público P16-07 não
-expõe valores que permitam reatestar cada variável atual; a reconciliação final deve ocorrer no
-hPanel ao aplicar a rotação.
+divergente. Na reconciliação final, a API Hostinger confirmou a presença das 27 chaves exigidas,
+sempre com valores mascarados; o build Node.js concluído estava ligado à branch canônica e ao commit
+`50601497899d11bd8fc01a4ae51fcb8402fe13c0`. O gate focado de staging passou em 2 arquivos / 25
+testes. A prova P16-06 dos valores efetivos permanece válida por continuidade, exceto o readiness
+token, que foi substituído e revalidado pelo monitor recorrente.
 
 ## P16-07-06 — Controlled negative validation
 
@@ -177,25 +175,27 @@ flood, entitlement real, pagamento ou transação comercial.
   invalidar o anterior
 - **Regression:** bearer ausente/aleatório continua 404; novo bearer deve retornar somente
   `ready`/`not_ready` e `no-store`
-- **Hosted validation:** pendente por falta de acesso interativo aos dois secret stores
-- **Final status:** BLOCKED
+- **Hosted validation:** presença mascarada na Hostinger, negações independentes e monitor Grafana
+  recorrente verde após a rotação coordenada
+- **Final status:** REMEDIATED / PASS
 
 ### P16-07-F02 — Hosted CSP replaced by upgrade-only policy
 
 - **Severity:** MEDIUM
 - **Surface:** Hostinger response layer/CDN
-- **Evidence:** quatro superfícies hosted retornam somente `upgrade-insecure-requests`; o artefato
-  Next contém a política completa
+- **Historical evidence:** quatro superfícies hosted retornavam somente
+  `upgrade-insecure-requests`; o artefato Next continha a política completa
 - **Risk:** o browser perde as restrições CSP planejadas para script, object, base, form, frame,
   worker e conexões; `X-Frame-Options: DENY` ainda mitiga framing
-- **Root cause:** override externo compatível com regra Hostinger/Apache
-  `Header always set Content-Security-Policy: upgrade-insecure-requests`
-- **Remediation:** remover somente o override externo e deixar o header da aplicação atravessar a
-  borda; se a linha não existir, abrir chamado Hostinger com request ID
+- **Root cause:** Hostinger Force HTTPS inseria no servidor
+  `Content-Security-Policy: upgrade-insecure-requests` e substituía a política da aplicação
+- **Remediation:** preservar SSL/CDN/DNS e o routing Passenger/Node, manter redirect 301 manual no
+  `.htaccess`, desabilitar Force HTTPS e deixar o CSP exclusivamente com a aplicação
 - **Regression:** exigir CSP completo em `/`, `/checkout/payment`, `/admin/login`, `/api/health` e
   uma resposta 4xx; checkout mantém somente a exceção `frame-src https:` necessária ao 3DS
-- **Hosted validation:** pendente por falta de hPanel/File Manager
-- **Final status:** BLOCKED
+- **Hosted validation:** origin direto e edge retornaram uma única política completa em todas as
+  superfícies, com HSTS; redirect HTTP -> HTTPS permaneceu funcional
+- **Final status:** REMEDIATED / PASS
 
 ### P16-07-F03 — Provider banner headers
 
@@ -221,55 +221,36 @@ flood, entitlement real, pagamento ou transação comercial.
 - **Hosted validation:** negações read-only observadas
 - **Final status:** PASS
 
-## Owner actions required to unblock
+## Remediações externas concluídas
 
-Executar em uma única janela curta, sem publicar o valor em chat, screenshot, log ou Git:
+- F01: novo valor CSPRNG foi aplicado em Hostinger e Grafana sem impressão; o monitor recorrente
+  voltou a verde. O valor permanece irrecuperável pela API, que o apresenta somente mascarado.
+- F02: o owner preservou as regras Passenger/Node e adicionou no início de `public_html/.htaccess`
+  o redirect 301 condicionado a HTTP; não adicionou CSP ao arquivo; preservou SSL/CDN/DNS e
+  desabilitou Force HTTPS. O CSP completo voltou a atravessar origin e edge.
 
-1. gerar localmente um novo segredo aleatório de pelo menos 32 bytes; manter o valor apenas em
-   memória/clipboard seguro;
-2. em Hostinger: **Websites -> Dashboard** do app Node.js -> **Environment variables** -> editar
-   `P16_READINESS_TOKEN` -> **Apply changes**;
-3. em Grafana Cloud: **Testing & synthetics -> Synthetics -> Config -> Secrets** -> editar
-   `p16-readiness-token` -> substituir pelo mesmo valor -> **Save**;
-4. confirmar que o check `lessenc-protected-readiness` usa a referência secreta, nunca um header
-   literal, e aguardar uma execução verde;
-5. confirmar externamente: sem bearer e bearer aleatório -> 404; novo bearer -> 200 `ready` ou 503
-   `not_ready`, sempre `no-store`; testar o antigo somente em cliente local que não registre o
-   valor e confirmar 404;
-6. limpar imediatamente clipboard e qualquer arquivo temporário.
-
-Para o CSP:
-
-1. em Hostinger: **Websites -> Dashboard -> File Manager**;
-2. abrir `public_html/.htaccess` e preservar todas as regras de roteamento Node.js;
-3. se existir, remover somente
-   `Header always set Content-Security-Policy: upgrade-insecure-requests`;
-4. salvar e usar **Performance -> CDN -> Flush cache**;
-5. verificar novamente os cinco caminhos indicados no finding F02;
-6. se a linha não existir ou a borda continuar substituindo o header, abrir chamado Hostinger com
-   domínio, horário UTC, path e `x-hcdn-request-id`, pedindo preservação do CSP originado pelo app.
-
-Não desabilitar o CDN, não alterar DNS e não enfraquecer o CSP como atalho.
+O `.htaccess` é estado hospedado gerenciado em parte pelo provider e não é governado pelo Git deste
+repositório. Como um redeploy Node.js pode regenerá-lo ou alterá-lo, todo deploy futuro deve testar
+funcionalmente o redirect HTTP -> HTTPS. CSP estático global não deve ser movido para `.htaccess`,
+pois a aplicação mantém política route-sensitive para o checkout.
 
 ## P16-07-07 — Closeout boundary
 
-O repositório registra a verdade atual e preserva os findings. O closeout final precisa de evidência
-hosted posterior às duas ações externas, reexecução do gate focado, reconciliação do deploy e um
-novo commit documental. Até lá:
+O repositório preserva os findings históricos e registra a revalidação hospedada posterior às duas
+ações externas. Nenhum teste destrutivo, brute force, pagamento real, mutação de OWNER ou de
+entitlement foi realizado.
 
 Quality gate executado:
 
 - testes focados: 11 arquivos / 78 testes PASS;
-- primeira tentativa de `npm run check`: FAIL de harness porque `APP_ENV` estava ausente; o parser
-  recusou a configuração e o logger usou `unknown`, sem indicar regressão de código;
 - `APP_ENV=test npm run check`: PASS — lint sem warnings, Prisma generate, typecheck, 99 arquivos /
   888 testes e Prettier;
 - build Next.js staging/production com configuração integralmente sintética: PASS, 11 páginas
   estáticas e todas as rotas dinâmicas compiladas;
-- 22 arquivos do bundle estático recém-gerado: zero nome/fixture server-only; manifest confirma CSP
-  global com `default-src 'self'`/`object-src 'none'`, sem `unsafe-eval`, e exceção 3DS apenas no
-  checkout;
+- gate adicional de isolamento: 2 arquivos / 25 testes PASS;
+- bundles públicos hosted: 3 páginas / 10 assets / 656.070 bytes de JS, sem nome server-only,
+  chave privada ou sourcemap;
 - `npm audit`: 0 vulnerabilidades;
 - `git diff --check`: PASS.
 
-`P16-07 BLOCKED / EXTERNAL SECRET ROTATION AND HOSTED CSP RECONCILIATION REQUIRE OWNER ACTION`
+`P16-07 COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`

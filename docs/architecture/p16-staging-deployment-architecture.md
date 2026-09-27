@@ -1,7 +1,7 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** P16-01–P16-06 COMPLETE / P16-07 BLOCKED ON EXTERNAL STAGING ACTIONS
+**Status:** P16-01–P16-07 COMPLETE / P16-08–P16-09 REMAINING
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
 **P16-06 validated hosted application release:** `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`
 **Repository baseline:** the current branch `HEAD`; documentation-only integration does not redefine which application release received P16-06 hosted validation unless that later commit is separately deployed and reconciled.
@@ -71,8 +71,8 @@ Hostinger automatically deployed that commit with `COMPLETED / PASS`. It contain
 hosted release path, the completed P16-05 Mercado Pago TEST baseline and the P16-06 hosted
 observability foundation.
 
-This does not prove complete P16 staging readiness. P16-06 is hosted validated, while P16-07 hosted
-security, P16-08 recovery evidence and P16-09 final gate remain separate and pending.
+This does not prove complete P16 staging readiness. P16-06 and P16-07 are hosted validated, while
+P16-08 recovery evidence and P16-09 final gate remain separate and pending.
 
 ## 5. Runtime toolchain
 
@@ -290,10 +290,11 @@ Hosted staging must validate the actual HTTP response policy including:
 Source-code configuration alone is not sufficient evidence.
 
 P16-07 proved TLS 1.3, the certificate/hostname, HTTPS redirect, HSTS, nosniff, referrer,
-permissions, frame denial, cache boundaries and `X-Powered-By` suppression. It also proved that the
-build artifact contains the complete CSP while the Hostinger edge emits only
-`upgrade-insecure-requests`. This is an open external-layer finding; the complete inventory,
-evidence and remediation are in
+permissions, frame denial, cache boundaries and `X-Powered-By` suppression. The historical
+Hostinger Force HTTPS override that reduced the CSP to `upgrade-insecure-requests` was remediated:
+SSL/CDN/DNS were preserved, a manual redirect remains in hosted `.htaccess`, Force HTTPS was
+disabled, and origin plus edge now return exactly one complete route-sensitive application CSP. The
+complete inventory, historical finding and remediation are in
 [`p16-hosted-security-validation.md`](../security/p16-hosted-security-validation.md).
 
 ## 14. Observability
@@ -504,8 +505,8 @@ Hosted backup scheduling, retention and measured restore evidence remain pending
 Stack public liveness and Grafana protected readiness run externally; the readiness secret remains
 redacted; a controlled real incident produced e-mail delivery, human acknowledgement, recovery and
 automatic resolution; the temporary monitor was deleted; and `status.lessenc.com.br` is online over
-HTTPS with one backed Website resource. P16-07, P16-08 and P16-09 remain pending, so P16 is not
-complete.
+HTTPS with one backed Website resource. P16-07 is also complete; P16-08 and P16-09 remain pending,
+so P16 is not complete.
 
 ## 17. Execution sequence
 

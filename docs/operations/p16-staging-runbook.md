@@ -1,6 +1,6 @@
 # P16 Staging Deployment Runbook
 
-**Status:** P16-01–P16-06 COMPLETE / P16-07 BLOCKED ON EXTERNAL STAGING ACTIONS
+**Status:** P16-01–P16-07 COMPLETE / P16-08–P16-09 REMAINING
 
 This runbook prepares a reproducible staging release without treating repository preparation as a
 deployment. No command in this document authorizes Hostinger, DNS, provider, migration, payment,
@@ -307,10 +307,15 @@ secrets and stack traces must never be republished on the public status page.
 
 Monitoring is evidence, not authority. It cannot mutate payments, orders, entitlements,
 authentication authority, database state, private-storage state or Mercado Pago state. The
-staging readiness token was visually exposed during P16-06 and must now be rotated before P16-07
-can close. This is not only a future-production prerequisite. The coordinated Hostinger and Grafana
-procedure, old-token invalidation proof and CSP reconciliation steps are canonical in
+staging readiness token visually exposed during P16-06 was replaced in Hostinger and Grafana; the
+recurring protected check returned green after reconciliation. The historical finding, safe
+rotation boundary and CSP reconciliation are canonical in
 [`p16-hosted-security-validation.md`](../security/p16-hosted-security-validation.md).
+
+Hostinger Force HTTPS was disabled because it replaced the application CSP. SSL, CDN, DNS and the
+Passenger/Node routing remain preserved; hosted `.htaccess` contains the manual HTTP -> HTTPS 301
+redirect but no CSP. Because provider redeploys may regenerate that file, every hosted deployment
+must re-prove the redirect. The application remains the sole route-sensitive CSP authority.
 
 ## Backup, retention, restore and rollback
 
@@ -332,9 +337,9 @@ the approved artifact; it is not a schema rollback or data restore.
 
 P16-01 through P16-06 have supplied the hosted architecture/configuration/database/storage,
 reproducible deployment, Mercado Pago TEST and observability evidence recorded by the current phase
-authority. P16-06 is `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`. P16 still cannot close until
-P16-07 security controls, P16-08 backup scheduling/encryption/off-site copy, isolated restore and
-measured RPO/RTO/rollback, and P16-09 final technical gate are complete.
+authority. P16-06 and P16-07 are `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`. P16 still cannot
+close until P16-08 backup scheduling/encryption/off-site copy, isolated restore and measured
+RPO/RTO/rollback, and P16-09 final technical gate are complete.
 
 For Hostinger MariaDB this explicitly includes migration privilege elevation, subsequent reduction,
 current-user and inherited/public grant evidence, and correction of the observed hosted
