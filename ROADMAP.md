@@ -1203,7 +1203,7 @@ PASS before release-environment validation.
 
 ## P16 — Staging Deployment
 
-**Status:** P16-01–P16-06 COMPLETE / P16-06 HOSTED VALIDATED / P16-07 NEXT
+**Status:** P16-01–P16-06 COMPLETE / P16-07 BLOCKED ON EXTERNAL STAGING ACTIONS
 
 ### Objective
 

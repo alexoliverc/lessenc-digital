@@ -1,7 +1,7 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** P16-01–P16-06 COMPLETE / P16-06 PASS / DOCUMENTED / HOSTED VALIDATED / P16-07 NEXT
+**Status:** P16-01–P16-06 COMPLETE / P16-07 BLOCKED ON EXTERNAL STAGING ACTIONS
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
 **P16-06 validated hosted application release:** `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`
 **Repository baseline:** the current branch `HEAD`; documentation-only integration does not redefine which application release received P16-06 hosted validation unless that later commit is separately deployed and reconciled.
@@ -288,6 +288,13 @@ Hosted staging must validate the actual HTTP response policy including:
 - upgrade-insecure-requests
 
 Source-code configuration alone is not sufficient evidence.
+
+P16-07 proved TLS 1.3, the certificate/hostname, HTTPS redirect, HSTS, nosniff, referrer,
+permissions, frame denial, cache boundaries and `X-Powered-By` suppression. It also proved that the
+build artifact contains the complete CSP while the Hostinger edge emits only
+`upgrade-insecure-requests`. This is an open external-layer finding; the complete inventory,
+evidence and remediation are in
+[`p16-hosted-security-validation.md`](../security/p16-hosted-security-validation.md).
 
 ## 14. Observability
 

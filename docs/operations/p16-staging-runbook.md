@@ -1,6 +1,6 @@
 # P16 Staging Deployment Runbook
 
-**Status:** P16-01–P16-06 COMPLETE / P16-06 PASS / DOCUMENTED / HOSTED VALIDATED / P16-07 NEXT
+**Status:** P16-01–P16-06 COMPLETE / P16-07 BLOCKED ON EXTERNAL STAGING ACTIONS
 
 This runbook prepares a reproducible staging release without treating repository preparation as a
 deployment. No command in this document authorizes Hostinger, DNS, provider, migration, payment,
@@ -307,7 +307,10 @@ secrets and stack traces must never be republished on the public status page.
 
 Monitoring is evidence, not authority. It cannot mutate payments, orders, entitlements,
 authentication authority, database state, private-storage state or Mercado Pago state. The
-staging readiness token must be rotated before production authorization.
+staging readiness token was visually exposed during P16-06 and must now be rotated before P16-07
+can close. This is not only a future-production prerequisite. The coordinated Hostinger and Grafana
+procedure, old-token invalidation proof and CSP reconciliation steps are canonical in
+[`p16-hosted-security-validation.md`](../security/p16-hosted-security-validation.md).
 
 ## Backup, retention, restore and rollback
 
