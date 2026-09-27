@@ -362,3 +362,10 @@ An initial `npm run check` invocation without explicit `APP_ENV` was rejected by
 because the shell context resolved the application environment as unknown. It was not counted as a
 product failure; the complete gate was rerun in the repository's canonical test environment and
 passed as recorded above.
+
+The partial closeout was committed as
+`e231dd395258dfe7f01d89e4cb0020b381a604ce` (`docs(p16): record partial hosted recovery evidence`)
+and pushed by fast-forward to `origin/phase/p16-staging-deployment`. Hostinger automatically built
+that exact SHA from 23:25:57Z through 23:27:16Z with state `completed`. Post-deploy read-only probes
+confirmed HTTP -> HTTPS 301, home 200, health 200/ok/no-store, unauthenticated readiness
+404/no-store, one CSP, HSTS, nosniff, frame deny and no `X-Powered-By`. `main` was not changed.
