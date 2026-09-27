@@ -3,6 +3,22 @@ export const P16_STAGING_ENVIRONMENT_ID: "lessenc-staging";
 export const P16_ISOLATED_RECOVERY_ENVIRONMENT_ID: "lessenc-recovery-test";
 export const P16_RPO_TARGET_SECONDS: 86400;
 export const P16_RTO_TARGET_SECONDS: 28800;
+export const P16_RPO_TARGET_MS: 86400000;
+export const P16_RTO_TARGET_MS: 28800000;
+export const P16_DATABASE_DUMP_CLIENT: "mariadb";
+
+type Environment = Readonly<Record<string, string | undefined>>;
+type Assessment = "PASS" | "FAIL";
+
+export type DatabaseBackupConfiguration = Readonly<{
+  hostname: string;
+  port: string;
+  databaseName: string;
+  username: string;
+  tlsCaFile: string;
+  environmentId: "lessenc-staging";
+  dumpMode: "SINGLE_TRANSACTION_NO_LOCKS";
+}>;
 
 export function decodeRecoveryEncryptionKey(value: string): Buffer;
 export function sha256File(path: string): Promise<string>;
@@ -13,32 +29,33 @@ export function calculateP16MigrationSetSha256(
   migrations: readonly Readonly<{ name: string; sha256: string }>[],
 ): string;
 export function validateStagingDatabaseBackupEnvironment(
-  env: Readonly<Record<string, string | undefined>>,
-): Readonly<{
-  hostname: string;
-  port: string;
-  databaseName: string;
-  username: string;
-  tlsCaFile: string;
-  environmentId: "lessenc-staging";
-  dumpMode: "SINGLE_TRANSACTION_NO_LOCKS";
-}>;
+  env: Environment,
+): Promise<DatabaseBackupConfiguration>;
 export function stagingMysqlDumpArguments(
-  configuration: ReturnType<typeof validateStagingDatabaseBackupEnvironment>,
+  configuration: DatabaseBackupConfiguration,
 ): readonly string[];
-export function createStagingDatabaseDump(
-  input: Readonly<{
-    env: Readonly<Record<string, string | undefined>>;
-    destinationPath: string;
+export function inspectMariaDbDumpClient(
+  input?: Readonly<{
     command?: string;
     commandPrefixArguments?: readonly string[];
+    env?: Environment;
+  }>,
+): Promise<Readonly<{ family: "mariadb"; version: string; executable: string }>>;
+export function createStagingDatabaseDump(
+  input: Readonly<{
+    env: Environment;
+    destinationPath: string;
+    repositoryRoot?: string;
+    command?: string;
+    commandPrefixArguments?: readonly string[];
+    resolveHead?: () => string;
+    clock?: () => Date;
   }>,
 ): Promise<
   Readonly<{
     destinationPath: string;
-    databaseName: string;
-    environmentId: "lessenc-staging";
-    snapshotMode: "SINGLE_TRANSACTION_NO_LOCKS";
+    evidencePath: string;
+    evidence: Readonly<Record<string, unknown>>;
     bytes: number;
     sha256: string;
     boundedDiagnosticBytes: number;
@@ -47,6 +64,8 @@ export function createStagingDatabaseDump(
 
 type RecoveryBundleOptions = Readonly<{
   encryptionKey: string | Buffer;
+  encryptionKeyId?: string;
+  repositoryRoot?: string;
   environmentId?: string;
   databaseName?: string;
   backupId?: string;
@@ -57,14 +76,21 @@ type RecoveryBundleOptions = Readonly<{
 export function createP16RecoveryBundle(
   input: Readonly<{
     backupId: string;
-    createdAt: string | Date;
-    releaseCommit: string;
-    databaseName: string;
-    databaseDumpPath: string;
+    databaseEvidencePath: string;
+    expectedDatabaseConfiguration: Readonly<{
+      hostname: string;
+      port: string | number;
+      databaseName: string;
+      tlsCaFile: string;
+      environmentId: string;
+      dumpMode: string;
+    }>;
     storageRoot: string;
     outputRoot: string;
     repositoryRoot: string;
     encryptionKey: string | Buffer;
+    encryptionKeyId: string;
+    resolveHead?: () => string;
   }>,
 ): Promise<Readonly<{ bundleDirectory: string; manifest: Readonly<Record<string, unknown>> }>>;
 
@@ -89,37 +115,53 @@ export function restoreP16RecoveryBundleIsolated(
     expectedReleaseCommit: string;
     expectedMigrationSetSha256: string;
     encryptionKey: string | Buffer;
+    encryptionKeyId: string;
+    repositoryRoot?: string;
   }>,
-): Promise<
-  Readonly<{
-    evidenceVersion: number;
-    outcome: "VALIDATED";
-    evidenceScope: "LOCAL_SYNTHETIC";
-    targetEnvironmentId: string;
-    targetDatabaseName: string;
-    backupId: string;
-    sourceEnvironmentId: string;
-    releaseCommit: string;
-    migrationSetSha256: string;
-    recoveryStartedAt: string;
-    recoveryValidatedAt: string;
-    durationMs: number;
-  }>
->;
+): Promise<Readonly<Record<string, unknown>>>;
 
+export function calculateP16Rpo(
+  input: Readonly<{
+    observedAt: string | Date;
+    latestVerifiedBackupAt: string | Date;
+  }>,
+): Readonly<{
+  assessment: Assessment;
+  targetMs: 86400000;
+  targetSeconds: 86400;
+  ageMs: number;
+  ageSeconds: number;
+}>;
 export function measureP16Rpo(
   input: Readonly<{
     observedAt: string | Date;
     latestVerifiedBackupAt?: string | Date | null;
     evidenceScope?: string | null;
   }>,
+): Readonly<Record<string, unknown>>;
+export function evaluateP16HostedRpoEvidence(
+  evidence: Readonly<Record<string, unknown>>,
 ): Readonly<{
-  status: "PASS" | "FAIL" | "UNKNOWN";
+  status: Assessment;
+  targetMs: 86400000;
   targetSeconds: 86400;
-  ageSeconds: number | null;
+  ageMs: number;
+  ageSeconds: number;
   reason: string;
 }>;
 
+export function calculateP16Rto(
+  input: Readonly<{
+    recoveryStartedAt: string | Date;
+    recoveryValidatedAt: string | Date;
+  }>,
+): Readonly<{
+  assessment: Assessment;
+  targetMs: 28800000;
+  targetSeconds: 28800;
+  durationMs: number;
+  durationSeconds: number;
+}>;
 export function measureP16Rto(
   input: Readonly<{
     recoveryStartedAt?: string | Date | null;
@@ -127,11 +169,15 @@ export function measureP16Rto(
     validationOutcome?: string | null;
     evidenceScope?: string | null;
   }>,
+): Readonly<Record<string, unknown>>;
+export function evaluateP16HostedRtoEvidence(
+  evidence: Readonly<Record<string, unknown>>,
 ): Readonly<{
-  status: "PASS" | "FAIL" | "UNKNOWN";
+  status: Assessment;
+  targetMs: 28800000;
   targetSeconds: 28800;
-  durationSeconds: number | null;
-  localAssessment: "PASS" | "FAIL" | null;
+  durationMs: number;
+  durationSeconds: number;
   reason: string;
 }>;
 

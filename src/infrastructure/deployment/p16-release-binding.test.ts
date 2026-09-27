@@ -22,6 +22,8 @@ function guardEnvironment(releaseCommit?: string): NodeJS.ProcessEnv {
     P16_STAGING_ENVIRONMENT_ID: "lessenc-staging",
     P16_DATABASE_ACCESS_MODEL: "hostinger-managed-single-user",
     P16_DATABASE_MIGRATION_WINDOW: "enabled",
+    P16_DATABASE_DUMP_CLIENT: "mariadb",
+    P16_DATABASE_EXPECTED_HOST: "db.invalid",
     DATABASE_URL: "mysql://hostinger:synthetic@db.invalid/lessenc_staging",
     DB_RUNTIME_URL: "mysql://hostinger:synthetic@db.invalid/lessenc_staging",
     DB_TLS_CA_FILE: readableSyntheticCaPath,

@@ -1,6 +1,16 @@
 import { Buffer } from "node:buffer";
-import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
-import { createReadStream, createWriteStream } from "node:fs";
+import process from "node:process";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  createHmac,
+  hkdfSync,
+  randomBytes,
+  randomUUID,
+  timingSafeEqual,
+} from "node:crypto";
+import { constants as fsConstants, createReadStream, createWriteStream } from "node:fs";
 import {
   access,
   lstat,
@@ -13,16 +23,25 @@ import {
   stat,
   writeFile,
 } from "node:fs/promises";
-import { dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { pipeline } from "node:stream/promises";
 import { URL } from "node:url";
+
+import {
+  normalizeDatabaseHostname,
+  validateStagingDatabaseAuthority,
+} from "./p16-staging-contract.mjs";
+import { validateReleaseCommitBinding } from "./p16-release-binding.mjs";
 
 export const P16_RECOVERY_MANIFEST_VERSION = 2;
 export const P16_STAGING_ENVIRONMENT_ID = "lessenc-staging";
 export const P16_ISOLATED_RECOVERY_ENVIRONMENT_ID = "lessenc-recovery-test";
 export const P16_RPO_TARGET_SECONDS = 24 * 60 * 60;
 export const P16_RTO_TARGET_SECONDS = 8 * 60 * 60;
+export const P16_RPO_TARGET_MS = P16_RPO_TARGET_SECONDS * 1000;
+export const P16_RTO_TARGET_MS = P16_RTO_TARGET_SECONDS * 1000;
+export const P16_DATABASE_DUMP_CLIENT = "mariadb";
 
 const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
 const COMMIT_PATTERN = /^[0-9a-f]{40}$/u;
@@ -33,6 +52,19 @@ const MIGRATION_NAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u;
 const RECOVERY_DATABASE_PATTERN = /^lessenc_(?:test_)?recovery(?:_[a-z0-9]+)?$/u;
 const MAX_STORAGE_INDEX_BYTES = 16 * 1024 * 1024;
 const ALGORITHM = "aes-256-gcm";
+const MANIFEST_INTEGRITY_ALGORITHM = "HMAC-SHA256";
+const KEY_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;
+const MANIFEST_AUTH_CONTEXT = Buffer.from(
+  "lessenc:p16:recovery:v2:manifest-authentication",
+  "utf8",
+);
+const ARTIFACT_ENCRYPTION_CONTEXT = Buffer.from(
+  "lessenc:p16:recovery:v2:artifact-encryption",
+  "utf8",
+);
+const RECOVERY_HKDF_SALT = Buffer.from("lessenc:p16:recovery:v2", "utf8");
+const MAX_MANIFEST_BYTES = 1024 * 1024;
+const DUMP_EVIDENCE_VERSION = 1;
 
 function invariant(condition, message) {
   if (!condition) throw new Error(message);
@@ -69,12 +101,98 @@ function isContainedPath(parent, child) {
   return candidate === "" || (!candidate.startsWith("..") && !isAbsolute(candidate));
 }
 
+async function assertNoSymlinkComponents(path, failureCode) {
+  let current = resolve(path);
+  while (true) {
+    const metadata = await lstat(current);
+    invariant(!metadata.isSymbolicLink(), failureCode);
+    const parent = dirname(current);
+    if (parent === current) return;
+    current = parent;
+  }
+}
+
 export function decodeRecoveryEncryptionKey(value) {
   invariant(typeof value === "string" && value.length > 0, "P16_RECOVERY_KEY_REQUIRED");
   const key = Buffer.from(value, "base64");
   invariant(key.length === 32, "P16_RECOVERY_KEY_INVALID");
   invariant(key.toString("base64") === value, "P16_RECOVERY_KEY_INVALID");
   return key;
+}
+
+function normalizeMasterKey(value) {
+  const key = Buffer.isBuffer(value) ? value : decodeRecoveryEncryptionKey(value);
+  invariant(key.length === 32, "P16_RECOVERY_KEY_INVALID");
+  return key;
+}
+
+function deriveRecoveryKeys(masterKey) {
+  return Object.freeze({
+    artifactEncryptionKey: Buffer.from(
+      hkdfSync("sha256", masterKey, RECOVERY_HKDF_SALT, ARTIFACT_ENCRYPTION_CONTEXT, 32),
+    ),
+    manifestAuthenticationKey: Buffer.from(
+      hkdfSync("sha256", masterKey, RECOVERY_HKDF_SALT, MANIFEST_AUTH_CONTEXT, 32),
+    ),
+  });
+}
+
+function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value)
+      .sort((left, right) => left.localeCompare(right, "en"))
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function manifestAuthenticationPayload(manifest) {
+  const authenticated = {
+    ...manifest,
+    manifestIntegrity: { ...manifest?.manifestIntegrity },
+  };
+  invariant(authenticated?.manifestIntegrity, "P16_RECOVERY_MANIFEST_INTEGRITY_INVALID");
+  delete authenticated.manifestIntegrity.mac;
+  return Buffer.from(canonicalJson(authenticated), "utf8");
+}
+
+function authenticateManifest(manifest, authenticationKey, keyId) {
+  manifest.manifestIntegrity = {
+    algorithm: MANIFEST_INTEGRITY_ALGORITHM,
+    keyId,
+    mac: "",
+  };
+  manifest.manifestIntegrity.mac = createHmac("sha256", authenticationKey)
+    .update(manifestAuthenticationPayload(manifest))
+    .digest("hex");
+}
+
+function verifyManifestAuthentication(manifest, authenticationKey, expectedKeyId) {
+  exactKeys(
+    manifest?.manifestIntegrity,
+    ["algorithm", "keyId", "mac"],
+    "P16_RECOVERY_MANIFEST_INTEGRITY_INVALID",
+  );
+  const integrity = manifest.manifestIntegrity;
+  invariant(
+    integrity.algorithm === MANIFEST_INTEGRITY_ALGORITHM &&
+      KEY_ID_PATTERN.test(integrity.keyId) &&
+      SHA256_PATTERN.test(integrity.mac),
+    "P16_RECOVERY_MANIFEST_INTEGRITY_INVALID",
+  );
+  if (expectedKeyId !== undefined) {
+    invariant(integrity.keyId === expectedKeyId, "P16_RECOVERY_KEY_ID_MISMATCH");
+  }
+  const expected = createHmac("sha256", authenticationKey)
+    .update(manifestAuthenticationPayload(manifest))
+    .digest();
+  const actual = Buffer.from(integrity.mac, "hex");
+  invariant(
+    actual.length === expected.length && timingSafeEqual(actual, expected),
+    "P16_RECOVERY_MANIFEST_INTEGRITY_INVALID",
+  );
 }
 
 export async function sha256File(path) {
@@ -135,7 +253,7 @@ function parseDatabaseUrl(raw) {
     "P16_BACKUP_DATABASE_URL_INVALID",
   );
   return {
-    hostname: url.hostname.toLowerCase(),
+    hostname: normalizeDatabaseHostname(url.hostname),
     port: url.port || "3306",
     databaseName,
     username: decodeURIComponent(url.username),
@@ -151,25 +269,83 @@ function isStagingDatabaseName(databaseName) {
   );
 }
 
-export function validateStagingDatabaseBackupEnvironment(env) {
+async function canonicalExistingPath(path, kind, failureCode) {
+  invariant(isAbsolute(path ?? ""), failureCode);
+  const resolved = resolve(path);
+  const metadata = await lstat(resolved);
+  invariant(!metadata.isSymbolicLink(), failureCode);
+  invariant(kind === "file" ? metadata.isFile() : metadata.isDirectory(), failureCode);
+  await assertNoSymlinkComponents(resolved, failureCode);
+  const canonical = await realpath(resolved);
+  return canonical;
+}
+
+async function canonicalProspectivePath(path, failureCode) {
+  invariant(isAbsolute(path ?? ""), failureCode);
+  const resolved = resolve(path);
+  let existing = resolved;
+  while (true) {
+    try {
+      const metadata = await lstat(existing);
+      invariant(!metadata.isSymbolicLink() && metadata.isDirectory(), failureCode);
+      await assertNoSymlinkComponents(existing, failureCode);
+      break;
+    } catch (error) {
+      if (!(error && typeof error === "object" && "code" in error && error.code === "ENOENT")) {
+        throw error;
+      }
+      const parent = dirname(existing);
+      invariant(parent !== existing, failureCode);
+      existing = parent;
+    }
+  }
+  const canonicalParent = await realpath(existing);
+  return resolve(canonicalParent, relative(existing, resolved));
+}
+
+async function assertOutsideRepository(path, repositoryRoot, failureCode) {
+  const canonicalRepository = await canonicalExistingPath(
+    resolve(repositoryRoot),
+    "directory",
+    "P16_RECOVERY_REPOSITORY_ROOT_INVALID",
+  );
+  invariant(!isContainedPath(canonicalRepository, path), failureCode);
+}
+
+function requireValidReleaseBinding(releaseCommit, resolveHead) {
+  const failures = validateReleaseCommitBinding(releaseCommit, resolveHead);
+  invariant(failures.length === 0, failures[0] ?? "P16_RELEASE_COMMIT_HEAD_UNVERIFIABLE");
+}
+
+export async function validateStagingDatabaseBackupEnvironment(env) {
   invariant(env.APP_ENV === "staging", "P16_BACKUP_APP_ENV_INVALID");
   invariant(env.NODE_ENV === "production", "P16_BACKUP_NODE_ENV_INVALID");
   invariant(
     env.P16_STAGING_ENVIRONMENT_ID === P16_STAGING_ENVIRONMENT_ID,
     "P16_BACKUP_ENVIRONMENT_ID_INVALID",
   );
+  const authorityFailures = validateStagingDatabaseAuthority(env, { gate: "runtime" });
   invariant(
-    env.P16_DATABASE_MIGRATION_WINDOW === "disabled",
-    "P16_BACKUP_MIGRATION_WINDOW_INVALID",
+    authorityFailures.length === 0,
+    `P16_BACKUP_DATABASE_AUTHORITY_INVALID:${authorityFailures.join(",")}`,
   );
-  invariant(
-    typeof env.DB_TLS_CA_FILE === "string" && isAbsolute(env.DB_TLS_CA_FILE),
-    "P16_BACKUP_TLS_CA_INVALID",
-  );
+  invariant(env.P16_DATABASE_DUMP_CLIENT === P16_DATABASE_DUMP_CLIENT, "P16_BACKUP_CLIENT_INVALID");
+  let tlsCaFile;
+  try {
+    tlsCaFile = await canonicalExistingPath(
+      env.DB_TLS_CA_FILE,
+      "file",
+      "P16_BACKUP_TLS_CA_INVALID",
+    );
+    await access(tlsCaFile, fsConstants.R_OK);
+  } catch (error) {
+    if (error instanceof Error && error.message === "P16_BACKUP_TLS_CA_INVALID") throw error;
+    throw new Error("P16_BACKUP_TLS_CA_INVALID", { cause: error });
+  }
   const target = parseDatabaseUrl(env.DB_RUNTIME_URL);
   invariant(
-    !["127.0.0.1", "localhost", "::1"].includes(target.hostname),
-    "P16_BACKUP_LOCALHOST_REFUSED",
+    target.hostname === normalizeDatabaseHostname(env.P16_DATABASE_EXPECTED_HOST),
+    "P16_BACKUP_DATABASE_HOST_MISMATCH",
   );
   invariant(isStagingDatabaseName(target.databaseName), "P16_BACKUP_DATABASE_NOT_STAGING");
   invariant(
@@ -181,9 +357,76 @@ export function validateStagingDatabaseBackupEnvironment(env) {
     port: target.port,
     databaseName: target.databaseName,
     username: target.username,
-    tlsCaFile: env.DB_TLS_CA_FILE,
+    tlsCaFile,
     environmentId: P16_STAGING_ENVIRONMENT_ID,
     dumpMode: "SINGLE_TRANSACTION_NO_LOCKS",
+  });
+}
+
+function boundedProcess(command, argumentsList, options = {}) {
+  return new Promise((resolveProcess, rejectProcess) => {
+    const child = spawn(command, argumentsList, {
+      env: options.env,
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    });
+    const chunks = [];
+    let bytes = 0;
+    const collect = (chunk) => {
+      if (bytes >= 64 * 1024) return;
+      const bounded = chunk.subarray(0, 64 * 1024 - bytes);
+      chunks.push(bounded);
+      bytes += bounded.length;
+    };
+    child.stdout.on("data", collect);
+    child.stderr.on("data", collect);
+    child.once("error", () => rejectProcess(new Error("P16_BACKUP_CLIENT_PREFLIGHT_FAILED")));
+    child.once("close", (code, signal) => {
+      if (code !== 0 || signal !== null) {
+        rejectProcess(new Error("P16_BACKUP_CLIENT_PREFLIGHT_FAILED"));
+        return;
+      }
+      resolveProcess(Buffer.concat(chunks).toString("utf8"));
+    });
+  });
+}
+
+export async function inspectMariaDbDumpClient(input = {}) {
+  const command = input.command ?? "mariadb-dump";
+  const prefixArguments = input.commandPrefixArguments ?? [];
+  invariant(
+    typeof command === "string" &&
+      command.length > 0 &&
+      Array.isArray(prefixArguments) &&
+      prefixArguments.every((argument) => typeof argument === "string"),
+    "P16_BACKUP_COMMAND_INVALID",
+  );
+  const childEnvironment = databaseDumpChildEnvironment(input.env ?? process.env, "");
+  delete childEnvironment.MYSQL_PWD;
+  const versionOutput = await boundedProcess(command, [...prefixArguments, "--version"], {
+    env: childEnvironment,
+  });
+  invariant(
+    /mariadb-dump/iu.test(versionOutput) && /MariaDB/iu.test(versionOutput),
+    "P16_BACKUP_CLIENT_FAMILY_UNSUPPORTED",
+  );
+  const versionMatch =
+    versionOutput.match(/Distrib\s+(\d+)\.(\d+)\.(\d+)-MariaDB/iu) ??
+    versionOutput.match(/(\d+)\.(\d+)\.(\d+)[^\r\n]*MariaDB/iu);
+  invariant(versionMatch, "P16_BACKUP_CLIENT_VERSION_UNSUPPORTED");
+  const major = Number(versionMatch[1]);
+  const minor = Number(versionMatch[2]);
+  invariant((major === 10 && minor >= 11) || major === 11, "P16_BACKUP_CLIENT_VERSION_UNSUPPORTED");
+  const helpOutput = await boundedProcess(command, [...prefixArguments, "--help"], {
+    env: childEnvironment,
+  });
+  for (const capability of ["--ssl-ca", "--ssl-verify-server-cert", "--single-transaction"]) {
+    invariant(helpOutput.includes(capability), "P16_BACKUP_CLIENT_CAPABILITY_MISSING");
+  }
+  return Object.freeze({
+    family: P16_DATABASE_DUMP_CLIENT,
+    version: `${versionMatch[1]}.${versionMatch[2]}.${versionMatch[3]}`,
+    executable: basename(command),
   });
 }
 
@@ -196,15 +439,28 @@ function databaseDumpChildEnvironment(env, password) {
 }
 
 export async function createStagingDatabaseDump(input) {
-  invariant(isAbsolute(input.destinationPath ?? ""), "P16_BACKUP_DESTINATION_INVALID");
-  const destinationPath = resolve(input.destinationPath);
+  const destinationPath = await canonicalProspectivePath(
+    input.destinationPath,
+    "P16_BACKUP_DESTINATION_INVALID",
+  );
   invariant(destinationPath.toLowerCase().endsWith(".sql"), "P16_BACKUP_DESTINATION_INVALID");
+  await assertOutsideRepository(
+    destinationPath,
+    input.repositoryRoot ?? process.cwd(),
+    "P16_BACKUP_DESTINATION_IN_REPOSITORY_REFUSED",
+  );
   await assertPathDoesNotExist(destinationPath, "P16_BACKUP_DESTINATION_EXISTS");
-  const configuration = validateStagingDatabaseBackupEnvironment(input.env);
+  const configuration = await validateStagingDatabaseBackupEnvironment(input.env);
   const credentials = parseDatabaseUrl(input.env.DB_RUNTIME_URL);
+  requireValidReleaseBinding(input.env.P16_RELEASE_COMMIT, input.resolveHead);
+  const client = await inspectMariaDbDumpClient({
+    command: input.command,
+    commandPrefixArguments: input.commandPrefixArguments,
+    env: input.env,
+  });
   const partialPath = `${destinationPath}.partial-${randomUUID()}`;
   await mkdir(dirname(destinationPath), { recursive: true });
-  const command = input.command ?? "mysqldump";
+  const command = input.command ?? "mariadb-dump";
   const prefixArguments = input.commandPrefixArguments ?? [];
   invariant(
     typeof command === "string" &&
@@ -214,8 +470,10 @@ export async function createStagingDatabaseDump(input) {
     "P16_BACKUP_COMMAND_INVALID",
   );
 
+  const startedAt = (input.clock?.() ?? new Date()).toISOString();
   let child;
   let closed;
+  let destinationCreated = false;
   try {
     child = spawn(command, [...prefixArguments, ...stagingMysqlDumpArguments(configuration)], {
       env: databaseDumpChildEnvironment(input.env, credentials.password),
@@ -244,19 +502,49 @@ export async function createStagingDatabaseDump(input) {
       "P16_BACKUP_DATABASE_DUMP_EMPTY",
     );
     await rename(partialPath, destinationPath);
+    destinationCreated = true;
+    const completedAt = (input.clock?.() ?? new Date()).toISOString();
+    const sha256 = await sha256File(destinationPath);
+    const tlsCaSha256 = await sha256File(configuration.tlsCaFile);
+    const evidence = {
+      evidenceVersion: DUMP_EVIDENCE_VERSION,
+      evidenceType: "P16_DATABASE_DUMP",
+      generatedBy: "scripts/p16-recovery.mjs",
+      startedAt,
+      completedAt,
+      source: {
+        environmentId: configuration.environmentId,
+        database: {
+          hostname: configuration.hostname,
+          port: configuration.port,
+          name: configuration.databaseName,
+        },
+      },
+      artifact: { file: basename(destinationPath), bytes: metadata.size, sha256 },
+      dumpClient: client,
+      snapshot: {
+        mode: configuration.dumpMode,
+        transport: "TLS_VERIFIED",
+        tlsCaSha256,
+      },
+      release: { commit: input.env.P16_RELEASE_COMMIT, authority: "REPOSITORY_HEAD_BOUND" },
+    };
+    const evidencePath = `${destinationPath}.evidence.json`;
+    await writeFile(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`, { flag: "wx" });
     return Object.freeze({
       destinationPath,
-      databaseName: configuration.databaseName,
-      environmentId: configuration.environmentId,
-      snapshotMode: configuration.dumpMode,
+      evidencePath,
+      evidence: Object.freeze(evidence),
       bytes: metadata.size,
-      sha256: await sha256File(destinationPath),
+      sha256,
       boundedDiagnosticBytes: stderrBytes,
     });
   } catch (error) {
     if (child && child.exitCode === null && child.signalCode === null) child.kill();
     if (closed) await closed;
     await rm(partialPath, { force: true });
+    if (destinationCreated) await rm(destinationPath, { force: true });
+    await rm(`${destinationPath}.evidence.json`, { force: true });
     throw new Error("P16_BACKUP_DATABASE_DUMP_FAILED", { cause: error });
   }
 }
@@ -273,6 +561,7 @@ export function stagingMysqlDumpArguments(configuration) {
     "P16_BACKUP_DATABASE_CONFIGURATION_INVALID",
   );
   return Object.freeze([
+    "--no-defaults",
     "--protocol=TCP",
     `--host=${configuration.hostname}`,
     `--port=${configuration.port}`,
@@ -283,7 +572,6 @@ export function stagingMysqlDumpArguments(configuration) {
     "--quick",
     "--skip-lock-tables",
     "--no-tablespaces",
-    "--set-gtid-purged=OFF",
     "--hex-blob",
     "--default-character-set=utf8mb4",
     "--order-by-primary",
@@ -432,9 +720,14 @@ async function verifyCiphertext(bundleRoot, artifact) {
     throw error;
   }
   invariant(metadata.isFile() && !metadata.isSymbolicLink(), "P16_RECOVERY_ARTIFACT_MISSING");
+  const canonical = await realpath(path);
+  invariant(isContainedPath(bundleRoot, canonical), "P16_RECOVERY_ARTIFACT_PATH_ESCAPE");
   invariant(metadata.size === artifact.bytes, "P16_RECOVERY_ARTIFACT_SIZE_MISMATCH");
-  invariant((await sha256File(path)) === artifact.sha256, "P16_RECOVERY_ARTIFACT_HASH_MISMATCH");
-  return path;
+  invariant(
+    (await sha256File(canonical)) === artifact.sha256,
+    "P16_RECOVERY_ARTIFACT_HASH_MISMATCH",
+  );
+  return canonical;
 }
 
 async function decryptArtifactToBuffer(bundleRoot, artifact, key) {
@@ -545,6 +838,182 @@ function validateMigrations(migrations, expectedDigest) {
   );
 }
 
+function validateDumpEvidenceShape(evidence) {
+  exactKeys(
+    evidence,
+    [
+      "evidenceVersion",
+      "evidenceType",
+      "generatedBy",
+      "startedAt",
+      "completedAt",
+      "source",
+      "artifact",
+      "dumpClient",
+      "snapshot",
+      "release",
+    ],
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  invariant(
+    evidence.evidenceVersion === DUMP_EVIDENCE_VERSION &&
+      evidence.evidenceType === "P16_DATABASE_DUMP" &&
+      evidence.generatedBy === "scripts/p16-recovery.mjs",
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  const startedAt = normalizeTimestamp(evidence.startedAt, "P16_RECOVERY_DUMP_EVIDENCE_INVALID");
+  const completedAt = normalizeTimestamp(
+    evidence.completedAt,
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  invariant(completedAt >= startedAt, "P16_RECOVERY_DUMP_EVIDENCE_INVALID");
+  exactKeys(evidence.source, ["environmentId", "database"], "P16_RECOVERY_DUMP_EVIDENCE_INVALID");
+  exactKeys(
+    evidence.source.database,
+    ["hostname", "port", "name"],
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  invariant(
+    evidence.source.environmentId === P16_STAGING_ENVIRONMENT_ID &&
+      normalizeDatabaseHostname(evidence.source.database.hostname) ===
+        evidence.source.database.hostname &&
+      /^\d{1,5}$/u.test(evidence.source.database.port) &&
+      SAFE_DATABASE_PATTERN.test(evidence.source.database.name) &&
+      isStagingDatabaseName(evidence.source.database.name),
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  exactKeys(evidence.artifact, ["file", "bytes", "sha256"], "P16_RECOVERY_DUMP_EVIDENCE_INVALID");
+  invariant(
+    basename(evidence.artifact.file) === evidence.artifact.file &&
+      evidence.artifact.file.toLowerCase().endsWith(".sql") &&
+      Number.isSafeInteger(evidence.artifact.bytes) &&
+      evidence.artifact.bytes > 0 &&
+      SHA256_PATTERN.test(evidence.artifact.sha256),
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  exactKeys(
+    evidence.dumpClient,
+    ["family", "version", "executable"],
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  invariant(
+    evidence.dumpClient.family === P16_DATABASE_DUMP_CLIENT &&
+      /^\d+\.\d+\.\d+$/u.test(evidence.dumpClient.version) &&
+      typeof evidence.dumpClient.executable === "string" &&
+      evidence.dumpClient.executable.length > 0,
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  exactKeys(
+    evidence.snapshot,
+    ["mode", "transport", "tlsCaSha256"],
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  invariant(
+    evidence.snapshot.mode === "SINGLE_TRANSACTION_NO_LOCKS" &&
+      evidence.snapshot.transport === "TLS_VERIFIED" &&
+      SHA256_PATTERN.test(evidence.snapshot.tlsCaSha256),
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  exactKeys(evidence.release, ["commit", "authority"], "P16_RECOVERY_DUMP_EVIDENCE_INVALID");
+  invariant(
+    COMMIT_PATTERN.test(evidence.release.commit) &&
+      evidence.release.authority === "REPOSITORY_HEAD_BOUND",
+    "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+  );
+  return evidence;
+}
+
+async function loadDatabaseDumpEvidence(input) {
+  const evidencePath = await canonicalExistingPath(
+    input.databaseEvidencePath,
+    "file",
+    "P16_RECOVERY_DUMP_EVIDENCE_PATH_INVALID",
+  );
+
+  invariant(evidencePath.endsWith(".sql.evidence.json"), "P16_RECOVERY_DUMP_EVIDENCE_PATH_INVALID");
+
+  let evidence;
+
+  try {
+    const text = await readFile(evidencePath, "utf8");
+
+    invariant(
+      Buffer.byteLength(text, "utf8") <= MAX_MANIFEST_BYTES,
+      "P16_RECOVERY_DUMP_EVIDENCE_INVALID",
+    );
+
+    evidence = validateDumpEvidenceShape(JSON.parse(text));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error("P16_RECOVERY_DUMP_EVIDENCE_INVALID", {
+        cause: error,
+      });
+    }
+
+    throw error;
+  }
+
+  const dumpPath = await canonicalExistingPath(
+    join(dirname(evidencePath), evidence.artifact.file),
+    "file",
+    "P16_RECOVERY_DATABASE_DUMP_PATH_INVALID",
+  );
+
+  invariant(
+    `${dumpPath}.evidence.json` === evidencePath,
+    "P16_RECOVERY_DUMP_EVIDENCE_ARTIFACT_MISMATCH",
+  );
+
+  const metadata = await lstat(dumpPath);
+
+  invariant(
+    metadata.size === evidence.artifact.bytes &&
+      (await sha256File(dumpPath)) === evidence.artifact.sha256,
+    "P16_RECOVERY_DUMP_EVIDENCE_ARTIFACT_MISMATCH",
+  );
+
+  const expected = input.expectedDatabaseConfiguration;
+
+  invariant(
+    expected !== null &&
+      typeof expected === "object" &&
+      typeof expected.environmentId === "string" &&
+      typeof expected.hostname === "string" &&
+      typeof expected.databaseName === "string" &&
+      typeof expected.tlsCaFile === "string" &&
+      typeof expected.dumpMode === "string",
+    "P16_RECOVERY_DATABASE_EXPECTATION_INVALID",
+  );
+
+  const expectedTlsCaFile = await canonicalExistingPath(
+    expected.tlsCaFile,
+    "file",
+    "P16_RECOVERY_DATABASE_CA_INVALID",
+  );
+
+  const expectedTlsCaSha256 = await sha256File(expectedTlsCaFile);
+
+  invariant(
+    evidence.source.environmentId === expected.environmentId &&
+      evidence.source.database.hostname === expected.hostname &&
+      String(evidence.source.database.port) === String(expected.port) &&
+      evidence.source.database.name === expected.databaseName &&
+      evidence.snapshot.mode === expected.dumpMode &&
+      evidence.snapshot.transport === "TLS_VERIFIED" &&
+      evidence.snapshot.tlsCaSha256 === expectedTlsCaSha256 &&
+      evidence.dumpClient.family === "mariadb",
+    "P16_RECOVERY_DATABASE_EVIDENCE_MISMATCH",
+  );
+
+  requireValidReleaseBinding(evidence.release.commit, input.resolveHead);
+
+  return Object.freeze({
+    evidence,
+    dumpPath,
+    evidencePath,
+  });
+}
+
 function validateManifest(manifest, expectations = {}) {
   exactKeys(
     manifest,
@@ -560,10 +1029,17 @@ function validateManifest(manifest, expectations = {}) {
       "privateStorage",
       "protection",
       "recovery",
+      "resilience",
+      "manifestIntegrity",
     ],
     "P16_RECOVERY_MANIFEST_INVALID",
   );
   assertSafeManifest(manifest);
+  exactKeys(
+    manifest.manifestIntegrity,
+    ["algorithm", "keyId", "mac"],
+    "P16_RECOVERY_MANIFEST_INTEGRITY_INVALID",
+  );
   invariant(
     manifest.manifestVersion === P16_RECOVERY_MANIFEST_VERSION,
     "P16_RECOVERY_MANIFEST_VERSION_UNSUPPORTED",
@@ -580,7 +1056,7 @@ function validateManifest(manifest, expectations = {}) {
   invariant(COMMIT_PATTERN.test(manifest.release.commit), "P16_RECOVERY_RELEASE_INVALID");
   exactKeys(
     manifest.database,
-    ["name", "snapshotMode", "artifact"],
+    ["name", "snapshotMode", "dumpEvidence", "artifact"],
     "P16_RECOVERY_DATABASE_INVALID",
   );
   invariant(
@@ -590,6 +1066,15 @@ function validateManifest(manifest, expectations = {}) {
     "P16_RECOVERY_DATABASE_INVALID",
   );
   validateArtifactMetadata(manifest.database.artifact);
+  validateDumpEvidenceShape(manifest.database.dumpEvidence);
+  invariant(
+    manifest.database.dumpEvidence.source.database.name === manifest.database.name &&
+      manifest.database.dumpEvidence.release.commit === manifest.release.commit &&
+      manifest.database.dumpEvidence.completedAt === manifest.createdAt &&
+      manifest.database.dumpEvidence.artifact.bytes === manifest.database.artifact.plaintextBytes &&
+      manifest.database.dumpEvidence.artifact.sha256 === manifest.database.artifact.plaintextSha256,
+    "P16_RECOVERY_DATABASE_EVIDENCE_MISMATCH",
+  );
   invariant(
     manifest.database.artifact.file === "database/database.sql.enc",
     "P16_RECOVERY_DATABASE_INVALID",
@@ -655,6 +1140,17 @@ function validateManifest(manifest, expectations = {}) {
     manifest.recovery,
     ["mode", "targetEnvironmentId", "databaseTargetPattern", "requiresExplicitAuthorization"],
     "P16_RECOVERY_INSTRUCTIONS_INVALID",
+  );
+  exactKeys(
+    manifest.resilience,
+    ["sourceFailureDomain", "independentCopyRequired", "independentCopyStatus"],
+    "P16_RECOVERY_RESILIENCE_INVALID",
+  );
+  invariant(
+    manifest.resilience.sourceFailureDomain === "cloudflare-r2" &&
+      manifest.resilience.independentCopyRequired === true &&
+      manifest.resilience.independentCopyStatus === "NOT_ATTESTED",
+    "P16_RECOVERY_RESILIENCE_INVALID",
   );
   invariant(
     manifest.recovery.mode === "ISOLATED_RESTORE_ONLY" &&
@@ -739,44 +1235,67 @@ async function parseStorageIndex(buffer, manifest) {
 
 export async function createP16RecoveryBundle(input) {
   invariant(BACKUP_ID_PATTERN.test(input.backupId ?? ""), "P16_RECOVERY_BACKUP_ID_INVALID");
-  const createdAt = normalizeTimestamp(
-    input.createdAt,
-    "P16_RECOVERY_CREATED_AT_INVALID",
-  ).toISOString();
-  invariant(COMMIT_PATTERN.test(input.releaseCommit ?? ""), "P16_RECOVERY_RELEASE_INVALID");
-  invariant(
-    SAFE_DATABASE_PATTERN.test(input.databaseName ?? "") &&
-      isStagingDatabaseName(input.databaseName),
-    "P16_RECOVERY_DATABASE_INVALID",
+  invariant(KEY_ID_PATTERN.test(input.encryptionKeyId ?? ""), "P16_RECOVERY_KEY_ID_INVALID");
+  const masterKey = normalizeMasterKey(input.encryptionKey);
+  const keys = deriveRecoveryKeys(masterKey);
+  const repositoryRoot = await canonicalExistingPath(
+    input.repositoryRoot,
+    "directory",
+    "P16_RECOVERY_REPOSITORY_ROOT_INVALID",
   );
-  invariant(isAbsolute(input.databaseDumpPath ?? ""), "P16_RECOVERY_DATABASE_DUMP_PATH_INVALID");
-  invariant(isAbsolute(input.outputRoot ?? ""), "P16_RECOVERY_OUTPUT_ROOT_INVALID");
-  const key = Buffer.isBuffer(input.encryptionKey)
-    ? input.encryptionKey
-    : decodeRecoveryEncryptionKey(input.encryptionKey);
-  invariant(key.length === 32, "P16_RECOVERY_KEY_INVALID");
-  const outputRoot = resolve(input.outputRoot);
+  const storageRoot = await canonicalExistingPath(
+    input.storageRoot,
+    "directory",
+    "P16_RECOVERY_STORAGE_ROOT_INVALID",
+  );
+  const outputRoot = await canonicalProspectivePath(
+    input.outputRoot,
+    "P16_RECOVERY_OUTPUT_ROOT_INVALID",
+  );
+  const dump = await loadDatabaseDumpEvidence({
+    databaseEvidencePath: input.databaseEvidencePath,
+    expectedDatabaseConfiguration: input.expectedDatabaseConfiguration,
+    resolveHead: input.resolveHead,
+  });
+  await assertOutsideRepository(
+    storageRoot,
+    repositoryRoot,
+    "P16_RECOVERY_STORAGE_IN_REPOSITORY_REFUSED",
+  );
+  await assertOutsideRepository(
+    dump.dumpPath,
+    repositoryRoot,
+    "P16_RECOVERY_DUMP_IN_REPOSITORY_REFUSED",
+  );
+  await assertOutsideRepository(
+    dump.evidencePath,
+    repositoryRoot,
+    "P16_RECOVERY_DUMP_EVIDENCE_IN_REPOSITORY_REFUSED",
+  );
+  await assertOutsideRepository(
+    outputRoot,
+    repositoryRoot,
+    "P16_RECOVERY_OUTPUT_IN_REPOSITORY_REFUSED",
+  );
   const finalRoot = join(outputRoot, input.backupId);
   const partialRoot = join(outputRoot, `.${input.backupId}.partial-${randomUUID()}`);
-  const storageRoot = resolve(input.storageRoot);
-  const dumpPath = resolve(input.databaseDumpPath);
   invariant(
     !isContainedPath(storageRoot, finalRoot) && !isContainedPath(finalRoot, storageRoot),
     "P16_RECOVERY_OUTPUT_OVERLAP",
   );
   invariant(
-    !isContainedPath(dumpPath, finalRoot) && !isContainedPath(finalRoot, dumpPath),
+    !isContainedPath(dump.dumpPath, finalRoot) && !isContainedPath(finalRoot, dump.dumpPath),
     "P16_RECOVERY_OUTPUT_OVERLAP",
   );
   await mkdir(outputRoot, { recursive: true });
   await assertPathDoesNotExist(finalRoot, "P16_RECOVERY_BUNDLE_ALREADY_EXISTS");
   await mkdir(partialRoot, { recursive: false });
   try {
-    const migrations = await collectP16MigrationMetadata(input.repositoryRoot);
+    const migrations = await collectP16MigrationMetadata(repositoryRoot);
     const databaseArtifact = await encryptFile(
-      dumpPath,
+      dump.dumpPath,
       join(partialRoot, "database", "database.sql.enc"),
-      key,
+      keys.artifactEncryptionKey,
       partialRoot,
     );
     const storageFiles = await enumerateStorage(storageRoot);
@@ -785,7 +1304,12 @@ export async function createP16RecoveryBundle(input) {
     for (const file of storageFiles) {
       const objectName = `${createHash("sha256").update(file.relativePath, "utf8").digest("hex")}.enc`;
       const destination = join(partialRoot, "storage", "objects", objectName);
-      const artifact = await encryptFile(file.sourcePath, destination, key, partialRoot);
+      const artifact = await encryptFile(
+        file.sourcePath,
+        destination,
+        keys.artifactEncryptionKey,
+        partialRoot,
+      );
       objectArtifacts.push(artifact);
       index.push({ relativePath: file.relativePath, artifactFile: artifact.file });
     }
@@ -796,18 +1320,19 @@ export async function createP16RecoveryBundle(input) {
     const indexArtifact = await encryptBuffer(
       indexBuffer,
       join(partialRoot, "storage", "index.json.enc"),
-      key,
+      keys.artifactEncryptionKey,
       partialRoot,
     );
     const manifest = {
       manifestVersion: P16_RECOVERY_MANIFEST_VERSION,
       backupId: input.backupId,
-      createdAt,
+      createdAt: dump.evidence.completedAt,
       source: { appEnv: "staging", environmentId: P16_STAGING_ENVIRONMENT_ID },
-      release: { commit: input.releaseCommit },
+      release: { commit: dump.evidence.release.commit },
       database: {
-        name: input.databaseName,
+        name: dump.evidence.source.database.name,
         snapshotMode: "SINGLE_TRANSACTION_NO_LOCKS",
+        dumpEvidence: dump.evidence,
         artifact: databaseArtifact,
       },
       migrations,
@@ -835,22 +1360,31 @@ export async function createP16RecoveryBundle(input) {
         databaseTargetPattern: "lessenc_(test_)?recovery(_<id>)?",
         requiresExplicitAuthorization: true,
       },
+      resilience: {
+        sourceFailureDomain: "cloudflare-r2",
+        independentCopyRequired: true,
+        independentCopyStatus: "NOT_ATTESTED",
+      },
+      manifestIntegrity: null,
     };
+    authenticateManifest(manifest, keys.manifestAuthenticationKey, input.encryptionKeyId);
     validateManifest(manifest, {
       environmentId: P16_STAGING_ENVIRONMENT_ID,
-      databaseName: input.databaseName,
+      databaseName: dump.evidence.source.database.name,
       backupId: input.backupId,
-      releaseCommit: input.releaseCommit,
+      releaseCommit: dump.evidence.release.commit,
     });
     await writeFile(join(partialRoot, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, {
       flag: "wx",
     });
     await verifyP16RecoveryBundle(partialRoot, {
-      encryptionKey: key,
+      encryptionKey: masterKey,
+      encryptionKeyId: input.encryptionKeyId,
+      repositoryRoot,
       environmentId: P16_STAGING_ENVIRONMENT_ID,
-      databaseName: input.databaseName,
+      databaseName: dump.evidence.source.database.name,
       backupId: input.backupId,
-      releaseCommit: input.releaseCommit,
+      releaseCommit: dump.evidence.release.commit,
     });
     await rename(partialRoot, finalRoot);
     return Object.freeze({ bundleDirectory: finalRoot, manifest: Object.freeze(manifest) });
@@ -861,17 +1395,34 @@ export async function createP16RecoveryBundle(input) {
 }
 
 export async function verifyP16RecoveryBundle(bundleDirectory, options) {
-  const bundleRoot = resolve(bundleDirectory);
-  const key = Buffer.isBuffer(options.encryptionKey)
-    ? options.encryptionKey
-    : decodeRecoveryEncryptionKey(options.encryptionKey);
-  invariant(key.length === 32, "P16_RECOVERY_KEY_INVALID");
+  const bundleRoot = await canonicalExistingPath(
+    bundleDirectory,
+    "directory",
+    "P16_RECOVERY_BUNDLE_ROOT_INVALID",
+  );
+  await assertOutsideRepository(
+    bundleRoot,
+    options.repositoryRoot ?? process.cwd(),
+    "P16_RECOVERY_BUNDLE_IN_REPOSITORY_REFUSED",
+  );
+  const keys = deriveRecoveryKeys(normalizeMasterKey(options.encryptionKey));
   let manifest;
   try {
-    manifest = JSON.parse(await readFile(join(bundleRoot, "manifest.json"), "utf8"));
+    const manifestPath = await canonicalExistingPath(
+      join(bundleRoot, "manifest.json"),
+      "file",
+      "P16_RECOVERY_MANIFEST_UNREADABLE",
+    );
+    const serialized = await readFile(manifestPath, "utf8");
+    invariant(
+      Buffer.byteLength(serialized, "utf8") <= MAX_MANIFEST_BYTES,
+      "P16_RECOVERY_MANIFEST_UNREADABLE",
+    );
+    manifest = JSON.parse(serialized);
   } catch {
     throw new Error("P16_RECOVERY_MANIFEST_UNREADABLE");
   }
+  verifyManifestAuthentication(manifest, keys.manifestAuthenticationKey, options.encryptionKeyId);
   validateManifest(manifest, options);
   await verifyCiphertext(bundleRoot, manifest.database.artifact);
   for (const artifact of manifest.privateStorage.objectArtifacts)
@@ -879,15 +1430,15 @@ export async function verifyP16RecoveryBundle(bundleDirectory, options) {
   const indexBuffer = await decryptArtifactToBuffer(
     bundleRoot,
     manifest.privateStorage.indexArtifact,
-    key,
+    keys.artifactEncryptionKey,
   );
   const index = await parseStorageIndex(indexBuffer, manifest);
-  await verifyArtifactPlaintext(bundleRoot, manifest.database.artifact, key);
+  await verifyArtifactPlaintext(bundleRoot, manifest.database.artifact, keys.artifactEncryptionKey);
   for (const entry of index) {
     const artifact = manifest.privateStorage.objectArtifacts.find(
       (candidate) => candidate.file === entry.artifactFile,
     );
-    await verifyArtifactPlaintext(bundleRoot, artifact, key);
+    await verifyArtifactPlaintext(bundleRoot, artifact, keys.artifactEncryptionKey);
   }
   return Object.freeze({ manifest: Object.freeze(manifest), storageIndex: Object.freeze(index) });
 }
@@ -901,9 +1452,20 @@ export async function restoreP16RecoveryBundleIsolated(input) {
     RECOVERY_DATABASE_PATTERN.test(input.targetDatabaseName ?? ""),
     "P16_RESTORE_DATABASE_TARGET_REFUSED",
   );
-  invariant(isAbsolute(input.targetRoot ?? ""), "P16_RESTORE_TARGET_ROOT_INVALID");
-  const targetRoot = resolve(input.targetRoot);
-  const bundleRoot = resolve(input.bundleDirectory);
+  const targetRoot = await canonicalProspectivePath(
+    input.targetRoot,
+    "P16_RESTORE_TARGET_ROOT_INVALID",
+  );
+  const bundleRoot = await canonicalExistingPath(
+    input.bundleDirectory,
+    "directory",
+    "P16_RECOVERY_BUNDLE_ROOT_INVALID",
+  );
+  await assertOutsideRepository(
+    targetRoot,
+    input.repositoryRoot ?? process.cwd(),
+    "P16_RESTORE_TARGET_IN_REPOSITORY_REFUSED",
+  );
   invariant(
     !isContainedPath(bundleRoot, targetRoot) && !isContainedPath(targetRoot, bundleRoot),
     "P16_RESTORE_TARGET_OVERLAP",
@@ -913,15 +1475,15 @@ export async function restoreP16RecoveryBundleIsolated(input) {
   const partialRoot = `${targetRoot}.partial-${randomUUID()}`;
   const verified = await verifyP16RecoveryBundle(bundleRoot, {
     encryptionKey: input.encryptionKey,
+    encryptionKeyId: input.encryptionKeyId,
+    repositoryRoot: input.repositoryRoot,
     environmentId: P16_STAGING_ENVIRONMENT_ID,
     databaseName: input.expectedSourceDatabaseName,
     backupId: input.expectedBackupId,
     releaseCommit: input.expectedReleaseCommit,
     migrationSetSha256: input.expectedMigrationSetSha256,
   });
-  const key = Buffer.isBuffer(input.encryptionKey)
-    ? input.encryptionKey
-    : decodeRecoveryEncryptionKey(input.encryptionKey);
+  const key = deriveRecoveryKeys(normalizeMasterKey(input.encryptionKey)).artifactEncryptionKey;
   await mkdir(partialRoot, { recursive: false });
   try {
     await decryptArtifactToFile(
@@ -965,28 +1527,86 @@ export async function restoreP16RecoveryBundleIsolated(input) {
   }
 }
 
-export function measureP16Rpo(input) {
+export function calculateP16Rpo(input) {
   const observedAt = normalizeTimestamp(input.observedAt, "P16_RPO_OBSERVED_AT_INVALID");
-  if (
-    input.evidenceScope !== "HOSTED_STAGING" ||
-    input.latestVerifiedBackupAt === null ||
-    input.latestVerifiedBackupAt === undefined
-  ) {
-    return Object.freeze({
-      status: "UNKNOWN",
-      targetSeconds: P16_RPO_TARGET_SECONDS,
-      ageSeconds: null,
-      reason: "NO_HOSTED_EVIDENCE",
-    });
-  }
   const backupAt = normalizeTimestamp(input.latestVerifiedBackupAt, "P16_RPO_BACKUP_AT_INVALID");
   invariant(backupAt.getTime() <= observedAt.getTime(), "P16_RPO_FUTURE_BACKUP_REFUSED");
-  const ageSeconds = Math.floor((observedAt.getTime() - backupAt.getTime()) / 1000);
+  const ageMs = observedAt.getTime() - backupAt.getTime();
   return Object.freeze({
-    status: ageSeconds <= P16_RPO_TARGET_SECONDS ? "PASS" : "FAIL",
+    assessment: ageMs <= P16_RPO_TARGET_MS ? "PASS" : "FAIL",
+    targetMs: P16_RPO_TARGET_MS,
     targetSeconds: P16_RPO_TARGET_SECONDS,
-    ageSeconds,
-    reason: ageSeconds <= P16_RPO_TARGET_SECONDS ? "WITHIN_TARGET" : "STALE_BACKUP",
+    ageMs,
+    ageSeconds: ageMs / 1000,
+  });
+}
+
+export function measureP16Rpo(input) {
+  if (input.latestVerifiedBackupAt === null || input.latestVerifiedBackupAt === undefined) {
+    return Object.freeze({
+      status: "UNKNOWN",
+      targetMs: P16_RPO_TARGET_MS,
+      targetSeconds: P16_RPO_TARGET_SECONDS,
+      ageMs: null,
+      ageSeconds: null,
+      localAssessment: null,
+      reason: "NO_DIAGNOSTIC_INPUT",
+    });
+  }
+  const calculation = calculateP16Rpo(input);
+  return Object.freeze({
+    status: "UNKNOWN",
+    targetMs: calculation.targetMs,
+    targetSeconds: calculation.targetSeconds,
+    ageMs: calculation.ageMs,
+    ageSeconds: calculation.ageSeconds,
+    localAssessment: calculation.assessment,
+    reason: "RAW_INPUT_NOT_AUTHORITATIVE_HOSTED_EVIDENCE",
+  });
+}
+
+export function evaluateP16HostedRpoEvidence(evidence) {
+  exactKeys(
+    evidence,
+    [
+      "evidenceType",
+      "evidenceScope",
+      "provenance",
+      "outcome",
+      "observedAt",
+      "latestVerifiedBackupAt",
+    ],
+    "P16_RPO_HOSTED_EVIDENCE_INVALID",
+  );
+  invariant(
+    evidence.evidenceType === "P16_HOSTED_BACKUP_OBSERVATION" &&
+      evidence.evidenceScope === "HOSTED_STAGING" &&
+      evidence.provenance === "AUTOMATED_PROVIDER_OBSERVATION" &&
+      evidence.outcome === "VERIFIED",
+    "P16_RPO_HOSTED_EVIDENCE_INVALID",
+  );
+  const calculation = calculateP16Rpo(evidence);
+  return Object.freeze({
+    status: calculation.assessment,
+    targetMs: calculation.targetMs,
+    targetSeconds: calculation.targetSeconds,
+    ageMs: calculation.ageMs,
+    ageSeconds: calculation.ageSeconds,
+    reason: calculation.assessment === "PASS" ? "WITHIN_TARGET" : "STALE_BACKUP",
+  });
+}
+
+export function calculateP16Rto(input) {
+  const startedAt = normalizeTimestamp(input.recoveryStartedAt, "P16_RTO_STARTED_AT_INVALID");
+  const validatedAt = normalizeTimestamp(input.recoveryValidatedAt, "P16_RTO_VALIDATED_AT_INVALID");
+  invariant(validatedAt.getTime() >= startedAt.getTime(), "P16_RTO_INTERVAL_INVALID");
+  const durationMs = validatedAt.getTime() - startedAt.getTime();
+  return Object.freeze({
+    assessment: durationMs <= P16_RTO_TARGET_MS ? "PASS" : "FAIL",
+    targetMs: P16_RTO_TARGET_MS,
+    targetSeconds: P16_RTO_TARGET_SECONDS,
+    durationMs,
+    durationSeconds: durationMs / 1000,
   });
 }
 
@@ -998,32 +1618,54 @@ export function measureP16Rto(input) {
   ) {
     return Object.freeze({
       status: "UNKNOWN",
+      targetMs: P16_RTO_TARGET_MS,
       targetSeconds: P16_RTO_TARGET_SECONDS,
+      durationMs: null,
       durationSeconds: null,
       localAssessment: null,
       reason: "NO_VALIDATED_RECOVERY_EVIDENCE",
     });
   }
-  const startedAt = normalizeTimestamp(input.recoveryStartedAt, "P16_RTO_STARTED_AT_INVALID");
-  const validatedAt = normalizeTimestamp(input.recoveryValidatedAt, "P16_RTO_VALIDATED_AT_INVALID");
-  invariant(validatedAt.getTime() >= startedAt.getTime(), "P16_RTO_INTERVAL_INVALID");
-  const durationSeconds = Math.floor((validatedAt.getTime() - startedAt.getTime()) / 1000);
-  const assessment = durationSeconds <= P16_RTO_TARGET_SECONDS ? "PASS" : "FAIL";
-  if (input.evidenceScope !== "HOSTED_STAGING") {
-    return Object.freeze({
-      status: "UNKNOWN",
-      targetSeconds: P16_RTO_TARGET_SECONDS,
-      durationSeconds,
-      localAssessment: assessment,
-      reason: "LOCAL_EVIDENCE_NOT_HOSTED_PROOF",
-    });
-  }
+  const calculation = calculateP16Rto(input);
   return Object.freeze({
-    status: assessment,
-    targetSeconds: P16_RTO_TARGET_SECONDS,
-    durationSeconds,
-    localAssessment: null,
-    reason: assessment === "PASS" ? "WITHIN_TARGET" : "RECOVERY_EXCEEDED_TARGET",
+    status: "UNKNOWN",
+    targetMs: calculation.targetMs,
+    targetSeconds: calculation.targetSeconds,
+    durationMs: calculation.durationMs,
+    durationSeconds: calculation.durationSeconds,
+    localAssessment: calculation.assessment,
+    reason: "RAW_INPUT_NOT_AUTHORITATIVE_HOSTED_EVIDENCE",
+  });
+}
+
+export function evaluateP16HostedRtoEvidence(evidence) {
+  exactKeys(
+    evidence,
+    [
+      "evidenceType",
+      "evidenceScope",
+      "provenance",
+      "validationOutcome",
+      "recoveryStartedAt",
+      "recoveryValidatedAt",
+    ],
+    "P16_RTO_HOSTED_EVIDENCE_INVALID",
+  );
+  invariant(
+    evidence.evidenceType === "P16_HOSTED_RECOVERY_VALIDATION" &&
+      evidence.evidenceScope === "HOSTED_STAGING" &&
+      evidence.provenance === "AUTOMATED_RECOVERY_RUN" &&
+      evidence.validationOutcome === "VALIDATED",
+    "P16_RTO_HOSTED_EVIDENCE_INVALID",
+  );
+  const calculation = calculateP16Rto(evidence);
+  return Object.freeze({
+    status: calculation.assessment,
+    targetMs: calculation.targetMs,
+    targetSeconds: calculation.targetSeconds,
+    durationMs: calculation.durationMs,
+    durationSeconds: calculation.durationSeconds,
+    reason: calculation.assessment === "PASS" ? "WITHIN_TARGET" : "RECOVERY_EXCEEDED_TARGET",
   });
 }
 

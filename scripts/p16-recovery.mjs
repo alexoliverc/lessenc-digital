@@ -12,6 +12,7 @@ import {
   decodeRecoveryEncryptionKey,
   measureP16Rpo,
   measureP16Rto,
+  inspectMariaDbDumpClient,
   planP16ApplicationRollback,
   restoreP16RecoveryBundleIsolated,
   stagingMysqlDumpArguments,
@@ -52,9 +53,10 @@ async function main() {
   const options = parseOptions(rawOptions);
 
   if (mode === "database-preflight") {
-    const configuration = validateStagingDatabaseBackupEnvironment(process.env);
+    const configuration = await validateStagingDatabaseBackupEnvironment(process.env);
     const argumentsList = stagingMysqlDumpArguments(configuration);
     invariant(argumentsList.length > 0, "P16_BACKUP_DUMP_ARGUMENTS_EMPTY");
+    await inspectMariaDbDumpClient({ env: process.env });
     process.stdout.write("P16_DATABASE_BACKUP_PREFLIGHT=PASS\n");
     process.stdout.write("P16_DATABASE_BACKUP_MODE=SINGLE_TRANSACTION_NO_LOCKS\n");
     process.stdout.write("P16_DATABASE_BACKUP_TRANSPORT=TLS_VERIFIED\n");
@@ -65,6 +67,7 @@ async function main() {
     const result = await createStagingDatabaseDump({
       env: process.env,
       destinationPath: resolve(required(options, "output")),
+      repositoryRoot: process.cwd(),
     });
     process.stdout.write("P16_DATABASE_BACKUP=PASS\n");
     process.stdout.write(`P16_DATABASE_BACKUP_BYTES=${result.bytes}\n`);
@@ -73,19 +76,16 @@ async function main() {
   }
 
   if (mode === "bundle") {
-    const configuration = validateStagingDatabaseBackupEnvironment(process.env);
-    const databaseName = required(options, "database-name");
-    invariant(databaseName === configuration.databaseName, "P16_RECOVERY_DATABASE_MISMATCH");
+    const configuration = await validateStagingDatabaseBackupEnvironment(process.env);
     const result = await createP16RecoveryBundle({
       backupId: required(options, "backup-id"),
-      createdAt: required(options, "created-at"),
-      releaseCommit: required(options, "release-commit"),
-      databaseName,
-      databaseDumpPath: resolve(required(options, "database-dump")),
+      databaseEvidencePath: resolve(required(options, "database-evidence")),
+      expectedDatabaseConfiguration: configuration,
       storageRoot: resolve(required(options, "storage-root")),
       outputRoot: resolve(required(options, "output-root")),
       repositoryRoot: process.cwd(),
       encryptionKey: encryptionKey(),
+      encryptionKeyId: required(options, "key-id"),
     });
     process.stdout.write("P16_RECOVERY_BUNDLE_CREATED=1\n");
     process.stdout.write(`P16_RECOVERY_BACKUP_ID=${result.manifest.backupId}\n`);
@@ -99,6 +99,8 @@ async function main() {
     const migrations = await collectP16MigrationMetadata(process.cwd());
     await verifyP16RecoveryBundle(resolve(required(options, "bundle")), {
       encryptionKey: encryptionKey(),
+      encryptionKeyId: required(options, "key-id"),
+      repositoryRoot: process.cwd(),
       environmentId: P16_STAGING_ENVIRONMENT_ID,
       databaseName: required(options, "database-name"),
       backupId: required(options, "backup-id"),
@@ -121,6 +123,8 @@ async function main() {
       expectedReleaseCommit: required(options, "release-commit"),
       expectedMigrationSetSha256: calculateP16MigrationSetSha256(migrations),
       encryptionKey: encryptionKey(),
+      encryptionKeyId: required(options, "key-id"),
+      repositoryRoot: process.cwd(),
     });
     process.stdout.write("P16_ISOLATED_RESTORE_VALIDATED=1\n");
     process.stdout.write(`P16_ISOLATED_RESTORE_DURATION_MS=${evidence.durationMs}\n`);

@@ -11,6 +11,8 @@ function validEnvironment(): Record<string, string> {
     P16_STAGING_ENVIRONMENT_ID: "lessenc-staging",
     P16_DATABASE_ACCESS_MODEL: "distinct-users",
     P16_DATABASE_MIGRATION_WINDOW: "disabled",
+    P16_DATABASE_DUMP_CLIENT: "mariadb",
+    P16_DATABASE_EXPECTED_HOST: "db.example",
     P16_RELEASE_COMMIT: "a".repeat(40),
     DATABASE_URL: "mysql://migrate:secret@db.example/staging_lessenc",
     DB_RUNTIME_URL: "mysql://runtime:secret@db.example/staging_lessenc",
@@ -37,6 +39,17 @@ function validEnvironment(): Record<string, string> {
 }
 
 describe("P16 staging configuration contract", () => {
+  it("requires the explicit MariaDB dump-client contract", () => {
+    const missing = validEnvironment();
+    delete missing.P16_DATABASE_DUMP_CLIENT;
+
+    expect(validateStagingEnvironment(missing)).toContain("P16_DATABASE_DUMP_CLIENT_INVALID");
+
+    const mysqlClient = validEnvironment();
+    mysqlClient.P16_DATABASE_DUMP_CLIENT = "mysqldump";
+
+    expect(validateStagingEnvironment(mysqlClient)).toContain("P16_DATABASE_DUMP_CLIENT_INVALID");
+  });
   it("accepts isolated staging identities without exposing values", () => {
     expect(validateStagingEnvironment(validEnvironment())).toEqual([]);
   });

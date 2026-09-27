@@ -26,20 +26,98 @@ function parseDatabaseUrl(raw) {
     if (url.protocol !== "mysql:" || !url.hostname || !url.username || !url.password || !database) {
       return null;
     }
-    return { url, database };
+    return {
+      url,
+      database,
+      hostname: normalizeDatabaseHostname(url.hostname),
+      port: url.port || "3306",
+      username: decodeURIComponent(url.username),
+      password: decodeURIComponent(url.password),
+    };
   } catch {
     return null;
   }
 }
 
-function isHostedDatabase(target) {
+export function normalizeDatabaseHostname(value) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/gu, "")
+    .replace(/\.$/u, "");
+}
+
+function isLoopbackDatabaseHostname(hostname) {
+  const normalized = normalizeDatabaseHostname(hostname);
+  if (normalized === "localhost" || normalized.endsWith(".localhost") || normalized === "::1") {
+    return true;
+  }
+  const ipv4 = normalized.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/u);
+  return ipv4 !== null && ipv4.slice(1).every((part) => Number(part) <= 255) && ipv4[1] === "127";
+}
+
+function isHostedDatabase(target, expectedHost) {
   const databaseTokens = target?.database.toLowerCase().split(/[_-]+/u) ?? [];
   return (
     target !== null &&
-    !["127.0.0.1", "localhost", "::1"].includes(target.url.hostname.toLowerCase()) &&
+    !isLoopbackDatabaseHostname(target.hostname) &&
+    target.hostname === normalizeDatabaseHostname(expectedHost) &&
     databaseTokens.some((token) => token === "stage" || token === "staging") &&
     !/(dev(elopment)?|local|test|prod(uction)?|live)/iu.test(target.database)
   );
+}
+
+export function validateStagingDatabaseAuthority(env, options = {}) {
+  const failures = [];
+  const gate = options.gate ?? "runtime";
+  const expectedHost = normalizeDatabaseHostname(env.P16_DATABASE_EXPECTED_HOST);
+  if (!expectedHost || isLoopbackDatabaseHostname(expectedHost)) {
+    failures.push("P16_DATABASE_EXPECTED_HOST_INVALID");
+  }
+  const accessModel = env.P16_DATABASE_ACCESS_MODEL;
+  if (!DATABASE_ACCESS_MODELS.includes(accessModel)) {
+    failures.push("P16_DATABASE_ACCESS_MODEL_INVALID");
+  }
+  const migrationWindow = env.P16_DATABASE_MIGRATION_WINDOW;
+  if (!DATABASE_MIGRATION_WINDOWS.includes(migrationWindow)) {
+    failures.push("P16_DATABASE_MIGRATION_WINDOW_INVALID");
+  } else if (gate === "migration" && migrationWindow !== "enabled") {
+    failures.push("P16_DATABASE_MIGRATION_WINDOW_REQUIRED");
+  } else if (gate === "runtime" && migrationWindow !== "disabled") {
+    failures.push("P16_DATABASE_MIGRATION_WINDOW_MUST_BE_DISABLED");
+  } else if (gate !== "migration" && gate !== "runtime") {
+    failures.push("P16_DATABASE_GATE_INVALID");
+  }
+  const migration = parseDatabaseUrl(env.DATABASE_URL);
+  const runtime = parseDatabaseUrl(env.DB_RUNTIME_URL);
+  if (!isHostedDatabase(migration, expectedHost)) {
+    failures.push("DATABASE_URL_NOT_UNAMBIGUOUS_STAGING");
+  }
+  if (!isHostedDatabase(runtime, expectedHost)) {
+    failures.push("DB_RUNTIME_URL_NOT_UNAMBIGUOUS_STAGING");
+  }
+  if (migration && runtime) {
+    if (
+      migration.hostname !== runtime.hostname ||
+      migration.port !== runtime.port ||
+      migration.database !== runtime.database
+    ) {
+      failures.push("DATABASE_TARGETS_DO_NOT_MATCH");
+    }
+    if (accessModel === "distinct-users" && migration.username === runtime.username) {
+      failures.push("DATABASE_USERS_MUST_BE_DISTINCT");
+    }
+    if (
+      accessModel === "hostinger-managed-single-user" &&
+      (migration.username !== runtime.username || migration.password !== runtime.password)
+    ) {
+      failures.push("HOSTINGER_MANAGED_DATABASE_IDENTITY_MISMATCH");
+    }
+  }
+  if (!env.DB_TLS_CA_FILE || !isAbsolute(env.DB_TLS_CA_FILE)) {
+    failures.push("DB_TLS_CA_FILE_MUST_BE_ABSOLUTE");
+  }
+  return Object.freeze([...new Set(failures)].sort());
 }
 
 function isCanonicalR2Endpoint(raw) {
@@ -80,6 +158,7 @@ export function validateStagingEnvironment(env, options = {}) {
   requireExact("NODE_ENV", "production");
   requireExact("APP_URL", "https://lessenc.com.br");
   requireExact("P16_STAGING_ENVIRONMENT_ID", STAGING_ENVIRONMENT_ID);
+  requireExact("P16_DATABASE_DUMP_CLIENT", "mariadb");
   requireExact("PRIVATE_STORAGE_DRIVER", "hosted");
   requireExact("P16_PRIVATE_STORAGE_PROVIDER", "r2");
   requireExact("PRIVATE_STORAGE_S3_REGION", "auto");
@@ -101,51 +180,7 @@ export function validateStagingEnvironment(env, options = {}) {
     failures.push("PRIVATE_STORAGE_S3_ACCESS_KEY_ID_MISSING_OR_INVALID");
   }
 
-  const accessModel = env.P16_DATABASE_ACCESS_MODEL;
-  if (!DATABASE_ACCESS_MODELS.includes(accessModel)) {
-    failures.push("P16_DATABASE_ACCESS_MODEL_INVALID");
-  }
-
-  const migrationWindow = env.P16_DATABASE_MIGRATION_WINDOW;
-  if (!DATABASE_MIGRATION_WINDOWS.includes(migrationWindow)) {
-    failures.push("P16_DATABASE_MIGRATION_WINDOW_INVALID");
-  } else if (gate === "migration" && migrationWindow !== "enabled") {
-    failures.push("P16_DATABASE_MIGRATION_WINDOW_REQUIRED");
-  } else if (gate === "runtime" && migrationWindow !== "disabled") {
-    failures.push("P16_DATABASE_MIGRATION_WINDOW_MUST_BE_DISABLED");
-  } else if (gate !== "migration" && gate !== "runtime") {
-    failures.push("P16_DATABASE_GATE_INVALID");
-  }
-
-  const migration = parseDatabaseUrl(env.DATABASE_URL);
-  const runtime = parseDatabaseUrl(env.DB_RUNTIME_URL);
-  if (!isHostedDatabase(migration)) failures.push("DATABASE_URL_NOT_UNAMBIGUOUS_STAGING");
-  if (!isHostedDatabase(runtime)) failures.push("DB_RUNTIME_URL_NOT_UNAMBIGUOUS_STAGING");
-  if (migration && runtime) {
-    if (
-      migration.url.hostname !== runtime.url.hostname ||
-      migration.url.port !== runtime.url.port ||
-      migration.database !== runtime.database
-    ) {
-      failures.push("DATABASE_TARGETS_DO_NOT_MATCH");
-    }
-
-    if (accessModel === "distinct-users" && migration.url.username === runtime.url.username) {
-      failures.push("DATABASE_USERS_MUST_BE_DISTINCT");
-    }
-
-    if (
-      accessModel === "hostinger-managed-single-user" &&
-      (migration.url.username !== runtime.url.username ||
-        migration.url.password !== runtime.url.password)
-    ) {
-      failures.push("HOSTINGER_MANAGED_DATABASE_IDENTITY_MISMATCH");
-    }
-  }
-
-  if (!env.DB_TLS_CA_FILE || !isAbsolute(env.DB_TLS_CA_FILE)) {
-    failures.push("DB_TLS_CA_FILE_MUST_BE_ABSOLUTE");
-  }
+  failures.push(...validateStagingDatabaseAuthority(env, { gate }));
 
   for (const name of STAGING_SECRET_NAMES) {
     if (typeof env[name] !== "string" || env[name].length < 32) {
