@@ -168,10 +168,38 @@ export function measureP16Rto(
     recoveryValidatedAt?: string | Date | null;
     validationOutcome?: string | null;
     evidenceScope?: string | null;
+    provenance?: string | null;
   }>,
 ): Readonly<Record<string, unknown>>;
+
+export type P16AutomatedHostedRtoEvidence = Readonly<{
+  evidenceType: "P16_HOSTED_RECOVERY_VALIDATION";
+  evidenceScope: "HOSTED_STAGING";
+  provenance: "AUTOMATED_RECOVERY_RUN";
+  validationOutcome: "VALIDATED";
+  recoveryStartedAt: string | Date;
+  recoveryValidatedAt: string | Date;
+}>;
+
+export type P16ControlledOperatorAssistedHostedRtoEvidence = Readonly<{
+  evidenceType: "P16_HOSTED_RECOVERY_VALIDATION";
+  evidenceScope: "HOSTED_STAGING";
+  provenance: "CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN";
+  validationOutcome: "VALIDATED";
+  recoveryStartedAt: string | Date;
+  recoveryValidatedAt: string | Date;
+  timestampAuthority: "RECOVERY_CONTROLLER";
+  providerPrivilegeRotationRequired: true;
+  providerPrivilegeRotationMode: "EXTERNAL_PROVIDER_CONTROL";
+  databaseRestoreValidation: "VALIDATED";
+  r2RestoreValidation: "VALIDATED";
+  finalRuntimePrivilegeValidation: "VALIDATED";
+  authenticatedHostedReadiness: "PASS";
+  hostedSmokeValidation: "PASS";
+}>;
+
 export function evaluateP16HostedRtoEvidence(
-  evidence: Readonly<Record<string, unknown>>,
+  evidence: P16AutomatedHostedRtoEvidence | P16ControlledOperatorAssistedHostedRtoEvidence,
 ): Readonly<{
   status: Assessment;
   targetMs: 28800000;

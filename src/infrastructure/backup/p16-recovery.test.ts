@@ -16,6 +16,7 @@ import process from "node:process";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  type P16ControlledOperatorAssistedHostedRtoEvidence,
   P16_ISOLATED_RECOVERY_ENVIRONMENT_ID,
   P16_STAGING_ENVIRONMENT_ID,
   calculateP16MigrationSetSha256,
@@ -43,6 +44,32 @@ const DATABASE = "lessenc_staging";
 const KEY = randomBytes(32);
 const KEY_ID = "p16-staging-2026-09";
 const roots = new Set<string>();
+
+function controlledOperatorAssistedRtoEvidence(
+  durationMs = 28_800_000,
+): P16ControlledOperatorAssistedHostedRtoEvidence {
+  const recoveryStartedAt = "2026-09-26T00:00:00.000Z";
+  return {
+    evidenceType: "P16_HOSTED_RECOVERY_VALIDATION",
+    evidenceScope: "HOSTED_STAGING",
+    provenance: "CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN",
+    validationOutcome: "VALIDATED",
+    recoveryStartedAt,
+    recoveryValidatedAt: new Date(Date.parse(recoveryStartedAt) + durationMs).toISOString(),
+    timestampAuthority: "RECOVERY_CONTROLLER",
+    providerPrivilegeRotationRequired: true,
+    providerPrivilegeRotationMode: "EXTERNAL_PROVIDER_CONTROL",
+    databaseRestoreValidation: "VALIDATED",
+    r2RestoreValidation: "VALIDATED",
+    finalRuntimePrivilegeValidation: "VALIDATED",
+    authenticatedHostedReadiness: "PASS",
+    hostedSmokeValidation: "PASS",
+  };
+}
+
+function evaluateUncheckedHostedRtoEvidence(evidence: Readonly<Record<string, unknown>>) {
+  return evaluateP16HostedRtoEvidence(evidence as never);
+}
 
 type TestManifest = {
   manifestVersion: number;
@@ -984,7 +1011,7 @@ describe("P16 recovery objectives and rollback separation", () => {
     ).toMatchObject({ status: "FAIL", ageMs: 86_400_001 });
   });
 
-  it("uses exact millisecond RTO boundaries and only typed hosted evidence can PASS", () => {
+  it("uses exact millisecond RTO boundaries and preserves automated hosted evidence", () => {
     const recoveryStartedAt = "2026-09-26T00:00:00.000Z";
     for (const [deltaMs, assessment] of [
       [28_799_999, "PASS"],
@@ -1011,6 +1038,7 @@ describe("P16 recovery objectives and rollback separation", () => {
         recoveryValidatedAt: "2026-09-26T01:00:00.000Z",
         validationOutcome: "VALIDATED",
         evidenceScope: "HOSTED_STAGING",
+        provenance: "CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN",
       }),
     ).toMatchObject({
       status: "UNKNOWN",
@@ -1027,6 +1055,67 @@ describe("P16 recovery objectives and rollback separation", () => {
         recoveryValidatedAt: new Date(Date.parse(recoveryStartedAt) + 28_800_000).toISOString(),
       }),
     ).toMatchObject({ status: "PASS", durationMs: 28_800_000 });
+  });
+
+  it("accepts only complete controlled operator-assisted hosted recovery evidence", () => {
+    expect(evaluateP16HostedRtoEvidence(controlledOperatorAssistedRtoEvidence())).toMatchObject({
+      status: "PASS",
+      durationMs: 28_800_000,
+    });
+
+    expect(
+      evaluateP16HostedRtoEvidence(controlledOperatorAssistedRtoEvidence(28_800_001)),
+    ).toMatchObject({ status: "FAIL", durationMs: 28_800_001 });
+  });
+
+  it("rejects incomplete or invalid privilege-rotation and final-validation evidence", () => {
+    const valid = controlledOperatorAssistedRtoEvidence();
+    const missingRotationMode: Record<string, unknown> = { ...valid };
+    delete missingRotationMode.providerPrivilegeRotationMode;
+
+    expect(() => evaluateUncheckedHostedRtoEvidence(missingRotationMode)).toThrow(
+      "P16_RTO_HOSTED_EVIDENCE_INVALID",
+    );
+    expect(() =>
+      evaluateUncheckedHostedRtoEvidence({
+        ...valid,
+        providerPrivilegeRotationRequired: false,
+      }),
+    ).toThrow("P16_RTO_HOSTED_EVIDENCE_INVALID");
+    expect(() =>
+      evaluateUncheckedHostedRtoEvidence({
+        ...valid,
+        finalRuntimePrivilegeValidation: "FAILED",
+      }),
+    ).toThrow("P16_RTO_HOSTED_EVIDENCE_INVALID");
+    expect(() =>
+      evaluateUncheckedHostedRtoEvidence({
+        ...valid,
+        hostedSmokeValidation: "UNKNOWN",
+      }),
+    ).toThrow("P16_RTO_HOSTED_EVIDENCE_INVALID");
+  });
+
+  it("rejects manual provenance and extra or missing assisted evidence fields", () => {
+    const valid = controlledOperatorAssistedRtoEvidence();
+    const missingR2Validation: Record<string, unknown> = { ...valid };
+    delete missingR2Validation.r2RestoreValidation;
+
+    expect(() =>
+      evaluateUncheckedHostedRtoEvidence({
+        ...valid,
+        provenance: "MANUAL_OPERATOR_TIMESTAMPS",
+      }),
+    ).toThrow("P16_RTO_HOSTED_EVIDENCE_INVALID");
+    expect(() =>
+      evaluateUncheckedHostedRtoEvidence({
+        ...valid,
+        operatorSuppliedStartedAt: valid.recoveryStartedAt,
+      }),
+    ).toThrow("P16_RTO_HOSTED_EVIDENCE_INVALID");
+    expect(() => evaluateUncheckedHostedRtoEvidence(missingR2Validation)).toThrow(
+      "P16_RTO_HOSTED_EVIDENCE_INVALID",
+    );
   });
 
   it("keeps application rollback plan-only and refuses schema-incompatible targets", () => {

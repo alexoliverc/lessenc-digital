@@ -160,6 +160,13 @@ Privilege elevation and reduction are Hostinger control-plane actions outside th
 5. disable the migration window;
 6. validate runtime grants and protected readiness.
 
+The isolated recovery target later proved why that external boundary is mandatory:
+`GRANTABLE_PRIVILEGE_COUNT=0` and `SELF_PRIVILEGE_ROTATION=NOT AVAILABLE`. The one managed identity
+may receive restore-time privileges, but without `GRANT OPTION` it cannot remove them from itself.
+The approved architecture therefore requires a controlled external Hostinger privilege transition
+both into and out of the restore window; application code and the database identity never acquire
+grant/revoke authority.
+
 Repository runtime behavior demonstrably requires `SELECT`, `INSERT`, `UPDATE` and `DELETE`.
 
 Under `distinct-users`, the runtime verifier continues to permit only those four DML privileges on
@@ -1204,5 +1211,13 @@ or bearer token was persisted in Git or documentation.
 
 This topology is intentionally incomplete. It does not supply a new database dump created under
 encrypted working storage, an isolated hosted MariaDB import, a temporary recovery application or
-authoritative automated RPO/RTO evidence. It therefore augments the architecture with real partial
+authoritative hosted RPO/RTO evidence. It therefore augments the architecture with real partial
 evidence but does not change the P16-08 completion gate.
+
+For RTO, `AUTOMATED_RECOVERY_RUN` remains authoritative for genuinely automated execution. The
+Hostinger model additionally permits `CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN`, which is not a
+manual-timestamp exception: the recovery controller alone records the interval, external provider
+rotation is mandatory, and the ending timestamp is emitted only after database and R2 restore,
+canonical runtime privilege verification, authenticated hosted readiness and hosted smoke pass.
+The exact eight-hour boundary is unchanged. Until a fresh hosted Attempt #2 produces that strict
+machine evidence, RTO remains `UNKNOWN` and P16-08 remains not complete.

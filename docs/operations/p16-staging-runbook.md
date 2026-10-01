@@ -113,7 +113,11 @@ controlled privilege rotation:
 9. capture sanitized evidence that the final grants are safe.
 
 Privilege changes are Hostinger control-plane actions. The repository never attempts to grant or
-revoke privileges itself.
+revoke privileges itself. The isolated recovery target proved
+`GRANTABLE_PRIVILEGE_COUNT=0` / `SELF_PRIVILEGE_ROTATION=NOT AVAILABLE`: the managed identity can
+hold restore-time privileges but cannot reduce them afterward. Every recovery privilege transition
+must therefore be performed through external Hostinger provider control and followed by the
+canonical runtime-grant verification.
 
 ### Runtime least privilege
 
@@ -353,6 +357,21 @@ account cron jobs were proven unrelated to the L'Essenc database/storage and pro
 authority. Raw RPO and local RTO diagnostics remain non-authoritative. A final run still requires a
 new dump created under encrypted working storage, isolated hosted MariaDB restore, migration and
 semantic validation, a recovery application environment and authoritative hosted RPO/RTO.
+
+For a Hostinger recovery, the controller may emit the strict provenance
+`CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN`. This is not permission for operator-entered timing.
+The controller must create `recoveryStartedAt` immediately before the first mutating recovery
+operation. After the external provider privilege reduction, it must prove database restore, R2
+restore, `finalRuntimePrivilegeValidation=VALIDATED`, authenticated hosted readiness and hosted
+smoke before it creates `recoveryValidatedAt`. The evidence must also declare
+`providerPrivilegeRotationRequired=true`,
+`providerPrivilegeRotationMode=EXTERNAL_PROVIDER_CONTROL` and
+`timestampAuthority=RECOVERY_CONTROLLER`. Missing or additional fields fail closed. The original
+`AUTOMATED_RECOVERY_RUN` remains accepted unchanged; raw/manual `measureP16Rto` input remains
+`UNKNOWN`.
+
+No current record satisfies this reconciled contract. A fresh hosted Attempt #2 is required; RTO
+remains `UNKNOWN`, the <= 28,800,000 ms target is unchanged and P16-08 remains not complete.
 
 ## Required hosted evidence
 

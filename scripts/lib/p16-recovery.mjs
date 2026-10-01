@@ -1639,24 +1639,63 @@ export function measureP16Rto(input) {
 }
 
 export function evaluateP16HostedRtoEvidence(evidence) {
-  exactKeys(
-    evidence,
-    [
-      "evidenceType",
-      "evidenceScope",
-      "provenance",
-      "validationOutcome",
-      "recoveryStartedAt",
-      "recoveryValidatedAt",
-    ],
-    "P16_RTO_HOSTED_EVIDENCE_INVALID",
-  );
+  const failureCode = "P16_RTO_HOSTED_EVIDENCE_INVALID";
+  invariant(evidence && typeof evidence === "object" && !Array.isArray(evidence), failureCode);
+
+  if (evidence.provenance === "AUTOMATED_RECOVERY_RUN") {
+    exactKeys(
+      evidence,
+      [
+        "evidenceType",
+        "evidenceScope",
+        "provenance",
+        "validationOutcome",
+        "recoveryStartedAt",
+        "recoveryValidatedAt",
+      ],
+      failureCode,
+    );
+  } else if (evidence.provenance === "CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN") {
+    exactKeys(
+      evidence,
+      [
+        "evidenceType",
+        "evidenceScope",
+        "provenance",
+        "validationOutcome",
+        "recoveryStartedAt",
+        "recoveryValidatedAt",
+        "timestampAuthority",
+        "providerPrivilegeRotationRequired",
+        "providerPrivilegeRotationMode",
+        "databaseRestoreValidation",
+        "r2RestoreValidation",
+        "finalRuntimePrivilegeValidation",
+        "authenticatedHostedReadiness",
+        "hostedSmokeValidation",
+      ],
+      failureCode,
+    );
+    invariant(
+      evidence.timestampAuthority === "RECOVERY_CONTROLLER" &&
+        evidence.providerPrivilegeRotationRequired === true &&
+        evidence.providerPrivilegeRotationMode === "EXTERNAL_PROVIDER_CONTROL" &&
+        evidence.databaseRestoreValidation === "VALIDATED" &&
+        evidence.r2RestoreValidation === "VALIDATED" &&
+        evidence.finalRuntimePrivilegeValidation === "VALIDATED" &&
+        evidence.authenticatedHostedReadiness === "PASS" &&
+        evidence.hostedSmokeValidation === "PASS",
+      failureCode,
+    );
+  } else {
+    invariant(false, failureCode);
+  }
+
   invariant(
     evidence.evidenceType === "P16_HOSTED_RECOVERY_VALIDATION" &&
       evidence.evidenceScope === "HOSTED_STAGING" &&
-      evidence.provenance === "AUTOMATED_RECOVERY_RUN" &&
       evidence.validationOutcome === "VALIDATED",
-    "P16_RTO_HOSTED_EVIDENCE_INVALID",
+    failureCode,
   );
   const calculation = calculateP16Rto(evidence);
   return Object.freeze({

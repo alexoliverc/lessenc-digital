@@ -1272,7 +1272,10 @@ application rollback. The partial hosted exercise proved EFS working storage, re
 mechanism bundle verification, private Google Drive round-trip and isolated R2 object restore. The
 source database dump was created earlier on an unencrypted volume and remains mechanism evidence
 only; the final same-point dump, isolated MariaDB/application recovery, scheduler evidence and
-authoritative RPO/RTO remain required.
+authoritative RPO/RTO remain required. Hostinger's managed identity has no grantable privilege or
+self-rotation authority, so the approved single-user recovery path requires external control-plane
+privilege rotation and strict controller-generated `CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN`
+evidence. This reconciliation does not establish RTO PASS; Attempt #2 remains required.
 
 P16-HDB-01 records the explicit owner decision to use Hostinger Managed MariaDB with one managed
 database user and controlled privilege rotation. The additive repository contract preserves the
