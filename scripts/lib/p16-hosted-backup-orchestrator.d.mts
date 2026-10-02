@@ -1,6 +1,12 @@
 type Environment = Readonly<Record<string, string | undefined>>;
 
-export const P16_HOSTED_BACKUP_AUTOMATION_AUTHORITY: "SCHEDULER_COMPATIBLE_AUTOMATION";
+export const P16_HOSTED_BACKUP_MANUAL_AUTHORITY: "CONTROLLED_MANUAL_EXECUTION";
+export const P16_HOSTED_BACKUP_SCHEDULED_AUTHORITY: "PROVIDER_SCHEDULED_EXECUTION";
+
+export function resolveHostedBackupCliExecutionAuthority(
+  mode: string | undefined,
+  unexpected?: readonly string[],
+): "CONTROLLED_MANUAL_EXECUTION" | "PROVIDER_SCHEDULED_EXECUTION";
 
 export function createHostedBackupId(
   input?: Readonly<{

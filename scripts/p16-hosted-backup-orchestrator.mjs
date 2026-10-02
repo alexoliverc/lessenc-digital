@@ -2,23 +2,28 @@
 import process from "node:process";
 
 import {
-  P16_HOSTED_BACKUP_AUTOMATION_AUTHORITY,
+  resolveHostedBackupCliExecutionAuthority,
   runP16HostedBackupOrchestrator,
 } from "./lib/p16-hosted-backup-orchestrator.mjs";
 
 async function main() {
   const [mode, ...unexpected] = process.argv.slice(2);
-  if (mode !== "run" || unexpected.length > 0) throw new Error("P16_HOSTED_BACKUP_MODE_INVALID");
+  const executionAuthority = resolveHostedBackupCliExecutionAuthority(mode, unexpected);
   const result = await runP16HostedBackupOrchestrator({
     env: process.env,
     repositoryRoot: process.cwd(),
-    executionAuthority: P16_HOSTED_BACKUP_AUTOMATION_AUTHORITY,
+    executionAuthority,
   });
   process.stdout.write("P16_HOSTED_BACKUP=PASS\n");
   process.stdout.write(`P16_HOSTED_BACKUP_ID=${result.backupId}\n`);
   process.stdout.write(`P16_HOSTED_BACKUP_OBJECTS=${result.objectCount}\n`);
   process.stdout.write(`P16_HOSTED_BACKUP_BYTES=${result.totalSnapshotBytes}\n`);
   process.stdout.write(`P16_HOSTED_BACKUP_RPO_STATUS=${result.rpo.status}\n`);
+  process.stdout.write(`P16_HOSTED_BACKUP_EXECUTION_CONTEXT=${result.executionContext}\n`);
+  process.stdout.write(`P16_HOSTED_BACKUP_RPO_AUTHORITY=${result.rpoAuthority}\n`);
+  process.stdout.write(
+    `P16_HOSTED_BACKUP_PROVIDER_ATTESTATION=${result.providerSchedulerAttestation}\n`,
+  );
 }
 
 main().catch((error) => {

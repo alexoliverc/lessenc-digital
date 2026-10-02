@@ -6,14 +6,17 @@ import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
-  P16_HOSTED_BACKUP_AUTOMATION_AUTHORITY,
+  P16_HOSTED_BACKUP_MANUAL_AUTHORITY,
+  P16_HOSTED_BACKUP_SCHEDULED_AUTHORITY,
   cleanupHostedBackupWorkspace,
   createHostedBackupId,
   materializeR2Snapshot,
+  resolveHostedBackupCliExecutionAuthority,
   resolveS3SdkCapabilities,
   runP16HostedBackupOrchestrator,
   updateBackupIndexAtomic,
 } from "../../../scripts/lib/p16-hosted-backup-orchestrator.mjs";
+import { evaluateP16HostedRpoEvidence } from "../../../scripts/lib/p16-recovery.mjs";
 
 const RELEASE = "a".repeat(40);
 const ENCRYPTION_KEY = Buffer.alloc(32, 7).toString("base64");
@@ -96,7 +99,15 @@ function input(harness: Harness) {
   return {
     env: harness.env,
     repositoryRoot: harness.repositoryRoot,
-    executionAuthority: P16_HOSTED_BACKUP_AUTOMATION_AUTHORITY,
+    executionAuthority: P16_HOSTED_BACKUP_MANUAL_AUTHORITY,
+  };
+}
+
+function scheduledInput(harness: Harness) {
+  return {
+    env: harness.env,
+    repositoryRoot: harness.repositoryRoot,
+    executionAuthority: P16_HOSTED_BACKUP_SCHEDULED_AUTHORITY,
   };
 }
 
@@ -165,17 +176,13 @@ function successfulDependencies(trace: string[] = []) {
       trace.push("verify");
       return { manifest: { createdAt: NOW }, storageIndex: [] };
     }),
-    evaluateHostedRpoEvidence: vi.fn((observation: unknown) => {
-      trace.push("observation");
-      expect(observation).toEqual({
-        evidenceType: "P16_HOSTED_BACKUP_OBSERVATION",
-        evidenceScope: "HOSTED_STAGING",
-        provenance: "AUTOMATED_PROVIDER_OBSERVATION",
-        outcome: "VERIFIED",
-        observedAt: NOW,
-        latestVerifiedBackupAt: NOW,
-      });
-      return { status: "PASS" };
+    measureRpo: vi.fn(() => {
+      trace.push("manual-rpo");
+      return { status: "UNKNOWN", reason: "RAW_INPUT_NOT_AUTHORITATIVE_HOSTED_EVIDENCE" };
+    }),
+    evaluateHostedRpoEvidence: vi.fn(() => {
+      trace.push("scheduled-rpo");
+      return { status: "PASS", reason: "WITHIN_TARGET" };
     }),
   };
 }
@@ -229,6 +236,69 @@ describe("P16 hosted backup pre-mutation gates", () => {
     ).rejects.toThrow(failure);
     expect(sdkResolver).not.toHaveBeenCalled();
     await expect(readdir(harness.workRoot)).resolves.toEqual([]);
+  });
+});
+
+describe("P16 hosted backup execution provenance", () => {
+  it("maps only explicit unambiguous CLI modes to separate authorities", () => {
+    expect(resolveHostedBackupCliExecutionAuthority("run-manual")).toBe(
+      P16_HOSTED_BACKUP_MANUAL_AUTHORITY,
+    );
+    expect(resolveHostedBackupCliExecutionAuthority("run-scheduled")).toBe(
+      P16_HOSTED_BACKUP_SCHEDULED_AUTHORITY,
+    );
+    expect(() => resolveHostedBackupCliExecutionAuthority("run")).toThrow(
+      "P16_HOSTED_BACKUP_MODE_INVALID",
+    );
+    expect(() => resolveHostedBackupCliExecutionAuthority(undefined)).toThrow(
+      "P16_HOSTED_BACKUP_MODE_INVALID",
+    );
+    expect(() => resolveHostedBackupCliExecutionAuthority("run-manual", ["unexpected"])).toThrow(
+      "P16_HOSTED_BACKUP_MODE_INVALID",
+    );
+  });
+
+  it("rejects the superseded ambiguous automation authority before mutation", async () => {
+    const harness = await createHarness();
+    const mutation = vi.fn();
+
+    await expect(
+      runP16HostedBackupOrchestrator(
+        {
+          env: harness.env,
+          repositoryRoot: harness.repositoryRoot,
+          executionAuthority: "SCHEDULER_COMPATIBLE_AUTOMATION",
+        },
+        { createDatabaseDump: mutation },
+      ),
+    ).rejects.toThrow("P16_HOSTED_BACKUP_EXECUTION_AUTHORITY_INVALID");
+    expect(mutation).not.toHaveBeenCalled();
+    await expect(readdir(harness.workRoot)).resolves.toEqual([]);
+  });
+
+  it("keeps the manual CLI source free from direct scheduled authority or automated provenance", async () => {
+    const cliSource = await readFile(
+      resolve("scripts", "p16-hosted-backup-orchestrator.mjs"),
+      "utf8",
+    );
+
+    expect(cliSource).toContain("resolveHostedBackupCliExecutionAuthority(mode, unexpected)");
+    expect(cliSource).not.toContain("P16_HOSTED_BACKUP_SCHEDULED_AUTHORITY");
+    expect(cliSource).not.toContain("PROVIDER_SCHEDULED_EXECUTION");
+    expect(cliSource).not.toContain("AUTOMATED_PROVIDER_OBSERVATION");
+  });
+
+  it("keeps the default package command manual and exposes scheduled execution separately", async () => {
+    const manifest = JSON.parse(await readFile(resolve("package.json"), "utf8")) as {
+      scripts: Record<string, string>;
+    };
+
+    expect(manifest.scripts["ops:p16:hosted-backup"]).toBe(
+      "node scripts/p16-hosted-backup-orchestrator.mjs run-manual",
+    );
+    expect(manifest.scripts["ops:p16:hosted-backup:scheduled"]).toBe(
+      "node scripts/p16-hosted-backup-orchestrator.mjs run-scheduled",
+    );
   });
 });
 
@@ -402,7 +472,7 @@ describe("P16 R2 read-only snapshot", () => {
 });
 
 describe("P16 hosted backup ordering, publication and cleanup", () => {
-  it("runs DB -> snapshot -> bundle -> verify -> observation, writes exact metadata and preserves the bundle", async () => {
+  it("runs a controlled manual backup without manufacturing automated provenance or authoritative RPO PASS", async () => {
     const harness = await createHarness();
     const trace: string[] = [];
     const dependencies = successfulDependencies(trace);
@@ -414,6 +484,9 @@ describe("P16 hosted backup ordering, publication and cleanup", () => {
       backupId: string;
       bundleDirectory: string;
       observation: Record<string, unknown>;
+      rpo: Record<string, unknown>;
+      rpoAuthority: string;
+      providerSchedulerAttestation: string;
     }>;
 
     expect(trace).toEqual([
@@ -423,7 +496,7 @@ describe("P16 hosted backup ordering, publication and cleanup", () => {
       "r2-snapshot",
       "bundle",
       "verify",
-      "observation",
+      "manual-rpo",
     ]);
     expect(result.backupId).toBe("p16-hosted-auto-20261002T123456789Z-0123456789abcdef");
     expect(Object.keys(result.observation).sort()).toEqual(
@@ -436,6 +509,14 @@ describe("P16 hosted backup ordering, publication and cleanup", () => {
         "latestVerifiedBackupAt",
       ].sort(),
     );
+    expect(result.observation.provenance).toBe("MANUAL_CONTROLLED_OBSERVATION");
+    expect(result.rpo).toMatchObject({ status: "UNKNOWN" });
+    expect(result.rpoAuthority).toBe("NOT_AUTHORITATIVE");
+    expect(result.providerSchedulerAttestation).toBe("NOT_APPLICABLE_MANUAL_EXECUTION");
+    expect(() => evaluateP16HostedRpoEvidence(result.observation)).toThrow(
+      "P16_RPO_HOSTED_EVIDENCE_INVALID",
+    );
+    expect(dependencies.evaluateHostedRpoEvidence).not.toHaveBeenCalled();
     await expect(readFile(join(result.bundleDirectory, "manifest.json"), "utf8")).resolves.toBe(
       "{}\n",
     );
@@ -463,12 +544,64 @@ describe("P16 hosted backup ordering, publication and cleanup", () => {
     }
     expect(serializedEvidence).not.toContain("process.env");
     expect(history).toMatchObject({
-      historyVersion: 1,
+      historyVersion: 2,
+      executionContext: "CONTROLLED_MANUAL",
+      observationProvenance: "MANUAL_CONTROLLED_OBSERVATION",
+      rpoAuthority: "NOT_AUTHORITATIVE",
+      providerSchedulerAttestation: "NOT_APPLICABLE_MANUAL_EXECUTION",
       outcome: "SUCCESS",
       objectCount: 1,
       totalSnapshotBytes: 8,
       failureCode: null,
     });
+  });
+
+  it("reserves automated provider observation for scheduled compatibility and marks provider attestation pending", async () => {
+    const harness = await createHarness();
+    const trace: string[] = [];
+    const dependencies = successfulDependencies(trace);
+
+    const result = (await runP16HostedBackupOrchestrator(
+      scheduledInput(harness),
+      dependencies,
+    )) as Readonly<{
+      observation: Record<string, unknown>;
+      rpo: Record<string, unknown>;
+      rpoEvaluation: Record<string, unknown>;
+      executionContext: string;
+      rpoAuthority: string;
+      providerSchedulerAttestation: string;
+      history: Record<string, unknown>;
+    }>;
+
+    expect(trace).toEqual([
+      "database-validate",
+      "sdk-resolve",
+      "database-dump",
+      "r2-snapshot",
+      "bundle",
+      "verify",
+      "scheduled-rpo",
+    ]);
+    expect(result.observation.provenance).toBe("AUTOMATED_PROVIDER_OBSERVATION");
+    expect(evaluateP16HostedRpoEvidence(result.observation)).toMatchObject({ status: "PASS" });
+    expect(result.rpoEvaluation).toMatchObject({ status: "PASS" });
+    expect(result.rpo).toMatchObject({
+      status: "UNKNOWN",
+      candidateAssessment: "PASS",
+      reason: "PROVIDER_SCHEDULER_ATTESTATION_PENDING",
+    });
+    expect(result.executionContext).toBe("PROVIDER_SCHEDULED");
+    expect(result.rpoAuthority).toBe("PENDING_PROVIDER_SCHEDULER_CORRELATION");
+    expect(result.providerSchedulerAttestation).toBe("PENDING_INDEPENDENT_PROVIDER_HISTORY");
+    expect(result.history).toMatchObject({
+      historyVersion: 2,
+      executionContext: "PROVIDER_SCHEDULED",
+      observationProvenance: "AUTOMATED_PROVIDER_OBSERVATION",
+      rpoAuthority: "PENDING_PROVIDER_SCHEDULER_CORRELATION",
+      providerSchedulerAttestation: "PENDING_INDEPENDENT_PROVIDER_HISTORY",
+    });
+    expect(dependencies.measureRpo).not.toHaveBeenCalled();
   });
 
   it("does not publish observation/index on failed verification, cleans plaintext and only removes the broken current bundle", async () => {

@@ -27,6 +27,7 @@ import {
   createStagingDatabaseDump,
   decodeRecoveryEncryptionKey,
   evaluateP16HostedRpoEvidence,
+  measureP16Rpo,
   validateStagingDatabaseBackupEnvironment,
   verifyP16RecoveryBundle,
 } from "./p16-recovery.mjs";
@@ -36,9 +37,17 @@ const KEY_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;
 const RELEASE_COMMIT_PATTERN = /^[0-9a-f]{40}$/u;
 const UTC_TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
 const BUCKET_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])$/u;
-const RUN_HISTORY_VERSION = 1;
-const AUTOMATION_AUTHORITY = "SCHEDULER_COMPATIBLE_AUTOMATION";
-const OBSERVATION_PROVENANCE = "AUTOMATED_PROVIDER_OBSERVATION";
+const RUN_HISTORY_VERSION = 2;
+const MANUAL_AUTHORITY = "CONTROLLED_MANUAL_EXECUTION";
+const SCHEDULED_AUTHORITY = "PROVIDER_SCHEDULED_EXECUTION";
+const MANUAL_EXECUTION_CONTEXT = "CONTROLLED_MANUAL";
+const SCHEDULED_EXECUTION_CONTEXT = "PROVIDER_SCHEDULED";
+const MANUAL_OBSERVATION_PROVENANCE = "MANUAL_CONTROLLED_OBSERVATION";
+const SCHEDULED_OBSERVATION_PROVENANCE = "AUTOMATED_PROVIDER_OBSERVATION";
+const MANUAL_RPO_AUTHORITY = "NOT_AUTHORITATIVE";
+const SCHEDULED_RPO_AUTHORITY = "PENDING_PROVIDER_SCHEDULER_CORRELATION";
+const MANUAL_PROVIDER_ATTESTATION = "NOT_APPLICABLE_MANUAL_EXECUTION";
+const SCHEDULED_PROVIDER_ATTESTATION = "PENDING_INDEPENDENT_PROVIDER_HISTORY";
 const SDK_PACKAGE = "@aws-sdk/client-s3";
 
 function invariant(condition, message) {
@@ -70,6 +79,33 @@ function normalizeTimestamp(value, failureCode) {
 function stableFailureCode(error) {
   const message = error instanceof Error ? error.message : "";
   return message.match(/^(P16_[A-Z0-9_]+)/u)?.[1] ?? "P16_HOSTED_BACKUP_FAILED";
+}
+
+function executionProfile(authority) {
+  if (authority === MANUAL_AUTHORITY) {
+    return Object.freeze({
+      executionContext: MANUAL_EXECUTION_CONTEXT,
+      observationProvenance: MANUAL_OBSERVATION_PROVENANCE,
+      rpoAuthority: MANUAL_RPO_AUTHORITY,
+      providerSchedulerAttestation: MANUAL_PROVIDER_ATTESTATION,
+    });
+  }
+  if (authority === SCHEDULED_AUTHORITY) {
+    return Object.freeze({
+      executionContext: SCHEDULED_EXECUTION_CONTEXT,
+      observationProvenance: SCHEDULED_OBSERVATION_PROVENANCE,
+      rpoAuthority: SCHEDULED_RPO_AUTHORITY,
+      providerSchedulerAttestation: SCHEDULED_PROVIDER_ATTESTATION,
+    });
+  }
+  throw new Error("P16_HOSTED_BACKUP_EXECUTION_AUTHORITY_INVALID");
+}
+
+export function resolveHostedBackupCliExecutionAuthority(mode, unexpected = []) {
+  invariant(Array.isArray(unexpected) && unexpected.length === 0, "P16_HOSTED_BACKUP_MODE_INVALID");
+  if (mode === "run-manual") return MANUAL_AUTHORITY;
+  if (mode === "run-scheduled") return SCHEDULED_AUTHORITY;
+  throw new Error("P16_HOSTED_BACKUP_MODE_INVALID");
 }
 
 async function canonicalExistingDirectory(
@@ -153,10 +189,7 @@ function validateR2Configuration(env) {
 export async function validateHostedBackupOrchestratorConfiguration(input) {
   const { env } = input;
   invariant(env && typeof env === "object", "P16_HOSTED_BACKUP_ENV_INVALID");
-  invariant(
-    input.executionAuthority === AUTOMATION_AUTHORITY,
-    "P16_HOSTED_BACKUP_AUTOMATION_AUTHORITY_INVALID",
-  );
+  const execution = executionProfile(input.executionAuthority);
   invariant(
     KEY_ID_PATTERN.test(env.P16_BACKUP_ENCRYPTION_KEY_ID ?? ""),
     "P16_RECOVERY_KEY_ID_INVALID",
@@ -219,6 +252,7 @@ export async function validateHostedBackupOrchestratorConfiguration(input) {
     encryptionKey,
     encryptionKeyId: env.P16_BACKUP_ENCRYPTION_KEY_ID,
     releaseCommit: env.P16_RELEASE_COMMIT,
+    execution,
     s3: Object.freeze({
       endpoint: env.PRIVATE_STORAGE_S3_ENDPOINT,
       region: env.PRIVATE_STORAGE_S3_REGION,
@@ -588,6 +622,10 @@ function createRunHistory(input) {
   return Object.freeze({
     historyVersion: RUN_HISTORY_VERSION,
     evidenceType: "P16_HOSTED_BACKUP_RUN",
+    executionContext: input.executionContext,
+    observationProvenance: input.observationProvenance,
+    rpoAuthority: input.rpoAuthority,
+    providerSchedulerAttestation: input.providerSchedulerAttestation,
     backupId: input.backupId,
     startedAt: input.startedAt,
     completedAt: input.completedAt,
@@ -702,14 +740,29 @@ export async function runP16HostedBackupOrchestrator(input, dependencies = {}) {
     const observation = Object.freeze({
       evidenceType: "P16_HOSTED_BACKUP_OBSERVATION",
       evidenceScope: "HOSTED_STAGING",
-      provenance: OBSERVATION_PROVENANCE,
+      provenance: configuration.execution.observationProvenance,
       outcome: "VERIFIED",
       observedAt,
       latestVerifiedBackupAt: verifiedBackupAt,
     });
-    const rpo = (dependencies.evaluateHostedRpoEvidence ?? evaluateP16HostedRpoEvidence)(
-      observation,
-    );
+    const rpoEvaluation =
+      configuration.execution.executionContext === SCHEDULED_EXECUTION_CONTEXT
+        ? (dependencies.evaluateHostedRpoEvidence ?? evaluateP16HostedRpoEvidence)(observation)
+        : (dependencies.measureRpo ?? measureP16Rpo)({
+            observedAt,
+            latestVerifiedBackupAt: verifiedBackupAt,
+            evidenceScope: MANUAL_EXECUTION_CONTEXT,
+          });
+    const rpo =
+      configuration.execution.executionContext === SCHEDULED_EXECUTION_CONTEXT &&
+      rpoEvaluation.status === "PASS"
+        ? Object.freeze({
+            ...rpoEvaluation,
+            status: "UNKNOWN",
+            candidateAssessment: "PASS",
+            reason: "PROVIDER_SCHEDULER_ATTESTATION_PENDING",
+          })
+        : rpoEvaluation;
     await (dependencies.writeObservation ?? writeExclusiveJsonAtomic)(observationPath, observation);
     await (dependencies.updateIndex ?? updateBackupIndexAtomic)({
       indexFile: configuration.indexFile,
@@ -722,6 +775,7 @@ export async function runP16HostedBackupOrchestrator(input, dependencies = {}) {
       "P16_HOSTED_BACKUP_CLOCK_INVALID",
     ).toISOString();
     history = createRunHistory({
+      ...configuration.execution,
       backupId,
       startedAt,
       completedAt,
@@ -738,7 +792,12 @@ export async function runP16HostedBackupOrchestrator(input, dependencies = {}) {
       bundleDirectory,
       observation,
       rpo,
+      rpoEvaluation,
       history,
+      executionContext: configuration.execution.executionContext,
+      observationProvenance: configuration.execution.observationProvenance,
+      rpoAuthority: configuration.execution.rpoAuthority,
+      providerSchedulerAttestation: configuration.execution.providerSchedulerAttestation,
       objectCount: snapshot.objectCount,
       totalSnapshotBytes: snapshot.totalBytes,
       sdkResolution: sdk.resolution,
@@ -750,6 +809,7 @@ export async function runP16HostedBackupOrchestrator(input, dependencies = {}) {
       "P16_HOSTED_BACKUP_CLOCK_INVALID",
     ).toISOString();
     history = createRunHistory({
+      ...configuration.execution,
       backupId,
       startedAt,
       completedAt,
@@ -784,6 +844,7 @@ export async function runP16HostedBackupOrchestrator(input, dependencies = {}) {
     } catch (error) {
       operationError = new Error("P16_HOSTED_BACKUP_PLAINTEXT_CLEANUP_FAILED", { cause: error });
       const failedHistory = createRunHistory({
+        ...configuration.execution,
         backupId,
         startedAt,
         completedAt: normalizeTimestamp(clock(), "P16_HOSTED_BACKUP_CLOCK_INVALID").toISOString(),
@@ -812,4 +873,5 @@ export async function runP16HostedBackupOrchestrator(input, dependencies = {}) {
   return result;
 }
 
-export const P16_HOSTED_BACKUP_AUTOMATION_AUTHORITY = AUTOMATION_AUTHORITY;
+export const P16_HOSTED_BACKUP_MANUAL_AUTHORITY = MANUAL_AUTHORITY;
+export const P16_HOSTED_BACKUP_SCHEDULED_AUTHORITY = SCHEDULED_AUTHORITY;
