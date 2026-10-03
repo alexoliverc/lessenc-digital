@@ -1803,3 +1803,26 @@ Meta CAPI is technically complete but intentionally policy-blocked under `MATCHI
 The checkpoint remains fixed at the implementation merge and must not be moved by later documentation-only work.
 
 P13-G — Admin Analytics is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED** through PR #32, implementation merge `7da548d922046f1c90ee71e13012f3374527146b` and permanent checkpoint `checkpoint/p13-g-admin-analytics-complete`. P13-H is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13 is complete and P14 remains pending.
+
+<!-- P16-09-LOCAL-FINAL-GATE -->
+
+### P16-09 — Final Technical Gate — local acceptance
+
+P16-01 through P16-08 remain COMPLETE.
+
+P16-09 local technical acceptance is PASS on commit
+`4e77c0120846bf4180441de85c08863c95a7060e`.
+
+The direct runtime CRITICAL dependency finding was remediated by moving Next from
+16.3.4 to 16.3.8. Runtime `npm audit --omit=dev` is clean. Four HIGH findings remain
+on development-tooling-only paths and are explicitly carried as residual tooling debt
+because the available automatic remediation requires an incompatible major downgrade.
+
+The final P16 release candidate is not yet published. Hosted final validation remains
+required before P16 can be marked COMPLETE.
+
+Current status:
+
+`P16-09 LOCAL FINAL TECHNICAL GATE PASS / HOSTED FINAL VALIDATION PENDING`
+
+`P16 NOT COMPLETE`

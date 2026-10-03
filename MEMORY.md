@@ -2228,3 +2228,29 @@ functional redirect must be rechecked after every Node.js deployment.
 F01 remains recorded as `HIGH / REMEDIATED / PASS`; F02 as `MEDIUM / REMEDIATED / PASS`; F03 as
 `INFO / ACCEPTED`; and F04 as `PASS`. P16 remains incomplete. P16-08 remains isolated and not
 integrated, P16-09 remains pending, and production remains unauthorized.
+
+<!-- P16-09-LOCAL-FINAL-GATE -->
+
+## P16-09 — Local Final Technical Gate
+
+P16-09 foi aberta após o fechamento independente da P16-08.
+
+A P16-09-A eliminou o finding CRITICAL de runtime do `next@16.3.4` por atualização
+controlada para `next@16.3.8`, alinhando também `@next/eslint-plugin-next@16.3.8`.
+`brace-expansion` passou a `5.0.12` e `fast-uri` a `3.1.8`.
+
+Após `npm ci`, `npm audit --omit=dev` reporta 0 vulnerabilidades de runtime.
+O audit completo mantém 4 HIGH exclusivamente na cadeia de development tooling;
+nenhum downgrade major automático foi autorizado.
+
+Quality gate pós-remediação: 101/101 arquivos Vitest, 996/996 testes, lint, typecheck,
+Prisma generate, Prisma validate, Prettier e diff check PASS.
+
+Commit técnico P16-09-A:
+`4e77c0120846bf4180441de85c08863c95a7060e`.
+
+P16-09 está `LOCAL FINAL TECHNICAL GATE PASS / HOSTED FINAL VALIDATION PENDING`.
+P16 continua `NOT COMPLETE`.
+
+Nenhum push da branch P16, deploy Hostinger, mudança de `P16_RELEASE_COMMIT`, merge em
+main ou ação de produção foi executado neste checkpoint.

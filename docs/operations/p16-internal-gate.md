@@ -369,3 +369,21 @@ Evidence classification remains strict:
 - production: not validated.
 
 Application deployment has not been executed. P16 remains incomplete.
+
+<!-- P16-09-LOCAL-FINAL-GATE -->
+
+## P16-09 local final gate
+
+| Gate | State |
+| --- | --- |
+| P16-01 through P16-08 | COMPLETE |
+| P16-09 dependency remediation | PASS |
+| runtime dependency audit | 0 vulnerabilities |
+| full regression | 996/996 PASS |
+| P16 focused regression | 151/151 PASS |
+| Prisma validation | PASS |
+| dev-tooling residual security debt | 4 HIGH / EXPLICIT / DEFERRED |
+| phase publication | PENDING |
+| hosted exact-SHA release binding | PENDING |
+| final hosted revalidation | PENDING |
+| P16 overall | NOT COMPLETE |

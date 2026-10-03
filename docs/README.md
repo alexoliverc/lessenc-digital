@@ -369,3 +369,18 @@ O checkpoint permanece congelado no merge da implementação e não deve ser mov
 Meta CAPI permanece tecnicamente concluído e bloqueado por política de privacidade; live transport e Advanced Matching não fazem parte do estado autorizado.
 
 P13-G — Admin Analytics é o próximo bloco. P13-H permanece NOT STARTED.
+
+<!-- P16-09-LOCAL-FINAL-GATE -->
+
+## P16-09 — Final Technical Gate
+
+Canonical document:
+
+`operations/p16-final-technical-gate.md`
+
+Current state:
+
+`LOCAL FINAL TECHNICAL GATE PASS / HOSTED FINAL VALIDATION PENDING`
+
+P16 remains incomplete until the final release candidate is published with exact
+release binding and hosted revalidation passes.
