@@ -1223,3 +1223,11 @@ The exact eight-hour boundary is unchanged. Attempt #2 produced strict controlle
 passed in 540395 ms. P16-08 is complete; P16-09 remains the final phase gate. The second scheduled
 window executed successfully but retains `UNKNOWN` for its individual RPO age until its private
 observation/history timestamps can be correlated independently.
+
+The independent P16-08 audit tightened this trust boundary without changing the hosted operational
+release. A scheduler-compatible CLI observation is now rejected by the authoritative RPO evaluator
+unless an independent provider-history correlation supplies exact authority, context, backup
+identity and attestation fields. The backup index also serializes its complete read-modify-write
+cycle with an exclusive private lock, eliminating silent lost updates while retaining atomic file
+replacement and plan-only retention semantics. These fixes remain local until deployment-aware
+publication and hosted revalidation are separately authorized.

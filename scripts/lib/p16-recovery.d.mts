@@ -139,9 +139,21 @@ export function measureP16Rpo(
     evidenceScope?: string | null;
   }>,
 ): Readonly<Record<string, unknown>>;
-export function evaluateP16HostedRpoEvidence(
-  evidence: Readonly<Record<string, unknown>>,
-): Readonly<{
+export type P16CorrelatedHostedRpoEvidence = Readonly<{
+  evidenceType: "P16_HOSTED_BACKUP_OBSERVATION";
+  evidenceScope: "HOSTED_STAGING";
+  provenance: "AUTOMATED_PROVIDER_OBSERVATION";
+  executionAuthority: "PROVIDER_SCHEDULED_EXECUTION";
+  executionContext: "PROVIDER_SCHEDULED";
+  rpoAuthority: "AUTHORITATIVE_PROVIDER_SCHEDULER_CORRELATION";
+  providerSchedulerAttestation: "INDEPENDENT_PROVIDER_HISTORY_VERIFIED";
+  outcome: "VERIFIED";
+  backupId: string;
+  observedAt: string | Date;
+  latestVerifiedBackupAt: string | Date;
+}>;
+
+export function evaluateP16HostedRpoEvidence(evidence: P16CorrelatedHostedRpoEvidence): Readonly<{
   status: Assessment;
   targetMs: 86400000;
   targetSeconds: 86400;

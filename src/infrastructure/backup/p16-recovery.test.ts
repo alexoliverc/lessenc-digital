@@ -999,14 +999,25 @@ describe("P16 recovery objectives and rollback separation", () => {
       localAssessment: "PASS",
       reason: "RAW_INPUT_NOT_AUTHORITATIVE_HOSTED_EVIDENCE",
     });
+    const scheduledObservation = {
+      evidenceType: "P16_HOSTED_BACKUP_OBSERVATION" as const,
+      evidenceScope: "HOSTED_STAGING" as const,
+      provenance: "AUTOMATED_PROVIDER_OBSERVATION" as const,
+      outcome: "VERIFIED" as const,
+      observedAt,
+      latestVerifiedBackupAt: new Date(Date.parse(observedAt) - 86_400_001).toISOString(),
+    };
+    expect(() => evaluateP16HostedRpoEvidence(scheduledObservation as never)).toThrow(
+      "P16_RPO_HOSTED_EVIDENCE_INVALID",
+    );
     expect(
       evaluateP16HostedRpoEvidence({
-        evidenceType: "P16_HOSTED_BACKUP_OBSERVATION",
-        evidenceScope: "HOSTED_STAGING",
-        provenance: "AUTOMATED_PROVIDER_OBSERVATION",
-        outcome: "VERIFIED",
-        observedAt,
-        latestVerifiedBackupAt: new Date(Date.parse(observedAt) - 86_400_001).toISOString(),
+        ...scheduledObservation,
+        backupId: "p16-hosted-auto-20260926T120000000Z-0123456789abcdef",
+        executionAuthority: "PROVIDER_SCHEDULED_EXECUTION",
+        executionContext: "PROVIDER_SCHEDULED",
+        rpoAuthority: "AUTHORITATIVE_PROVIDER_SCHEDULER_CORRELATION",
+        providerSchedulerAttestation: "INDEPENDENT_PROVIDER_HISTORY_VERIFIED",
       }),
     ).toMatchObject({ status: "FAIL", ageMs: 86_400_001 });
   });

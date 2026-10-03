@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure and P14 — Security Hardening remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as canonical technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets that technical merge and must not be retargeted by the documentation closeout. Gate C — OPERATIONS READY is PASS. P16-01 through P16-08 are COMPLETE. P16-08 is COMPLETE / HOSTED VALIDATED / DOCUMENTED at operational release `976a0472382abc0597996366db63c981b5733d6e`, with provider-scheduled backup/RPO proof, plan-only 7/4/3 retention, isolated RTO PASS, rollback and verified roll-forward. Residual limitations remain explicit: the second schedule window lacks an authoritative individual RPO age, the final point has no proved independent off-R2 copy, DB+R2 capture is sequential rather than atomic and dependency remediation is deferred. P16 is not complete; P16-09 remains pending.
+**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure and P14 — Security Hardening remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as canonical technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets that technical merge and must not be retargeted by the documentation closeout. Gate C — OPERATIONS READY is PASS. P16-01 through P16-08 are COMPLETE. P16-08 is COMPLETE / REMEDIATED / INDEPENDENT AUDIT PASS, while its operational hosted release remains `976a0472382abc0597996366db63c981b5733d6e`. The local remediation requires independent provider-history attestation before authoritative RPO evaluation and serializes retention-index read-modify-write with an exclusive lock. Existing hosted evidence remains bounded to provider-scheduled backup/RPO proof, plan-only 7/4/3 retention, isolated RTO PASS, rollback and verified roll-forward. Residual limitations remain explicit: the second schedule window lacks an authoritative individual RPO age, the final point has no proved independent off-R2 copy, DB+R2 capture is sequential rather than atomic and dependency remediation is deferred. P16 is not complete; P16-09 remains NOT STARTED pending owner-side review.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1277,11 +1277,18 @@ single-user recovery relied on external control-plane rotation and strict contro
 prior Google Drive copy remains mechanism-only, not proof of an independent off-R2 copy for the
 final point; database and R2 capture were sequential and are not described as atomic.
 
+The independent audit subsequently remediated two repository-only controls without redefining that
+operational release: authoritative RPO evaluation now rejects scheduler-compatible observations
+until independent provider history supplies exact correlation/attestation, and retention-index
+updates hold an exclusive private lock across the complete read-modify-write cycle. These changes
+remain local pending owner-side review and deployment-aware publication.
+
 P16-HDB-01 records the explicit owner decision to use Hostinger Managed MariaDB with one managed
 database user and controlled privilege rotation. The additive repository contract preserves the
 dual-user mode, permits the Hostinger single-user mode only when explicitly selected, requires a
 migration window for `prisma migrate deploy`, and requires a disabled window plus conservative
-runtime-grant verification afterward. Hosted validation remains pending.
+runtime-grant verification afterward. That adaptation originally awaited hosted proof; the later
+HDB-03 sequence validated strict TLS, all eight migrations and the reduced runtime-grant posture.
 
 The hosted access model for `/api/readiness` is selected and validated as a machine-monitor
 boundary—through infrastructure/reverse-proxy restriction or another explicitly approved control—

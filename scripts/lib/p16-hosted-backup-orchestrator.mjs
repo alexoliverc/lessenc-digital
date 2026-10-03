@@ -26,7 +26,6 @@ import {
   createP16RecoveryBundle,
   createStagingDatabaseDump,
   decodeRecoveryEncryptionKey,
-  evaluateP16HostedRpoEvidence,
   measureP16Rpo,
   validateStagingDatabaseBackupEnvironment,
   verifyP16RecoveryBundle,
@@ -557,25 +556,62 @@ async function writeExclusiveJsonAtomic(path, value, randomId = randomUUID) {
   }
 }
 
+async function acquireBackupIndexLock(indexFile) {
+  const lockPath = `${indexFile}.lock`;
+  try {
+    const handle = await open(lockPath, "wx", 0o600);
+    return Object.freeze({ handle, lockPath });
+  } catch (error) {
+    if (error && typeof error === "object" && error.code === "EEXIST") {
+      throw new Error("P16_HOSTED_BACKUP_INDEX_LOCKED", { cause: error });
+    }
+    throw new Error("P16_HOSTED_BACKUP_INDEX_LOCK_FAILED", { cause: error });
+  }
+}
+
+async function releaseBackupIndexLock(lock) {
+  try {
+    await lock.handle.close();
+    await unlink(lock.lockPath);
+  } catch (error) {
+    throw new Error("P16_HOSTED_BACKUP_INDEX_LOCK_CLEANUP_FAILED", { cause: error });
+  }
+}
+
 export async function updateBackupIndexAtomic(input) {
-  const createdAt = normalizeTimestamp(
-    input.createdAt,
-    "P16_RETENTION_CREATED_AT_INVALID",
-  ).toISOString();
-  const current = await readRetentionIndex(input.indexFile, input.now ?? createdAt);
-  invariant(
-    !current.some((entry) => entry.id === input.backupId),
-    "P16_RETENTION_DUPLICATE_BACKUP_ID",
-  );
-  const updated = [...current, { id: input.backupId, createdAt }];
-  planBackupRetention(updated, { now: input.now ?? createdAt });
-  updated.sort(
-    (left, right) =>
-      Date.parse(right.createdAt) - Date.parse(left.createdAt) ||
-      left.id.localeCompare(right.id, "en"),
-  );
-  await (input.writeJsonAtomic ?? writeReplacementJsonAtomic)(input.indexFile, updated);
-  return Object.freeze(updated.map((entry) => Object.freeze({ ...entry })));
+  const lock = await acquireBackupIndexLock(input.indexFile);
+  let result;
+  let operationError;
+  try {
+    const createdAt = normalizeTimestamp(
+      input.createdAt,
+      "P16_RETENTION_CREATED_AT_INVALID",
+    ).toISOString();
+    const current = await readRetentionIndex(input.indexFile, input.now ?? createdAt);
+    invariant(
+      !current.some((entry) => entry.id === input.backupId),
+      "P16_RETENTION_DUPLICATE_BACKUP_ID",
+    );
+    const updated = [...current, { id: input.backupId, createdAt }];
+    planBackupRetention(updated, { now: input.now ?? createdAt });
+    updated.sort(
+      (left, right) =>
+        Date.parse(right.createdAt) - Date.parse(left.createdAt) ||
+        left.id.localeCompare(right.id, "en"),
+    );
+    await (input.writeJsonAtomic ?? writeReplacementJsonAtomic)(input.indexFile, updated);
+    result = Object.freeze(updated.map((entry) => Object.freeze({ ...entry })));
+  } catch (error) {
+    operationError = error;
+  }
+
+  try {
+    await releaseBackupIndexLock(lock);
+  } catch (error) {
+    operationError ??= error;
+  }
+  if (operationError) throw operationError;
+  return result;
 }
 
 async function removeBrokenBundle(bundleDirectory, outputRoot, backupId) {
@@ -745,21 +781,17 @@ export async function runP16HostedBackupOrchestrator(input, dependencies = {}) {
       observedAt,
       latestVerifiedBackupAt: verifiedBackupAt,
     });
-    const rpoEvaluation =
-      configuration.execution.executionContext === SCHEDULED_EXECUTION_CONTEXT
-        ? (dependencies.evaluateHostedRpoEvidence ?? evaluateP16HostedRpoEvidence)(observation)
-        : (dependencies.measureRpo ?? measureP16Rpo)({
-            observedAt,
-            latestVerifiedBackupAt: verifiedBackupAt,
-            evidenceScope: MANUAL_EXECUTION_CONTEXT,
-          });
+    const rpoEvaluation = (dependencies.measureRpo ?? measureP16Rpo)({
+      observedAt,
+      latestVerifiedBackupAt: verifiedBackupAt,
+      evidenceScope: configuration.execution.executionContext,
+    });
     const rpo =
-      configuration.execution.executionContext === SCHEDULED_EXECUTION_CONTEXT &&
-      rpoEvaluation.status === "PASS"
+      configuration.execution.executionContext === SCHEDULED_EXECUTION_CONTEXT
         ? Object.freeze({
             ...rpoEvaluation,
             status: "UNKNOWN",
-            candidateAssessment: "PASS",
+            candidateAssessment: rpoEvaluation.localAssessment,
             reason: "PROVIDER_SCHEDULER_ATTESTATION_PENDING",
           })
         : rpoEvaluation;

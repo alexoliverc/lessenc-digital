@@ -2,7 +2,7 @@
 
 **Phase:** P16 — Staging Deployment
 
-**Status:** P16-01–P16-08 COMPLETE / HOSTED VALIDATED / P16-09 REMAINING
+**Status:** P16-01–P16-08 COMPLETE; P16-08 REMEDIATED / INDEPENDENT AUDIT PASS; P16-09 REMAINING
 
 **Starting baseline:** `11c4a18e4c2b479ebd8155f8a5397e8820e49513`
 
@@ -36,7 +36,11 @@
 | P16-HDB-F02 Prisma migration TLS binding | REMEDIATED IN P16-HDB-02 | hosted validation exposed P16-HDB-F03 |
 | P16-HDB-F03 explicit Prisma `sslcert` incompatibility | REMEDIATED IN P16-HDB-03 | hosted strict-system-trust revalidation PASS |
 
-## Gate evidence
+## Initial internal gate evidence (historical checkpoint)
+
+The following table records the original repository gate at that checkpoint; it is not the current
+P16-08 regression or dependency-audit result. Current P16-08 evidence is in
+[`p16-backup-recovery-candidate.md`](./p16-backup-recovery-candidate.md).
 
 | Gate | Result |
 | --- | --- |

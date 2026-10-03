@@ -351,6 +351,19 @@ automated observation and 966 ms RPO age. The 13:17 job also produced a distinct
 but its individual observation/history timestamps remain unavailable through the provider API and
 its RPO projection correctly remains `UNKNOWN / PENDING_PROVIDER_SCHEDULER_CORRELATION`.
 
+`run-scheduled` is only scheduler-compatible input and cannot establish provider authority by
+itself. Its observation is deliberately insufficient for `evaluateP16HostedRpoEvidence()`. A caller
+must add a separately verified backup identity, scheduled execution authority/context and exact
+`AUTHORITATIVE_PROVIDER_SCHEDULER_CORRELATION` /
+`INDEPENDENT_PROVIDER_HISTORY_VERIFIED` fields before the evaluator can return PASS or FAIL. Cron
+configuration, filename time and manual invocation never satisfy that contract.
+
+The metadata index update uses an exclusive sibling `.lock` across the whole read-modify-write
+interval, followed by atomic replacement. Lock contention fails closed and never deletes another
+run's lock. If a process terminates while owning the lock, inspect the associated bundle,
+observation/history and process state before explicitly removing it; there is no automatic stale
+lock timeout and no deletion authority in the retention planner.
+
 Retention remains `PLAN_ONLY` under the 7/4/3 policy and gives no deletion authority. The earlier
 private Google Drive round-trip proves only the off-R2 mechanism bundle, not an independent copy of
 the final hosted point. Database and R2 capture are sequential and must not be described as an

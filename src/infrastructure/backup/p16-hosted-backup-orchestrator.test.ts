@@ -177,12 +177,12 @@ function successfulDependencies(trace: string[] = []) {
       return { manifest: { createdAt: NOW }, storageIndex: [] };
     }),
     measureRpo: vi.fn(() => {
-      trace.push("manual-rpo");
-      return { status: "UNKNOWN", reason: "RAW_INPUT_NOT_AUTHORITATIVE_HOSTED_EVIDENCE" };
-    }),
-    evaluateHostedRpoEvidence: vi.fn(() => {
-      trace.push("scheduled-rpo");
-      return { status: "PASS", reason: "WITHIN_TARGET" };
+      trace.push("diagnostic-rpo");
+      return {
+        status: "UNKNOWN",
+        localAssessment: "PASS",
+        reason: "RAW_INPUT_NOT_AUTHORITATIVE_HOSTED_EVIDENCE",
+      };
     }),
   };
 }
@@ -219,6 +219,23 @@ describe("P16 hosted backup pre-mutation gates", () => {
         createDatabaseDump: mutation,
       }),
     ).rejects.toThrow(failure);
+    expect(mutation).not.toHaveBeenCalled();
+    await expect(readdir(harness.workRoot)).resolves.toEqual([]);
+  });
+
+  it.each([
+    ["overlapping work/output roots", "P16_HOSTED_BACKUP_OUTPUT_ROOT", "work"],
+    ["repository-contained work root", "P16_HOSTED_BACKUP_WORK_ROOT", "repository"],
+  ])("rejects %s before database or provider mutation", async (_label, name, rootName) => {
+    const harness = await createHarness();
+    harness.env[name] = rootName === "work" ? harness.workRoot : harness.repositoryRoot;
+    const mutation = vi.fn();
+
+    await expect(
+      runP16HostedBackupOrchestrator(input(harness), {
+        validateDatabaseEnvironment: mutation,
+      }),
+    ).rejects.toThrow(/P16_HOSTED_BACKUP_PATH_(?:OVERLAP|IN_REPOSITORY_REFUSED)/u);
     expect(mutation).not.toHaveBeenCalled();
     await expect(readdir(harness.workRoot)).resolves.toEqual([]);
   });
@@ -469,6 +486,66 @@ describe("P16 R2 read-only snapshot", () => {
       "do-not-overwrite",
     );
   });
+
+  it("rejects duplicate object keys and repeated pagination tokens before materialization", async () => {
+    const harness = await createHarness();
+    const snapshotRoot = join(harness.workRoot, "snapshot");
+    await mkdir(snapshotRoot);
+    const duplicateClient = {
+      async send() {
+        return { Contents: [{ Key: "duplicate.txt" }, { Key: "duplicate.txt" }] };
+      },
+    };
+    await expect(
+      materializeR2Snapshot({
+        client: duplicateClient,
+        ListObjectsV2Command,
+        GetObjectCommand,
+        bucket: "lessenc-staging-private",
+        destinationRoot: snapshotRoot,
+      }),
+    ).rejects.toThrow("P16_HOSTED_BACKUP_DUPLICATE_OBJECT_KEY");
+
+    const repeatedTokenClient = {
+      async send() {
+        return { Contents: [], IsTruncated: true, NextContinuationToken: "same-token" };
+      },
+    };
+    await expect(
+      materializeR2Snapshot({
+        client: repeatedTokenClient,
+        ListObjectsV2Command,
+        GetObjectCommand,
+        bucket: "lessenc-staging-private",
+        destinationRoot: snapshotRoot,
+      }),
+    ).rejects.toThrow("P16_HOSTED_BACKUP_PAGINATION_INVALID");
+  });
+
+  it("removes only its partial object when streamed length verification fails", async () => {
+    const harness = await createHarness();
+    const snapshotRoot = join(harness.workRoot, "snapshot");
+    await mkdir(snapshotRoot);
+    const client = {
+      async send(command: unknown) {
+        if (command instanceof ListObjectsV2Command) {
+          return { Contents: [{ Key: "partial.txt" }], IsTruncated: false };
+        }
+        return { ContentLength: 99, Body: Buffer.from("short") };
+      },
+    };
+
+    await expect(
+      materializeR2Snapshot({
+        client,
+        ListObjectsV2Command,
+        GetObjectCommand,
+        bucket: "lessenc-staging-private",
+        destinationRoot: snapshotRoot,
+      }),
+    ).rejects.toThrow("P16_HOSTED_BACKUP_OBJECT_LENGTH_MISMATCH");
+    await expect(readdir(snapshotRoot)).resolves.toEqual([]);
+  });
 });
 
 describe("P16 hosted backup ordering, publication and cleanup", () => {
@@ -496,7 +573,7 @@ describe("P16 hosted backup ordering, publication and cleanup", () => {
       "r2-snapshot",
       "bundle",
       "verify",
-      "manual-rpo",
+      "diagnostic-rpo",
     ]);
     expect(result.backupId).toBe("p16-hosted-auto-20261002T123456789Z-0123456789abcdef");
     expect(Object.keys(result.observation).sort()).toEqual(
@@ -513,10 +590,9 @@ describe("P16 hosted backup ordering, publication and cleanup", () => {
     expect(result.rpo).toMatchObject({ status: "UNKNOWN" });
     expect(result.rpoAuthority).toBe("NOT_AUTHORITATIVE");
     expect(result.providerSchedulerAttestation).toBe("NOT_APPLICABLE_MANUAL_EXECUTION");
-    expect(() => evaluateP16HostedRpoEvidence(result.observation)).toThrow(
+    expect(() => evaluateP16HostedRpoEvidence(result.observation as never)).toThrow(
       "P16_RPO_HOSTED_EVIDENCE_INVALID",
     );
-    expect(dependencies.evaluateHostedRpoEvidence).not.toHaveBeenCalled();
     await expect(readFile(join(result.bundleDirectory, "manifest.json"), "utf8")).resolves.toBe(
       "{}\n",
     );
@@ -581,11 +657,13 @@ describe("P16 hosted backup ordering, publication and cleanup", () => {
       "r2-snapshot",
       "bundle",
       "verify",
-      "scheduled-rpo",
+      "diagnostic-rpo",
     ]);
     expect(result.observation.provenance).toBe("AUTOMATED_PROVIDER_OBSERVATION");
-    expect(evaluateP16HostedRpoEvidence(result.observation)).toMatchObject({ status: "PASS" });
-    expect(result.rpoEvaluation).toMatchObject({ status: "PASS" });
+    expect(() => evaluateP16HostedRpoEvidence(result.observation as never)).toThrow(
+      "P16_RPO_HOSTED_EVIDENCE_INVALID",
+    );
+    expect(result.rpoEvaluation).toMatchObject({ status: "UNKNOWN", localAssessment: "PASS" });
     expect(result.rpo).toMatchObject({
       status: "UNKNOWN",
       candidateAssessment: "PASS",
@@ -601,7 +679,7 @@ describe("P16 hosted backup ordering, publication and cleanup", () => {
       rpoAuthority: "PENDING_PROVIDER_SCHEDULER_CORRELATION",
       providerSchedulerAttestation: "PENDING_INDEPENDENT_PROVIDER_HISTORY",
     });
-    expect(dependencies.measureRpo).not.toHaveBeenCalled();
+    expect(dependencies.measureRpo).toHaveBeenCalledOnce();
   });
 
   it("does not publish observation/index on failed verification, cleans plaintext and only removes the broken current bundle", async () => {
@@ -653,6 +731,68 @@ describe("P16 hosted backup ordering, publication and cleanup", () => {
     expect(dependencies.createBundle).not.toHaveBeenCalled();
     expect(dependencies.verifyBundle).not.toHaveBeenCalled();
   });
+
+  it("preserves a verified encrypted bundle but fails closed when index publication fails", async () => {
+    const harness = await createHarness();
+    const dependencies = {
+      ...successfulDependencies(),
+      updateIndex: vi.fn(async () => {
+        throw new Error("P16_HOSTED_BACKUP_INDEX_WRITE_FAILED");
+      }),
+    };
+
+    await expect(runP16HostedBackupOrchestrator(input(harness), dependencies)).rejects.toThrow(
+      "P16_HOSTED_BACKUP_INDEX_WRITE_FAILED",
+    );
+
+    await expect(readdir(harness.workRoot)).resolves.toEqual([]);
+    const bundles = await readdir(harness.outputRoot);
+    expect(bundles).toHaveLength(1);
+    await expect(
+      readFile(join(harness.outputRoot, String(bundles[0]), "manifest.json"), "utf8"),
+    ).resolves.toBe("{}\n");
+    const historyEntries = await readdir(harness.historyRoot);
+    expect(historyEntries.some((name) => name.endsWith(".observation.json"))).toBe(true);
+    expect(historyEntries.some((name) => name.endsWith(".run.json"))).toBe(true);
+  });
+
+  it("returns failure and cleans plaintext when success-history publication fails", async () => {
+    const harness = await createHarness();
+    const dependencies = {
+      ...successfulDependencies(),
+      writeHistory: vi.fn(async () => {
+        throw new Error("P16_HOSTED_BACKUP_HISTORY_WRITE_FAILED");
+      }),
+    };
+
+    await expect(runP16HostedBackupOrchestrator(input(harness), dependencies)).rejects.toThrow(
+      "P16_HOSTED_BACKUP_HISTORY_WRITE_FAILED",
+    );
+    await expect(readdir(harness.workRoot)).resolves.toEqual([]);
+    await expect(readdir(harness.outputRoot)).resolves.toHaveLength(1);
+  });
+
+  it("overrides an apparent success with a stable failure when plaintext cleanup fails", async () => {
+    const harness = await createHarness();
+    const dependencies = {
+      ...successfulDependencies(),
+      cleanupWorkspace: vi.fn(async () => {
+        throw new Error("synthetic cleanup denial");
+      }),
+      replaceHistory: vi.fn(async () => undefined),
+    };
+
+    await expect(runP16HostedBackupOrchestrator(input(harness), dependencies)).rejects.toThrow(
+      "P16_HOSTED_BACKUP_PLAINTEXT_CLEANUP_FAILED",
+    );
+    expect(dependencies.replaceHistory).toHaveBeenCalledWith(
+      expect.stringMatching(/\.run\.json$/u),
+      expect.objectContaining({
+        outcome: "FAIL",
+        failureCode: "P16_HOSTED_BACKUP_PLAINTEXT_CLEANUP_FAILED",
+      }),
+    );
+  });
 });
 
 describe("P16 metadata index and bounded cleanup", () => {
@@ -693,6 +833,60 @@ describe("P16 metadata index and bounded cleanup", () => {
     await expect(readdir(harness.historyRoot)).resolves.toEqual([]);
   });
 
+  it("serializes read-modify-write with an exclusive lock and refuses a competing updater", async () => {
+    const harness = await createHarness();
+    const indexFile = String(harness.env.P16_BACKUP_INDEX_FILE);
+    await writeFile(`${indexFile}.lock`, "existing-owner\n", { flag: "wx" });
+
+    await expect(
+      updateBackupIndexAtomic({
+        indexFile,
+        backupId: "contending-backup",
+        createdAt: NOW,
+        now: NOW,
+      }),
+    ).rejects.toThrow("P16_HOSTED_BACKUP_INDEX_LOCKED");
+    await expect(readFile(`${indexFile}.lock`, "utf8")).resolves.toBe("existing-owner\n");
+    await expect(readFile(indexFile, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("releases its index lock after write failure and preserves all successful entries", async () => {
+    const harness = await createHarness();
+    const indexFile = String(harness.env.P16_BACKUP_INDEX_FILE);
+    const failingWriter = vi.fn(async () => {
+      throw new Error("synthetic index write failure");
+    });
+
+    await expect(
+      updateBackupIndexAtomic({
+        indexFile,
+        backupId: "failed-backup",
+        createdAt: "2026-10-02T12:34:55.789Z",
+        now: NOW,
+        writeJsonAtomic: failingWriter,
+      }),
+    ).rejects.toThrow("synthetic index write failure");
+    await expect(readFile(`${indexFile}.lock`, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+
+    await updateBackupIndexAtomic({
+      indexFile,
+      backupId: "first-backup",
+      createdAt: "2026-10-02T12:34:55.789Z",
+      now: NOW,
+    });
+    const updated = await updateBackupIndexAtomic({
+      indexFile,
+      backupId: "second-backup",
+      createdAt: NOW,
+      now: NOW,
+    });
+    expect(updated).toEqual([
+      { id: "second-backup", createdAt: NOW },
+      { id: "first-backup", createdAt: "2026-10-02T12:34:55.789Z" },
+    ]);
+    await expect(readFile(`${indexFile}.lock`, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
   it("refuses recursive cleanup outside the exact current-run workspace", async () => {
     const harness = await createHarness();
     const arbitrary = join(harness.workRoot, "arbitrary-caller-directory");
@@ -713,6 +907,9 @@ describe("P16 metadata index and bounded cleanup", () => {
   it("generates a deterministic scheduler-provenance backup id under an injected clock", () => {
     expect(createHostedBackupId({ now: NOW, randomSuffix: "0123456789abcdef" })).toBe(
       "p16-hosted-auto-20261002T123456789Z-0123456789abcdef",
+    );
+    expect(() => createHostedBackupId({ now: NOW, randomSuffix: "../escape" })).toThrow(
+      "P16_HOSTED_BACKUP_RANDOM_SUFFIX_INVALID",
     );
   });
 });

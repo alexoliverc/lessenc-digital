@@ -1,6 +1,6 @@
 # P16-08 — Backup, Restore, RPO/RTO, Retention & Rollback Candidate
 
-**Status:** P16-08 COMPLETE / HOSTED VALIDATED / DOCUMENTED
+**Status:** P16-08 COMPLETE / REMEDIATED / INDEPENDENT AUDIT PASS
 
 **Canonical branch:** `phase/p16-staging-deployment`
 
@@ -8,33 +8,34 @@
 
 **R1 review baseline:** `fa70d7d3de9833394d6c4af3b99678949edc6b93`
 
+**Operational hosted release:** `976a0472382abc0597996366db63c981b5733d6e`
+
+**Independent-audit starting HEAD:** `0f6be4a5286db54475a39f0f64010c7ba3540739`
+
 **Recovery objectives:** RPO <= 24 hours; RTO <= 8 hours; 7 daily, 4 weekly and 3 monthly points
 
 **Canonical boundary:** P16-07 is COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED in the current
-P16 baseline. The P16-08 tooling is integrated and deployed, but the partial exercise below does
-not reinterpret P16-07 and does not close P16-08.
+P16 baseline. P16-08 closed on operational release `976a0472382abc0597996366db63c981b5733d6e`;
+the later local audit remediation does not redefine that hosted release or authorize publication.
 
-This document defines the repository-side P16-08 contract and records only the provider evidence
-actually obtained on 27/09/2026. The first real database dump proves the guarded dump mechanism but
-was created on an unencrypted volume and is not the final recovery point. The subsequent exercise
-proved encrypted working storage, real R2 export, a v2 bundle, independent off-R2 copy and isolated
-storage restore, but it could not create the mandated new matching database dump. It authorizes no
-live deletion or restore over staging.
+This document defines the repository-side P16-08 contract and preserves the dated partial exercises
+as historical evidence. The 27/09/2026 mechanism exercise did not close P16-08; the final hosted
+closeout on 03/10/2026 and the independent audit below supersede its status conclusions. No section
+authorizes live deletion, restore over primary staging, phase-branch publication or P16-09.
 
 ## Evidence classification
 
 | Capability | Repository/local evidence | Hosted/provider evidence |
 | --- | --- | --- |
-| database guard and dump process | MariaDB-family preflight and synthetic PASS | real guarded dump PASS as mechanism evidence; new encrypted recovery-point dump BLOCKED |
-| encrypted recovery unit v2 | HKDF-separated encryption/authentication and synthetic PASS | real-data mechanism bundle PASS; not the final recovery point |
-| manifest verification | canonical HMAC and artifact binding synthetic PASS | independent verification PASS for the mechanism bundle |
-| private-storage export | filesystem export contract PASS | real R2 source export PASS under EFS; source unchanged |
-| off-R2 copy | provider-boundary contract | private Google Drive round-trip PASS for the encrypted mechanism bundle |
-| retention 7/4/3 | deterministic planner PASS | PLAN_ONLY PASS on one verified point; required history/schedule unproven |
-| isolated restore | encrypted artifacts restored to a new local target | local exact restore PASS and isolated R2 restore PASS; isolated MariaDB/app NOT EXECUTED |
-| RPO <= 24 h | calculation contract PASS | status UNKNOWN — diagnostic age is not authoritative scheduler evidence |
-| RTO <= 8 h | local timing machinery PASS | status UNKNOWN — no hosted database/application recovery interval |
-| application rollback | compatible plan-only result PASS | hosted deployment/rollback NOT EXECUTED |
+| database guard and dump process | MariaDB-family preflight, release binding and adversarial tests PASS | final controller evidence validates isolated database restore; primary was not restored or mutated |
+| encrypted recovery unit v2 | HKDF-separated encryption/authentication, HMAC and artifact binding PASS | provider-scheduled verified encrypted bundles exist; private artifacts are not exposed by the API |
+| private-storage export | paginated read-only snapshot and integrity tests PASS | two objects restored in the isolated recovery boundary; source remained unchanged |
+| off-R2 copy | provider-boundary contract | earlier private Google Drive mechanism bundle only; final hosted point has no independently proved off-R2 copy |
+| retention 7/4/3 | deterministic `PLAN_ONLY` planner and serialized index update PASS | no deletion or lifecycle mutation; `notRetained` remains non-authoritative |
+| isolated restore | exact local reconstruction remains `LOCAL_SYNTHETIC` | controller evidence validates isolated MariaDB/R2 restore, runtime grants, readiness and smoke |
+| RPO <= 24 h | authoritative evaluator now requires explicit independent provider-history attestation | 01:17 event PASS at 966 ms from preserved correlated evidence; 13:17 event real but individual RPO remains pending |
+| RTO <= 8 h | exact millisecond and strict provenance contracts PASS | controller-measured isolated recovery PASS at 540395 ms |
+| application rollback | compatible planner remains non-mutating | recovery-only rollback to `2580994...` and roll-forward to `976a047...` demonstrated; primary preserved |
 
 ## Canonical recovery unit v2
 
@@ -463,14 +464,47 @@ failure-domain mechanism for the earlier encrypted mechanism bundle only; this c
 claim an independent off-R2 copy of the final hosted point. Database and R2 capture were sequential,
 so `SAME_RECOVERY_POINT` describes one recovery unit, not a cross-system atomic snapshot.
 
-The current dependency audit reports 8 aggregated vulnerable npm nodes: 2 critical, 5 high and 1
-moderate. `next@16.3.4` is the only direct runtime finding and has a patch candidate at 16.3.6, but
+The independent audit dependency scan reports 7 aggregated vulnerable npm nodes: 1 critical, 5 high
+and 1 moderate. `next@16.3.4` is the only direct runtime finding and the current npm audit proposes
+the non-major patch `16.3.8` (the provider scanner still reports `16.3.6`), but
 the repository has zero `next/og` or `ImageResponse` usage. `brace-expansion`, `braces`,
 `micromatch` and `fast-glob` are dev-only lint/tooling paths; `fast-uri` is dev-optional Prisma CLI
-tooling. Dependency and lockfile changes are outside this recovery closeout and would invalidate the
-tested target/current resolution comparison, so no `npm audit fix`, upgrade or provider patch PR was
-performed. Remediation requires a separately authorized dependency update and full application
-regression.
+tooling. No executable path from untrusted application input to those tooling dependencies was
+found. A dependency/lockfile update is not necessary to correct the P16-08 recovery defects and
+would create a new operational release requiring hosted backup/rollback revalidation, so no
+`npm audit fix`, upgrade or provider patch PR was performed. This remains explicit security debt for
+a separately governed dependency update and full application plus hosted regression.
 
-P16-08 is complete with the limitations above recorded as residual evidence/security debt. This
-does not complete P16, authorize a phase-branch push or start P16-09.
+### Independent audit and remediation — 03/10/2026
+
+The independent audit did not inherit the earlier PASS. It re-read the implementation, tests,
+history, canonical documentation and current read-only provider state, then found and remediated two
+repository defects:
+
+- `run-scheduled` already returned `UNKNOWN`, but its six-field observation could still be passed
+  directly to `evaluateP16HostedRpoEvidence()` to manufacture a `PASS` without independent provider
+  history. Scheduled execution now uses only the non-authoritative diagnostic calculator. The
+  authoritative evaluator requires exact execution authority/context, backup identity,
+  `AUTHORITATIVE_PROVIDER_SCHEDULER_CORRELATION` and
+  `INDEPENDENT_PROVIDER_HISTORY_VERIFIED`; a raw scheduled observation fails closed.
+- index-file replacement was atomic, but its read-modify-write interval was not serialized. The
+  updater now acquires an exclusive mode-0600 sibling lock before reading and releases only its own
+  lock after publication. Contention fails closed as `P16_HOSTED_BACKUP_INDEX_LOCKED`; write failure
+  releases the current-run lock. A lock left by process termination is not auto-deleted and requires
+  operator inspection, preventing a guessed stale-lock timeout from losing backup history.
+
+Adversarial coverage now also exercises repository/backup-root overlap, malformed backup-ID suffix,
+duplicate R2 keys, repeated pagination tokens, streamed-length mismatch cleanup, index/history
+publication failure, cleanup failure and lock contention. Current provider/API inspection confirms
+primary at `976a047...` from the canonical repository/phase branch and recovery at `976a047...` from
+the private rehearsal repository/`rehearsal-return`; both health and home return 200. The two Cron
+entries remain `17 1 * * *` and `17 13 * * *` and still project pending correlation in their own
+output. Environment values remain masked, so the API proves only key presence, not the value of
+`P16_RELEASE_COMMIT`. The private runner file, mode, hash and 11-key scheduler environment are
+historical baseline evidence, not current-session API proof.
+
+The remediation is repository-local and not deployed. It preserves the hosted operational evidence
+boundary at `976a047...`; publication of this later local HEAD would require coordinated release
+binding and a new hosted validation. P16-08 is complete with the limitations above recorded as
+residual evidence/security debt. This does not complete P16, authorize a phase-branch push or start
+P16-09.

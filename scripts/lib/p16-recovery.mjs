@@ -1572,7 +1572,12 @@ export function evaluateP16HostedRpoEvidence(evidence) {
       "evidenceType",
       "evidenceScope",
       "provenance",
+      "executionAuthority",
+      "executionContext",
+      "rpoAuthority",
+      "providerSchedulerAttestation",
       "outcome",
+      "backupId",
       "observedAt",
       "latestVerifiedBackupAt",
     ],
@@ -1582,6 +1587,11 @@ export function evaluateP16HostedRpoEvidence(evidence) {
     evidence.evidenceType === "P16_HOSTED_BACKUP_OBSERVATION" &&
       evidence.evidenceScope === "HOSTED_STAGING" &&
       evidence.provenance === "AUTOMATED_PROVIDER_OBSERVATION" &&
+      evidence.executionAuthority === "PROVIDER_SCHEDULED_EXECUTION" &&
+      evidence.executionContext === "PROVIDER_SCHEDULED" &&
+      evidence.rpoAuthority === "AUTHORITATIVE_PROVIDER_SCHEDULER_CORRELATION" &&
+      evidence.providerSchedulerAttestation === "INDEPENDENT_PROVIDER_HISTORY_VERIFIED" &&
+      BACKUP_ID_PATTERN.test(evidence.backupId ?? "") &&
       evidence.outcome === "VERIFIED",
     "P16_RPO_HOSTED_EVIDENCE_INVALID",
   );
