@@ -2,7 +2,7 @@
 
 **Phase:** P16 — Staging Deployment
 
-**Status:** P16 INTERNAL IMPLEMENTATION COMPLETE / REAL DB AND R2 VALIDATED / DEPLOYED AND EXTERNAL OPERATIONS PENDING
+**Status:** P16-01–P16-08 COMPLETE / HOSTED VALIDATED / P16-09 REMAINING
 
 **Starting baseline:** `11c4a18e4c2b479ebd8155f8a5397e8820e49513`
 
@@ -30,7 +30,7 @@
 | P16-F05 hosted database validation | CODE READY | provider provisioning, TLS and migration proof |
 | P16-F06 hosted private-storage adapter | REAL PROVIDER + APPLICATION VALIDATED LOCALLY | deployed/hosted HTTP proof |
 | P16-F07 hosted readiness access control | REMEDIATED IN CODE | hosted HTTP proof |
-| P16-F08 hosted recovery implementation | PARTIAL / CODE READY | scheduler, encryption, off-site copy and restore drill |
+| P16-F08 hosted recovery implementation | COMPLETE / HOSTED VALIDATED | residual limits: second-window RPO correlation, final off-R2 copy and sequential DB/R2 point |
 | P16-F09 hosted observability delivery | APPLICATION CONTRACT READY | external monitor, alert destination and status page |
 | P16-HDB-F01 migration release binding | REMEDIATED IN FIX01 | hosted migration remains separately authorized and pending |
 | P16-HDB-F02 Prisma migration TLS binding | REMEDIATED IN P16-HDB-02 | hosted validation exposed P16-HDB-F03 |

@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 30/09/2026
+**Última atualização:** 03/10/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. P16-01–P16-07 estão COMPLETE. A release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`. P16-06 e P16-07 estão `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`.
-**Estado atual:** P16-07 — Hosted Security Validation foi encerrada após remediação e revalidação dos dois findings externos. `P16-07-F01 / HIGH` permanece no histórico como exposição visual do readiness token, agora `REMEDIATED / PASS` por rotação coordenada Hostinger/Grafana e monitor recorrente verde. `P16-07-F02 / MEDIUM` permanece no histórico como override CSP do Force HTTPS, agora `REMEDIATED / PASS` com SSL/CDN/DNS preservados, redirect HTTP -> HTTPS manual no `.htaccess`, Force HTTPS desabilitado e CSP route-sensitive novamente sob autoridade da aplicação no origin e edge. Ver [dossiê P16-07](docs/security/p16-hosted-security-validation.md). P16 não está COMPLETE. O tooling P16-08 está integrado na branch canônica e implantado em `45b45e7`; o exercício de 27/09/2026 comprovou EFS, export R2 real, bundle/HMAC de mecanismo, cópia Google Drive privada com round-trip exato e restore em R2 isolado. A reconciliação de 30/09/2026 registra que a identidade MariaDB gerenciada tem zero privilégio grantable e não pode fazer self-rotation; Attempt #2 requer rotação externa pelo control plane e evidência estrita `CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN`. O novo dump sob storage criptografado, restore MariaDB/aplicacional e RPO/RTO autoritativos permanecem bloqueados/`UNKNOWN`; ver [dossiê P16-08](docs/operations/p16-backup-recovery-candidate.md). P16-09 não foi iniciada.
+**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. P16-01–P16-08 estão COMPLETE. A release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`; a release operacional do closeout P16-08 é `976a0472382abc0597996366db63c981b5733d6e`. P16-06, P16-07 e P16-08 estão `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED` em seus respectivos escopos.
+**Estado atual:** P16-08 — Backup / RPO / Retention / Rollback / Recovery está `COMPLETE / HOSTED VALIDATED / DOCUMENTED`, com release operacional `976a0472382abc0597996366db63c981b5733d6e`. O scheduler real executou a janela de 01:17 UTC com proveniência provider-scheduled e RPO autoritativo de 966 ms, dentro do objetivo de 24 horas; a segunda janela de 13:17 UTC também produziu um backup real distinto, mas sua idade RPO individual permanece `UNKNOWN / PENDING_PROVIDER_SCHEDULER_CORRELATION`. A retenção 7/4/3 continua estritamente `PLAN_ONLY`, sem deleção. O recovery isolado controller-measured passou em 9 minutos e 00,395 segundos, dentro do RTO de 8 horas. O rollback compatível para `2580994f53d419070fd13c485b49dbedc4463334` e o roll-forward para `976a047...` foram materializados somente no recovery, com health/home 200 e primary preservado. A cópia off-R2 do ponto final e atomicidade DB+R2 não são afirmadas; a captura permanece sequencial. O audit atual é dívida separada: 8 nós npm agregados, sem uso de `next/og`/`ImageResponse`, com tooling transitivo/dev e sem alteração de dependências neste closeout. P16 não está COMPLETE; P16-09 não foi iniciada.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -45,19 +45,19 @@
   separa chaves com HKDF-SHA-256, autentica canonicamente todo o manifesto por HMAC-SHA-256 e `keyId`,
   exige evidência de dump gerada pela execução e release ligada ao `HEAD`, fixa `mariadb-dump`
   10.11/11.x com preflight de família/capacidades, reforça autoridade do banco/CA/path real e mede
-  limites em milissegundos. Entrada manual nunca produz PASS hosted. Em 27/09/2026, o primeiro dump
-  hosted real comprovou o mecanismo, mas seu volume de origem não era criptografado e ele não vale
-  como ponto final. A execução posterior sob EFS exportou R2, criou/verificou bundle de mecanismo,
-  guardou a chave separadamente em DPAPI, verificou cópia privada no Google Drive e restaurou os
-  objetos em bucket R2 isolado. `PLAN_ONLY` 7/4/3 passou para um ponto; cron jobs existentes foram
-  provados alheios ao workload. RPO/RTO hosted permanecem `UNKNOWN`; novo dump encrypted-at-rest,
-  restore MariaDB/aplicacional e rehearsal hosted continuam pendentes.
+  limites em milissegundos. Entrada manual nunca produz PASS hosted. O orquestrador distingue
+  `run-manual` de `run-scheduled`; somente execução real do provider cria proveniência scheduled. A
+  janela de 01:17 UTC passou RPO com 966 ms. A janela de 13:17 UTC executou e produziu backup
+  distinto, mas permanece sem idade RPO autoritativa individual. Retenção 7/4/3 permanece
+  `PLAN_ONLY`; nenhuma deleção está autorizada ou foi executada.
 - O RTO autoritativo preserva `AUTOMATED_RECOVERY_RUN` e aceita adicionalmente
   `CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN` somente com schema exato gerado pelo controller,
   rotação obrigatória `EXTERNAL_PROVIDER_CONTROL` e validação final de database, R2, grants,
-  readiness autenticado e smoke. O modelo existe porque Hostinger Managed MariaDB usa uma única
-  identidade com `GRANTABLE_PRIVILEGE_COUNT=0` e sem self-rotation. Entrada raw/manual continua
-  `UNKNOWN`; o limite permanece <= 28.800.000 ms e nenhuma evidência atual concede RTO PASS.
+  readiness autenticado e smoke. O recovery isolado passou em 540395 ms, abaixo do limite exato de
+  28.800.000 ms. O rehearsal de aplicação provou rollback compatível em `2580994...` e roll-forward
+  em `976a047...` somente no recovery; primary permaneceu em `976a047...`. A cópia Google Drive
+  anterior continua mechanism-only, não prova cópia off-R2 do ponto final. DB e R2 foram capturados
+  sequencialmente, portanto `SAME_RECOVERY_POINT` não significa snapshot atômico entre sistemas.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
 - Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11, identidade/autenticação/administração P12, analytics P13, Security Hardening P14 e Observability & Operational Readiness P15 permanecem nas respectivas baselines canônicas. P13, P14 e P15 estão COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. O checkpoint técnico permanente da P15 permanece em `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Produção continua fora do escopo atual; P16 está em implementação interna e não está completa.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.
@@ -66,7 +66,7 @@
 
 ## Onde encontrar as decisões
 
-- [ROADMAP.md](ROADMAP.md): fases P00–P20; P13/P14/P15 encerradas; P15 COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; Gate C — OPERATIONS READY PASS; P16–P20 pendentes.
+- [ROADMAP.md](ROADMAP.md): fases P00–P20; P13/P14/P15 encerradas; Gate C — OPERATIONS READY PASS; P16-01–P16-08 encerradas e P16-09 pendente.
 - [docs/README.md](docs/README.md): índice canônico P00–P16, incluindo arquitetura, recuperação, incidentes e candidatos de validação P16.
 - [P12 Final Gate](docs/operations/p12-final-gate.md): arquitetura final, backoffice, RBAC, auditoria, evidências, defer de recovery e limites Git.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.

@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P16
 
-**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897`, PR #43 MERGED, merge técnico canônico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` e checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete`. Gate C — OPERATIONS READY está PASS. P16-01–P16-07 estão COMPLETE e a release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`; P16-07 está COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED. P16 não está completa; o tooling P16-08 está integrado na branch canônica e implantado em `45b45e7`, com evidência hosted parcial de R2, bundle/off-site e restore de storage, mas sem o novo dump criptografado, restore MariaDB/aplicacional ou RPO/RTO autoritativos. P16-09 permanece pendente.
+**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897`, PR #43 MERGED, merge técnico canônico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` e checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete`. Gate C — OPERATIONS READY está PASS. P16-01–P16-08 estão COMPLETE. P16-08 está COMPLETE / HOSTED VALIDATED / DOCUMENTED na release operacional `976a0472382abc0597996366db63c981b5733d6e`; P16-09 permanece pendente e P16 ainda não está completa.
 
 ## Precedência e classificação das fontes
 
@@ -325,7 +325,7 @@ push, PR, merge, checkpoint, deploy e P16 não foram executados.
 The paragraph above preserves the pre-integration candidate checkpoint. P15 was later integrated
 and checkpointed as recorded at the top of this index.
 
-## P16 — Staging Deployment — P16-01–P16-07 COMPLETE
+## P16 — Staging Deployment — P16-01–P16-08 COMPLETE
 
 A [arquitetura congelada P16](architecture/p16-staging-deployment-architecture.md), o
 [runbook de staging](operations/p16-staging-runbook.md) e o
@@ -338,7 +338,7 @@ Grafana Cloud para readiness protegido recorrente, além de recovery e auto-reso
 O [dossiê P16-07](security/p16-hosted-security-validation.md) registra os controles aprovados, os
 negativos hosted e a remediação dos dois findings externos: rotação coordenada do readiness em
 Hostinger/Grafana e remoção do override CSP do Force HTTPS, preservando redirect, SSL, CDN e DNS.
-O [dossiê P16-08](operations/p16-backup-recovery-candidate.md) registra o tooling integrado de dump MariaDB, unidade cifrada v2 com HKDF/HMAC, paths canônicos, retenção 7/4/3, restore isolado, RPO/RTO em milissegundos e rollback plan-only. O exercício de 27/09/2026 comprovou export R2 sob EFS, bundle real de mecanismo, cópia privada fora do Cloudflare com round-trip exato e restore de objetos em bucket isolado. A reconciliação de proveniência registra a ausência de `GRANT OPTION`/self-rotation da identidade Hostinger e exige rotação externa mais evidência controller-generated para o run assistido. O dump inicial ocorreu em volume sem criptografia e não é o recovery point final; novo dump, restore MariaDB/aplicacional e RPO/RTO hosted continuam bloqueados/UNKNOWN. P16-08 não está completa e o gate final P16-09 permanece pendente.
+O [dossiê P16-08](operations/p16-backup-recovery-candidate.md) registra o tooling integrado de dump MariaDB, unidade cifrada v2 com HKDF/HMAC, paths canônicos, retenção 7/4/3, restore isolado, RPO/RTO em milissegundos e rollback. O closeout hosted provou backup real agendado e RPO de 966 ms na janela de 01:17 UTC, recovery isolado em 540395 ms, rollback compatível para `2580994...` e roll-forward para `976a047...`, preservando primary. A segunda janela de 13:17 executou e gerou backup próprio, mas sua idade RPO individual permanece pendente de correlação. Retenção continua plan-only, DB+R2 não são descritos como snapshot atômico e a cópia off-R2 anterior permanece mechanism-only. P16-08 está completa; P16-09 permanece pendente.
 
 P16-HDB-01 adds the owner-approved `P16-DB-DECISION-01`: Hostinger Managed MariaDB may use one
 physical database identity only under the explicit `hostinger-managed-single-user` mode, a guarded

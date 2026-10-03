@@ -1,6 +1,6 @@
 # P16-08 — Backup, Restore, RPO/RTO, Retention & Rollback Candidate
 
-**Status:** P16-08 INTEGRATED / PARTIAL HOSTED RECOVERY EVIDENCE / NOT COMPLETE
+**Status:** P16-08 COMPLETE / HOSTED VALIDATED / DOCUMENTED
 
 **Canonical branch:** `phase/p16-staging-deployment`
 
@@ -348,12 +348,14 @@ The required transition is external through the Hostinger control plane. For tha
 an otherwise complete hosted run may use
 `CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN`, but only under the exact controller-generated evidence
 contract above. This reconciliation does not represent a recovery execution, does not relabel any
-manual timestamp and does not establish RTO PASS. A fresh hosted Attempt #2 is still required, so
-authoritative hosted RTO remains `UNKNOWN` and P16-08 remains not complete.
+manual timestamp and did not establish RTO PASS. At that 30/09 checkpoint, a fresh hosted Attempt
+#2 was still required, authoritative hosted RTO remained `UNKNOWN` and P16-08 was not complete. The
+final 03/10 closeout below supersedes that then-current status without rewriting its evidence.
 
 ## Exact hosted evidence required to close P16-08
 
-P16-08 remains open until an authorized independent exercise supplies all of the following:
+At that pre-closeout checkpoint, P16-08 remained open until an authorized independent exercise
+supplied all of the following:
 
 1. deployed release and current migration-set identity;
 2. successful guarded dump from the real remote staging database, with sanitized exit/size/hash;
@@ -376,11 +378,11 @@ P16-08 remains open until an authorized independent exercise supplies all of the
     with database/data restoration remaining separate;
 13. sanitized audit evidence, failure/cleanup records and independent review.
 
-The 27/09/2026 exercise partially satisfies items 1, 3–6, 8–9 and 12, but none is allowed to mask
+The 27/09/2026 exercise partially satisfied items 1, 3–6, 8–9 and 12, but none was allowed to mask
 the absent new database point or the lack of isolated database/application validation. Hosted RPO
 and RTO remain `UNKNOWN`; scheduled coverage, final same-recovery-point protection, physical
-MariaDB restore and recovery-application probes remain unproven. The exact status is **P16-08
-INTEGRATED / PARTIAL HOSTED RECOVERY EVIDENCE / NOT COMPLETE**.
+MariaDB restore and recovery-application probes remained unproven. The exact status at that
+checkpoint was **P16-08 INTEGRATED / PARTIAL HOSTED RECOVERY EVIDENCE / NOT COMPLETE**.
 
 ## Repository validation evidence
 
@@ -399,7 +401,7 @@ The build used explicit synthetic overrides for its database, authentication and
 inputs. Next.js reported the existing `.env.local` in its normal environment inventory; that file
 was not inspected or altered, and no value from it was printed. The build performed no hosted
 database, R2, Hostinger, Mercado Pago or production operation. The later hosted exercise is
-recorded separately above and also does not qualify P16-08 for completion.
+recorded separately above and also did not qualify P16-08 for completion at that checkpoint.
 
 Closeout documentation validation on the canonical branch produced:
 
@@ -422,3 +424,53 @@ and pushed by fast-forward to `origin/phase/p16-staging-deployment`. Hostinger a
 that exact SHA from 23:25:57Z through 23:27:16Z with state `completed`. Post-deploy read-only probes
 confirmed HTTP -> HTTPS 301, home 200, health 200/ok/no-store, unauthenticated readiness
 404/no-store, one CSP, HSTS, nosniff, frame deny and no `X-Powered-By`. `main` was not changed.
+
+## Final hosted closeout — 03/10/2026
+
+Release `976a0472382abc0597996366db63c981b5733d6e` corrected hosted execution provenance by
+separating `run-manual` from `run-scheduled`. The private provider runner remained scheduled at
+01:17 and 13:17 UTC. Independent Hostinger history correlated the 01:17 execution with backup
+`p16-hosted-auto-20261003T011702366Z-dde97c087d654185a2cc9d931a8727d4`,
+`PROVIDER_SCHEDULED_EXECUTION`, `AUTOMATED_PROVIDER_OBSERVATION` and RPO age 966 ms. This is the
+authoritative <= 24 hour RPO PASS.
+
+The 13:17 provider job also executed and emitted a distinct successful backup. Its sanitized Cron
+output proves provider execution context, release `976a047...`, backup completion and a distinct
+backup ID, but still projects `UNKNOWN / PENDING_PROVIDER_SCHEDULER_CORRELATION`. The private
+observation/history timestamps needed to calculate that run's individual RPO age are not exposed by
+the Hostinger API. The correct classification is
+`DUAL_WINDOW_SECOND_REAL_PROVIDER_EVENT_OBSERVED / AUTHORITATIVE_RPO_CORRELATION_PENDING`; it does
+not replace or weaken the already-proved 01:17 RPO PASS.
+
+The controlled isolated recovery produced exact controller-owned evidence spanning the first
+mutating recovery action through database/R2 restore, final runtime-grant validation, authenticated
+readiness and hosted smoke. Duration was 540395 ms (9 minutes and 00.395 seconds), below the exact
+28,800,000 ms objective. No operator-supplied timestamp or local diagnostic was promoted to hosted
+proof.
+
+The application rollback rehearsal materialized only recovery release
+`2580994f53d419070fd13c485b49dbedc4463334`. Its web surface, Prisma schema/migrations and
+dependency resolution were identical to current; only the P16 backup/provenance operations surface
+differed. Recovery health/home and primary health/home returned 200. No checkout, payment, webhook,
+buyer-access, authenticated-admin or financial mutation was exercised. Roll-forward used the
+private rehearsal repository branch `rehearsal-return` at `976a047...`; Hostinger subsequently
+built that exact source and recovery health/home returned 200 while primary and scheduler authority
+remained unchanged.
+
+Retention remains strictly `PLAN_ONLY` for 7 daily, 4 weekly and 3 monthly points. No backup, R2
+object or retention candidate was deleted. The private Google Drive copy proved an independent
+failure-domain mechanism for the earlier encrypted mechanism bundle only; this closeout does not
+claim an independent off-R2 copy of the final hosted point. Database and R2 capture were sequential,
+so `SAME_RECOVERY_POINT` describes one recovery unit, not a cross-system atomic snapshot.
+
+The current dependency audit reports 8 aggregated vulnerable npm nodes: 2 critical, 5 high and 1
+moderate. `next@16.3.4` is the only direct runtime finding and has a patch candidate at 16.3.6, but
+the repository has zero `next/og` or `ImageResponse` usage. `brace-expansion`, `braces`,
+`micromatch` and `fast-glob` are dev-only lint/tooling paths; `fast-uri` is dev-optional Prisma CLI
+tooling. Dependency and lockfile changes are outside this recovery closeout and would invalidate the
+tested target/current resolution comparison, so no `npm audit fix`, upgrade or provider patch PR was
+performed. Remediation requires a separately authorized dependency update and full application
+regression.
+
+P16-08 is complete with the limitations above recorded as residual evidence/security debt. This
+does not complete P16, authorize a phase-branch push or start P16-09.

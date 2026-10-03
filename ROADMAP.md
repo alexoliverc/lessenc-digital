@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure and P14 — Security Hardening remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as canonical technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets that technical merge and must not be retargeted by the documentation closeout. Gate C — OPERATIONS READY is PASS. P16-01 through P16-07 are COMPLETE; the P16-06 validated hosted application release is `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`. P16-07 is COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED after coordinated readiness-token rotation and restoration of the application CSP at origin and edge. P16 is not complete; P16-08 tooling is integrated and deployed at `45b45e7`, and the 27/09/2026 exercise produced partial hosted storage/off-site evidence. The final encrypted database point, isolated MariaDB/application restore and authoritative RPO/RTO remain blocked; P16-09 remains pending.
+**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure and P14 — Security Hardening remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as canonical technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets that technical merge and must not be retargeted by the documentation closeout. Gate C — OPERATIONS READY is PASS. P16-01 through P16-08 are COMPLETE. P16-08 is COMPLETE / HOSTED VALIDATED / DOCUMENTED at operational release `976a0472382abc0597996366db63c981b5733d6e`, with provider-scheduled backup/RPO proof, plan-only 7/4/3 retention, isolated RTO PASS, rollback and verified roll-forward. Residual limitations remain explicit: the second schedule window lacks an authoritative individual RPO age, the final point has no proved independent off-R2 copy, DB+R2 capture is sequential rather than atomic and dependency remediation is deferred. P16 is not complete; P16-09 remains pending.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1203,7 +1203,7 @@ PASS before release-environment validation.
 
 ## P16 — Staging Deployment
 
-**Status:** P16-01–P16-07 COMPLETE / P16-08 INTEGRATED WITH PARTIAL HOSTED EVIDENCE / P16-09 REMAINING
+**Status:** P16-01–P16-08 COMPLETE / P16-09 REMAINING
 
 ### Objective
 
@@ -1263,19 +1263,19 @@ Mercado Pago TEST hosted validation. P16-06 supplied owner-verified hosted evide
 public liveness, recurring protected readiness, controlled real alert/incident delivery, e-mail
 notification, acknowledgement, recovery/auto-resolution and the HTTPS public status origin. P16-07
 supplied the final hosted security validation, including remediated readiness-secret and CSP
-findings. P16-08 recovery evidence and P16-09 final gate remain required before P16 can be declared
-complete. The integrated P16-08 tooling implements an exact-host
+findings. P16-09 final gate remains required before P16 can be declared complete. The integrated
+P16-08 tooling implements an exact-host
 MariaDB dump with machine evidence, HKDF-separated encryption/authentication, a canonical HMAC-bound
-recovery unit v2, deterministic 7/4/3 retention, canonical path defenses, isolated local restore,
-millisecond RPO/RTO calculation with authoritative provenance separation and plan-only compatible
-application rollback. The partial hosted exercise proved EFS working storage, real R2 export,
-mechanism bundle verification, private Google Drive round-trip and isolated R2 object restore. The
-source database dump was created earlier on an unencrypted volume and remains mechanism evidence
-only; the final same-point dump, isolated MariaDB/application recovery, scheduler evidence and
-authoritative RPO/RTO remain required. Hostinger's managed identity has no grantable privilege or
-self-rotation authority, so the approved single-user recovery path requires external control-plane
-privilege rotation and strict controller-generated `CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN`
-evidence. This reconciliation does not establish RTO PASS; Attempt #2 remains required.
+recovery unit v2, deterministic plan-only 7/4/3 retention, canonical path defenses, isolated
+restore, millisecond RPO/RTO calculation with authoritative provenance separation and compatible
+application rollback. The final hosted sequence proved a real provider-scheduled backup at 01:17
+UTC with RPO age 966 ms, a second real 13:17 execution with its individual RPO correlation still
+pending, isolated controller-measured recovery in 540395 ms, application rollback to `2580994...`
+and roll-forward to `976a047...` without changing primary. Retention performed no deletion.
+Hostinger's managed identity still has no grantable privilege or self-rotation authority, so the
+single-user recovery relied on external control-plane rotation and strict controller evidence. The
+prior Google Drive copy remains mechanism-only, not proof of an independent off-R2 copy for the
+final point; database and R2 capture were sequential and are not described as atomic.
 
 P16-HDB-01 records the explicit owner decision to use Hostinger Managed MariaDB with one managed
 database user and controlled privilege rotation. The additive repository contract preserves the

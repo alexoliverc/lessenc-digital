@@ -1,7 +1,7 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** P16-01–P16-07 COMPLETE / P16-08 INTEGRATED WITH PARTIAL HOSTED EVIDENCE / P16-09 REMAINING
+**Status:** P16-01–P16-08 COMPLETE / P16-09 REMAINING
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
 **P16-06 validated hosted application release:** `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`
 **Repository baseline:** the current branch `HEAD`; documentation-only integration does not redefine which application release received P16-06 hosted validation unless that later commit is separately deployed and reconciled.
@@ -1209,15 +1209,17 @@ and no custom domain is attached. The source bucket remains unchanged. Google Dr
 already-encrypted bundle and is private/not shared. No database URL, R2 credential, encryption key
 or bearer token was persisted in Git or documentation.
 
-This topology is intentionally incomplete. It does not supply a new database dump created under
-encrypted working storage, an isolated hosted MariaDB import, a temporary recovery application or
-authoritative hosted RPO/RTO evidence. It therefore augments the architecture with real partial
-evidence but does not change the P16-08 completion gate.
+This topology was the partial mechanism baseline. The later final exercise added a real scheduled
+backup/RPO proof, isolated hosted recovery, application rollback and verified roll-forward without
+changing the primary environment. It does not retroactively make the mechanism-only Google Drive
+object a final independent copy, and it does not make sequential DB and R2 capture atomic.
 
 For RTO, `AUTOMATED_RECOVERY_RUN` remains authoritative for genuinely automated execution. The
 Hostinger model additionally permits `CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN`, which is not a
 manual-timestamp exception: the recovery controller alone records the interval, external provider
 rotation is mandatory, and the ending timestamp is emitted only after database and R2 restore,
 canonical runtime privilege verification, authenticated hosted readiness and hosted smoke pass.
-The exact eight-hour boundary is unchanged. Until a fresh hosted Attempt #2 produces that strict
-machine evidence, RTO remains `UNKNOWN` and P16-08 remains not complete.
+The exact eight-hour boundary is unchanged. Attempt #2 produced strict controller evidence and
+passed in 540395 ms. P16-08 is complete; P16-09 remains the final phase gate. The second scheduled
+window executed successfully but retains `UNKNOWN` for its individual RPO age until its private
+observation/history timestamps can be correlated independently.

@@ -1,6 +1,6 @@
 # P16 Staging Deployment Runbook
 
-**Status:** P16-01–P16-07 COMPLETE / P16-08 INTEGRATED WITH PARTIAL HOSTED EVIDENCE / P16-09 REMAINING
+**Status:** P16-01–P16-08 COMPLETE / P16-09 REMAINING
 
 This runbook prepares a reproducible staging release without treating repository preparation as a
 deployment. No command in this document authorizes Hostinger, DNS, provider, migration, payment,
@@ -344,19 +344,17 @@ A hosted restore must target a new isolated database/storage namespace and prove
 database semantics, storage integrity and application behavior. Application rollback changes only
 an approved compatible artifact; it is not schema rollback or data restore.
 
-The 27/09/2026 partial hosted exercise used deployed release `45b45e7`, an EFS work root restricted
-to owner/SYSTEM and separate DPAPI key custody. It proved read-only export of the two-object R2
-source, v2/HMAC bundle creation and verification for real mechanism data, exact local restore,
-private Google Drive round-trip of the encrypted bundle and exact object restore into the isolated
-private bucket `lessenc-digital-recovery-test-p1608`. Source R2 objects were not mutated and no
-delete/sync ran. The off-R2 object is explicitly named `NONFINAL-MECHANISM`: the database dump used
-by it originated on an unencrypted volume and cannot be promoted to the final recovery point.
+The 27/09/2026 partial hosted exercise remains mechanism history. The final 03/10/2026 closeout used
+release `976a047...`, a private runner and the Hostinger schedules `17 1 * * *` and
+`17 13 * * *`. The 01:17 provider event was independently correlated to its successful backup,
+automated observation and 966 ms RPO age. The 13:17 job also produced a distinct successful backup,
+but its individual observation/history timestamps remain unavailable through the provider API and
+its RPO projection correctly remains `UNKNOWN / PENDING_PROVIDER_SCHEDULER_CORRELATION`.
 
-Retention ran only as `PLAN_ONLY`; one verified point was retained under the 7/4/3 policy. Existing
-account cron jobs were proven unrelated to the L'Essenc database/storage and provide no scheduler
-authority. Raw RPO and local RTO diagnostics remain non-authoritative. A final run still requires a
-new dump created under encrypted working storage, isolated hosted MariaDB restore, migration and
-semantic validation, a recovery application environment and authoritative hosted RPO/RTO.
+Retention remains `PLAN_ONLY` under the 7/4/3 policy and gives no deletion authority. The earlier
+private Google Drive round-trip proves only the off-R2 mechanism bundle, not an independent copy of
+the final hosted point. Database and R2 capture are sequential and must not be described as an
+atomic cross-system snapshot.
 
 For a Hostinger recovery, the controller may emit the strict provenance
 `CONTROLLED_OPERATOR_ASSISTED_RECOVERY_RUN`. This is not permission for operator-entered timing.
@@ -370,17 +368,19 @@ smoke before it creates `recoveryValidatedAt`. The evidence must also declare
 `AUTOMATED_RECOVERY_RUN` remains accepted unchanged; raw/manual `measureP16Rto` input remains
 `UNKNOWN`.
 
-No current record satisfies this reconciled contract. A fresh hosted Attempt #2 is required; RTO
-remains `UNKNOWN`, the <= 28,800,000 ms target is unchanged and P16-08 remains not complete.
+A controller-generated isolated recovery record now satisfies this reconciled contract. The
+measured duration is 540395 ms, below the unchanged <= 28,800,000 ms target. The rehearsal also
+proved recovery-only application rollback to `2580994...` and roll-forward to `976a047...`, with
+health/home 200 and primary preserved. The smoke remains intentionally minimal and does not claim
+checkout, payment, webhook, buyer-access, authenticated-admin or financial validation.
 
 ## Required hosted evidence
 
-P16-01 through P16-06 have supplied the hosted architecture/configuration/database/storage,
-reproducible deployment, Mercado Pago TEST and observability evidence recorded by the current phase
-authority. P16-06 and P16-07 are `COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED`. P16 still cannot
-close until the remaining P16-08 database/application restore, scheduled-backup, authoritative
-RPO/RTO and rollback gates, and the P16-09 final technical gate are complete. The partial hosted
-storage/off-site evidence is not completion authority.
+P16-01 through P16-08 have supplied their bounded hosted evidence. P16-06, P16-07 and P16-08 are
+`COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED` within their respective scopes. P16 still cannot
+close until P16-09 performs the final technical gate. P16-08 residual limitations—second-window
+individual RPO correlation, no proved final off-R2 independent copy, sequential DB/R2 capture and
+dependency remediation debt—remain explicit inputs to that review.
 
 For Hostinger MariaDB this explicitly includes migration privilege elevation, subsequent reduction,
 current-user and inherited/public grant evidence, and correction of the observed hosted
