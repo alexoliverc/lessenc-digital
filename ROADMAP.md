@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13 — Analytics, Attribution & Growth Infrastructure and P14 — Security Hardening remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P15 — Observability & Operational Readiness is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897` was merged through PR #43 into `main` as canonical technical merge `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Permanent checkpoint `checkpoint/p15-observability-operational-readiness-complete` targets that technical merge and must not be retargeted by the documentation closeout. Gate C — OPERATIONS READY is PASS. P16-01 through P16-08 are COMPLETE. P16-08 is COMPLETE / REMEDIATED / INDEPENDENT AUDIT PASS, while its operational hosted release remains `976a0472382abc0597996366db63c981b5733d6e`. The local remediation requires independent provider-history attestation before authoritative RPO evaluation and serializes retention-index read-modify-write with an exclusive lock. Existing hosted evidence remains bounded to provider-scheduled backup/RPO proof, plan-only 7/4/3 retention, isolated RTO PASS, rollback and verified roll-forward. Residual limitations remain explicit: the second schedule window lacks an authoritative individual RPO age, the final point has no proved independent off-R2 copy, DB+R2 capture is sequential rather than atomic and dependency remediation is deferred. P16 is not complete; P16-09 remains NOT STARTED pending owner-side review.
+**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment has completed technical and hosted validation on frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 is COMPLETE / PASS / HOSTED VALIDATED. The documentation closeout is complete in the current working tree and awaits Git integration/checkpoint. Final authoritative hosted RPO is 888 ms against the <= 24 hour objective. `976a0472382abc0597996366db63c981b5733d6e` is retained only as a schema-compatible break-glass application rollback target. Residual limits remain explicit: retention 7/4/3 is PLAN_ONLY, no independently proved final off-R2 copy is claimed, DB/R2 capture is sequential rather than atomic and four HIGH development-tooling findings remain deferred. Production is not authorized by P16. P17 remains the next phase after P16 Git lifecycle closeout.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1203,7 +1203,7 @@ PASS before release-environment validation.
 
 ## P16 — Staging Deployment
 
-**Status:** P16-01–P16-08 COMPLETE / P16-09 REMAINING
+**Status:** P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION
 
 ### Objective
 
@@ -1818,11 +1818,40 @@ The direct runtime CRITICAL dependency finding was remediated by moving Next fro
 on development-tooling-only paths and are explicitly carried as residual tooling debt
 because the available automatic remediation requires an incompatible major downgrade.
 
-The final P16 release candidate is not yet published. Hosted final validation remains
-required before P16 can be marked COMPLETE.
+At this historical local pre-publication checkpoint, the final P16 release candidate had not yet been published and hosted final validation was still required. The later P16-09 final closeout below supersedes only this sequencing statement.
 
 Current status:
 
-`P16-09 LOCAL FINAL TECHNICAL GATE PASS / HOSTED FINAL VALIDATION PENDING`
+`P16-09 LOCAL FINAL TECHNICAL GATE PASS / HOSTED FINAL VALIDATION — PENDING AT THIS CHECKPOINT`
 
-`P16 NOT COMPLETE`
+`P16 — NOT COMPLETE AT THIS CHECKPOINT`
+
+<!-- P16-09-FINAL-CLOSEOUT -->
+
+## P16 final closeout — 04/10/2026
+
+P16 — Staging Deployment has completed its technical and hosted validation on frozen technical release
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`.
+
+P16-09 final evidence includes:
+
+- hosted application/home/health/authenticated-readiness/security validation;
+- exact final source/release binding;
+- hardened private scheduler reconciliation;
+- controlled manual final-release backup with manual provenance preserved;
+- real Hostinger provider-scheduled backup on the final release;
+- independent provider-history correlation;
+- authoritative RPO PASS at 888 ms against the <= 24 hour objective;
+- independent non-mutating rollback compatibility proof from `22fad0f...` to `976a047...`;
+- byte-identical Prisma schema and migration tree;
+- no non-test runtime application-source delta;
+- final technical-release immutability.
+
+Residual limitations remain explicit: retention 7/4/3 is plan-only, no independently proved final
+off-R2 copy is claimed, and database/R2 capture is sequential rather than atomic.
+
+P16 status:
+
+`COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION`
+
+Production is not authorized by P16.

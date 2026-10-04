@@ -2,7 +2,7 @@
 
 **Phase:** P16 — Staging Deployment
 
-**Status:** P16-01–P16-08 COMPLETE; P16-08 REMEDIATED / INDEPENDENT AUDIT PASS; P16-09 REMAINING
+**Status:** P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION
 
 **Starting baseline:** `11c4a18e4c2b479ebd8155f8a5397e8820e49513`
 
@@ -30,7 +30,7 @@
 | P16-F05 hosted database validation | CODE READY | provider provisioning, TLS and migration proof |
 | P16-F06 hosted private-storage adapter | REAL PROVIDER + APPLICATION VALIDATED LOCALLY | deployed/hosted HTTP proof |
 | P16-F07 hosted readiness access control | REMEDIATED IN CODE | hosted HTTP proof |
-| P16-F08 hosted recovery implementation | COMPLETE / HOSTED VALIDATED | residual limits: second-window RPO correlation, final off-R2 copy and sequential DB/R2 point |
+| P16-F08 hosted recovery implementation | COMPLETE / HOSTED VALIDATED | residual limits: historical 13:17 P16-08 individual RPO correlation, final off-R2 copy and sequential DB/R2 point |
 | P16-F09 hosted observability delivery | APPLICATION CONTRACT READY | external monitor, alert destination and status page |
 | P16-HDB-F01 migration release binding | REMEDIATED IN FIX01 | hosted migration remains separately authorized and pending |
 | P16-HDB-F02 Prisma migration TLS binding | REMEDIATED IN P16-HDB-02 | hosted validation exposed P16-HDB-F03 |
@@ -81,9 +81,7 @@ effective privileges, migration success or runtime readiness. Subsequent P16 hos
 since proved database TLS, completed all eight hosted migrations, reconciled effective runtime
 privileges and validated the provider-specific privilege constraint.
 
-Database and private-storage provider readiness now have bounded real evidence. Full deployed
-application readiness is still not proven because deployed/hosted HTTP and the remaining P16 hosted
-operational dependencies remain incomplete. P16 therefore remains incomplete.
+Database and private-storage provider readiness now have bounded real evidence. At the P16-HDB-01 checkpoint, full deployed application readiness was not yet proven because deployed/hosted HTTP and remaining P16 operational evidence were incomplete. Later hosted closeouts supersede only that historical sequencing statement.
 
 `P16-HDB-01-FIX01` makes release binding an independent migration-guard control: the configured
 40-hex release commit must equal the current Git `HEAD`, and inability to resolve `HEAD` fails
@@ -294,8 +292,7 @@ Verified in code:
 Synthetic focused evidence: 88 tests passing across 10 files. Full quality evidence: 854 tests
 passing across 97 files, lint/typecheck/formatting/build passing and zero production dependency
 vulnerabilities. Subsequent H3-E evidence verified the real sentinel through the production H3-D
-factory and the authenticated local readiness path. Deployed/hosted HTTP remains pending. P16
-remains incomplete and deployment is not authorized by H3-D.
+factory and the authenticated local readiness path. At the H3-D checkpoint, deployed/hosted HTTP was pending and P16 remained incomplete. Later P16-06/P16-09 closeouts supersede that historical state; H3-D itself still grants no deployment authority.
 
 <!-- P16-H3-E-REAL-R2-EVIDENCE-CLOSEOUT -->
 
@@ -368,11 +365,13 @@ Evidence classification remains strict:
 - deployed/hosted HTTP: not yet validated;
 - production: not validated.
 
-Application deployment has not been executed. P16 remains incomplete.
+At the H3-E checkpoint, application deployment had not yet been executed and P16 remained incomplete. Subsequent hosted closeouts supersede only that historical sequencing statement.
 
 <!-- P16-09-LOCAL-FINAL-GATE -->
 
 ## P16-09 local final gate
+
+This table records the historical local pre-publication checkpoint. The final external/hosted gate below supersedes its PENDING / NOT COMPLETE sequencing states.
 
 | Gate | State |
 | --- | --- |
@@ -387,3 +386,33 @@ Application deployment has not been executed. P16 remains incomplete.
 | hosted exact-SHA release binding | PENDING |
 | final hosted revalidation | PENDING |
 | P16 overall | NOT COMPLETE |
+
+<!-- P16-09-FINAL-CLOSEOUT -->
+
+## P16-09 final external/hosted gate
+
+P16-09 has completed its final external validation on frozen technical release
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`.
+
+Final results:
+
+| Control | Result |
+| --- | --- |
+| final hosted application deployment | PASS |
+| home / health | PASS |
+| authenticated readiness | PASS |
+| security headers | PASS |
+| private runner source/binding | PASS |
+| controlled final-release manual backup | PASS |
+| real provider-scheduled final-release backup | PASS |
+| independent provider-history correlation | PASS |
+| authoritative RPO <= 24 h | PASS — 888 ms |
+| rollback compatibility proof | PASS |
+| source/release immutability | PASS |
+| production authorization | NOT GRANTED |
+
+Classification:
+
+`P16-09 COMPLETE / PASS / HOSTED VALIDATED`
+
+`P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION`

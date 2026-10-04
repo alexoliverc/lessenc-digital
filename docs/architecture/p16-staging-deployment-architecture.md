@@ -1,7 +1,7 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** P16-01–P16-08 COMPLETE / P16-09 REMAINING
+**Status:** P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
 **P16-06 validated hosted application release:** `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`
 **Repository baseline:** the current branch `HEAD`; documentation-only integration does not redefine which application release received P16-06 hosted validation unless that later commit is separately deployed and reconciled.
@@ -71,9 +71,7 @@ Hostinger automatically deployed that commit with `COMPLETED / PASS`. It contain
 hosted release path, the completed P16-05 Mercado Pago TEST baseline and the P16-06 hosted
 observability foundation.
 
-This does not prove complete P16 staging readiness. P16-06 and P16-07 are hosted validated; P16-08
-has an isolated, local-synthetic repository candidate whose hosted recovery evidence remains
-pending; and P16-09 remains separate and pending.
+That paragraph described the P16-06 checkpoint only. P16-07, P16-08 and P16-09 subsequently completed their bounded hosted validation. The final frozen technical release validated by P16-09 is `22fad0f690618c27cabcfa58528a76ce0a580ad3`.
 
 The P16-08 recovery design and its strict local-versus-hosted evidence boundary are defined in
 [`p16-backup-recovery-candidate.md`](../operations/p16-backup-recovery-candidate.md). The v2
@@ -519,8 +517,7 @@ Hosted backup scheduling, retention and measured restore evidence remain pending
 Stack public liveness and Grafana protected readiness run externally; the readiness secret remains
 redacted; a controlled real incident produced e-mail delivery, human acknowledgement, recovery and
 automatic resolution; the temporary monitor was deleted; and `status.lessenc.com.br` is online over
-HTTPS with one backed Website resource. P16-07 is also complete; P16-08 and P16-09 remain pending,
-so P16 is not complete.
+HTTPS with one backed Website resource. At that checkpoint P16-07 was also complete while P16-08/P16-09 were still pending; the later final hosted closeout supersedes only that sequencing statement.
 
 ## 17. Execution sequence
 
@@ -1185,7 +1182,7 @@ Evidence levels are not interchangeable: pre-existing H3-C/H3-D suites are synth
 direct real-provider validation; H3-E-C is real application-level provider validation and local
 in-process HTTP validation. At the H3-E closeout, deployment and deployed HTTP were not yet
 validated. P16-06 later supplied owner-verified Hostinger deployment and recurring deployed
-readiness evidence. Production and complete P16 readiness remain unauthorized/unvalidated.
+readiness evidence. At that historical H3-E checkpoint, production and complete P16 readiness were unauthorized/unvalidated. The later P16-09 final closeout supersedes the complete-P16-readiness portion only; production remains unauthorized.
 
 ## P16-08 partial hosted recovery topology
 
@@ -1220,7 +1217,7 @@ manual-timestamp exception: the recovery controller alone records the interval, 
 rotation is mandatory, and the ending timestamp is emitted only after database and R2 restore,
 canonical runtime privilege verification, authenticated hosted readiness and hosted smoke pass.
 The exact eight-hour boundary is unchanged. Attempt #2 produced strict controller evidence and
-passed in 540395 ms. P16-08 is complete; P16-09 remains the final phase gate. The second scheduled
+passed in 540395 ms. At the P16-08 closeout, P16-09 remained the final phase gate; the P16-09 final closeout below supersedes only that historical sequencing statement. The second scheduled
 window executed successfully but retains `UNKNOWN` for its individual RPO age until its private
 observation/history timestamps can be correlated independently.
 
@@ -1229,5 +1226,26 @@ release. A scheduler-compatible CLI observation is now rejected by the authorita
 unless an independent provider-history correlation supplies exact authority, context, backup
 identity and attestation fields. The backup index also serializes its complete read-modify-write
 cycle with an exclusive private lock, eliminating silent lost updates while retaining atomic file
-replacement and plan-only retention semantics. These fixes remain local until deployment-aware
-publication and hosted revalidation are separately authorized.
+replacement and plan-only retention semantics. At the P16-08 independent-audit checkpoint, these fixes remained local until deployment-aware publication and hosted revalidation; that publication/revalidation was later completed by P16-09.
+
+<!-- P16-09-FINAL-CLOSEOUT -->
+
+## P16 final hosted architecture state — 04/10/2026
+
+The final validated staging technical release is
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`.
+
+The deployed application, protected readiness contract, provider scheduler source, scheduler release
+binding and successful provider-generated recovery point were reconciled to that same frozen technical
+release.
+
+The final provider-scheduled recovery point was independently correlated and evaluated at 888 ms RPO,
+within the owner-approved 24-hour objective.
+
+Final-release rollback compatibility to `976a047...` is established through byte-identical Prisma schema
+and migration tree plus no non-test runtime application-source delta. This is an application-artifact
+compatibility statement only. It is not authorization for database restore, schema reversal or an
+automatic live rollback.
+
+P16 staging architecture is therefore technically validated. Documentation integration/checkpoint remains
+the only outstanding P16 governance action. Production deployment remains a later controlled phase.

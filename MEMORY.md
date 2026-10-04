@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 03/10/2026
+**Última atualização:** 04/10/2026
 **Projeto:** LES-DIG — L'Essenc Digital
-**Estado documental:** P00–P15 implementadas e integradas conforme seus respectivos gates. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Gate C — OPERATIONS READY está PASS. O checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete` permanece fixado no merge técnico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. P16-01–P16-08 estão COMPLETE. A release de aplicação validada na P16-06 é `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`; a release operacional do closeout P16-08 é `976a0472382abc0597996366db63c981b5733d6e`. P16-08 está `COMPLETE / REMEDIATED / INDEPENDENT AUDIT PASS`; a remediação é local e não altera a release hospedada já validada. P16-09 permanece `NOT STARTED`.
-**Estado atual:** P16-08 — Backup / RPO / Retention / Rollback / Recovery está `COMPLETE / REMEDIATED / INDEPENDENT AUDIT PASS`, preservando como release operacional `976a0472382abc0597996366db63c981b5733d6e`. A auditoria independente corrigiu duas falhas locais: o evaluator RPO agora exige correlação e atestação explícitas do histórico do provider, de modo que `run-scheduled` isoladamente permanece não autoritativo; o índice de retenção agora serializa todo o read-modify-write com lock exclusivo fail-closed. O scheduler real executou a janela de 01:17 UTC com RPO autoritativo preservado de 966 ms; a segunda janela de 13:17 UTC produziu backup distinto, mas sua idade individual permanece `UNKNOWN / PENDING_PROVIDER_SCHEDULER_CORRELATION`. Retenção 7/4/3 continua `PLAN_ONLY`; recovery isolado passou em 540395 ms; rollback para `2580994...` e roll-forward para `976a047...` ocorreram somente no recovery, com primary preservado. A cópia off-R2 final e atomicidade DB+R2 não são afirmadas. O audit npm atual reporta 7 nós agregados (1 critical, 5 high, 1 moderate); não há uso de `next/og`/`ImageResponse`, os demais caminhos são tooling e nenhuma dependência foi alterada. P16 não está COMPLETE; P16-09 não foi iniciada.
+**Estado documental:** P00–P15 permanecem nas respectivas baselines canônicas integradas/checkpointed. P16 — Staging Deployment concluiu a validação técnica e hosted na release técnica congelada `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 está `COMPLETE / PASS / HOSTED VALIDATED`. O closeout documental está preparado e aguarda integração/checkpoint Git. A release operacional histórica da P16-08 permanece `976a0472382abc0597996366db63c981b5733d6e` e não é reescrita como se tivesse sido a release técnica final.
+**Estado atual:** P16 está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION`. A release técnica final validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`. O scheduler real da Hostinger executou essa release em 04/10/2026 01:17 UTC; o backup `p16-hosted-auto-20261004T011702683Z-9fc2be680257402a94a041ef40e2ae4f` foi correlacionado independentemente e o evaluator hardened retornou RPO autoritativo `PASS / WITHIN_TARGET` em 888 ms contra o objetivo <= 24 h. A compatibilidade de rollback para `976a0472382abc0597996366db63c981b5733d6e` foi revalidada sem deploy: Prisma schema e migration tree são byte-identical e não existe delta de runtime de aplicação não-teste em `src/`; esse target é break-glass e reverteria também o patch Next.js 16.3.8. Retenção 7/4/3 continua `PLAN_ONLY`; não há prova de cópia final independente off-R2; DB/R2 permanecem sequenciais e não atômicos; quatro HIGH de development tooling permanecem dívida explícita. Produção continua fora do escopo e não autorizada.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -65,14 +65,14 @@
   anterior continua mechanism-only, não prova cópia off-R2 do ponto final. DB e R2 foram capturados
   sequencialmente, portanto `SAME_RECOVERY_POINT` não significa snapshot atômico entre sistemas.
 - O owner autorizou a implementação P07 em 12/09/2026, sem commit, tag, push, PR, merge ou P08. Núcleo puro de catálogo/pedido/pagamento/entitlement, primitivas e adapter de leitura de catálogo; coordenação financeira persistida/outbox permanece para o fluxo posterior. Ver [implementação P07](docs/architecture/p07-core-implementation.md).
-- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11, identidade/autenticação/administração P12, analytics P13, Security Hardening P14 e Observability & Operational Readiness P15 permanecem nas respectivas baselines canônicas. P13, P14 e P15 estão COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. O checkpoint técnico permanente da P15 permanece em `be59d791f81fd5c75a5e39ffebd8aa814ca6368b`. Produção continua fora do escopo atual; P16 está em implementação interna e não está completa.
+- Governança, arquitetura, persistência P06, integração financeira P10, entrega digital segura P11, identidade/autenticação/administração P12, analytics P13, Security Hardening P14, Observability & Operational Readiness P15 e Staging Deployment P16 permanecem nas respectivas baselines canônicas. P13, P14 e P15 estão COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. P16 está COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION. Produção continua fora do escopo atual.
 - O modelo ChatGPT → Codex → ChatGPT review está adotado: ChatGPT responde pela direção técnica, planejamento e revisão; Codex executa somente o escopo autorizado no repositório.
 - Cada execução requer Phase Execution Brief, branch, autorização de operações protegidas por `AGENTS.md`, validação e retorno ao ChatGPT antes da progressão. Repositório é a memória técnica oficial; ler os arquivos na ordem definida em AGENTS.md.
 - O projeto principal de cosméticos físicos continua separado e será retomado com a formação de caixa.
 
 ## Onde encontrar as decisões
 
-- [ROADMAP.md](ROADMAP.md): fases P00–P20; P13/P14/P15 encerradas; Gate C — OPERATIONS READY PASS; P16-01–P16-08 encerradas e P16-09 pendente.
+- [ROADMAP.md](ROADMAP.md): fases P00–P20; P13/P14/P15 encerradas; Gate C — OPERATIONS READY PASS; P16 técnica/hosted concluída e documentada, aguardando integração/checkpoint Git.
 - [docs/README.md](docs/README.md): índice canônico P00–P16, incluindo arquitetura, recuperação, incidentes e candidatos de validação P16.
 - [P12 Final Gate](docs/operations/p12-final-gate.md): arquitetura final, backoffice, RBAC, auditoria, evidências, defer de recovery e limites Git.
 - [Persistência P06](docs/persistence/README.md): schema físico, isolamento local, migrações e testes.
@@ -2167,7 +2167,7 @@ Evidence boundaries remain explicit: earlier H3-C/H3-D tests are synthetic; H3-E
 provider validation; H3-E-C is real application-level provider validation plus local in-process
 HTTP validation. At the H3-E closeout, application deployment and deployed HTTP were still pending.
 P16-06 later supplied owner-verified Hostinger deployment and recurring deployed readiness evidence;
-production and complete P16 readiness remain unauthorized/unvalidated.
+production remained unauthorized at that checkpoint, while complete P16 readiness was later validated by the P16-09 final closeout below.
 
 <!-- P16-06-HOSTED-OBSERVABILITY-HOSTED-CLOSEOUT -->
 
@@ -2226,8 +2226,7 @@ HSTS and the remaining security headers passed. Hosted `.htaccess` is not Git-ma
 functional redirect must be rechecked after every Node.js deployment.
 
 F01 remains recorded as `HIGH / REMEDIATED / PASS`; F02 as `MEDIUM / REMEDIATED / PASS`; F03 as
-`INFO / ACCEPTED`; and F04 as `PASS`. P16 remains incomplete. P16-08 remains isolated and not
-integrated, P16-09 remains pending, and production remains unauthorized.
+`INFO / ACCEPTED`; and F04 as `PASS`. At this P16-07 checkpoint, P16 remained incomplete, P16-08 remained isolated/not integrated and P16-09 had not yet executed. The later P16-08/P16-09 closeouts supersede only this historical sequencing statement. Production remains unauthorized.
 
 <!-- P16-09-LOCAL-FINAL-GATE -->
 
@@ -2249,8 +2248,37 @@ Prisma generate, Prisma validate, Prettier e diff check PASS.
 Commit técnico P16-09-A:
 `4e77c0120846bf4180441de85c08863c95a7060e`.
 
-P16-09 está `LOCAL FINAL TECHNICAL GATE PASS / HOSTED FINAL VALIDATION PENDING`.
-P16 continua `NOT COMPLETE`.
+Neste checkpoint local pré-publicação, P16-09 estava `LOCAL FINAL TECHNICAL GATE PASS / HOSTED FINAL VALIDATION — PENDING AT THIS CHECKPOINT`.
+Nesse checkpoint local, P16 permanecia `NOT COMPLETE AT THIS CHECKPOINT`; o closeout hosted posterior abaixo supersede apenas essa sequência temporal.
 
 Nenhum push da branch P16, deploy Hostinger, mudança de `P16_RELEASE_COMMIT`, merge em
 main ou ação de produção foi executado neste checkpoint.
+
+<!-- P16-09-FINAL-CLOSEOUT -->
+
+## P16-09 final hosted closeout — 04/10/2026
+
+Frozen technical release:
+
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`
+
+P16-09 final hosted application validation passed. The private Hostinger backup runner source and
+release binding were reconciled to the frozen release. A controlled manual backup passed while remaining
+non-authoritative. The subsequent real 01:17 UTC Hostinger scheduler execution produced backup
+`p16-hosted-auto-20261004T011702683Z-9fc2be680257402a94a041ef40e2ae4f`.
+
+Independent provider-history correlation plus private run/observation/manifest evidence satisfied the
+hardened evaluator contract. Final authoritative RPO was 888 ms, PASS against the <= 24 hour objective.
+
+Independent rollback compatibility proof established `976a0472382abc0597996366db63c981b5733d6e`
+as a break-glass compatible application-artifact target for `22fad0f...`: Prisma schema and migration
+tree are byte-identical and there is no non-test runtime application-source delta. No live rollback,
+database restore or schema rollback occurred. Reverting to `976a047...` would also revert the Next.js
+security update and therefore is not the preferred persistent runtime.
+
+Residual P16 limits remain: retention 7/4/3 is `PLAN_ONLY`; no independently proved final off-R2 copy;
+DB/R2 capture is sequential, not atomic; production remains unauthorized.
+
+Current P16 classification:
+
+`COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION`

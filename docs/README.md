@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P16
 
-**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. Implementation commit `7a7ffd498856fc8bd1a3f2a6773a14c34aa52897`, PR #43 MERGED, merge técnico canônico `be59d791f81fd5c75a5e39ffebd8aa814ca6368b` e checkpoint permanente `checkpoint/p15-observability-operational-readiness-complete`. Gate C — OPERATIONS READY está PASS. P16-01–P16-08 estão COMPLETE. P16-08 está COMPLETE / HOSTED VALIDATED / DOCUMENTED na release operacional `976a0472382abc0597996366db63c981b5733d6e`; P16-09 permanece pendente e P16 ainda não está completa.
+**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED e Gate C — OPERATIONS READY permanece PASS. P16 — Staging Deployment concluiu P16-01–P16-09 e está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION`. A release técnica final hospedada/validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`; a release `976a0472382abc0597996366db63c981b5733d6e` permanece evidência histórica da P16-08 e target break-glass compatível. Produção permanece fora do escopo e não autorizada.
 
 ## Precedência e classificação das fontes
 
@@ -325,7 +325,7 @@ push, PR, merge, checkpoint, deploy e P16 não foram executados.
 The paragraph above preserves the pre-integration candidate checkpoint. P15 was later integrated
 and checkpointed as recorded at the top of this index.
 
-## P16 — Staging Deployment — P16-01–P16-08 COMPLETE
+## P16 — Staging Deployment — COMPLETE / HOSTED VALIDATED / AWAITING GIT INTEGRATION
 
 A [arquitetura congelada P16](architecture/p16-staging-deployment-architecture.md), o
 [runbook de staging](operations/p16-staging-runbook.md) e o
@@ -338,7 +338,7 @@ Grafana Cloud para readiness protegido recorrente, além de recovery e auto-reso
 O [dossiê P16-07](security/p16-hosted-security-validation.md) registra os controles aprovados, os
 negativos hosted e a remediação dos dois findings externos: rotação coordenada do readiness em
 Hostinger/Grafana e remoção do override CSP do Force HTTPS, preservando redirect, SSL, CDN e DNS.
-O [dossiê P16-08](operations/p16-backup-recovery-candidate.md) registra o tooling integrado de dump MariaDB, unidade cifrada v2 com HKDF/HMAC, paths canônicos, retenção 7/4/3, restore isolado, RPO/RTO em milissegundos e rollback. O closeout hosted provou backup real agendado e RPO de 966 ms na janela de 01:17 UTC, recovery isolado em 540395 ms, rollback compatível para `2580994...` e roll-forward para `976a047...`, preservando primary. A auditoria independente remediou o evaluator RPO para exigir correlação explícita com histórico do provider e serializou o read-modify-write do índice com lock exclusivo; essas correções permanecem locais e não redefinem a release operacional `976a047...`. A segunda janela de 13:17 executou e gerou backup próprio, mas sua idade RPO individual permanece pendente de correlação. Retenção continua plan-only, DB+R2 não são descritos como snapshot atômico e a cópia off-R2 anterior permanece mechanism-only. P16-08 está `COMPLETE / REMEDIATED / INDEPENDENT AUDIT PASS`; P16-09 permanece pendente.
+O [dossiê P16-08](operations/p16-backup-recovery-candidate.md) registra o tooling integrado de dump MariaDB, unidade cifrada v2 com HKDF/HMAC, paths canônicos, retenção 7/4/3, restore isolado, RPO/RTO em milissegundos e rollback. O closeout hosted provou backup real agendado e RPO de 966 ms na janela de 01:17 UTC, recovery isolado em 540395 ms, rollback compatível para `2580994...` e roll-forward para `976a047...`, preservando primary. A auditoria independente remediou o evaluator RPO para exigir correlação explícita com histórico do provider e serializou o read-modify-write do índice com lock exclusivo; essas correções permanecem locais e não redefinem a release operacional `976a047...`. A segunda janela de 13:17 executou e gerou backup próprio, mas sua idade RPO individual permanece pendente de correlação. Retenção continua plan-only, DB+R2 não são descritos como snapshot atômico e a cópia off-R2 anterior permanece mechanism-only. P16-08 permanece `COMPLETE / REMEDIATED / INDEPENDENT AUDIT PASS` como evidência histórica; P16-09 foi posteriormente concluída como `COMPLETE / PASS / HOSTED VALIDATED` na release técnica final `22fad0f...`.
 
 P16-HDB-01 adds the owner-approved `P16-DB-DECISION-01`: Hostinger Managed MariaDB may use one
 physical database identity only under the explicit `hostinger-managed-single-user` mode, a guarded
@@ -380,7 +380,27 @@ Canonical document:
 
 Current state:
 
-`LOCAL FINAL TECHNICAL GATE PASS / HOSTED FINAL VALIDATION PENDING`
+`LOCAL FINAL TECHNICAL GATE PASS / HOSTED FINAL VALIDATION — PENDING AT THIS CHECKPOINT`
 
-P16 remains incomplete until the final release candidate is published with exact
-release binding and hosted revalidation passes.
+At that historical local checkpoint, P16 remained incomplete until publication, exact release binding and hosted revalidation. The final closeout immediately below supersedes only this sequencing statement.
+
+<!-- P16-09-FINAL-CLOSEOUT -->
+
+### P16 final hosted closeout — 04/10/2026
+
+P16-09 completed final hosted validation on frozen technical release
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`.
+
+The final application validation, private scheduler reconciliation, controlled manual backup, real
+provider-scheduled backup and independent authoritative RPO correlation all passed. The final
+provider-correlated RPO age was 888 ms against the <= 24 hour objective.
+
+Application rollback compatibility from `22fad0f...` to the preceding hosted release `976a047...`
+was independently revalidated without deployment: Prisma schema and migrations are byte-identical and
+there is no non-test runtime application-source delta.
+
+P16 classification:
+
+`COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION`
+
+Production remains out of scope and unauthorized.

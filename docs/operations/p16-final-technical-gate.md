@@ -1,6 +1,6 @@
 # P16-09 — Final Technical Gate
 
-**Status:** LOCAL FINAL TECHNICAL GATE PASS / HOSTED FINAL VALIDATION PENDING
+**Status:** COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION
 
 ## 1. Purpose
 
@@ -164,7 +164,7 @@ During final coordinated publication:
 7. source, release binding and observed runtime must be reconciled before P16 is
    declared COMPLETE.
 
-## 11. Current decision
+## 11. Decision at the local pre-publication checkpoint
 
 Local technical classification:
 
@@ -172,15 +172,116 @@ Local technical classification:
 
 Hosted classification:
 
-`HOSTED FINAL VALIDATION PENDING`
+`HOSTED FINAL VALIDATION — PENDING AT THIS CHECKPOINT`
 
 P16 classification:
 
-`P16 NOT COMPLETE`
+`P16 — NOT COMPLETE AT THIS CHECKPOINT`
 
 Production:
 
 `OUT OF SCOPE / NOT AUTHORIZED`
 
-The next gate is the pre-publication release-candidate freeze followed by one
-deployment-aware coordinated phase publication and hosted revalidation.
+At that checkpoint, the next gate was the pre-publication release-candidate freeze followed by coordinated phase publication and hosted revalidation. Section 12 records the completed result.
+
+<!-- P16-09-FINAL-HOSTED-CLOSEOUT -->
+
+## 12. Final hosted closeout — 04/10/2026
+
+The frozen technical release for the final P16-09 hosted validation is:
+
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`
+
+This SHA remains the exact application/runtime release validated in Hostinger. The later
+documentation closeout does not redefine that deployed technical release.
+
+The coordinated final publication and hosted reconciliation completed the previously pending
+release-binding sequence:
+
+- `origin/phase/p16-staging-deployment` published the exact technical release;
+- Hostinger completed the owner-initiated deployment from the P16 phase branch;
+- hosted `P16_RELEASE_COMMIT` was reconciled to the same exact SHA;
+- public home returned HTTP 200;
+- `/api/health` returned HTTP 200 / `{"status":"ok"}`;
+- authenticated `/api/readiness` returned HTTP 200 / `{"status":"ready"}`;
+- readiness preserved `Cache-Control: no-store`;
+- CSP, HSTS, `X-Content-Type-Options` and Referrer-Policy were present.
+
+The private provider scheduler was independently reconciled. Its source resolved to
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`, the three hardened P16 backup/recovery files matched
+the frozen release hashes, and `scheduler.env` was atomically aligned to the same exact release
+without changing the two Hostinger schedules (`17 1 * * *` and `17 13 * * *`).
+
+A controlled manual backup then passed under the real Hostinger Node runtime and exact application
+plus scheduler env-file contract. It produced a distinct encrypted recovery unit while correctly
+remaining `CONTROLLED_MANUAL / NOT_AUTHORITATIVE`, proving that manual execution cannot manufacture
+provider-scheduled authority.
+
+The real Hostinger 01:17 UTC scheduler subsequently executed the frozen release and produced:
+
+`p16-hosted-auto-20261004T011702683Z-9fc2be680257402a94a041ef40e2ae4f`
+
+Provider output established `PROVIDER_SCHEDULED`, the exact `22fad0f...` source release and successful
+backup completion. Independent Hostinger execution history was correlated with the private run,
+observation and manifest evidence. The hardened evaluator accepted the exact authoritative schema and
+returned:
+
+- status: `PASS`;
+- target: 86,400,000 ms / 24 h;
+- measured RPO age: 888 ms;
+- reason: `WITHIN_TARGET`;
+- `AUTHORITATIVE_PROVIDER_SCHEDULER_CORRELATION`;
+- `INDEPENDENT_PROVIDER_HISTORY_VERIFIED`.
+
+Therefore the final hosted RPO objective is PASS for the `22fad0f...` technical release.
+
+Final rollback revalidation used an independent non-mutating compatibility proof against the immediately
+preceding operational release:
+
+`976a0472382abc0597996366db63c981b5733d6e`
+
+Git object identity proved the Prisma schema byte-identical and the complete migration tree byte-identical.
+There is no non-test runtime application source delta under `src/`. Direct dependency changes are bounded
+to `next` 16.3.4 -> 16.3.8 and `@next/eslint-plugin-next` 16.3.4 -> 16.3.8, while the operational P16
+backup/recovery tooling contains the expected hardened changes.
+
+`976a047...` is therefore retained only as a schema-compatible break-glass application rollback target.
+No live rollback was executed during P16-09. It must not be treated as the preferred persistent runtime
+because rollback to it also reverts the Next.js security remediation.
+
+Application rollback remains separate from database/data recovery:
+
+- database restore: false;
+- schema rollback: false;
+- live rollback deployment: not executed;
+- explicit deployment authorization remains required for any real rollback.
+
+Residual limits remain explicit:
+
+1. retention 7 daily / 4 weekly / 3 monthly remains `PLAN_ONLY`;
+2. no independently proved final off-R2 copy is claimed;
+3. database and R2 capture remain sequential rather than one atomic cross-system snapshot;
+4. the historical P16-08 13:17 execution at `976a047...` retains its historical individual
+   `UNKNOWN / PENDING_PROVIDER_SCHEDULER_CORRELATION` classification;
+5. the full dependency audit retains four HIGH development-tooling findings;
+6. production remains outside P16 and is not authorized by this closeout.
+
+Final P16-09 technical classification:
+
+`COMPLETE / PASS / HOSTED VALIDATED`
+
+Final frozen technical release:
+
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`
+
+Documentation classification:
+
+`DOCUMENTED / AWAITING GIT INTEGRATION`
+
+P16 classification at this documentation-closeout stage:
+
+`COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION`
+
+Production:
+
+`OUT OF SCOPE / NOT AUTHORIZED`

@@ -508,3 +508,31 @@ boundary at `976a047...`; publication of this later local HEAD would require coo
 binding and a new hosted validation. P16-08 is complete with the limitations above recorded as
 residual evidence/security debt. This does not complete P16, authorize a phase-branch push or start
 P16-09.
+
+<!-- P16-09-FINAL-RELEASE-RECONCILIATION -->
+
+## P16-09 final-release reconciliation — 04/10/2026
+
+P16-08 remains historically closed on operational release
+`976a0472382abc0597996366db63c981b5733d6e`; its dated evidence is not rewritten.
+
+P16-09 subsequently published and hosted-validated frozen technical release
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`.
+
+The private Hostinger scheduler source and `P16_RELEASE_COMMIT` were reconciled to that exact SHA.
+A controlled manual backup passed while retaining non-authoritative manual provenance. The next real
+provider execution at 01:17 UTC produced backup
+`p16-hosted-auto-20261004T011702683Z-9fc2be680257402a94a041ef40e2ae4f`.
+
+Independent provider-history correlation plus private run/observation/manifest evidence satisfied the
+hardened `P16CorrelatedHostedRpoEvidence` contract. `evaluateP16HostedRpoEvidence()` returned
+`PASS / WITHIN_TARGET` with an exact RPO age of 888 ms against the unchanged 24-hour objective.
+
+Final-release application rollback revalidation did not deploy an older artifact. Independent Git-object
+proof established byte-identical Prisma schema and migration tree between `22fad0f...` and
+`976a047...`, with no non-test application runtime source delta under `src/`. `976a047...` is retained
+as a break-glass compatible rollback artifact only; a real rollback still requires separate explicit
+deployment authorization and would revert the Next.js security patch from 16.3.8 to 16.3.4.
+
+This P16-09 reconciliation does not strengthen the P16-08 residual claims: retention remains plan-only,
+the final point has no independently proved off-R2 copy and database/R2 capture remains sequential.

@@ -1,6 +1,6 @@
 # P16 Staging Deployment Runbook
 
-**Status:** P16-01–P16-08 COMPLETE / P16-09 REMAINING
+**Status:** P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION
 
 This runbook prepares a reproducible staging release without treating repository preparation as a
 deployment. No command in this document authorizes Hostinger, DNS, provider, migration, payment,
@@ -390,8 +390,7 @@ checkout, payment, webhook, buyer-access, authenticated-admin or financial valid
 ## Required hosted evidence
 
 P16-01 through P16-08 have supplied their bounded hosted evidence. P16-06, P16-07 and P16-08 are
-`COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED` within their respective scopes. P16 still cannot
-close until P16-09 performs the final technical gate. P16-08 residual limitations—second-window
+`COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED` within their respective scopes. At the P16-08 closeout, P16 could not yet close until P16-09 performed the final technical gate. The final P16-09 closeout below supersedes only this sequencing statement. P16-08 residual limitations—second-window
 individual RPO correlation, no proved final off-R2 independent copy, sequential DB/R2 capture and
 dependency remediation debt—remain explicit inputs to that review.
 
@@ -578,5 +577,28 @@ is buyer/product content.
 Keep the evidence layers distinct: prior H3-C/H3-D suites are synthetic; H3-E-B is direct
 real-provider validation; H3-E-C covers real application-level provider behavior and local
 in-process HTTP. At the H3-E closeout, deployment and deployed HTTP were still pending. P16-06 later
-supplied owner-verified Hostinger deployment and recurring deployed readiness evidence. Production,
-hosted protected buyer delivery and complete P16 readiness remain unauthorized/unvalidated.
+supplied owner-verified Hostinger deployment and recurring deployed readiness evidence. At that H3-E checkpoint, production, hosted protected buyer delivery and complete P16 readiness were still unauthorized/unvalidated. P16-06 and P16-09 later superseded the complete-P16-readiness portion only; production and hosted protected buyer delivery remain outside this evidence boundary.
+
+<!-- P16-09-FINAL-CLOSEOUT -->
+
+## P16-09 final staging closeout — 04/10/2026
+
+The final frozen staging technical release is
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`.
+
+Hosted home, health, authenticated readiness and security-header validation passed after the final
+deployment. The private backup scheduler was reconciled to the same source/binding, a controlled manual
+backup passed without provider authority, and a subsequent real Hostinger-scheduled execution produced
+a successful final-release recovery unit.
+
+Independent provider-history correlation established an authoritative RPO age of 888 ms,
+`PASS / WITHIN_TARGET`, against the <= 24 hour objective.
+
+Rollback compatibility from `22fad0f...` to the immediately preceding hosted release `976a047...`
+was independently revalidated without deployment. Prisma schema and migration tree are byte-identical
+and there is no non-test runtime application source delta. Any real rollback remains an explicitly
+authorized application deployment only; it is not database restore or schema rollback.
+
+P16-09 is `COMPLETE / PASS / HOSTED VALIDATED`.
+P16 is technically complete and documented, pending Git integration/checkpoint.
+Production remains out of scope.
