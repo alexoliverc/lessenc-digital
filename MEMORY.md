@@ -2320,3 +2320,24 @@ P17-01 architecture documents:
 
 No package installation, provider mutation, deploy, tag or production action is authorized by this
 entry.
+
+<!-- P17-LOCAL-VALIDATION-CANDIDATE -->
+
+## P17 local end-to-end validation candidate — 04/10/2026
+
+The owner-authorized P17 execution is in progress on isolated branch
+`codex/p17-end-to-end-validation` from `cda824ce151d75e7dc2f496101d03d1ccd474d14`.
+
+Playwright 1.63.0 now has an isolated real-Chromium configuration, deterministic mobile/tablet/
+desktop viewports, sanitized per-run evidence and guarded local/hosted targets. Local public browser,
+checkout/order persistence, invalid admin identity and invalid buyer credential scenarios pass.
+The isolated MySQL integration suite passes 22 files / 191 tests and the full unit/application gate
+passes 101 files / 999 tests.
+
+Staging release binding is phase-neutral through `STAGING_RELEASE_COMMIT` while preserving the
+frozen P16 variable as a strict compatibility alias. No Hostinger variable or hosted release was
+mutated.
+
+Gate D remains NOT READY. Mercado Pago TEST/provider, hosted P17 source/runtime, protected hosted
+delivery, positive real-admin browser evidence, complete responsive coverage and an approved
+performance budget remain external requirements. Production remains unauthorized.

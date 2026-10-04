@@ -1300,6 +1300,13 @@ liveness.
 
 **Status:** EM ANDAMENTO
 
+Local execution candidate on 04/10/2026: Playwright real-browser foundation, phase-neutral staging
+release binding, public responsive smoke, isolated-test-database checkout/order flow and negative
+admin/buyer authorization boundaries are implemented and locally validated. This is not Gate D
+PASS. Mercado Pago TEST/provider, hosted P17 release identity, hosted protected delivery, positive
+administrative browser flow, complete responsive surfaces and an approved performance budget remain
+pending external certification.
+
 ### Objective
 
 Validate the complete system and business journey.

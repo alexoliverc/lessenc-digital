@@ -131,3 +131,35 @@ Gate D may be PASS only when:
 8. production remains unauthorized.
 
 GATE D = NOT READY
+
+## Local execution snapshot — 04/10/2026
+
+This snapshot records evidence produced on the isolated local Codex branch. It does not rewrite the
+scenario tables above as staging PASS.
+
+| Scope | Local result | Gate D state | Evidence boundary |
+| --- | --- | --- | --- |
+| P17-01 architecture/tooling | PASS | PASS locally | Playwright 1.63.0, Chromium 153, deterministic mobile/tablet/desktop projects, sanitized run artifacts |
+| P17-E01 public experience | PASS | PENDING_EXTERNAL | real local Chromium; hosted P17 release not deployed |
+| P17-E02 checkout | PASS | PENDING_EXTERNAL | real local Chromium plus isolated `lessenc_test` |
+| P17-E03 order | PASS | PENDING_EXTERNAL | one synthetic PENDING order persisted with canonical snapshot and cleaned after the run |
+| P17-E04–E06 provider/payment | server regression PASS | PENDING_EXTERNAL | 191 MySQL integration tests; no Mercado Pago TEST credential/provider run |
+| P17-E07–E10 buyer/delivery | server regression PASS | PENDING_EXTERNAL | local contracts/recovery re-executed; no hosted protected R2 delivery |
+| P17-E11–E12 admin/audit | negative browser boundary PASS; integration PASS | PENDING_EXTERNAL | invalid admin identity denied; positive real-admin MFA/projection browser run not executed |
+| P17-F01–F08 failure matrix | server regression PASS | PENDING_EXTERNAL where provider evidence is required | local deterministic tests are support, not hosted/provider authority |
+| P17-B01 invalid buyer credential | PASS locally | PENDING_EXTERNAL | real local Chromium fetch returned generic 401/no buyer cookie |
+| P17-P03/P17-P04 CSP/unsafe-eval | PASS locally | PENDING_EXTERNAL | real local Chromium response CSP; hosted P17 CSP remains untested |
+| P17-R01–R03 responsive | PASS for public entry | PENDING_EXTERNAL | 390x844, 768x1024 and 1440x900; checkout/payment/buyer/admin full matrix remains pending |
+| P17-PR01–PR04 performance | MEASURED LOCALLY | PENDING_EXTERNAL | development timings only; no owner-approved numeric budget exists |
+| P17-L01 exact RC source | NOT_EXECUTED | NOT_EXECUTED | requires frozen local commit after review-ready commits |
+| P17-L02 hosted RC binding | NOT_EXECUTED | PENDING_EXTERNAL | deploy and Hostinger environment mutation prohibited in this execution |
+| P17-L03 P16 checkpoint immutable | PASS | HISTORICAL_SUPPORT_ONLY | still dereferences to `22fad0f690618c27cabcfa58528a76ce0a580ad3` |
+| P17-L04 phase-neutral binding | PASS locally | PASS locally | new binding accepts phase-neutral value, preserves P16 alias and rejects conflicts/mismatch |
+| P17-L05 production unauthorized | PASS | PASS | no production action or credential used |
+
+Current counts and detailed commands are recorded in
+[`p17-local-validation-report.md`](p17-local-validation-report.md).
+
+GATE D remains `NOT READY`: provider TEST, hosted P17 source/runtime binding, complete hosted buyer
+delivery, positive administrative browser flow, complete responsive surfaces and an approved
+performance budget remain unresolved.

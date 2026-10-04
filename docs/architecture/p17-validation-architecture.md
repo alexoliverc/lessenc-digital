@@ -263,12 +263,18 @@ P17-01 does not modify the Hostinger value.
 Before any new P17 technical release may be deployed, the release identity architecture must be
 reconciled.
 
-Preferred future direction is a phase-neutral staging release identity such as
-`STAGING_RELEASE_COMMIT`, but that variable is not yet implemented or authorized.
+The P17 worktree implements the phase-neutral `STAGING_RELEASE_COMMIT` identity for staging
+preflight and migration guarding. The frozen `P16_RELEASE_COMMIT` remains a compatibility alias so
+the already validated P16 release is not invalidated. If both variables are present they must be
+identical; conflict, malformed value, HEAD mismatch or unverifiable HEAD fails closed.
 
-Until release-binding reconciliation passes:
+This repository implementation is locally validated. It does not change either variable in
+Hostinger and does not deploy a P17 release.
 
-P17 APPLICATION DEPLOYMENT = BLOCKED
+Until the owner-controlled hosted environment supplies the exact P17 release identity and the
+resulting source/runtime binding is revalidated:
+
+P17 APPLICATION DEPLOYMENT = PENDING_EXTERNAL
 
 ## Production boundary
 
@@ -294,5 +300,6 @@ REAL BROWSER E2E: REQUIRED
 MERCADO PAGO: TEST ONLY
 P16 CHECKPOINT: IMMUTABLE
 P16_RELEASE_COMMIT: UNCHANGED FOR CURRENT HOSTED P16 RELEASE
-P17 DEPLOYMENT: BLOCKED PENDING RELEASE-BINDING RECONCILIATION
+STAGING_RELEASE_COMMIT: LOCALLY IMPLEMENTED / HOSTED VALUE NOT MUTATED
+P17 DEPLOYMENT: PENDING_EXTERNAL OWNER-CONTROLLED CERTIFICATION
 PRODUCTION: NOT AUTHORIZED
