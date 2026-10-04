@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment has completed technical and hosted validation on frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 is COMPLETE / PASS / HOSTED VALIDATED. The documentation closeout is integrated in `main` at `6c60441e00e4520b8c689f8c4944c36c73d80d12`. The permanent annotated checkpoint `checkpoint/p16-staging-deployment-complete` dereferences to frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3` and must not be moved by later documentation-only work. Final authoritative hosted RPO is 888 ms against the <= 24 hour objective. `976a0472382abc0597996366db63c981b5733d6e` is retained only as a schema-compatible break-glass application rollback target. Residual limits remain explicit: retention 7/4/3 is PLAN_ONLY, no independently proved final off-R2 copy is claimed, DB/R2 capture is sequential rather than atomic and four HIGH development-tooling findings remain deferred. Production is not authorized by P16. P17 remains the next phase after P16 Git lifecycle closeout.
+**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment has completed technical and hosted validation on frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 is COMPLETE / PASS / HOSTED VALIDATED. The documentation closeout is integrated in `main` at `6c60441e00e4520b8c689f8c4944c36c73d80d12`. The permanent annotated checkpoint `checkpoint/p16-staging-deployment-complete` dereferences to frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3` and must not be moved by later documentation-only work. Final authoritative hosted RPO is 888 ms against the <= 24 hour objective. `976a0472382abc0597996366db63c981b5733d6e` is retained only as a schema-compatible break-glass application rollback target. Residual limits remain explicit: retention 7/4/3 is PLAN_ONLY, no independently proved final off-R2 copy is claimed, DB/R2 capture is sequential rather than atomic and four HIGH development-tooling findings remain deferred. Production is not authorized by P16. P17 — End-to-End & Business Validation is OPEN on local branch `phase/p17-end-to-end-business-validation` from canonical baseline `6e269e6db928b228babd8ffd44c3f55574cade4c`. P17-01 validation architecture is the active workstream; no P17 application deployment or production authorization exists.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1298,7 +1298,7 @@ liveness.
 
 ## P17 — End-to-End & Business Validation
 
-**Status:** PENDENTE
+**Status:** EM ANDAMENTO
 
 ### Objective
 

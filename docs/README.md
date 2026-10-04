@@ -404,3 +404,19 @@ P16 classification:
 `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`
 
 Production remains out of scope and unauthorized.
+
+<!-- P17-01-VALIDATION-ARCHITECTURE-INDEX -->
+
+## P17 — End-to-End & Business Validation
+
+P17 is the active validation phase after the completed P16 staging lifecycle.
+
+Canonical P17 validation documents:
+
+- [P17 validation architecture](architecture/p17-validation-architecture.md)
+- [P17 Gate D evidence matrix](operations/p17-gate-d-evidence-matrix.md)
+
+P17 requires real browser/provider E2E, complete business-journey reconciliation, hosted protected
+buyer-delivery validation, responsive validation and performance evidence before Gate D may pass.
+
+Production remains unauthorized.

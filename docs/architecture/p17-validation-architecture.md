@@ -1,0 +1,298 @@
+# P17 — End-to-End & Business Validation Architecture
+
+## Status
+
+P17-01 — VALIDATION ARCHITECTURE & RELEASE CANDIDATE BASELINE
+
+ARCHITECTURE FROZEN / IMPLEMENTATION READY
+
+This document defines the validation architecture for P17.
+
+It does not authorize deployment, production activation, provider mutation, payment production
+credentials, database mutation, destructive cleanup or movement of any previous checkpoint.
+
+## Canonical baseline
+
+Repository baseline:
+
+`6e269e6db928b228babd8ffd44c3f55574cade4c`
+
+Phase branch:
+
+`phase/p17-end-to-end-business-validation`
+
+Previous immutable checkpoint:
+
+`checkpoint/p16-staging-deployment-complete`
+
+Previous hosted technical release:
+
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`
+
+P16 remains closed and its permanent checkpoint must not be moved by P17 work.
+
+## Objective
+
+P17 validates the complete system and business journey in staging.
+
+Canonical journey:
+
+Public Experience
+→ Checkout
+→ Order
+→ Mercado Pago
+→ Webhook
+→ Payment
+→ Entitlement
+→ Delivery
+→ Admin
+→ Audit
+
+P17 is primarily a validation phase.
+
+Existing commerce, payment, entitlement, buyer-access and administrative authority must not be
+silently redesigned merely to make an E2E scenario pass.
+
+A discovered product defect must be classified and remediated explicitly before the affected gate can
+continue.
+
+## Validation layers
+
+### Repository quality
+
+Vitest remains authoritative for current unit, boundary and application/infrastructure tests.
+
+Existing Vitest tests whose names include `browser` remain Node-based contract tests. They are not
+real-browser E2E evidence.
+
+### Database integration
+
+Existing integration suites remain authoritative for bounded integration behavior.
+
+P17 must not relabel database-integration tests as provider/browser E2E evidence.
+
+### Real browser E2E
+
+`@playwright/test` is the approved P17 real-browser runner.
+
+It is not installed by P17-01-B1.
+
+A separate controlled toolchain gate must add it, lock its version and validate the dependency graph.
+
+### Real provider validation
+
+Mercado Pago interactions remain TEST-only.
+
+Production payment credentials and real-money activation are prohibited.
+
+The browser is presentation authority only. Financial truth remains server/provider-side.
+
+### Hosted application validation
+
+The staging target remains:
+
+`https://lessenc.com.br`
+
+Hosted validation must distinguish application source identity, browser evidence, provider evidence,
+persisted business state, administrative/audit projection and infrastructure readiness.
+
+No single signal proves all layers.
+
+## P17 execution identity
+
+Each controlled P17 execution must have an evidence-package run identifier.
+
+Conceptual name:
+
+`P17_RUN_ID`
+
+It is evidence metadata only.
+
+It is not payment, authentication, authorization or business authority.
+
+Secrets and protected provider material must never enter the evidence package.
+
+## Evidence model
+
+Every applicable scenario must record:
+
+- scenario identifier;
+- P17 run identifier;
+- start and finish timestamps;
+- target application release;
+- browser engine and version;
+- viewport;
+- public route result;
+- Order identity;
+- Payment state;
+- provider TEST result;
+- webhook/reconciliation result;
+- Entitlement result;
+- buyer-access/delivery result;
+- administrative projection;
+- audit projection;
+- sanitized failure classification;
+- final outcome.
+
+Allowed outcomes:
+
+- PASS;
+- FAIL;
+- BLOCKED;
+- PENDING_EXTERNAL;
+- NOT_APPLICABLE.
+
+Screenshots and traces support evidence but do not replace authoritative server/provider state.
+
+## Data isolation
+
+P17 test data must remain distinguishable from ordinary application activity through values already
+supported by the application/provider contracts.
+
+P17 must not introduce a schema change solely to tag test data unless independently authorized.
+
+Destructive blanket cleanup is prohibited.
+
+## Mercado Pago boundary
+
+P17 uses Mercado Pago TEST only.
+
+`P16_MERCADOPAGO_CREDENTIAL_SET=test` remains the staging attestation unless a later controlled
+migration replaces the P16-named staging contract.
+
+Credential shape does not independently prove TEST authority.
+
+## Protected buyer delivery
+
+P17 must validate:
+
+Buyer Session
+→ rate limit
+→ entitlement/resource authorization
+→ server-only storage key
+→ PrivateResourceStorage
+→ private R2 object
+→ backend stream
+→ protected HTTP response
+→ delivery audit
+
+The browser must receive neither R2 credentials nor a direct private-storage URL.
+
+## Administrative validation
+
+P17 must validate:
+
+- login;
+- MFA;
+- session enforcement;
+- RBAC;
+- Orders;
+- Payments;
+- Entitlements;
+- Deliveries;
+- Audit.
+
+Administrative browser validation must not bypass authentication merely to inspect data.
+
+## Browser and provider security validation
+
+Required validation includes:
+
+- Mercado Pago Payment Brick;
+- provider challenge/3DS when TEST produces it;
+- route-specific CSP compatibility;
+- no production dependency on `unsafe-eval`;
+- browser/provider network behavior;
+- GTM when configured;
+- Meta only when active.
+
+Disabled providers are recorded as NOT_APPLICABLE with proof of disabled state.
+
+## Responsive validation
+
+P17 E2E must cover deterministic:
+
+- mobile;
+- tablet;
+- desktop.
+
+Responsive PASS requires functional usability, not merely absence of exceptions.
+
+## Performance validation
+
+The roadmap requires performance validation.
+
+No authoritative numeric P17 performance budget currently exists.
+
+P17 therefore requires:
+
+1. deterministic timing evidence;
+2. explicit measured stages;
+3. no fabricated PASS threshold;
+4. approved numeric acceptance budget before Gate D performance PASS.
+
+## Failure scenarios
+
+P17 must validate:
+
+- declined payment;
+- timeout;
+- duplicate webhook;
+- out-of-order webhook;
+- retries;
+- expired order;
+- duplicate attempt;
+- invalid authorization;
+- storage failure;
+- recovery.
+
+Fault injection must be controlled and bounded.
+
+## Release binding
+
+The current P16 infrastructure uses `P16_RELEASE_COMMIT` as a fail-closed exact-HEAD binding.
+
+While the hosted technical release remains:
+
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`
+
+the hosted P16 binding remains unchanged.
+
+P17-01 does not modify the Hostinger value.
+
+Before any new P17 technical release may be deployed, the release identity architecture must be
+reconciled.
+
+Preferred future direction is a phase-neutral staging release identity such as
+`STAGING_RELEASE_COMMIT`, but that variable is not yet implemented or authorized.
+
+Until release-binding reconciliation passes:
+
+P17 APPLICATION DEPLOYMENT = BLOCKED
+
+## Production boundary
+
+P17 does not authorize production.
+
+Production deployment, production payment credentials, real-money activation and production data
+mutation remain future owner-controlled decisions.
+
+## Gate D authority
+
+Gate D asks whether the complete customer and operational journey functions correctly in staging.
+
+PASS requires all critical mandatory scenarios to be resolved as PASS.
+
+Critical FAIL or unresolved mandatory BLOCKED prevents progression.
+
+## P17-01 architecture decision
+
+DISCOVERY: COMPLETE
+VALIDATION ARCHITECTURE: FROZEN
+PLAYWRIGHT: APPROVED / NOT INSTALLED
+REAL BROWSER E2E: REQUIRED
+MERCADO PAGO: TEST ONLY
+P16 CHECKPOINT: IMMUTABLE
+P16_RELEASE_COMMIT: UNCHANGED FOR CURRENT HOSTED P16 RELEASE
+P17 DEPLOYMENT: BLOCKED PENDING RELEASE-BINDING RECONCILIATION
+PRODUCTION: NOT AUTHORIZED

@@ -2282,3 +2282,41 @@ DB/R2 capture is sequential, not atomic; production remains unauthorized.
 Current P16 classification:
 
 `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`
+
+<!-- P17-01-VALIDATION-ARCHITECTURE-OPENING -->
+
+## P17 — End-to-End & Business Validation — Opening State
+
+P17 is OPEN on local branch `phase/p17-end-to-end-business-validation` from canonical baseline
+`6e269e6db928b228babd8ffd44c3f55574cade4c`.
+
+P17-00 opening audits passed. P17-01 discovery established the validation architecture.
+
+The approved real-browser direction is `@playwright/test`, but it is not installed by this
+documentation gate.
+
+Existing Vitest `browser` tests remain Node-based regression/contract tests and are not evidence of
+real browser E2E.
+
+The current hosted P16 technical release remains
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`.
+
+The permanent checkpoint `checkpoint/p16-staging-deployment-complete` continues to dereference to
+that exact technical release and must not move.
+
+`P16_RELEASE_COMMIT` remains unchanged while that P16 release remains the hosted application release.
+
+Any future P17 application deployment is blocked until controlled release-binding reconciliation is
+implemented and validated.
+
+Mercado Pago remains TEST-only for P17.
+
+Production is not authorized.
+
+P17-01 architecture documents:
+
+- `docs/architecture/p17-validation-architecture.md`
+- `docs/operations/p17-gate-d-evidence-matrix.md`
+
+No package installation, provider mutation, deploy, tag or production action is authorized by this
+entry.
