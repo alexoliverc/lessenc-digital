@@ -5,7 +5,7 @@
   "description": "Plataforma digital inicial da L'Essenc para venda de infoprodutos autorais.",
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run db:generate",
+    "prebuild": "npm run ops:p16:preflight && npm run db:generate",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
