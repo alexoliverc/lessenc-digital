@@ -1263,7 +1263,7 @@ Mercado Pago TEST hosted validation. P16-06 supplied owner-verified hosted evide
 public liveness, recurring protected readiness, controlled real alert/incident delivery, e-mail
 notification, acknowledgement, recovery/auto-resolution and the HTTPS public status origin. P16-07
 supplied the final hosted security validation, including remediated readiness-secret and CSP
-findings. P16-09 final gate remains required before P16 can be declared complete. The integrated
+findings. P16-09 final gate subsequently completed and P16 is now technically COMPLETE / PASS / HOSTED VALIDATED; Git integration/checkpoint remains the outstanding governance action. The integrated
 P16-08 tooling implements an exact-host
 MariaDB dump with machine evidence, HKDF-separated encryption/authentication, a canonical HMAC-bound
 recovery unit v2, deterministic plan-only 7/4/3 retention, canonical path defenses, isolated
@@ -1280,8 +1280,7 @@ final point; database and R2 capture were sequential and are not described as at
 The independent audit subsequently remediated two repository-only controls without redefining that
 operational release: authoritative RPO evaluation now rejects scheduler-compatible observations
 until independent provider history supplies exact correlation/attestation, and retention-index
-updates hold an exclusive private lock across the complete read-modify-write cycle. These changes
-remain local pending owner-side review and deployment-aware publication.
+updates hold an exclusive private lock across the complete read-modify-write cycle. At that independent-audit checkpoint these changes remained local. They were subsequently published in the frozen technical release 22fad0f690618c27cabcfa58528a76ce0a580ad3 and revalidated during the P16-09 hosted closeout.
 
 P16-HDB-01 records the explicit owner decision to use Hostinger Managed MariaDB with one managed
 database user and controlled privilege rotation. The additive repository contract preserves the

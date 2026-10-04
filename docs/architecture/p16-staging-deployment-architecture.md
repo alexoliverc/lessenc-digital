@@ -134,7 +134,7 @@ If it cannot satisfy the frozen requirements, the application may remain on Host
 
 **Reason:** the selected Hostinger service exposes one database user for the database
 
-**Status:** OWNER APPROVED / CODE ADAPTATION COMPLETE / HOSTED DATABASE VALIDATION COMPLETE / APPLICATION READINESS PENDING
+**Status:** OWNER APPROVED / CODE ADAPTATION COMPLETE / HOSTED DATABASE VALIDATION COMPLETE / APPLICATION READINESS VALIDATED
 
 P16 supports two explicit access models through `P16_DATABASE_ACCESS_MODEL`:
 
@@ -394,7 +394,7 @@ Owner-approved release objectives remain:
 - 4 weekly backups
 - 3 monthly backups
 
-These remain objectives until hosted evidence validates them.
+Hosted evidence subsequently validated the <= 24 hour RPO and <= 8 hour RTO objectives. Retention 7 daily / 4 weekly / 3 monthly remains PLAN_ONLY and does not imply deletion execution.
 
 P16 must validate recovery covering database, private storage, migration metadata and integrity evidence.
 
@@ -417,18 +417,17 @@ preserving the factual statement that no deployment occurred.
 
 ### P16-F04 — Staging migration guard missing
 
-`REMEDIATED IN CODE`: the P16 staging guard precedes `prisma migrate deploy`; hosted execution is
-still pending.
+`REMEDIATED / HOSTED VALIDATED`: the P16 staging guard precedes `prisma migrate deploy`; the authorized hosted migration lifecycle subsequently executed all eight repository migrations successfully.
 
-### P16-F05 — Hosted database validation pending
+### P16-F05 — Hosted database validation complete
 
-Database compatibility, TLS and hosted migrations have not yet been proven.
+Database compatibility, strict TLS and all eight hosted migrations were subsequently validated against the Hostinger staging database.
 
 ### P16-HDB-F01 — Migration release-commit binding
 
 `REMEDIATED IN P16-HDB-01-FIX01`: the migration guard now independently verifies that
 `P16_RELEASE_COMMIT` exactly matches the repository `HEAD` before `prisma migrate deploy` can be
-eligible. Hosted execution remains pending and was not performed by the fix.
+eligible. Hosted execution was not performed by FIX01 itself; it was subsequently completed under the authorized hosted migration lifecycle with the exact release-binding control preserved.
 
 ### P16-HDB-F02 — Prisma migration TLS binding missing
 
@@ -477,14 +476,13 @@ individually exposed by hPanel. H2-M1 reconciles those exact exceptions with con
 readiness controls requiring zero system-versioned tables and zero stored routines.
 
 The database lifecycle portion of P16-F10 is therefore validated. Real private-storage provisioning
-and controlled local application/provider validation were subsequently completed in H3-E. Full
-deployed application readiness remains pending with the other P16 hosted operational dependencies.
+and controlled local application/provider validation were subsequently completed in H3-E. Full deployed application readiness was subsequently validated by the P16-06 hosted evidence and the P16-09 final hosted closeout.
 
-### P16-F11 — Hosted APP_URL drift
+### P16-F11 — Hosted APP_URL drift — RESOLVED
 
 The observed Hostinger value `https://staging.lessenc.com.br` conflicts with the canonical P16
 value `https://lessenc.com.br`. The repository continues to fail closed on the canonical value;
-the Hostinger environment must be corrected externally.
+the Hostinger environment was subsequently corrected to the canonical `https://lessenc.com.br` value and validated in the final hosted release.
 
 ### P16-F06 — Cloudflare R2 private storage validated locally
 
@@ -507,9 +505,9 @@ protected buyer-delivery validation.
 requests before dependency probes. Owner-verified hosted evidence records unauthenticated HTTP 404
 and recurring externally authenticated HTTP 200 `ready`, with a redacted bearer header and no-store.
 
-### P16-F08 — Hosted recovery implementation pending
+### P16-F08 — Hosted recovery implementation complete
 
-Hosted backup scheduling, retention and measured restore evidence remain pending.
+Hosted backup scheduling and measured recovery evidence are complete. Retention remains explicitly PLAN_ONLY under the 7/4/3 policy.
 
 ### P16-F09 — Hosted observability delivery
 
@@ -1110,7 +1108,7 @@ The original H3-D implementation gate used only synthetic SDK responses. Subsequ
 created and verified the real private sentinel, exercised the production H3-D factory against R2
 from a controlled local process and validated the authenticated readiness composition. P16-06 later
 supplied owner-verified deployed/hosted HTTP evidence through recurring authenticated Grafana
-readiness; complete P16 application readiness remains pending P16-07 through P16-09.
+readiness. At the H3-D checkpoint, complete P16 readiness still depended on P16-07 through P16-09; those gates subsequently completed and the final hosted closeout validated P16 readiness.
 
 Validated evidence at the H3-D pre-commit boundary:
 

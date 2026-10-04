@@ -26,13 +26,13 @@
 | P16-F01 environment contract drift | REMEDIATED | configure real values outside Git |
 | P16-F02 documentation state drift | REMEDIATED | none internally |
 | P16-F03 runtime toolchain drift | REMEDIATED | hosted runtime observation |
-| P16-F04 staging migration guard missing | REMEDIATED | owner-authorized hosted execution |
-| P16-F05 hosted database validation | CODE READY | provider provisioning, TLS and migration proof |
-| P16-F06 hosted private-storage adapter | REAL PROVIDER + APPLICATION VALIDATED LOCALLY | deployed/hosted HTTP proof |
-| P16-F07 hosted readiness access control | REMEDIATED IN CODE | hosted HTTP proof |
+| P16-F04 staging migration guard missing | COMPLETE / HOSTED VALIDATED | guarded hosted migration lifecycle completed |
+| P16-F05 hosted database validation | COMPLETE / HOSTED VALIDATED | provider compatibility, strict TLS and all eight migrations validated |
+| P16-F06 hosted private-storage adapter | COMPLETE / HOSTED VALIDATED | real provider plus deployed readiness evidence complete |
+| P16-F07 hosted readiness access control | COMPLETE / HOSTED VALIDATED | unauthenticated denial and authenticated hosted readiness validated |
 | P16-F08 hosted recovery implementation | COMPLETE / HOSTED VALIDATED | residual limits: historical 13:17 P16-08 individual RPO correlation, final off-R2 copy and sequential DB/R2 point |
-| P16-F09 hosted observability delivery | APPLICATION CONTRACT READY | external monitor, alert destination and status page |
-| P16-HDB-F01 migration release binding | REMEDIATED IN FIX01 | hosted migration remains separately authorized and pending |
+| P16-F09 hosted observability delivery | COMPLETE / HOSTED VALIDATED | Better Stack, Grafana, alert delivery and public status evidence complete |
+| P16-HDB-F01 migration release binding | COMPLETE / HOSTED VALIDATED | exact release binding preserved through hosted migration lifecycle |
 | P16-HDB-F02 Prisma migration TLS binding | REMEDIATED IN P16-HDB-02 | hosted validation exposed P16-HDB-F03 |
 | P16-HDB-F03 explicit Prisma `sslcert` incompatibility | REMEDIATED IN P16-HDB-03 | hosted strict-system-trust revalidation PASS |
 
@@ -157,8 +157,7 @@ Focused validation after remediation:
 - `git diff --check` passed;
 - code/test scope remained exactly four files before this documentation reconciliation.
 
-Application deployment remains NOT EXECUTED. P16 remains incomplete because deployed/hosted HTTP
-and the remaining hosted operational validation are still pending.
+At the H2-M1 checkpoint, application deployment had not yet executed and P16 remained incomplete. Subsequent hosted deployment and P16-09 validation supersede only that historical sequencing state.
 
 <!-- P16-H3-B1-INTERNAL-GATE -->
 
@@ -186,7 +185,7 @@ provisioning, sentinel creation and hosted proof were still pending. H3-C/H3-D l
 synthetically validated the application paths; H3-E then supplied bounded real-provider and local
 application evidence.
 
-P16 remains incomplete and application deployment remains NOT EXECUTED.
+At the H3-B1 checkpoint, P16 remained incomplete and application deployment had not yet executed; later hosted gates supersede only that historical sequencing state.
 
 <!-- P16-H3-C-B-R2-ADAPTER-IMPLEMENTATION-FREEZE -->
 
@@ -260,7 +259,7 @@ Completed after H3-C through H3-D/H3-E:
 - real application-level H3-C/H3-D validation;
 - local in-process authenticated readiness HTTP validation.
 
-Still pending:
+At the H3-C checkpoint, the following remained pending:
 
 - deployed/hosted HTTP validation;
 - staging deployment;

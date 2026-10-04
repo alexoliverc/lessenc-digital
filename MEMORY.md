@@ -2098,7 +2098,7 @@ files and 854 tests, plus lint, typecheck, formatting, optimized staging build a
 production dependency audit. Subsequent H3-E evidence validated the production H3-D factory and
 the real private sentinel against R2 from a controlled local process. P16-06 later supplied
 owner-verified deployed/hosted HTTP readiness evidence through the recurring authenticated Grafana
-check; complete P16 application readiness remains pending P16-07 through P16-09.
+check. At that H3-D checkpoint, complete P16 application readiness still depended on P16-07 through P16-09; those gates subsequently completed and P16-09 validated final hosted readiness.
 
 <!-- P16-H3-E-REAL-R2-EVIDENCE-CLOSEOUT -->
 

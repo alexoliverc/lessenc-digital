@@ -223,11 +223,10 @@ authenticated proof.
 
 ## Mercado Pago TEST
 
-The preflight requires `P16_MERCADOPAGO_CREDENTIAL_SET=test` and validates the current `APP_USR-` access/public-key shape. `APP_USR-` is format validation only and does not independently prove sandbox authority. Hosted Mercado Pago TEST validation remains mandatory before P16 closeout. Existing P10 boundaries remain:
+The preflight requires `P16_MERCADOPAGO_CREDENTIAL_SET=test` and validates the current `APP_USR-` access/public-key shape. `APP_USR-` is format validation only and does not independently prove sandbox authority. P16-05 subsequently completed the required hosted Mercado Pago TEST validation. Existing P10 boundaries remain:
 authenticated raw-body webhook verification, bounded timestamp tolerance, request-id validation,
 duplicate/malformed input rejection, idempotent persistence, replay-safe state transitions,
-server-side payment authority, failure isolation and sanitized logging. Hosted validation still
-requires owner-provided TEST credentials, registered TEST webhook and controlled TEST transactions.
+server-side payment authority, failure isolation and sanitized logging. The completed P16-05 hosted validation used the approved TEST credential boundary, registered TEST webhook and controlled TEST transactions; production credentials remain prohibited.
 Production credentials are prohibited in P16.
 
 ## Monitoring, alerts and service health
