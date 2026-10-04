@@ -36,6 +36,29 @@ describe("global HTTP security headers", () => {
     expect(csp).not.toMatch(/(?:^|; )frame-src https:(?:;|$)/u);
   });
 
+  it("allows only the observed Mercado Pago Card Brick origins without weakening CSP", () => {
+    const csp = asMap("staging").get("Content-Security-Policy")!;
+    const checkoutCsp = new Map(
+      checkoutPaymentSecurityHeaders("staging").map(({ key, value }) => [key, value]),
+    ).get("Content-Security-Policy")!;
+    const directive = (policy: string, name: string) =>
+      policy.split("; ").find((value) => value.startsWith(`${name} `));
+    const sources = (policy: string, name: string) => directive(policy, name)?.split(" ").slice(1);
+
+    expect(directive(csp, "connect-src")).toContain("https://api.mercadolibre.com");
+    expect(directive(csp, "connect-src")).toContain("https://www.mercadolibre.com");
+    expect(directive(csp, "img-src")).toContain("https://www.mercadopago.com.br");
+    expect(directive(csp, "img-src")).toContain("https://www.mercadolibre.com");
+    expect(csp).not.toContain("*.mercadolibre.com");
+    expect(csp).not.toContain("'unsafe-eval'");
+    expect(sources(csp, "default-src")).not.toContain("https:");
+    expect(sources(csp, "frame-src")).not.toContain("https:");
+    expect(directive(csp, "script-src-attr")).toBe("script-src-attr 'none'");
+    expect(directive(csp, "object-src")).toBe("object-src 'none'");
+    expect(directive(csp, "frame-ancestors")).toBe("frame-ancestors 'none'");
+    expect(directive(checkoutCsp, "frame-src")).toBe("frame-src https:");
+  });
+
   it("relaxes only checkout payment frames for provider-originated dynamic 3DS ACS URLs", () => {
     const csp = new Map(
       checkoutPaymentSecurityHeaders("production").map(({ key, value }) => [key, value]),
