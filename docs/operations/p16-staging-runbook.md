@@ -1,6 +1,6 @@
 # P16 Staging Deployment Runbook
 
-**Status:** P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION
+**Status:** P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINT PENDING
 
 This runbook prepares a reproducible staging release without treating repository preparation as a
 deployment. No command in this document authorizes Hostinger, DNS, provider, migration, payment,
@@ -599,5 +599,5 @@ and there is no non-test runtime application source delta. Any real rollback rem
 authorized application deployment only; it is not database restore or schema rollback.
 
 P16-09 is `COMPLETE / PASS / HOSTED VALIDATED`.
-P16 is technically complete and documented, pending Git integration/checkpoint.
+P16 is technically complete, documented and integrated in `main` at `6c60441e00e4520b8c689f8c4944c36c73d80d12`. The permanent checkpoint `checkpoint/p16-staging-deployment-complete` remains pending.
 Production remains out of scope.

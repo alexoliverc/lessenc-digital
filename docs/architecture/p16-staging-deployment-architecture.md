@@ -1,7 +1,7 @@
 # P16 — Staging Deployment Architecture
 
 **Phase:** P16 — Staging Deployment
-**Status:** P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION
+**Status:** P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINT PENDING
 **Original P16 baseline:** `671c974345496092e8dc17bb4c37ead2e1952140`
 **P16-06 validated hosted application release:** `5dae89fed133cc9db704c1e6c848cc1ef1e64ccc`
 **Repository baseline:** the current branch `HEAD`; documentation-only integration does not redefine which application release received P16-06 hosted validation unless that later commit is separately deployed and reconciled.
@@ -1245,5 +1245,4 @@ and migration tree plus no non-test runtime application-source delta. This is an
 compatibility statement only. It is not authorization for database restore, schema reversal or an
 automatic live rollback.
 
-P16 staging architecture is therefore technically validated. Documentation integration/checkpoint remains
-the only outstanding P16 governance action. Production deployment remains a later controlled phase.
+P16 staging architecture is therefore technically validated. Documentation integration completed in `main` at `6c60441e00e4520b8c689f8c4944c36c73d80d12`. The permanent checkpoint is the only outstanding P16 governance action. Production deployment remains a later controlled phase.

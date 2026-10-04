@@ -1,6 +1,6 @@
 # Índice oficial da baseline documental LES-DIG P00–P16
 
-**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED e Gate C — OPERATIONS READY permanece PASS. P16 — Staging Deployment concluiu P16-01–P16-09 e está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION`. A release técnica final hospedada/validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`; a release `976a0472382abc0597996366db63c981b5733d6e` permanece evidência histórica da P16-08 e target break-glass compatível. Produção permanece fora do escopo e não autorizada.
+**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED e Gate C — OPERATIONS READY permanece PASS. P16 — Staging Deployment concluiu P16-01–P16-09 e está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINT PENDING`. A release técnica final hospedada/validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`; a release `976a0472382abc0597996366db63c981b5733d6e` permanece evidência histórica da P16-08 e target break-glass compatível. Produção permanece fora do escopo e não autorizada.
 
 ## Precedência e classificação das fontes
 
@@ -325,7 +325,7 @@ push, PR, merge, checkpoint, deploy e P16 não foram executados.
 The paragraph above preserves the pre-integration candidate checkpoint. P15 was later integrated
 and checkpointed as recorded at the top of this index.
 
-## P16 — Staging Deployment — COMPLETE / HOSTED VALIDATED / AWAITING GIT INTEGRATION
+## P16 — Staging Deployment — COMPLETE / HOSTED VALIDATED / INTEGRATED / CHECKPOINT PENDING
 
 A [arquitetura congelada P16](architecture/p16-staging-deployment-architecture.md), o
 [runbook de staging](operations/p16-staging-runbook.md) e o
@@ -401,6 +401,6 @@ there is no non-test runtime application-source delta.
 
 P16 classification:
 
-`COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION`
+`COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINT PENDING`
 
 Production remains out of scope and unauthorized.

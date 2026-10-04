@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment has completed technical and hosted validation on frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 is COMPLETE / PASS / HOSTED VALIDATED. The documentation closeout is complete in the current working tree and awaits Git integration/checkpoint. Final authoritative hosted RPO is 888 ms against the <= 24 hour objective. `976a0472382abc0597996366db63c981b5733d6e` is retained only as a schema-compatible break-glass application rollback target. Residual limits remain explicit: retention 7/4/3 is PLAN_ONLY, no independently proved final off-R2 copy is claimed, DB/R2 capture is sequential rather than atomic and four HIGH development-tooling findings remain deferred. Production is not authorized by P16. P17 remains the next phase after P16 Git lifecycle closeout.
+**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment has completed technical and hosted validation on frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 is COMPLETE / PASS / HOSTED VALIDATED. The documentation closeout is integrated in `main` at `6c60441e00e4520b8c689f8c4944c36c73d80d12`. The permanent P16 checkpoint remains pending and will preserve frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3`. Final authoritative hosted RPO is 888 ms against the <= 24 hour objective. `976a0472382abc0597996366db63c981b5733d6e` is retained only as a schema-compatible break-glass application rollback target. Residual limits remain explicit: retention 7/4/3 is PLAN_ONLY, no independently proved final off-R2 copy is claimed, DB/R2 capture is sequential rather than atomic and four HIGH development-tooling findings remain deferred. Production is not authorized by P16. P17 remains the next phase after P16 Git lifecycle closeout.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1203,7 +1203,7 @@ PASS before release-environment validation.
 
 ## P16 — Staging Deployment
 
-**Status:** P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION
+**Status:** P16 COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINT PENDING
 
 ### Objective
 
@@ -1263,7 +1263,7 @@ Mercado Pago TEST hosted validation. P16-06 supplied owner-verified hosted evide
 public liveness, recurring protected readiness, controlled real alert/incident delivery, e-mail
 notification, acknowledgement, recovery/auto-resolution and the HTTPS public status origin. P16-07
 supplied the final hosted security validation, including remediated readiness-secret and CSP
-findings. P16-09 final gate subsequently completed and P16 is now technically COMPLETE / PASS / HOSTED VALIDATED; Git integration/checkpoint remains the outstanding governance action. The integrated
+findings. P16-09 final gate subsequently completed and P16 is now technically COMPLETE / PASS / HOSTED VALIDATED; Git integration completed by fast-forward at `6c60441e00e4520b8c689f8c4944c36c73d80d12`; the permanent checkpoint is the remaining P16 governance action. The integrated
 P16-08 tooling implements an exact-host
 MariaDB dump with machine evidence, HKDF-separated encryption/authentication, a canonical HMAC-bound
 recovery unit v2, deterministic plan-only 7/4/3 retention, canonical path defenses, isolated
@@ -1851,6 +1851,6 @@ off-R2 copy is claimed, and database/R2 capture is sequential rather than atomic
 
 P16 status:
 
-`COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / AWAITING GIT INTEGRATION`
+`COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINT PENDING`
 
 Production is not authorized by P16.
