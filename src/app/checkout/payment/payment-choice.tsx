@@ -145,6 +145,7 @@ export function PaymentChoice({
           },
         },
         callbacks: {
+          onReady: () => {},
           onSubmit: async (formData: unknown, additionalData: unknown) => {
             const form =
               formData && typeof formData === "object" ? (formData as Record<string, unknown>) : {};
