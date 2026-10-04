@@ -3,7 +3,11 @@ import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { validateReleaseCommitBinding } from "../../../scripts/lib/p16-release-binding.mjs";
+import {
+  resolveStagingReleaseCommit,
+  validateReleaseCommitBinding,
+  validateStagingReleaseCommitBinding,
+} from "../../../scripts/lib/p16-release-binding.mjs";
 
 const guardPath = resolve("scripts/p16-staging-migration-guard.mjs");
 const readableSyntheticCaPath = resolve("package.json");
@@ -12,7 +16,10 @@ function currentHead(): string {
   return execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 }
 
-function guardEnvironment(releaseCommit?: string): NodeJS.ProcessEnv {
+function guardEnvironment(
+  releaseCommit?: string,
+  releaseVariable: "STAGING_RELEASE_COMMIT" | "P16_RELEASE_COMMIT" = "STAGING_RELEASE_COMMIT",
+): NodeJS.ProcessEnv {
   const unique = (name: string) => `${name}-0123456789012345678901234567890123456789`;
   const environment: NodeJS.ProcessEnv = {
     ...process.env,
@@ -47,21 +54,25 @@ function guardEnvironment(releaseCommit?: string): NodeJS.ProcessEnv {
     P16_READINESS_TOKEN: unique("p16"),
   };
 
-  if (releaseCommit === undefined) delete environment.P16_RELEASE_COMMIT;
-  else environment.P16_RELEASE_COMMIT = releaseCommit;
+  delete environment.STAGING_RELEASE_COMMIT;
+  delete environment.P16_RELEASE_COMMIT;
+  if (releaseCommit !== undefined) environment[releaseVariable] = releaseCommit;
 
   return environment;
 }
 
-function runGuard(releaseCommit?: string) {
+function runGuard(
+  releaseCommit?: string,
+  releaseVariable?: "STAGING_RELEASE_COMMIT" | "P16_RELEASE_COMMIT",
+) {
   return spawnSync(process.execPath, [guardPath], {
     cwd: process.cwd(),
-    env: guardEnvironment(releaseCommit),
+    env: guardEnvironment(releaseCommit, releaseVariable),
     encoding: "utf8",
   });
 }
 
-describe("P16 staging migration release binding", () => {
+describe("phase-neutral staging migration release binding", () => {
   it("makes the migration guard eligible only for the exact repository HEAD", () => {
     const result = runGuard(currentHead());
 
@@ -73,21 +84,43 @@ describe("P16 staging migration release binding", () => {
     const result = runGuard("0".repeat(40));
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("P16_RELEASE_COMMIT_DOES_NOT_MATCH_HEAD");
+    expect(result.stderr).toContain("STAGING_RELEASE_COMMIT_DOES_NOT_MATCH_HEAD");
   });
 
   it("refuses a missing release commit", () => {
     const result = runGuard();
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("P16_RELEASE_COMMIT_INVALID");
+    expect(result.stderr).toContain("STAGING_RELEASE_COMMIT_INVALID");
   });
 
   it("refuses a malformed release commit", () => {
     const result = runGuard("not-a-commit");
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("P16_RELEASE_COMMIT_INVALID");
+    expect(result.stderr).toContain("STAGING_RELEASE_COMMIT_INVALID");
+  });
+
+  it("keeps the frozen P16 release variable as a compatible legacy alias", () => {
+    const result = runGuard(currentHead(), "P16_RELEASE_COMMIT");
+
+    expect(result.status).toBe(0);
+    expect(
+      resolveStagingReleaseCommit(guardEnvironment(currentHead(), "P16_RELEASE_COMMIT")),
+    ).toMatchObject({
+      releaseCommit: currentHead(),
+      source: "P16_RELEASE_COMMIT",
+      failures: [],
+    });
+  });
+
+  it("fails closed when phase-neutral and legacy bindings conflict", () => {
+    const environment = guardEnvironment(currentHead());
+    environment.P16_RELEASE_COMMIT = "0".repeat(40);
+
+    expect(validateStagingReleaseCommitBinding(environment)).toContain(
+      "STAGING_RELEASE_COMMIT_CONFLICT",
+    );
   });
 
   it("fails closed when repository HEAD cannot be resolved", () => {
@@ -96,5 +129,13 @@ describe("P16 staging migration release binding", () => {
     });
 
     expect(failures).toContain("P16_RELEASE_COMMIT_HEAD_UNVERIFIABLE");
+  });
+
+  it("uses phase-neutral failure codes for new staging releases", () => {
+    const failures = validateStagingReleaseCommitBinding(guardEnvironment(currentHead()), () => {
+      throw new Error("synthetic git lookup failure");
+    });
+
+    expect(failures).toContain("STAGING_RELEASE_COMMIT_HEAD_UNVERIFIABLE");
   });
 });

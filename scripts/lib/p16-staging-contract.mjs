@@ -197,8 +197,16 @@ export function validateStagingEnvironment(env, options = {}) {
   if (!/^APP_USR-[A-Za-z0-9-]+$/u.test(env.MERCADOPAGO_ACCESS_TOKEN ?? "")) {
     failures.push("MERCADOPAGO_ACCESS_TOKEN_INVALID");
   }
-  if (!/^[0-9a-f]{40}$/iu.test(env.P16_RELEASE_COMMIT ?? "")) {
-    failures.push("P16_RELEASE_COMMIT_INVALID");
+  const releaseCommit = env.STAGING_RELEASE_COMMIT ?? env.P16_RELEASE_COMMIT;
+  if (!/^[0-9a-f]{40}$/iu.test(releaseCommit ?? "")) {
+    failures.push("STAGING_RELEASE_COMMIT_INVALID");
+  }
+  if (
+    env.STAGING_RELEASE_COMMIT !== undefined &&
+    env.P16_RELEASE_COMMIT !== undefined &&
+    env.STAGING_RELEASE_COMMIT !== env.P16_RELEASE_COMMIT
+  ) {
+    failures.push("STAGING_RELEASE_COMMIT_CONFLICT");
   }
 
   const configuredSecrets = STAGING_SECRET_NAMES.map((name) => env[name]).filter(
