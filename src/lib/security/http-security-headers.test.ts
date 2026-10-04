@@ -43,15 +43,25 @@ describe("global HTTP security headers", () => {
     ).get("Content-Security-Policy")!;
     const directive = (policy: string, name: string) =>
       policy.split("; ").find((value) => value.startsWith(`${name} `));
-    const sources = (policy: string, name: string) => directive(policy, name)?.split(" ").slice(1);
+    const sources = (policy: string, name: string) =>
+      directive(policy, name)?.split(" ").slice(1) ?? [];
+    const connectSources = sources(csp, "connect-src");
+    const scriptSources = sources(csp, "script-src");
+    const imageSources = sources(csp, "img-src");
 
-    expect(directive(csp, "connect-src")).toContain("https://api.mercadolibre.com");
-    expect(directive(csp, "connect-src")).toContain("https://www.mercadolibre.com");
-    expect(directive(csp, "img-src")).toContain("https://www.mercadopago.com.br");
-    expect(directive(csp, "img-src")).toContain("https://www.mercadolibre.com");
+    expect(connectSources).toContain("https://http2.mlstatic.com");
+    expect(scriptSources).toContain("https://http2.mlstatic.com");
+    expect(connectSources).toContain("https://api.mercadolibre.com");
+    expect(connectSources).toContain("https://www.mercadolibre.com");
+    expect(imageSources).toContain("https://www.mercadopago.com.br");
+    expect(imageSources).toContain("https://www.mercadolibre.com");
+    expect(scriptSources).toContain("https://sdk.mercadopago.com");
+    expect(csp).not.toContain("*.mlstatic.com");
     expect(csp).not.toContain("*.mercadolibre.com");
     expect(csp).not.toContain("'unsafe-eval'");
-    expect(sources(csp, "default-src")).not.toContain("https:");
+    expect(connectSources).not.toContain("https:");
+    expect(scriptSources).not.toContain("https:");
+    expect(directive(csp, "default-src")).toBe("default-src 'self'");
     expect(sources(csp, "frame-src")).not.toContain("https:");
     expect(directive(csp, "script-src-attr")).toBe("script-src-attr 'none'");
     expect(directive(csp, "object-src")).toBe("object-src 'none'");
