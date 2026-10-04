@@ -5,6 +5,8 @@ import { captureBrowserEvidence } from "./helpers/evidence";
 test("P17-B01/A01/A04 rejects invalid buyer and admin identities without bypass", async ({
   page,
 }, testInfo) => {
+  test.skip(process.env.P17_TARGET !== "local", "P17_STATE_CHANGING_SCENARIO_LOCAL_ONLY");
+
   test.skip(
     testInfo.project.name !== "chromium-desktop",
     "One isolated security run is sufficient",

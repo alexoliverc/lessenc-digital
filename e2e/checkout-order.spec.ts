@@ -43,6 +43,8 @@ async function connectToTestDatabase(rawUrl: string): Promise<Connection> {
 test("P17-E02/E03/F07 validates checkout, persisted order and duplicate submission", async ({
   page,
 }, testInfo) => {
+  test.skip(process.env.P17_TARGET !== "local", "P17_STATE_CHANGING_SCENARIO_LOCAL_ONLY");
+
   test.skip(
     testInfo.project.name !== "chromium-desktop",
     "One isolated write scenario is sufficient",

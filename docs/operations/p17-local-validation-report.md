@@ -152,3 +152,14 @@ disabled to make tests pass.
 The local candidate is suitable for technical review and later controlled hosted certification.
 Gate D must remain open until every critical hosted/provider/business-journey requirement and the
 performance decision are resolved with fresh P17 evidence.
+
+## External execution boundary reconciliation
+
+For this local P17 execution:
+
+- Provider TEST executions: 0.
+- Hosted P17 executions: 0.
+- Pagamentos reais: 0.
+- Mercado Pago production credentials used: 0.
+- Hosted P17 evidence remains PENDING_EXTERNAL.
+- These local results MUST NOT be promoted to Gate D hosted PASS.
