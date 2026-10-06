@@ -429,6 +429,40 @@ Unauthorized resources remain unavailable.
 
 R2 credentials, storage keys and direct private-storage URLs remain server-only.
 
+#### P17 G5 hosted closeout — 06/10/2026
+
+Hosted release authority:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+The final G5-D adversarial matrix proved:
+
+- missing Buyer Session + Range -> `401 SESSION_INVALID`;
+- invalid Buyer Session + Range -> `401 SESSION_INVALID`;
+- valid Buyer Session + unauthorized resource + Range -> `404 RESOURCE_NOT_AVAILABLE`;
+- unauthorized resource produced no delivery audit;
+- valid Buyer Session + authorized resource + Range -> `206 Partial Content`;
+- authorized Range delivery produced exactly one `DigitalDeliveryEvent / SUCCEEDED`;
+- Range remained transport-only authority;
+- Buyer Session remained mandatory;
+- resource authorization remained mandatory;
+- R2 remained private;
+- storage key and direct R2 URL remained server-only;
+- protected response retained `Cache-Control: private, no-store`, `Referrer-Policy: no-referrer` and `X-Content-Type-Options: nosniff`;
+- Order remained `PAID`;
+- Payment remained `APPROVED`;
+- PAYMENT_APPROVED outbox remained `PROCESSED`;
+- Entitlement remained `ACTIVE`;
+- no new payment or commercial-right mutation occurred.
+
+Final status:
+
+`P17-HV-P8-F3-G5-D = COMPLETE / PASS / HOSTED PROVEN`
+
+`P17-HV-P8-F3-G5 = COMPLETE / PASS / HOSTED PROVEN`
+
+Gate D remains `NOT READY`; G5 closeout does not close the remaining P17 validation matrix.
+
 ### C5.4 — Full Protected Delivery Security Review
 
 Status: COMPLETE / PASS

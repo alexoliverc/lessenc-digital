@@ -198,6 +198,32 @@ P17 must prove adversarially that:
 
 The application does not depend on `Accept-Ranges: none` and does not treat the incoming Range header as an authorization control.
 
+### Hosted G5-D proof — 06/10/2026
+
+The hosted adversarial matrix was executed against release:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+Observed results:
+
+- missing Buyer Session plus Range -> `401 SESSION_INVALID`;
+- invalid Buyer Session plus Range -> `401 SESSION_INVALID`;
+- valid Buyer Session plus unauthorized resource plus Range -> `404 RESOURCE_NOT_AVAILABLE`;
+- the unauthorized case created no delivery audit event;
+- valid Buyer Session plus authorized resource plus Range -> `206 Partial Content`;
+- the authorized case produced exactly one new `DigitalDeliveryEvent / SUCCEEDED`;
+- no direct R2 URL or storage key was exposed;
+- protected response controls remained `private, no-store`, `no-referrer` and `nosniff`;
+- Payment, Order, Outbox and Entitlement remained unchanged.
+
+Result:
+
+`G5-D = COMPLETE / PASS / HOSTED PROVEN`
+
+`G5 = COMPLETE / PASS / HOSTED PROVEN`
+
+This evidence closes the hosted Buyer Access / Protected Delivery validation scope. It does not independently make Gate D ready.
+
 ## Administrative validation
 
 P17 must validate:

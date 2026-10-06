@@ -73,7 +73,39 @@ Canonical acceptance requires a hosted adversarial matrix proving that Range doe
 
 The authorized-resource case may resolve as HTTP 206 at the hosting transport layer after the protected backend path succeeds.
 
-Repository reconciliation status: `PENDING_HOSTED_MATRIX`.
+Hosted authority:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+Hosted adversarial matrix executed on 06/10/2026:
+
+- missing Buyer Session plus `Range: bytes=0-0` -> `401 SESSION_INVALID` / PASS;
+- invalid Buyer Session plus `Range: bytes=0-0` -> `401 SESSION_INVALID` / PASS;
+- valid Buyer Session plus unauthorized resource plus Range -> `404 RESOURCE_NOT_AVAILABLE` / PASS;
+- unauthorized resource produced no `DigitalDeliveryEvent`;
+- valid Buyer Session plus authorized resource plus Range -> `206 Partial Content` / PASS;
+- authorized hosted response returned `Content-Range: bytes 0-0/242`;
+- authorized Range delivery produced exactly one new `DigitalDeliveryEvent / SUCCEEDED`;
+- `Cache-Control: private, no-store`, `Referrer-Policy: no-referrer` and `X-Content-Type-Options: nosniff` remained enforced;
+- Buyer Session remained mandatory;
+- resource authorization remained mandatory;
+- R2 remained private;
+- storage keys and direct R2 URLs were not exposed;
+- Order remained `PAID`;
+- Payment remained `APPROVED`;
+- PAYMENT_APPROVED OutboxEvent remained `PROCESSED`;
+- Entitlement remained `ACTIVE`;
+- no new payment, commercial-state mutation, outbox processing, entitlement mutation or R2 mutation occurred.
+
+Repository reconciliation status: `PASS / HOSTED PROVEN`.
+
+G5-D status: `COMPLETE / PASS / HOSTED PROVEN`.
+
+G5 status: `COMPLETE / PASS / HOSTED PROVEN`.
+
+This closes the Buyer Access and Protected Delivery G5 scope only.
+
+Gate D remains `NOT READY` until the remaining mandatory P17 scenarios, provider/browser evidence, administrative validation, responsive validation, performance acceptance and release-closeout requirements are resolved.
 
 ## Browser/provider matrix
 
