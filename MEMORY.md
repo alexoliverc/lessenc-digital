@@ -463,6 +463,49 @@ Final status:
 
 Gate D remains `NOT READY`; G5 closeout does not close the remaining P17 validation matrix.
 
+#### P17 administrative hosted closeout — 06/10/2026
+
+Hosted release authority:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+`P17-HV-P9-A` completed the read-only administrative preflight and reconciled the existing F3 commercial authority without mutation.
+
+`P17-HV-P9-B` executed the real hosted administrative browser matrix using only the existing OWNER identity. Password, TOTP, recovery codes and session cookies remained browser-only and were not captured in project evidence.
+
+Hosted results:
+
+- `A01` real administrative login -> `PASS / HOSTED PROVEN`;
+- `A02` real MFA -> `PASS / HOSTED PROVEN`;
+- `A03` authenticated administrative session -> `PASS / HOSTED PROVEN`;
+- `A04` OWNER RBAC and protected administrative resource access -> `PASS / HOSTED PROVEN`;
+- `A05` Order `e56f6f12-a1f2-489e-8f88-5c626aabc402` -> `PAID / PASS / HOSTED PROVEN`;
+- `A06` Payment `408c927d-67d6-4e5c-92ff-05cfff704cbf` -> `APPROVED`, `MERCADO_PAGO`, provider `processed / accredited`, `CREATE_RESPONSE / APPLIED`;
+- `A07` Entitlement `3e05674c-dc24-4713-9515-148162a36825` -> `ACTIVE / PASS / HOSTED PROVEN`;
+- `A08` four `DigitalDeliveryEvent` records -> all `SUCCEEDED / PASS / HOSTED PROVEN`;
+- `A09` administrative audit surface -> accessible through OWNER RBAC with legitimate empty state and `AdminAuditEvent.totalCount = 0`.
+
+`AdminAuditEvent` is administrative audit authority and is not interchangeable with `PaymentEvent`, `OutboxEvent`, `Entitlement` or `DigitalDeliveryEvent`.
+
+The A09 PASS proves the hosted administrative audit surface, RBAC access, append-only/read-only presentation and legitimate zero-event state. It does not claim that the administrative audit event write path has been exercised.
+
+Preserved limitations:
+
+- real Mercado Pago TEST webhook delivery remains `NOT PROVEN`;
+- administrative `AdminAuditEvent` write-path execution remains `NOT PROVEN`.
+
+No new AdminUser was created. No role or MFA configuration was changed. No second payment occurred. No Order, Payment, Outbox, Entitlement, R2 object or Buyer Access state was mutated. G5 was not reopened.
+
+Final administrative hosted validation status:
+
+`P17-HV-P9-A = PASS`
+
+`P17-HV-P9-B = COMPLETE / PASS / HOSTED PROVEN`
+
+`P17-HV-P9 = COMPLETE / PASS / HOSTED PROVEN`
+
+Gate D remains `NOT READY`; administrative hosted validation is complete, but the remaining P17 browser/provider, responsive, performance and release-closeout requirements retain their independent authority.
+
 ### C5.4 — Full Protected Delivery Security Review
 
 Status: COMPLETE / PASS

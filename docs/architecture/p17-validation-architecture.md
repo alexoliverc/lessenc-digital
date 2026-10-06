@@ -240,6 +240,40 @@ P17 must validate:
 
 Administrative browser validation must not bypass authentication merely to inspect data.
 
+### Hosted administrative proof — 06/10/2026
+
+The administrative browser matrix was executed against hosted technical release:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+The existing OWNER identity completed real primary authentication, MFA and authenticated session establishment before protected administrative resources were inspected.
+
+Observed hosted results:
+
+- `P17-A01` Login -> `PASS / HOSTED PROVEN`;
+- `P17-A02` MFA -> `PASS / HOSTED PROVEN`;
+- `P17-A03` Session -> `PASS / HOSTED PROVEN`;
+- `P17-A04` OWNER RBAC -> `PASS / HOSTED PROVEN`;
+- `P17-A05` Order projection -> F3 Order `PAID`;
+- `P17-A06` Payment projection -> F3 Payment `APPROVED`, Mercado Pago `processed / accredited`, `CREATE_RESPONSE / APPLIED`;
+- `P17-A07` Entitlement projection -> F3 Entitlement `ACTIVE` with active protected resource grant;
+- `P17-A08` Delivery projection -> four F3 delivery events, all `SUCCEEDED`;
+- `P17-A09` Audit projection -> OWNER-authorized administrative audit surface with legitimate empty state.
+
+The administrative audit model remains a separate authority boundary: `AdminAuditEvent` is not a substitute for provider/payment events, outbox processing, entitlement state or delivery audit events.
+
+`AdminAuditEvent.totalCount = 0` was preserved. No synthetic administrative mutation was created merely to populate the audit UI. Therefore the hosted A09 result proves surface access, RBAC, empty-state behavior and absence of exposed sensitive authentication material; it does not prove the administrative audit write path.
+
+No new AdminUser, role change, MFA reset, second payment, commercial-state mutation, manual outbox processing, entitlement mutation, R2 mutation or Buyer Access/G5 change occurred.
+
+Real Mercado Pago TEST webhook delivery remains `NOT PROVEN`.
+
+Administrative hosted result:
+
+`P17-HV-P9 = COMPLETE / PASS / HOSTED PROVEN`
+
+This closes the hosted administrative browser-validation scope only. It does not independently make Gate D ready.
+
 ## Browser and provider security validation
 
 Required validation includes:

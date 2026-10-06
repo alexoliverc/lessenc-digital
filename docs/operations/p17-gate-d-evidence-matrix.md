@@ -105,7 +105,7 @@ G5 status: `COMPLETE / PASS / HOSTED PROVEN`.
 
 This closes the Buyer Access and Protected Delivery G5 scope only.
 
-Gate D remains `NOT READY` until the remaining mandatory P17 scenarios, provider/browser evidence, administrative validation, responsive validation, performance acceptance and release-closeout requirements are resolved.
+Gate D remains `NOT READY` until the remaining mandatory P17 scenarios, provider/browser evidence, responsive validation, performance acceptance and release-closeout requirements are resolved. Hosted administrative validation is now `COMPLETE / PASS / HOSTED PROVEN`.
 
 ## Browser/provider matrix
 
@@ -128,17 +128,44 @@ Gate D remains `NOT READY` until the remaining mandatory P17 scenarios, provider
 
 ## Administrative matrix
 
-| ID | Scenario | Criticality | Initial state |
+| ID | Scenario | Criticality | Current state |
 | --- | --- | --- | --- |
-| P17-A01 | Login | CRITICAL | NOT_EXECUTED |
-| P17-A02 | MFA | CRITICAL | NOT_EXECUTED |
-| P17-A03 | Session | CRITICAL | NOT_EXECUTED |
-| P17-A04 | RBAC | CRITICAL | NOT_EXECUTED |
-| P17-A05 | Order projection | HIGH | NOT_EXECUTED |
-| P17-A06 | Payment projection | HIGH | NOT_EXECUTED |
-| P17-A07 | Entitlement projection | HIGH | NOT_EXECUTED |
-| P17-A08 | Delivery projection | HIGH | NOT_EXECUTED |
-| P17-A09 | Audit projection | CRITICAL | NOT_EXECUTED |
+| P17-A01 | Login | CRITICAL | PASS / HOSTED PROVEN |
+| P17-A02 | MFA | CRITICAL | PASS / HOSTED PROVEN |
+| P17-A03 | Session | CRITICAL | PASS / HOSTED PROVEN |
+| P17-A04 | RBAC | CRITICAL | PASS / HOSTED PROVEN |
+| P17-A05 | Order projection | HIGH | PASS / HOSTED PROVEN |
+| P17-A06 | Payment projection | HIGH | PASS / HOSTED PROVEN |
+| P17-A07 | Entitlement projection | HIGH | PASS / HOSTED PROVEN |
+| P17-A08 | Delivery projection | HIGH | PASS / HOSTED PROVEN |
+| P17-A09 | Audit projection | CRITICAL | PASS / HOSTED PROVEN |
+
+### Hosted administrative evidence — 06/10/2026
+
+Hosted technical release authority:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+The existing OWNER identity completed real login, MFA and authenticated session establishment. Protected administrative routes then reconciled the existing F3 authority in read-only mode:
+
+- Order `e56f6f12-a1f2-489e-8f88-5c626aabc402` -> `PAID`;
+- Payment `408c927d-67d6-4e5c-92ff-05cfff704cbf` -> `APPROVED`, `MERCADO_PAGO`, `processed / accredited`, `CREATE_RESPONSE / APPLIED`;
+- Entitlement `3e05674c-dc24-4713-9515-148162a36825` -> `ACTIVE`;
+- protected resource `8f03dee8-84d1-4e2f-972b-166fa88a8f8c` -> `ACTIVE`;
+- four `DigitalDeliveryEvent` records -> all `SUCCEEDED`;
+- administrative audit surface -> OWNER-authorized, append-only/read-only presentation, legitimate empty state, `AdminAuditEvent.totalCount = 0`.
+
+A09 does not claim an exercised `AdminAuditEvent` write path. Administrative audit authority remains distinct from `PaymentEvent`, `OutboxEvent`, `Entitlement` and `DigitalDeliveryEvent`.
+
+No new AdminUser, role change, MFA reset, second payment, commercial mutation, manual outbox processing, entitlement mutation, R2 mutation or G5 reopening occurred.
+
+Real Mercado Pago TEST webhook delivery remains `NOT PROVEN`.
+
+`P17-HV-P9-A = PASS`
+
+`P17-HV-P9-B = COMPLETE / PASS / HOSTED PROVEN`
+
+`P17-HV-P9 = COMPLETE / PASS / HOSTED PROVEN`
 
 ## Performance matrix
 
@@ -204,6 +231,7 @@ scenario tables above as staging PASS.
 Current counts and detailed commands are recorded in
 [`p17-local-validation-report.md`](p17-local-validation-report.md).
 
-GATE D remains `NOT READY`: provider TEST, hosted P17 source/runtime binding, complete hosted buyer
-delivery, positive administrative browser flow, complete responsive surfaces and an approved
-performance budget remain unresolved.
+GATE D remains `NOT READY`: real Mercado Pago TEST webhook delivery remains `NOT PROVEN`; remaining
+browser/provider evidence, complete responsive surfaces, an approved numeric performance budget
+and remaining release-closeout requirements are unresolved. Hosted administrative validation
+`P17-HV-P9` is `COMPLETE / PASS / HOSTED PROVEN`.
