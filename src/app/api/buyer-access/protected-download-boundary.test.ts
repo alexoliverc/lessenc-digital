@@ -87,6 +87,8 @@ describe("P11 protected download HTTP boundary", () => {
 
     expect(response.headers.get("x-content-type-options")).toBe("nosniff");
 
+    expect(response.headers.get("accept-ranges")).toBe("none");
+
     const bytes = new Uint8Array(await response.arrayBuffer());
 
     expect([...bytes]).toEqual([1, 2, 3]);

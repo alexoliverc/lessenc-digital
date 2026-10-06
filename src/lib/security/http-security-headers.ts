@@ -60,6 +60,15 @@ export function checkoutPaymentSecurityHeaders(appEnv = process.env.APP_ENV) {
   ];
 }
 
+export function protectedDigitalDeliverySecurityHeaders() {
+  return [
+    { key: "Referrer-Policy", value: "no-referrer" },
+    { key: "Accept-Ranges", value: "none" },
+    { key: "Cache-Control", value: "private, no-store" },
+    { key: "X-Content-Type-Options", value: "nosniff" },
+  ];
+}
+
 export function securityHeaderRules(appEnv = process.env.APP_ENV) {
   return [
     {
@@ -69,6 +78,10 @@ export function securityHeaderRules(appEnv = process.env.APP_ENV) {
     {
       source: "/checkout/payment",
       headers: checkoutPaymentSecurityHeaders(appEnv),
+    },
+    {
+      source: "/api/buyer-access/resources/:path*",
+      headers: protectedDigitalDeliverySecurityHeaders(),
     },
   ];
 }

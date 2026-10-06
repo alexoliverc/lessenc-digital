@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   checkoutPaymentSecurityHeaders,
   globalSecurityHeaders,
+  protectedDigitalDeliverySecurityHeaders,
   securityHeaderRules,
 } from "./http-security-headers";
 
@@ -14,9 +15,36 @@ describe("global HTTP security headers", () => {
   it("applies the baseline to every application route", () => {
     const rules = securityHeaderRules("local");
 
-    expect(rules).toHaveLength(2);
+    expect(rules).toHaveLength(3);
     expect(rules[0]?.source).toBe("/:path*");
     expect(rules[1]?.source).toBe("/checkout/payment");
+    expect(rules[2]?.source).toBe("/api/buyer-access/resources/:path*");
+  });
+
+  it("overrides the global policy at the protected digital delivery boundary", () => {
+    const protectedHeaders = new Map(
+      protectedDigitalDeliverySecurityHeaders().map(({ key, value }) => [key, value]),
+    );
+
+    expect(protectedHeaders.get("Referrer-Policy")).toBe("no-referrer");
+    expect(protectedHeaders.get("Accept-Ranges")).toBe("none");
+    expect(protectedHeaders.get("Cache-Control")).toBe("private, no-store");
+    expect(protectedHeaders.get("X-Content-Type-Options")).toBe("nosniff");
+
+    const rules = securityHeaderRules("staging");
+
+    const effective = new Map<string, string>();
+
+    for (const rule of [rules[0]!, rules[2]!]) {
+      for (const { key, value } of rule.headers) {
+        effective.set(key, value);
+      }
+    }
+
+    expect(effective.get("Referrer-Policy")).toBe("no-referrer");
+    expect(effective.get("Accept-Ranges")).toBe("none");
+    expect(effective.get("Cache-Control")).toBe("private, no-store");
+    expect(effective.get("X-Content-Type-Options")).toBe("nosniff");
   });
 
   it("uses an explicit CSP for the providers represented by the repository", () => {
