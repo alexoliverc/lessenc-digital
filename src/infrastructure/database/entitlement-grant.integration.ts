@@ -6,15 +6,28 @@ import { PrismaEntitlementRevocationRepository } from "./prisma-entitlement-revo
 import { PrismaResourceAuthorizationRepository } from "./prisma-resource-authorization-repository";
 import { randomUUID } from "node:crypto";
 
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ProviderSnapshot } from "../../modules/payments/application/payment-provider";
+import { DispatchPendingEntitlementGrants } from "../../modules/entitlements/application/dispatch-pending-entitlement-grants";
+import { EntitlementGrantFinancialObserver } from "../../modules/entitlements/application/entitlement-grant-financial-observer";
+import { ProcessEntitlementGrant } from "../../modules/entitlements/application/process-entitlement-grant";
+import {
+  FinancialCoordinator,
+  type FinancialObservationObserver,
+} from "../../modules/payments/application/financial-coordinator";
+import { IndependentFinancialObservers } from "../../modules/payments/application/independent-financial-observers";
+import type {
+  PaymentProvider,
+  ProviderSnapshot,
+} from "../../modules/payments/application/payment-provider";
 import { createDatabaseClient } from "./client";
 import { PrismaEntitlementGrantRepository } from "./prisma-entitlement-grant-repository";
 import { PrismaPaymentRepository } from "./prisma-payment-repository";
 
 let db: ReturnType<typeof createDatabaseClient>;
 let repo: PrismaEntitlementGrantRepository;
+let dispatcher: DispatchPendingEntitlementGrants;
+let entitlementObserver: EntitlementGrantFinancialObserver;
 
 type Fixture = {
   productIds: string[];
@@ -158,6 +171,71 @@ async function createFixture(): Promise<void> {
   });
 }
 
+function approvedObservation(): ProviderSnapshot {
+  return {
+    providerOrderId: `ORD${randomUUID().replaceAll("-", "")}`,
+    providerPaymentId: `PAY${randomUUID().replaceAll("-", "")}`,
+    providerAccountId: null,
+    externalReference: fixture.orderId,
+    amountMinor: 2990,
+    paymentAmountMinor: 2990,
+    currency: "BRL",
+    paymentMethod: "PIX",
+    paidAmountMinor: 2990,
+    refundedAmountMinor: null,
+    status: "APPROVED",
+    requiresReview: false,
+    reviewReason: null,
+    providerStatus: "processed",
+    providerStatusDetail: "accredited",
+    occurredAt: "2026-09-13T10:00:00Z",
+    createdAt: "2026-09-13T09:59:00Z",
+    presentation: null,
+  };
+}
+
+function providerFor(observation: ProviderSnapshot): PaymentProvider {
+  return {
+    createPayment: async () => observation,
+    getSnapshot: async () => observation,
+    searchPayments: async () => ({ snapshots: [observation], complete: true }),
+  };
+}
+
+async function resetFinancialFixtureToPending(): Promise<void> {
+  await db.outboxEvent.deleteMany({ where: { orderId: fixture.orderId } });
+  await db.paymentEvent.deleteMany({ where: { payment: { orderId: fixture.orderId } } });
+  await db.payment.deleteMany({ where: { orderId: fixture.orderId } });
+  await db.order.update({
+    where: { id: fixture.orderId },
+    data: {
+      status: "PENDING",
+      paidAt: null,
+    },
+  });
+}
+
+function productionObservers(
+  canonicalObserver: FinancialObservationObserver | null = null,
+): IndependentFinancialObservers {
+  return new IndependentFinancialObservers([
+    ...(canonicalObserver
+      ? [
+          {
+            observer: canonicalObserver,
+            failureEvent: "canonical_purchase_projection_failed" as const,
+            failureCode: "CANONICAL_PURCHASE_PROJECTION_FAILED" as const,
+          },
+        ]
+      : []),
+    {
+      observer: entitlementObserver,
+      failureEvent: "entitlement_grant_dispatch_failed",
+      failureCode: "ENTITLEMENT_GRANT_DISPATCH_FAILED",
+    },
+  ]);
+}
+
 async function cleanupFixture(): Promise<void> {
   if (!fixture) return;
   const { orderId, itemIds, productIds, offerIds, customerId, resourceIds } = fixture;
@@ -201,6 +279,8 @@ describe("P11 entitlement grant on isolated MySQL", () => {
     db = createDatabaseClient(guardedTestUrl());
     await db.$connect();
     repo = new PrismaEntitlementGrantRepository(db);
+    dispatcher = new DispatchPendingEntitlementGrants(repo, new ProcessEntitlementGrant(repo));
+    entitlementObserver = new EntitlementGrantFinancialObserver(dispatcher);
   });
   beforeEach(createFixture);
   afterEach(cleanupFixture);
@@ -227,6 +307,45 @@ describe("P11 entitlement grant on isolated MySQL", () => {
     const event = await db.outboxEvent.findUniqueOrThrow({ where: { id: fixture.eventId } });
     expect(event.status).toBe("PROCESSED");
     expect(event.processedAt).toBeInstanceOf(Date);
+  });
+
+  it("dispatches the pending event once and does not select it after processing", async () => {
+    await expect(dispatcher.execute(fixture.orderId)).resolves.toEqual({
+      selected: 1,
+      processed: 1,
+      noop: 0,
+    });
+    await expect(dispatcher.execute(fixture.orderId)).resolves.toEqual({
+      selected: 0,
+      processed: 0,
+      noop: 0,
+    });
+  });
+
+  it("selects PAYMENT_APPROVED/PENDING deterministically with the hard bound", async () => {
+    await db.outboxEvent.update({
+      where: { id: fixture.eventId },
+      data: { status: "PROCESSED", processedAt: new Date("2026-09-13T10:01:00.000Z") },
+    });
+    const ids = Array.from(
+      { length: 10 },
+      (_, index) => `${String(index + 1).padStart(8, "0")}-1111-4111-8111-111111111111`,
+    );
+    await db.outboxEvent.createMany({
+      data: ids.map((id) => ({
+        id,
+        orderId: fixture.orderId,
+        type: "PAYMENT_APPROVED" as const,
+        status: "PENDING" as const,
+        deduplicationKey: `p17-dispatch:${id}`,
+        payload: { version: 1, orderId: fixture.orderId, paymentId: fixture.paymentId },
+        createdAt: new Date("2026-09-13T10:02:00.000Z"),
+      })),
+    });
+
+    await expect(repo.findPendingPaymentApproved(fixture.orderId, 8)).resolves.toEqual(
+      ids.slice(0, 8).map((id) => ({ id })),
+    );
   });
 
   it("replays an already processed event without changing entitlement or grant IDs", async () => {
@@ -264,58 +383,26 @@ describe("P11 entitlement grant on isolated MySQL", () => {
     ).toBe(1);
   });
 
-  it("consumes the real PAYMENT_APPROVED event persisted by P10", async () => {
-    // Remove the manually prepared financial state used by the isolated C2 fixtures.
-    await db.outboxEvent.deleteMany({
-      where: { orderId: fixture.orderId },
-    });
-    await db.payment.deleteMany({
-      where: { orderId: fixture.orderId },
-    });
-    await db.order.update({
-      where: { id: fixture.orderId },
-      data: {
-        status: "PENDING",
-        paidAt: null,
-      },
-    });
-
+  it("CREATE_RESPONSE dispatches entitlement after commit even when analytics fails", async () => {
+    await resetFinancialFixtureToPending();
     const paymentRepository = new PrismaPaymentRepository(db);
-
-    const { attempt } = await paymentRepository.reserve(fixture.orderId, "PIX");
-
-    const observation: ProviderSnapshot = {
-      providerOrderId: `ORD${randomUUID().replaceAll("-", "")}`,
-      providerPaymentId: `PAY${randomUUID().replaceAll("-", "")}`,
-      providerAccountId: null,
-      externalReference: fixture.orderId,
-      amountMinor: 2990,
-      paymentAmountMinor: 2990,
-      currency: "BRL",
-      paymentMethod: "PIX",
-      paidAmountMinor: 2990,
-      refundedAmountMinor: null,
-      status: "APPROVED",
-      requiresReview: false,
-      reviewReason: null,
-      providerStatus: "processed",
-      providerStatusDetail: "accredited",
-      occurredAt: "2026-09-13T10:00:00Z",
-      createdAt: "2026-09-13T09:59:00Z",
-      presentation: null,
-    };
-
-    expect(
-      await paymentRepository.applyObservation({
-        paymentId: attempt.paymentId,
-        snapshot: observation,
-        source: "CREATE_RESPONSE",
+    const observation = approvedObservation();
+    const diagnostic = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const coordinator = new FinancialCoordinator(
+      paymentRepository,
+      providerFor(observation),
+      productionObservers({
+        afterFinancialObservation: async () => {
+          throw new Error("sensitive analytics failure");
+        },
       }),
-    ).toBe("APPLIED");
+    );
 
-    const payment = await db.payment.findUniqueOrThrow({
-      where: { id: attempt.paymentId },
+    await expect(coordinator.start(fixture.orderId, "PIX")).resolves.toMatchObject({
+      state: "approved",
     });
+
+    const payment = await db.payment.findFirstOrThrow({ where: { orderId: fixture.orderId } });
 
     expect(payment.status).toBe("APPROVED");
 
@@ -341,15 +428,14 @@ describe("P11 entitlement grant on isolated MySQL", () => {
       throw new Error("P10 PAYMENT_APPROVED event was not persisted");
     }
 
-    expect(event.status).toBe("PENDING");
-    expect(event.deduplicationKey).toBe(`payment-approved:${attempt.paymentId}`);
+    expect(event.status).toBe("PROCESSED");
+    expect(event.processedAt).toBeInstanceOf(Date);
+    expect(event.deduplicationKey).toBe(`payment-approved:${payment.id}`);
     expect(event.payload).toEqual({
       version: 1,
       orderId: fixture.orderId,
-      paymentId: attempt.paymentId,
+      paymentId: payment.id,
     });
-
-    expect(await repo.processPaymentApproved(event.id)).toBe("PROCESSED");
 
     const entitlement = await db.entitlement.findUniqueOrThrow({
       where: {
@@ -364,12 +450,113 @@ describe("P11 entitlement grant on isolated MySQL", () => {
     expect(entitlement.sourceOutboxEventId).toBe(event.id);
     expect(entitlement.resources.map((grant) => grant.resourceId)).toEqual([firstResourceId()]);
 
-    const processedEvent = await db.outboxEvent.findUniqueOrThrow({
-      where: { id: event.id },
+    const logged = diagnostic.mock.calls.flat().join(" ");
+    expect(JSON.parse(logged)).toMatchObject({
+      event: "canonical_purchase_projection_failed",
+      failureCode: "CANONICAL_PURCHASE_PROJECTION_FAILED",
     });
+    expect(logged).not.toContain("sensitive analytics failure");
+    diagnostic.mockRestore();
+  });
 
-    expect(processedEvent.status).toBe("PROCESSED");
-    expect(processedEvent.processedAt).toBeInstanceOf(Date);
+  it("WEBHOOK retries pending fulfillment for an already-approved payment", async () => {
+    const observation = approvedObservation();
+    await db.payment.update({
+      where: { id: fixture.paymentId },
+      data: {
+        provider: "MERCADO_PAGO",
+        providerOrderId: observation.providerOrderId,
+        providerPaymentId: observation.providerPaymentId,
+        paymentMethod: "PIX",
+      },
+    });
+    const coordinator = new FinancialCoordinator(
+      new PrismaPaymentRepository(db),
+      providerFor(observation),
+      productionObservers(),
+    );
+
+    await expect(coordinator.webhook(observation.providerOrderId)).resolves.toBe("NOOP");
+    await expect(
+      db.outboxEvent.findUniqueOrThrow({ where: { id: fixture.eventId } }),
+    ).resolves.toMatchObject({
+      status: "PROCESSED",
+      processedAt: expect.any(Date),
+    });
+  });
+
+  it("approved status triggers RECONCILIATION/NOOP fulfillment without provider access", async () => {
+    const provider: PaymentProvider = {
+      createPayment: async () => {
+        throw new Error("provider must not be called");
+      },
+      getSnapshot: async () => {
+        throw new Error("provider must not be called");
+      },
+      searchPayments: async () => {
+        throw new Error("provider must not be called");
+      },
+    };
+    const coordinator = new FinancialCoordinator(
+      new PrismaPaymentRepository(db),
+      provider,
+      productionObservers(),
+    );
+
+    await expect(coordinator.status(fixture.orderId, false)).resolves.toMatchObject({
+      state: "approved",
+    });
+    await expect(
+      db.outboxEvent.findUniqueOrThrow({ where: { id: fixture.eventId } }),
+    ).resolves.toMatchObject({
+      status: "PROCESSED",
+      processedAt: expect.any(Date),
+    });
+  });
+
+  it("entitlement failure leaves approved financial truth and pending outbox intact", async () => {
+    await resetFinancialFixtureToPending();
+    await db.productDigitalResource.deleteMany({ where: { productId: firstProductId() } });
+    const observation = approvedObservation();
+    const diagnostic = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const coordinator = new FinancialCoordinator(
+      new PrismaPaymentRepository(db),
+      providerFor(observation),
+      productionObservers(),
+    );
+
+    await expect(coordinator.start(fixture.orderId, "PIX")).resolves.toMatchObject({
+      state: "approved",
+    });
+    await expect(
+      db.order.findUniqueOrThrow({ where: { id: fixture.orderId } }),
+    ).resolves.toMatchObject({
+      status: "PAID",
+    });
+    await expect(
+      db.payment.findFirstOrThrow({ where: { orderId: fixture.orderId } }),
+    ).resolves.toMatchObject({
+      status: "APPROVED",
+    });
+    await expect(
+      db.outboxEvent.findFirstOrThrow({ where: { orderId: fixture.orderId } }),
+    ).resolves.toMatchObject({
+      status: "PENDING",
+      processedAt: null,
+    });
+    expect(await db.entitlement.count({ where: { orderItemId: firstItemId() } })).toBe(0);
+    expect(
+      await db.entitlementDigitalResource.count({
+        where: { entitlement: { orderItemId: firstItemId() } },
+      }),
+    ).toBe(0);
+    const logged = diagnostic.mock.calls.flat().join(" ");
+    expect(JSON.parse(logged)).toMatchObject({
+      event: "entitlement_grant_dispatch_failed",
+      failureCode: "ENTITLEMENT_GRANT_DISPATCH_FAILED",
+    });
+    expect(logged).not.toContain("ENTITLEMENT_RESOURCE_MAPPING_MISSING");
+    diagnostic.mockRestore();
   });
 
   it.each([

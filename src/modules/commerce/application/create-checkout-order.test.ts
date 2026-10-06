@@ -86,6 +86,7 @@ function catalogOffer(amountMinor = 2990): CatalogOffer {
       price: Money.of(amountMinor, "BRL"),
       isActive: true,
     }),
+    deliveryReady: true,
   });
 }
 

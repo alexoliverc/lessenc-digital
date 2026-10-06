@@ -5,6 +5,10 @@ import type {
   EntitlementGrantProcessResult,
   EntitlementGrantRepository,
 } from "../../modules/entitlements/application/process-entitlement-grant";
+import type {
+  PendingPaymentApprovedEvent,
+  PendingPaymentApprovedEventRepository,
+} from "../../modules/entitlements/application/dispatch-pending-entitlement-grants";
 import type { Order as DomainOrder } from "../../modules/commerce/domain/order";
 import {
   applyEntitlementFact,
@@ -51,11 +55,37 @@ function parsePaymentApprovedPayload(
   };
 }
 
-export class PrismaEntitlementGrantRepository implements EntitlementGrantRepository {
+export class PrismaEntitlementGrantRepository
+  implements EntitlementGrantRepository, PendingPaymentApprovedEventRepository
+{
   constructor(
     private readonly db: PrismaClient,
     private readonly clock: Clock = new SystemClock(),
   ) {}
+
+  async findPendingPaymentApproved(
+    orderId: string,
+    limit: number,
+  ): Promise<readonly PendingPaymentApprovedEvent[]> {
+    if (!orderId.trim() || !Number.isSafeInteger(limit) || limit < 1 || limit > 8) {
+      throw new Error("INVALID_ENTITLEMENT_GRANT_DISPATCH_QUERY");
+    }
+
+    const events = await this.db.outboxEvent.findMany({
+      where: {
+        orderId,
+        type: "PAYMENT_APPROVED",
+        status: "PENDING",
+      },
+      select: {
+        id: true,
+      },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      take: limit,
+    });
+
+    return Object.freeze(events.map((event) => Object.freeze({ id: event.id })));
+  }
 
   private async lockOutboxEvent(tx: Tx, eventId: string): Promise<void> {
     await tx.$queryRaw`

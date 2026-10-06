@@ -20,6 +20,7 @@ export class ResolvePurchasableOffer {
       return Object.freeze({
         product: Object.freeze({ ...selected.product }),
         offer: Object.freeze({ ...selected.offer }),
+        deliveryReady: selected.deliveryReady,
       });
     });
   }

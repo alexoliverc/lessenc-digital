@@ -23,6 +23,7 @@ function availableResult() {
         price: Money.of(2990, "BRL"),
         isActive: true,
       }),
+      deliveryReady: true,
     }),
   };
 }

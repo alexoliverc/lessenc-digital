@@ -16,6 +16,7 @@ export function catalogFixture(): CatalogOffer {
       status: "ACTIVE",
     },
     offer: { id: "offer", productId: "product", price: Money.of(2990, "BRL"), isActive: true },
+    deliveryReady: true,
   };
 }
 

@@ -53,7 +53,23 @@ export class PrismaCatalogRepository implements CatalogRepository {
         (transaction) =>
           transaction.offer.findUnique({
             where: { id: offerId },
-            include: { product: true },
+            include: {
+              product: {
+                include: {
+                  digitalResources: {
+                    where: {
+                      resource: {
+                        status: "ACTIVE",
+                      },
+                    },
+                    select: {
+                      resourceId: true,
+                    },
+                    take: 1,
+                  },
+                },
+              },
+            },
           }),
         { isolationLevel: "RepeatableRead" },
       );
@@ -73,6 +89,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
           price: Money.of(row.priceMinor, row.currency),
           isActive: row.isActive,
         }),
+        deliveryReady: row.product.digitalResources.length > 0,
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientInitializationError) {

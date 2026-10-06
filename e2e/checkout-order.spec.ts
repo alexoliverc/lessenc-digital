@@ -7,6 +7,7 @@ import { captureBrowserEvidence, expectNoHorizontalOverflow } from "./helpers/ev
 
 const productId = "17000000-0000-4000-8000-000000000001";
 const offerId = "17000000-0000-4000-8000-000000000002";
+const resourceId = "17000000-0000-4000-8000-000000000003";
 const buyerEmail = "p17.browser.checkout@example.invalid";
 
 async function connectToTestDatabase(rawUrl: string): Promise<Connection> {
@@ -72,6 +73,22 @@ test("P17-E02/E03/F07 validates checkout, persisted order and duplicate submissi
          (id, product_id, price_minor, currency, is_active, created_at, updated_at)
        VALUES (?, ?, 2990, 'BRL', TRUE, UTC_TIMESTAMP(3), UTC_TIMESTAMP(3))`,
       [offerId, productId],
+    );
+    await database.query(
+      `INSERT INTO digital_resources
+         (id, logical_key, version, storage_key, filename, media_type, status, created_at, updated_at)
+       VALUES (?, ?, 1, ?, ?, 'text/plain; charset=utf-8', 'ACTIVE', UTC_TIMESTAMP(3), UTC_TIMESTAMP(3))`,
+      [
+        resourceId,
+        "p17-local-checkout-delivery-ready",
+        "p17-fixtures/local-checkout-delivery-ready.txt",
+        "p17-local-checkout-delivery-ready.txt",
+      ],
+    );
+    await database.query(
+      `INSERT INTO product_digital_resources (product_id, resource_id, created_at)
+       VALUES (?, ?, UTC_TIMESTAMP(3))`,
+      [productId, resourceId],
     );
     await database.commit();
 
@@ -166,6 +183,8 @@ test("P17-E02/E03/F07 validates checkout, persisted order and duplicate submissi
       productId,
       offerId,
     ]);
+    await database.query("DELETE FROM product_digital_resources WHERE product_id = ?", [productId]);
+    await database.query("DELETE FROM digital_resources WHERE id = ?", [resourceId]);
     await database.query("DELETE FROM offers WHERE id = ?", [offerId]);
     await database.query("DELETE FROM products WHERE id = ?", [productId]);
     await database.end();
