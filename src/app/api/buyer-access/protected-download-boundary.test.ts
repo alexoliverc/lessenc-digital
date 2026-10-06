@@ -34,11 +34,15 @@ function delivery(overrides: Partial<PreparedProtectedDelivery> = {}): PreparedP
   });
 }
 
-function request(cookie?: string) {
+function request(cookie?: string, range?: string) {
   const headers = new Headers();
 
   if (cookie) {
     headers.set("cookie", cookie);
+  }
+
+  if (range) {
+    headers.set("range", range);
   }
 
   return new NextRequest(`https://lessenc.example/api/buyer-access/resources/${RESOURCE_ID}`, {
@@ -126,6 +130,48 @@ describe("P11 protected download HTTP boundary", () => {
     });
 
     expect(prepareDelivery).not.toHaveBeenCalled();
+  });
+
+  it("rejects byte-range requests before protected delivery preparation", async () => {
+    const prepareDelivery = vi.fn();
+
+    const succeeded = vi.fn();
+
+    const streamFailed = vi.fn();
+
+    const handler = createProtectedDownloadHandler({
+      validateSession: {
+        execute: vi.fn().mockResolvedValue(SUBJECT),
+      },
+      prepareDelivery: {
+        execute: prepareDelivery,
+      },
+      recordOutcome: {
+        succeeded,
+        streamFailed,
+      },
+      appEnv: "production",
+    });
+
+    const response = await handler(
+      request(`__Host-lessenc_buyer=${SESSION_TOKEN}`, "bytes=0-0"),
+      RESOURCE_ID,
+    );
+
+    expect(response.status).toBe(416);
+
+    await expect(response.json()).resolves.toEqual({
+      error: "RANGE_NOT_SUPPORTED",
+    });
+
+    expect(response.headers.get("accept-ranges")).toBe("none");
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(response.headers.get("referrer-policy")).toBe("no-referrer");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+
+    expect(prepareDelivery).not.toHaveBeenCalled();
+    expect(succeeded).not.toHaveBeenCalled();
+    expect(streamFailed).not.toHaveBeenCalled();
   });
 
   it("rejects an invalid persisted Buyer Session before protected delivery", async () => {
