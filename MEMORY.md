@@ -463,6 +463,40 @@ Final status:
 
 Gate D remains `NOT READY`; G5 closeout does not close the remaining P17 validation matrix.
 
+#### P17 F3 hosted browser/provider reconciliation — 05/10/2026
+
+Hosted technical release authority:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+Owner-observed hosted F3 browser evidence established the following without a second payment:
+
+- the real Mercado Pago Card Payment Brick reached its interactive rendered state after the P17 CSP, `mlstatic` and mandatory `onReady` corrections;
+- the hosted checkout/payment browser path was exercised against the F3 Order;
+- exactly one Mercado Pago TEST payment attempt was submitted;
+- the application displayed server-confirmed payment success;
+- Order `e56f6f12-a1f2-489e-8f88-5c626aabc402` became `PAID`;
+- Payment `408c927d-67d6-4e5c-92ff-05cfff704cbf` became `APPROVED`;
+- provider result was `processed / accredited`;
+- authoritative PaymentEvent origin/outcome was `CREATE_RESPONSE / APPLIED`;
+- no provider 3DS/challenge flow was triggered during the successful F3 TEST execution;
+- no new hosted CSP or `unsafe-eval` violation was observed after the final Brick fixes;
+- real Mercado Pago TEST webhook delivery was not observed and remains `NOT PROVEN`.
+
+Gate D reconciliation from that evidence:
+
+- `P17-E02 Checkout = PASS / HOSTED PROVEN`;
+- `P17-E03 Order = PASS / HOSTED PROVEN`;
+- `P17-E04 Mercado Pago TEST = PASS / HOSTED PROVEN`;
+- `P17-E05 Webhook = PENDING_EXTERNAL / NOT PROVEN`;
+- `P17-E06 Payment = PASS / HOSTED PROVEN`;
+- `P17-P01 Payment Brick = PASS / HOSTED PROVEN`;
+- `P17-P02 3DS/challenge = NOT_APPLICABLE for the F3 run because TEST did not trigger challenge`;
+- `P17-P03 CSP = PASS / HOSTED PROVEN`;
+- `P17-P04 unsafe-eval = PASS / HOSTED PROVEN`.
+
+This reconciliation does not authorize or require another payment.
+
 #### P17 administrative hosted closeout — 06/10/2026
 
 Hosted release authority:

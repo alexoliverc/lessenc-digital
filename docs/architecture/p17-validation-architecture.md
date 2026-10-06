@@ -288,6 +288,30 @@ Required validation includes:
 
 Disabled providers are recorded as NOT_APPLICABLE with proof of disabled state.
 
+### Hosted F3 browser/provider proof — 05/10/2026
+
+Hosted technical release:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+The final hosted F3 execution used the real Mercado Pago Card Payment Brick after the P17 CSP, `mlstatic` and mandatory `onReady` fixes were included in the hosted release.
+
+The Brick rendered interactively and exactly one Mercado Pago TEST payment attempt was submitted through the hosted checkout/payment flow.
+
+Authoritative result:
+
+- Order `e56f6f12-a1f2-489e-8f88-5c626aabc402` -> `PAID`;
+- Payment `408c927d-67d6-4e5c-92ff-05cfff704cbf` -> `APPROVED`;
+- provider -> `MERCADO_PAGO`;
+- provider state -> `processed / accredited`;
+- PaymentEvent -> `CREATE_RESPONSE / APPLIED`.
+
+No 3DS/challenge was produced by TEST during this successful execution, therefore P17-P02 is `NOT_APPLICABLE` for F3 rather than a fabricated PASS.
+
+The successful hosted Brick execution occurred without a new CSP or `unsafe-eval` violation after the final compatibility corrections.
+
+Real Mercado Pago TEST webhook delivery remains a separate authority boundary and remains `NOT PROVEN`.
+
 ## Responsive validation
 
 P17 E2E must cover deterministic:
@@ -330,31 +354,33 @@ Fault injection must be controlled and bounded.
 
 ## Release binding
 
-The current P16 infrastructure uses `P16_RELEASE_COMMIT` as a fail-closed exact-HEAD binding.
-
-While the hosted technical release remains:
+The immutable P16 checkpoint remains:
 
 `22fad0f690618c27cabcfa58528a76ce0a580ad3`
 
-the hosted P16 binding remains unchanged.
+It is historical checkpoint authority and is no longer the current hosted application release.
 
-P17-01 does not modify the Hostinger value.
+Current P17 hosted technical release authority:
 
-Before any new P17 technical release may be deployed, the release identity architecture must be
-reconciled.
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
 
-The P17 worktree implements the phase-neutral `STAGING_RELEASE_COMMIT` identity for staging
-preflight and migration guarding. The frozen `P16_RELEASE_COMMIT` remains a compatibility alias so
-the already validated P16 release is not invalidated. If both variables are present they must be
-identical; conflict, malformed value, HEAD mismatch or unverifiable HEAD fails closed.
+Documentation reconciliation parent HEAD before this update:
 
-This repository implementation is locally validated. It does not change either variable in
-Hostinger and does not deploy a P17 release.
+`1430d68db27e7535470a3746ee418fbb2582f4db`
 
-Until the owner-controlled hosted environment supplies the exact P17 release identity and the
-resulting source/runtime binding is revalidated:
+The delta from the hosted technical release to that reconciliation parent HEAD is documentation only: `MEMORY.md`, `docs/architecture/p17-validation-architecture.md` and `docs/operations/p17-gate-d-evidence-matrix.md`.
 
-P17 APPLICATION DEPLOYMENT = PENDING_EXTERNAL
+Therefore the application source exercised by the hosted G5, F3 and P9 evidence remains the exact P17 technical release `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`.
+
+The phase-neutral `STAGING_RELEASE_COMMIT` implementation is present in the P17 source lineage and preserves the frozen `P16_RELEASE_COMMIT` compatibility alias with fail-closed conflict and mismatch handling.
+
+The exact current Hostinger release-binding environment value has not yet been independently re-read during Gate D closeout. That environment attestation remains `PENDING_EXTERNAL` and is the remaining P17-L04 authority.
+
+P17 APPLICATION DEPLOYMENT = HOSTED TECHNICAL RELEASE PRESENT
+
+P17 SOURCE/RELEASE IDENTITY = RECONCILED TO 9e2ef25f4667b19f727c6ba1e277a79f55e3086f
+
+P17 RELEASE-BINDING ENVIRONMENT ATTESTATION = PENDING_EXTERNAL
 
 ## Production boundary
 

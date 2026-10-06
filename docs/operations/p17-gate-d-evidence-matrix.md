@@ -4,9 +4,9 @@
 
 This matrix defines the P17 validation requirements for Gate D — RELEASE CANDIDATE.
 
-It does not claim that any scenario has already passed.
+This matrix records the current reconciled P17 Gate D state. PASS is assigned only where fresh P17 evidence satisfies the applicable authority boundary.
 
-Initial state is `NOT_EXECUTED` unless explicitly stated otherwise.
+Rows not yet executed or reconciled retain `NOT_EXECUTED` unless another outcome is explicitly supported by current P17 evidence.
 
 ## Outcome vocabulary
 
@@ -23,20 +23,20 @@ real-provider or complete-journey evidence.
 
 ## Core journey matrix
 
-| ID | Surface | Gate D criticality | Initial state |
+| ID | Surface | Gate D criticality | Current state |
 | --- | --- | --- | --- |
 | P17-E01 | Public Experience | CRITICAL | NOT_EXECUTED |
-| P17-E02 | Checkout | CRITICAL | NOT_EXECUTED |
-| P17-E03 | Order | CRITICAL | NOT_EXECUTED |
-| P17-E04 | Mercado Pago TEST | CRITICAL | NOT_EXECUTED |
-| P17-E05 | Webhook | CRITICAL | NOT_EXECUTED |
-| P17-E06 | Payment | CRITICAL | NOT_EXECUTED |
-| P17-E07 | Entitlement | CRITICAL | NOT_EXECUTED |
-| P17-E08 | Buyer Access | CRITICAL | NOT_EXECUTED |
-| P17-E09 | Protected Delivery | CRITICAL | NOT_EXECUTED |
-| P17-E10 | Delivery Audit | CRITICAL | NOT_EXECUTED |
-| P17-E11 | Admin | CRITICAL | NOT_EXECUTED |
-| P17-E12 | Audit | CRITICAL | NOT_EXECUTED |
+| P17-E02 | Checkout | CRITICAL | PASS / HOSTED PROVEN |
+| P17-E03 | Order | CRITICAL | PASS / HOSTED PROVEN |
+| P17-E04 | Mercado Pago TEST | CRITICAL | PASS / HOSTED PROVEN |
+| P17-E05 | Webhook | CRITICAL | PENDING_EXTERNAL |
+| P17-E06 | Payment | CRITICAL | PASS / HOSTED PROVEN |
+| P17-E07 | Entitlement | CRITICAL | PASS / HOSTED PROVEN |
+| P17-E08 | Buyer Access | CRITICAL | PASS / HOSTED PROVEN |
+| P17-E09 | Protected Delivery | CRITICAL | PASS / HOSTED PROVEN |
+| P17-E10 | Delivery Audit | CRITICAL | PASS / HOSTED PROVEN |
+| P17-E11 | Admin | CRITICAL | PASS / HOSTED PROVEN |
+| P17-E12 | Audit | CRITICAL | PASS / HOSTED PROVEN |
 
 ## Failure matrix
 
@@ -53,10 +53,10 @@ real-provider or complete-journey evidence.
 
 ## Buyer and delivery matrix
 
-| ID | Scenario | Gate D criticality | Initial state |
+| ID | Scenario | Gate D criticality | Current state |
 | --- | --- | --- | --- |
-| P17-B01 | Invalid buyer credential | CRITICAL | NOT_EXECUTED |
-| P17-B02 | Unauthorized resource | CRITICAL | NOT_EXECUTED |
+| P17-B01 | Invalid buyer credential | CRITICAL | PENDING_EXTERNAL |
+| P17-B02 | Unauthorized resource | CRITICAL | PASS / HOSTED PROVEN |
 | P17-B03 | Buyer rate limit | HIGH | NOT_EXECUTED |
 | P17-B04 | Storage unavailable | CRITICAL | NOT_EXECUTED |
 | P17-B05 | Stream failure | HIGH | NOT_EXECUTED |
@@ -107,14 +107,30 @@ This closes the Buyer Access and Protected Delivery G5 scope only.
 
 Gate D remains `NOT READY` until the remaining mandatory P17 scenarios, provider/browser evidence, responsive validation, performance acceptance and release-closeout requirements are resolved. Hosted administrative validation is now `COMPLETE / PASS / HOSTED PROVEN`.
 
+### Hosted F3 commercial/browser evidence
+
+Hosted authority:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+The hosted F3 execution established a real interactive Mercado Pago Card Payment Brick and exactly one successful Mercado Pago TEST submission.
+
+The resulting authority was Order `PAID`, Payment `APPROVED`, provider `processed / accredited`, and `CREATE_RESPONSE / APPLIED`.
+
+No 3DS/challenge was triggered by TEST during F3. This is `NOT_APPLICABLE` for the execution, not a synthetic PASS.
+
+After the final CSP, `mlstatic` and `onReady` corrections, the successful hosted Brick execution produced no new CSP or `unsafe-eval` failure.
+
+Real Mercado Pago TEST webhook delivery remains `NOT PROVEN`.
+
 ## Browser/provider matrix
 
-| ID | Surface | Gate D criticality | Initial state |
+| ID | Surface | Gate D criticality | Current state |
 | --- | --- | --- | --- |
-| P17-P01 | Payment Brick | CRITICAL | NOT_EXECUTED |
-| P17-P02 | 3DS/challenge | CRITICAL WHEN TRIGGERED | NOT_EXECUTED |
-| P17-P03 | CSP | CRITICAL | NOT_EXECUTED |
-| P17-P04 | unsafe-eval | CRITICAL | NOT_EXECUTED |
+| P17-P01 | Payment Brick | CRITICAL | PASS / HOSTED PROVEN |
+| P17-P02 | 3DS/challenge | CRITICAL WHEN TRIGGERED | NOT_APPLICABLE |
+| P17-P03 | CSP | CRITICAL | PASS / HOSTED PROVEN |
+| P17-P04 | unsafe-eval | CRITICAL | PASS / HOSTED PROVEN |
 | P17-P05 | GTM | MEDIUM | NOT_EXECUTED |
 | P17-P06 | Meta browser provider | MEDIUM | NOT_EXECUTED |
 
@@ -180,13 +196,22 @@ No performance item can become PASS until a numeric acceptance budget is approve
 
 ## Release identity matrix
 
-| ID | Requirement | Criticality | Initial state |
+| ID | Requirement | Criticality | Current state |
 | --- | --- | --- | --- |
-| P17-L01 | Exact P17 RC source commit known | CRITICAL | NOT_EXECUTED |
-| P17-L02 | Hosted release reconciles to P17 RC | CRITICAL | NOT_EXECUTED |
-| P17-L03 | P16 checkpoint remains immutable | CRITICAL | HISTORICAL_SUPPORT_ONLY |
-| P17-L04 | Release binding is P17-compatible before deploy | CRITICAL | BLOCKED |
-| P17-L05 | Production remains unauthorized | CRITICAL | NOT_EXECUTED |
+| P17-L01 | Exact P17 RC source commit known | CRITICAL | PASS / HOSTED PROVEN |
+| P17-L02 | Hosted release reconciles to P17 RC | CRITICAL | PASS / HOSTED PROVEN |
+| P17-L03 | P16 checkpoint remains immutable | CRITICAL | PASS / HISTORICAL_SUPPORT_ONLY |
+| P17-L04 | Release binding is P17-compatible before deploy | CRITICAL | PENDING_EXTERNAL |
+| P17-L05 | Production remains unauthorized | CRITICAL | PASS |
+
+### Current P17 release identity evidence
+
+- hosted technical release -> `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`;
+- documentation reconciliation parent HEAD -> `1430d68db27e7535470a3746ee418fbb2582f4db`;
+- post-hosted delta to that reconciliation parent -> documentation only;
+- immutable P16 checkpoint -> `22fad0f690618c27cabcfa58528a76ce0a580ad3`;
+- production remains unauthorized;
+- exact current Hostinger release-binding environment attestation remains pending under P17-L04.
 
 ## Gate D rule
 
@@ -231,7 +256,10 @@ scenario tables above as staging PASS.
 Current counts and detailed commands are recorded in
 [`p17-local-validation-report.md`](p17-local-validation-report.md).
 
-GATE D remains `NOT READY`: real Mercado Pago TEST webhook delivery remains `NOT PROVEN`; remaining
-browser/provider evidence, complete responsive surfaces, an approved numeric performance budget
-and remaining release-closeout requirements are unresolved. Hosted administrative validation
-`P17-HV-P9` is `COMPLETE / PASS / HOSTED PROVEN`.
+GATE D remains `NOT READY`.
+
+Confirmed remaining authorities include P17-E01 public experience; real Mercado Pago TEST webhook P17-E05; the unresolved failure matrix; P17-B01 and P17-B03-B07; GTM/Meta active-or-disabled browser-provider classification; complete responsive R01-R03; owner-approved performance budget and PR01-PR04 evaluation; and P17-L04 hosted release-binding environment attestation.
+
+P17-P02 is `NOT_APPLICABLE` for F3 because TEST did not trigger 3DS/challenge.
+
+G5 and P9 remain closed and are not reopened by this reconciliation.
