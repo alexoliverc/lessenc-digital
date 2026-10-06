@@ -474,7 +474,7 @@ async function expectSuccessfulResponse(
 ): Promise<void> {
   expect(response.status).toBe(200);
 
-  expect(response.headers.get("accept-ranges")).toBe("none");
+  expect(response.headers.get("accept-ranges")).toBeNull();
 
   expect(response.headers.get("content-type")).toContain("application/pdf");
 

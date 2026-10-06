@@ -63,7 +63,6 @@ export function checkoutPaymentSecurityHeaders(appEnv = process.env.APP_ENV) {
 export function protectedDigitalDeliverySecurityHeaders() {
   return [
     { key: "Referrer-Policy", value: "no-referrer" },
-    { key: "Accept-Ranges", value: "none" },
     { key: "Cache-Control", value: "private, no-store" },
     { key: "X-Content-Type-Options", value: "nosniff" },
   ];

@@ -27,7 +27,7 @@ describe("global HTTP security headers", () => {
     );
 
     expect(protectedHeaders.get("Referrer-Policy")).toBe("no-referrer");
-    expect(protectedHeaders.get("Accept-Ranges")).toBe("none");
+    expect(protectedHeaders.has("Accept-Ranges")).toBe(false);
     expect(protectedHeaders.get("Cache-Control")).toBe("private, no-store");
     expect(protectedHeaders.get("X-Content-Type-Options")).toBe("nosniff");
 
@@ -42,7 +42,7 @@ describe("global HTTP security headers", () => {
     }
 
     expect(effective.get("Referrer-Policy")).toBe("no-referrer");
-    expect(effective.get("Accept-Ranges")).toBe("none");
+    expect(effective.has("Accept-Ranges")).toBe(false);
     expect(effective.get("Cache-Control")).toBe("private, no-store");
     expect(effective.get("X-Content-Type-Options")).toBe("nosniff");
   });

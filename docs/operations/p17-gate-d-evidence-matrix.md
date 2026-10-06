@@ -63,6 +63,18 @@ real-provider or complete-journey evidence.
 | P17-B06 | Delivery audit failure | CRITICAL | NOT_EXECUTED |
 | P17-B07 | Recovery | CRITICAL | NOT_EXECUTED |
 
+### Hosted byte-range reconciliation evidence
+
+G5-D does not create a new Gate D scenario ID.
+
+It is supporting evidence for the existing Buyer Access and Protected Delivery requirements.
+
+Canonical acceptance requires a hosted adversarial matrix proving that Range does not bypass Buyer Session validation or protected resource authorization.
+
+The authorized-resource case may resolve as HTTP 206 at the hosting transport layer after the protected backend path succeeds.
+
+Repository reconciliation status: `PENDING_HOSTED_MATRIX`.
+
 ## Browser/provider matrix
 
 | ID | Surface | Gate D criticality | Initial state |

@@ -725,7 +725,7 @@ describe("Gate B commerce core on isolated MySQL", () => {
 
     expect(response.headers.get("content-type")).toContain("application/pdf");
 
-    expect(response.headers.get("accept-ranges")).toBe("none");
+    expect(response.headers.get("accept-ranges")).toBeNull();
 
     const responseBytes = await response.arrayBuffer();
 

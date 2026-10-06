@@ -178,6 +178,26 @@ Buyer Session
 
 The browser must receive neither R2 credentials nor a direct private-storage URL.
 
+### Hosted byte-range transport reconciliation
+
+P17 hosted validation established that the hosting transport may honor an HTTP `Range` request after the application has already completed its protected backend flow.
+
+Byte-range is transport behavior, not buyer authentication or resource-authorization authority.
+
+The required invariant is:
+
+`Buyer Session -> rate limit -> entitlement/resource authorization -> private storage -> protected backend response -> optional hosted 206 transport -> delivery audit`
+
+P17 must prove adversarially that:
+
+- missing Buyer Session plus Range remains denied;
+- invalid Buyer Session plus Range remains denied;
+- a valid Buyer Session cannot use Range to obtain an unauthorized resource;
+- an authorized resource may be materialized as HTTP 200 or HTTP 206 by the hosted transport;
+- no R2 credential, storage key or direct private-storage URL is exposed.
+
+The application does not depend on `Accept-Ranges: none` and does not treat the incoming Range header as an authorization control.
+
 ## Administrative validation
 
 P17 must validate:

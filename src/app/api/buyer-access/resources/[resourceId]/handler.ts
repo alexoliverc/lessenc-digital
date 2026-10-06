@@ -192,22 +192,6 @@ function genericJson(
   );
 }
 
-function rangeNotSupported(): NextResponse {
-  return NextResponse.json(
-    {
-      error: "RANGE_NOT_SUPPORTED",
-    },
-    {
-      status: 416,
-      headers: {
-        ...BUYER_ACCESS_NO_STORE_HEADERS,
-        "X-Content-Type-Options": CONTENT_TYPE_OPTIONS,
-        "Accept-Ranges": "none",
-      },
-    },
-  );
-}
-
 export function createProtectedDownloadHandler(dependencies: ProtectedDownloadDependencies) {
   return async function handleProtectedDownload(
     request: NextRequest,
@@ -236,10 +220,6 @@ export function createProtectedDownloadHandler(dependencies: ProtectedDownloadDe
       });
 
       return genericJson("SESSION_INVALID", 401);
-    }
-
-    if (request.headers.has("range")) {
-      return rangeNotSupported();
     }
 
     let delivery: PreparedProtectedDelivery;
@@ -340,7 +320,6 @@ export function createProtectedDownloadHandler(dependencies: ProtectedDownloadDe
         "Content-Type": delivery.mediaType,
         "Content-Length": String(delivery.sizeBytes),
         "Content-Disposition": contentDisposition(delivery.filename),
-        "Accept-Ranges": "none",
       },
     });
   };

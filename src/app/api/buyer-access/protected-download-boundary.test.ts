@@ -91,7 +91,7 @@ describe("P11 protected download HTTP boundary", () => {
 
     expect(response.headers.get("x-content-type-options")).toBe("nosniff");
 
-    expect(response.headers.get("accept-ranges")).toBe("none");
+    expect(response.headers.get("accept-ranges")).toBeNull();
 
     const bytes = new Uint8Array(await response.arrayBuffer());
 
@@ -132,10 +132,10 @@ describe("P11 protected download HTTP boundary", () => {
     expect(prepareDelivery).not.toHaveBeenCalled();
   });
 
-  it("rejects byte-range requests before protected delivery preparation", async () => {
-    const prepareDelivery = vi.fn();
+  it("keeps Range subordinate to the normal authenticated protected-delivery path", async () => {
+    const prepareDelivery = vi.fn().mockResolvedValue(delivery());
 
-    const succeeded = vi.fn();
+    const succeeded = vi.fn().mockResolvedValue(undefined);
 
     const streamFailed = vi.fn();
 
@@ -158,19 +158,24 @@ describe("P11 protected download HTTP boundary", () => {
       RESOURCE_ID,
     );
 
-    expect(response.status).toBe(416);
+    /*
+     * The application itself does not perform byte slicing.
+     * The hosted transport may subsequently materialize the
+     * already-authorized backend response as HTTP 206.
+     */
+    expect(response.status).toBe(200);
 
-    await expect(response.json()).resolves.toEqual({
-      error: "RANGE_NOT_SUPPORTED",
-    });
+    expect(response.headers.get("accept-ranges")).toBeNull();
 
-    expect(response.headers.get("accept-ranges")).toBe("none");
-    expect(response.headers.get("cache-control")).toBe("private, no-store");
-    expect(response.headers.get("referrer-policy")).toBe("no-referrer");
-    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(prepareDelivery).toHaveBeenCalledWith(SUBJECT, RESOURCE_ID);
 
-    expect(prepareDelivery).not.toHaveBeenCalled();
     expect(succeeded).not.toHaveBeenCalled();
+
+    const bytes = new Uint8Array(await response.arrayBuffer());
+
+    expect([...bytes]).toEqual([1, 2, 3]);
+
+    expect(succeeded).toHaveBeenCalledTimes(1);
     expect(streamFailed).not.toHaveBeenCalled();
   });
 

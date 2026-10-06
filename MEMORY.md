@@ -404,12 +404,30 @@ Security and delivery behavior:
 - `Cache-Control: private, no-store`.
 - `Referrer-Policy: no-referrer`.
 - `X-Content-Type-Options: nosniff`.
-- `Accept-Ranges: none`.
-- Range/partial delivery is not implemented.
+- Byte-range behavior is transport-layer behavior, not authentication or authorization authority.
+- Hosted transport may return HTTP 206 only after the protected backend path has enforced Buyer Session validation and protected resource authorization.
 - `highWaterMark: 0` prevents automatic stream prefetch.
 - `SUCCEEDED` is persisted only when body consumption actually begins and before requesting the first resource chunk.
 - Stream failure after start records `FAILED / STREAM_FAILED`.
 - If the `SUCCEEDED` audit cannot be persisted, resource bytes are not released.
+
+#### P17 hosted transport reconciliation — 06/10/2026
+
+P17 hosted validation superseded the earlier transport assumption that partial delivery was disabled end-to-end.
+
+The hosted transport may materialize a client Range request as HTTP 206 after the application has already completed the authenticated protected-delivery path.
+
+The canonical security sequence is:
+
+`Buyer Session -> rate limit -> resource authorization -> private storage -> backend protected response -> optional hosted byte-range transport -> delivery audit`
+
+Range is not authentication or authorization authority.
+
+Missing or invalid Buyer Session remains fail-closed.
+
+Unauthorized resources remain unavailable.
+
+R2 credentials, storage keys and direct private-storage URLs remain server-only.
 
 ### C5.4 — Full Protected Delivery Security Review
 
