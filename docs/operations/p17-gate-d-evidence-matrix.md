@@ -25,7 +25,7 @@ real-provider or complete-journey evidence.
 
 | ID | Surface | Gate D criticality | Current state |
 | --- | --- | --- | --- |
-| P17-E01 | Public Experience | CRITICAL | NOT_EXECUTED |
+| P17-E01 | Public Experience | CRITICAL | PASS / HOSTED PROVEN |
 | P17-E02 | Checkout | CRITICAL | PASS / HOSTED PROVEN |
 | P17-E03 | Order | CRITICAL | PASS / HOSTED PROVEN |
 | P17-E04 | Mercado Pago TEST | CRITICAL | PASS / HOSTED PROVEN |
@@ -131,16 +131,16 @@ Real Mercado Pago TEST webhook delivery remains `NOT PROVEN`.
 | P17-P02 | 3DS/challenge | CRITICAL WHEN TRIGGERED | NOT_APPLICABLE |
 | P17-P03 | CSP | CRITICAL | PASS / HOSTED PROVEN |
 | P17-P04 | unsafe-eval | CRITICAL | PASS / HOSTED PROVEN |
-| P17-P05 | GTM | MEDIUM | NOT_EXECUTED |
-| P17-P06 | Meta browser provider | MEDIUM | NOT_EXECUTED |
+| P17-P05 | GTM | MEDIUM | NOT_APPLICABLE |
+| P17-P06 | Meta browser provider | MEDIUM | NOT_APPLICABLE |
 
 ## Responsive matrix
 
-| ID | Viewport | Criticality | Initial state |
+| ID | Viewport | Criticality | Current state |
 | --- | --- | --- | --- |
-| P17-R01 | Mobile | HIGH | NOT_EXECUTED |
-| P17-R02 | Tablet | HIGH | NOT_EXECUTED |
-| P17-R03 | Desktop | HIGH | NOT_EXECUTED |
+| P17-R01 | Mobile | HIGH | PENDING_EXTERNAL |
+| P17-R02 | Tablet | HIGH | PENDING_EXTERNAL |
+| P17-R03 | Desktop | HIGH | PENDING_EXTERNAL |
 
 ## Administrative matrix
 
@@ -201,17 +201,19 @@ No performance item can become PASS until a numeric acceptance budget is approve
 | P17-L01 | Exact P17 RC source commit known | CRITICAL | PASS / HOSTED PROVEN |
 | P17-L02 | Hosted release reconciles to P17 RC | CRITICAL | PASS / HOSTED PROVEN |
 | P17-L03 | P16 checkpoint remains immutable | CRITICAL | PASS / HISTORICAL_SUPPORT_ONLY |
-| P17-L04 | Release binding is P17-compatible before deploy | CRITICAL | PENDING_EXTERNAL |
+| P17-L04 | Release binding is P17-compatible before deploy | CRITICAL | PASS / HOSTED PROVEN |
 | P17-L05 | Production remains unauthorized | CRITICAL | PASS |
 
 ### Current P17 release identity evidence
 
-- hosted technical release -> `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`;
+- hosted G5/F3/P9 application-evidence execution release -> `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`;
+- current Hostinger deployed Git release -> `0f6534fcf1d5b87588f21f6dd64005309a50c786`;
+- Git delta from the evidence release to the current hosted release -> canonical documentation only; application code changes = `0`;
 - documentation reconciliation parent HEAD -> `1430d68db27e7535470a3746ee418fbb2582f4db`;
 - post-hosted delta to that reconciliation parent -> documentation only;
 - immutable P16 checkpoint -> `22fad0f690618c27cabcfa58528a76ce0a580ad3`;
 - production remains unauthorized;
-- exact current Hostinger release-binding environment attestation remains pending under P17-L04.
+- exact current Hostinger release-binding environment attestation is proven under P17-L04 for deployed commit `0f6534fcf1d5b87588f21f6dd64005309a50c786`: `STAGING_RELEASE_COMMIT` matched HEAD, `P16_RELEASE_COMMIT` matched the phase-neutral binding as compatibility alias, the fail-closed staging preflight passed, and Hostinger build, publish and Node restart completed successfully.
 
 ## Gate D rule
 
@@ -258,7 +260,40 @@ Current counts and detailed commands are recorded in
 
 GATE D remains `NOT READY`.
 
-Confirmed remaining authorities include P17-E01 public experience; real Mercado Pago TEST webhook P17-E05; the unresolved failure matrix; P17-B01 and P17-B03-B07; GTM/Meta active-or-disabled browser-provider classification; complete responsive R01-R03; owner-approved performance budget and PR01-PR04 evaluation; and P17-L04 hosted release-binding environment attestation.
+### Hosted public/provider/release/responsive reconciliation — 06/10/2026
+
+Current Hostinger deployed Git release:
+
+`0f6534fcf1d5b87588f21f6dd64005309a50c786`
+
+Application-code equivalence:
+
+- the hosted G5/F3/P9 application evidence was originally exercised on `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`;
+- `git diff --name-only 9e2ef25f4667b19f727c6ba1e277a79f55e3086f..0f6534fcf1d5b87588f21f6dd64005309a50c786` contains only `MEMORY.md`, `docs/architecture/p17-validation-architecture.md` and `docs/operations/p17-gate-d-evidence-matrix.md`;
+- therefore there are zero application-code changes between the evidence execution release and the current Hostinger deployment.
+
+New hosted authority established without a new payment or commercial-state mutation:
+
+- `P17-E01 Public Experience` -> `PASS / HOSTED PROVEN`: `/` and `/cronograma-capilar-inteligente` returned HTTP 200 in hosted Chromium and rendered successfully in mobile, tablet and desktop viewports;
+- `P17-P05 GTM` -> `NOT_APPLICABLE`: `GTM_CONTAINER_ID` is absent in Hostinger and hosted validation observed no GTM/GA provider script, global or network request;
+- `P17-P06 Meta browser provider` -> `NOT_APPLICABLE`: `META_PIXEL_ID` is absent in Hostinger and hosted validation observed no Meta browser script, `fbq` global or provider network request;
+- `P17-L04 Release binding` -> `PASS / HOSTED PROVEN`: Hostinger checked out `0f6534fcf1d5b87588f21f6dd64005309a50c786`, both release-binding variables were aligned with that HEAD, the fail-closed staging preflight passed, and build, publish, current-version switch and Node restart completed successfully.
+
+Responsive hosted evidence now covers:
+
+- public surfaces in `390x844`, `768x1024` and `1440x900`;
+- checkout guard state in all three viewport classes;
+- payment guard state in all three viewport classes;
+- unauthenticated administrative boundary in all three viewport classes;
+- authenticated OWNER administrative surfaces `/admin`, `/admin/orders`, `/admin/payments`, `/admin/entitlements`, `/admin/deliveries` and `/admin/audit` in all three viewport classes;
+- authenticated administrative functional-content consistency after stabilization, with no horizontal overflow, page errors, console errors or post-auth non-read requests;
+- no separate buyer-facing `page.tsx` exists in the current MVP; Buyer Access remains an API/protected-delivery boundary already covered by G5.
+
+`P17-R01`, `P17-R02` and `P17-R03` are not PASS. They move from `NOT_EXECUTED` to `PENDING_EXTERNAL` because substantial hosted responsive execution now exists, while the real interactive Mercado Pago Payment Brick has not been proven across mobile, tablet and desktop. The earlier F3 execution proves a real interactive hosted Brick and one Mercado Pago TEST submission, but it does not prove the three-viewport responsive matrix.
+
+The earlier pre-hosted/local snapshot remains historical support evidence only and is not current Gate D authority. The current-state matrix rows and this hosted reconciliation govern wherever they differ from that historical snapshot.
+
+Confirmed remaining authorities include real Mercado Pago TEST webhook P17-E05; the unresolved failure matrix; P17-B01 and P17-B03-B07; complete responsive P17-R01-R03 with real Payment Brick multi-viewport proof; and owner-approved performance budget and P17-PR01-PR04 evaluation. Gate D remains `NOT READY`.
 
 P17-P02 is `NOT_APPLICABLE` for F3 because TEST did not trigger 3DS/challenge.
 

@@ -360,7 +360,11 @@ The immutable P16 checkpoint remains:
 
 It is historical checkpoint authority and is no longer the current hosted application release.
 
-Current P17 hosted technical release authority:
+Current P17 Hostinger deployed Git release authority:
+
+`0f6534fcf1d5b87588f21f6dd64005309a50c786`
+
+Hosted G5/F3/P9 application-evidence execution release:
 
 `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
 
@@ -368,19 +372,36 @@ Documentation reconciliation parent HEAD before this update:
 
 `1430d68db27e7535470a3746ee418fbb2582f4db`
 
-The delta from the hosted technical release to that reconciliation parent HEAD is documentation only: `MEMORY.md`, `docs/architecture/p17-validation-architecture.md` and `docs/operations/p17-gate-d-evidence-matrix.md`.
+The delta from the hosted G5/F3/P9 evidence release `9e2ef25f4667b19f727c6ba1e277a79f55e3086f` through the current Hostinger deployed Git release `0f6534fcf1d5b87588f21f6dd64005309a50c786` is documentation only: `MEMORY.md`, `docs/architecture/p17-validation-architecture.md` and `docs/operations/p17-gate-d-evidence-matrix.md`.
 
-Therefore the application source exercised by the hosted G5, F3 and P9 evidence remains the exact P17 technical release `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`.
+The hosted G5, F3 and P9 evidence was executed on technical release `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`. The current Hostinger deployed Git release is `0f6534fcf1d5b87588f21f6dd64005309a50c786`. The Git delta from `9e2ef25f4667b19f727c6ba1e277a79f55e3086f` to `0f6534fcf1d5b87588f21f6dd64005309a50c786` contains only canonical documentation, therefore the deployed application code remains code-equivalent to the application source exercised by G5, F3 and P9.
 
 The phase-neutral `STAGING_RELEASE_COMMIT` implementation is present in the P17 source lineage and preserves the frozen `P16_RELEASE_COMMIT` compatibility alias with fail-closed conflict and mismatch handling.
 
-The exact current Hostinger release-binding environment value has not yet been independently re-read during Gate D closeout. That environment attestation remains `PENDING_EXTERNAL` and is the remaining P17-L04 authority.
+The current Hostinger release-binding environment was subsequently owner-observed during the R13/R14 hosted reconciliation. `STAGING_RELEASE_COMMIT` and the `P16_RELEASE_COMMIT` compatibility alias matched deployed HEAD `0f6534fcf1d5b87588f21f6dd64005309a50c786`; the fail-closed staging preflight passed before the successful Hostinger build, publish, current-version switch and Node restart. P17-L04 is therefore `PASS / HOSTED PROVEN`.
 
-P17 APPLICATION DEPLOYMENT = HOSTED TECHNICAL RELEASE PRESENT
+### Hosted public, provider, release-binding and responsive reconciliation — 06/10/2026
 
-P17 SOURCE/RELEASE IDENTITY = RECONCILED TO 9e2ef25f4667b19f727c6ba1e277a79f55e3086f
+Hosted validation against current Hostinger deployed Git release `0f6534fcf1d5b87588f21f6dd64005309a50c786` established:
 
-P17 RELEASE-BINDING ENVIRONMENT ATTESTATION = PENDING_EXTERNAL
+- public experience E01 is `PASS / HOSTED PROVEN`;
+- GTM is `NOT_APPLICABLE` because `GTM_CONTAINER_ID` is absent and no GTM/GA browser provider script, global or network request was observed;
+- Meta browser provider is `NOT_APPLICABLE` because `META_PIXEL_ID` is absent and no Meta browser script, `fbq` global or provider network request was observed;
+- release-binding L04 is `PASS / HOSTED PROVEN`: `STAGING_RELEASE_COMMIT` and the `P16_RELEASE_COMMIT` compatibility alias matched the deployed HEAD, the fail-closed preflight passed and Hostinger completed build, publish, current-version switch and application restart.
+
+Responsive hosted execution covers public, checkout guard, payment guard, unauthenticated admin and authenticated OWNER administrative surfaces in the canonical mobile, tablet and desktop viewport classes.
+
+Buyer Access has no separate buyer-facing presentation page in the current MVP; its authority remains API/protected-delivery and was already closed by hosted G5.
+
+Responsive Gate D rows remain unresolved rather than synthetically passing. The hosted F3 execution proves a real interactive Mercado Pago Card Payment Brick, but it does not prove that Brick in mobile, tablet and desktop. `P17-R01`, `P17-R02` and `P17-R03` therefore remain `PENDING_EXTERNAL`.
+
+No second payment, Order, Payment, Entitlement, R2 object, Buyer Access/G5 state or administrative business object was created or mutated for this responsive reconciliation. Normal OWNER authentication and administrative session activity occurred only as required to access the protected hosted presentation.
+
+P17 APPLICATION DEPLOYMENT = HOSTED / CURRENT GIT RELEASE 0f6534fcf1d5b87588f21f6dd64005309a50c786 / BUILD + PUBLISH + RESTART PASS
+
+P17 SOURCE/RELEASE IDENTITY = CURRENT HOSTINGER GIT RELEASE 0f6534fcf1d5b87588f21f6dd64005309a50c786 / APPLICATION CODE EQUIVALENT TO 9e2ef25f4667b19f727c6ba1e277a79f55e3086f
+
+P17 RELEASE-BINDING ENVIRONMENT ATTESTATION = PASS / HOSTED PROVEN / 0f6534fcf1d5b87588f21f6dd64005309a50c786
 
 ## Production boundary
 
@@ -401,11 +422,11 @@ Critical FAIL or unresolved mandatory BLOCKED prevents progression.
 
 DISCOVERY: COMPLETE
 VALIDATION ARCHITECTURE: FROZEN
-PLAYWRIGHT: APPROVED / NOT INSTALLED
+PLAYWRIGHT: AVAILABLE / HOSTED R13 BROWSER VALIDATION EXECUTED
 REAL BROWSER E2E: REQUIRED
 MERCADO PAGO: TEST ONLY
 P16 CHECKPOINT: IMMUTABLE
-P16_RELEASE_COMMIT: UNCHANGED FOR CURRENT HOSTED P16 RELEASE
-STAGING_RELEASE_COMMIT: LOCALLY IMPLEMENTED / HOSTED VALUE NOT MUTATED
-P17 DEPLOYMENT: PENDING_EXTERNAL OWNER-CONTROLLED CERTIFICATION
+P16_RELEASE_COMMIT: HOSTED 0f6534fcf1d5b87588f21f6dd64005309a50c786 / COMPATIBILITY ALIAS / MATCHES STAGING_RELEASE_COMMIT
+STAGING_RELEASE_COMMIT: HOSTED 0f6534fcf1d5b87588f21f6dd64005309a50c786 / MATCHES HEAD / FAIL-CLOSED PREFLIGHT PASS
+P17 DEPLOYMENT: HOSTED / 0f6534fcf1d5b87588f21f6dd64005309a50c786 / CERTIFIED BUILD + PUBLISH + RESTART
 PRODUCTION: NOT AUTHORIZED

@@ -2467,6 +2467,31 @@ Staging release binding is phase-neutral through `STAGING_RELEASE_COMMIT` while 
 frozen P16 variable as a strict compatibility alias. No Hostinger variable or hosted release was
 mutated.
 
-Gate D remains NOT READY. Mercado Pago TEST/provider, hosted P17 source/runtime, protected hosted
-delivery, positive real-admin browser evidence, complete responsive coverage and an approved
-performance budget remain external requirements. Production remains unauthorized.
+Gate D remains NOT READY. Real Mercado Pago TEST webhook delivery, the unresolved failure matrix, P17-B01 and P17-B03-B07, real Payment Brick multi-viewport responsive proof, and an owner-approved performance budget with P17-PR01–PR04 evaluation remain mandatory authorities. Hosted P17 source/runtime, protected hosted delivery and positive real-admin browser evidence are now proven. Production remains unauthorized.
+
+## P17 R13/R14 hosted public/provider/release/responsive reconciliation — 06/10/2026
+
+Current Hostinger deployed Git release:
+
+`0f6534fcf1d5b87588f21f6dd64005309a50c786`
+
+Original hosted G5/F3/P9 application-evidence execution release:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+The Git delta from `9e2ef25f4667b19f727c6ba1e277a79f55e3086f` to `0f6534fcf1d5b87588f21f6dd64005309a50c786` contains only canonical documentation; application-code delta is zero.
+
+Hosted reconciliation results:
+
+- `P17-E01 Public Experience = PASS / HOSTED PROVEN`;
+- `P17-P05 GTM = NOT_APPLICABLE / DISABLED HOSTED PROVEN`;
+- `P17-P06 Meta browser provider = NOT_APPLICABLE / DISABLED HOSTED PROVEN`;
+- `P17-L04 release binding = PASS / HOSTED PROVEN`;
+- public, checkout guard, payment guard, unauthenticated admin and authenticated admin responsive boundaries were exercised in mobile, tablet and desktop viewport classes;
+- current MVP has no separate buyer-facing `page.tsx`;
+- real hosted Mercado Pago Payment Brick multi-viewport execution remains `NOT PROVEN`;
+- therefore `P17-R01`, `P17-R02` and `P17-R03` remain `PENDING_EXTERNAL`, not PASS.
+
+No second payment or commercial mutation was performed.
+
+Gate D remains `NOT READY`.
