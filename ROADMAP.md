@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment has completed technical and hosted validation on frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 is COMPLETE / PASS / HOSTED VALIDATED. The documentation closeout is integrated in `main` at `6c60441e00e4520b8c689f8c4944c36c73d80d12`. The permanent annotated checkpoint `checkpoint/p16-staging-deployment-complete` dereferences to frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3` and must not be moved by later documentation-only work. Final authoritative hosted RPO is 888 ms against the <= 24 hour objective. `976a0472382abc0597996366db63c981b5733d6e` is retained only as a schema-compatible break-glass application rollback target. Residual limits remain explicit: retention 7/4/3 is PLAN_ONLY, no independently proved final off-R2 copy is claimed, DB/R2 capture is sequential rather than atomic and four HIGH development-tooling findings remain deferred. Production is not authorized by P16. P17 — End-to-End & Business Validation is OPEN on local branch `phase/p17-end-to-end-business-validation` from canonical baseline `6e269e6db928b228babd8ffd44c3f55574cade4c`. P17-01 validation architecture is the active workstream; no P17 application deployment or production authorization exists.
+**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment is COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED and its permanent checkpoint remains immutable at `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P17 — End-to-End & Business Validation is IN PROGRESS on branch `phase/p17-end-to-end-business-validation`. Current Hostinger deployed Git release is `0f6534fcf1d5b87588f21f6dd64005309a50c786`. Hosted G5 and P9 are COMPLETE / PASS / HOSTED PROVEN. P17-E01 and P17-L04 are PASS / HOSTED PROVEN. P17-P05 GTM and P17-P06 Meta browser provider are NOT_APPLICABLE. P17-R01–R03 remain PENDING_EXTERNAL because real Payment Brick multi-viewport proof is NOT PROVEN. Real Mercado Pago TEST webhook delivery remains NOT PROVEN. Gate D remains NOT READY. Production remains unauthorized.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -723,7 +723,7 @@ The first OWNER bootstrap was not executed and no real administrative account wa
 
 ## P13 — Analytics, Attribution & Growth Infrastructure
 
-**Status:** IN PROGRESS / P13-A COMPLETE / P13-B COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED / P13-C COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
+**Status:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 ### Objective
 
 Create measurement infrastructure for acquisition and conversion.
@@ -796,8 +796,8 @@ A completed sale can be attributed to its acquisition journey when data is avail
 - P13-D — Internal Measurement Producers & Consent Boundary: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
 - P13-E — Canonical Purchase & Financial Reconciliation: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
 - P13-F — Measurement & Advertising Adapters: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
-- P13-G — Admin Analytics: **NOT STARTED**;
-- P13-H — Technical Gate: **NOT STARTED**.
+- P13-G — Admin Analytics: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
+- P13-H — Technical Gate: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 
 <!-- P13-B-ATTRIBUTION-PERSISTENCE-CLOSEOUT -->
 ### P13-A Git lifecycle and P13-B implementation closeout
@@ -1298,14 +1298,22 @@ liveness.
 
 ## P17 — End-to-End & Business Validation
 
-**Status:** EM ANDAMENTO
+**Status:** IN PROGRESS / GATE D NOT READY
 
-Local execution candidate on 04/10/2026: Playwright real-browser foundation, phase-neutral staging
-release binding, public responsive smoke, isolated-test-database checkout/order flow and negative
-admin/buyer authorization boundaries are implemented and locally validated. This is not Gate D
-PASS. Mercado Pago TEST/provider, hosted P17 release identity, hosted protected delivery, positive
-administrative browser flow, complete responsive surfaces and an approved performance budget remain
-pending external certification.
+Hosted Gate D validation has progressed beyond the original local candidate. The current Hostinger deployed Git release is `0f6534fcf1d5b87588f21f6dd64005309a50c786`. The original hosted G5/F3/P9 application-evidence execution release is `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`, with zero application-code delta between those releases.
+
+Current hosted authority includes:
+
+- P17-E01 Public Experience = `PASS / HOSTED PROVEN`;
+- P17-L04 release binding = `PASS / HOSTED PROVEN`;
+- hosted protected delivery G5 = `COMPLETE / PASS / HOSTED PROVEN`;
+- hosted administrative validation P9 = `COMPLETE / PASS / HOSTED PROVEN`;
+- P17-P05 GTM = `NOT_APPLICABLE`;
+- P17-P06 Meta browser provider = `NOT_APPLICABLE`.
+
+Gate D remains fail-closed. Real Mercado Pago TEST webhook delivery P17-E05 remains `NOT PROVEN`; P17-F01–F08, P17-B01 and P17-B03–B07 retain unresolved validation authority; P17-R01–R03 remain `PENDING_EXTERNAL` because the real interactive Payment Brick has not been proven across mobile, tablet and desktop; and P17-PR01–PR04 remain pending an owner-approved numeric performance budget and evaluation.
+
+Production remains unauthorized.
 
 ### Objective
 
@@ -1362,6 +1370,8 @@ Release Candidate passes complete staging validation.
 # GATE D — RELEASE CANDIDATE
 
 **Position:** after P17.
+
+**Status:** NOT READY
 
 ### Question
 
@@ -1667,7 +1677,9 @@ The platform can be operated, monitored, diagnosed and recovered.
 
 After P17.
 
-The complete staging journey has passed end-to-end validation.
+**Status:** NOT READY
+
+The complete staging journey has not yet satisfied every mandatory Gate D acceptance criterion. Existing hosted evidence remains valid, but unresolved Mercado Pago TEST webhook delivery, the failure matrix, Buyer Access residual scenarios, real Payment Brick multi-viewport responsive proof and performance acceptance prevent Gate D PASS.
 
 ## GATE E — PRODUCTION GO / NO-GO
 
@@ -1679,13 +1691,19 @@ The system receives formal authorization or denial for real production transacti
 
 # 10. Current transition
 
-The next phase after P12 integration closeout is:
+The current active phase is:
 
-**P13 — Analytics, Attribution & Growth Infrastructure**
+**P17 — End-to-End & Business Validation**
 
 Current execution state:
 
-**IN PROGRESS / P13-A COMPLETE / P13-B COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED / P13-C COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**
+**IN PROGRESS / HOSTED VALIDATION PARTIALLY PROVEN / GATE D NOT READY**
+
+P13, P14, P15 and P16 are closed under their respective canonical baselines.
+
+P17 currently has hosted proof for the public experience, protected delivery, administrative browser flow and release binding. Remaining Gate D authority includes real Mercado Pago TEST webhook delivery, the unresolved failure matrix, Buyer Access residual scenarios, real Payment Brick multi-viewport responsive proof and owner-approved performance acceptance.
+
+P18 remains pending until Gate D reaches PASS.
 
 Current status:
 
@@ -1711,7 +1729,7 @@ P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creati
 
 P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED**: final implementation checkpoint `ea3295cf1703466763c9cd333d98e59fe6535f8e`, implementation PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`, and documentation closeout PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P13 is **IN PROGRESS / P13-A COMPLETE / P13-B COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED / P13-C COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. Production deployment remains outside the completed P12 scope.
+P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED**: final implementation checkpoint `ea3295cf1703466763c9cd333d98e59fe6535f8e`, implementation PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`, and documentation closeout PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P13 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. Production deployment remains outside the completed P12 scope.
 
 <!-- P11-POST-MERGE-CLOSEOUT -->
 ### P11 — Git Integration Closeout
@@ -1808,7 +1826,7 @@ Meta CAPI is technically complete but intentionally policy-blocked under `MATCHI
 
 The checkpoint remains fixed at the implementation merge and must not be moved by later documentation-only work.
 
-P13-G — Admin Analytics is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED** through PR #32, implementation merge `7da548d922046f1c90ee71e13012f3374527146b` and permanent checkpoint `checkpoint/p13-g-admin-analytics-complete`. P13-H is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13 is complete and P14 remains pending.
+P13-G — Admin Analytics is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED** through PR #32, implementation merge `7da548d922046f1c90ee71e13012f3374527146b` and permanent checkpoint `checkpoint/p13-g-admin-analytics-complete`. P13-H is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. At that P13 closeout checkpoint, P13 was complete and P14 remained pending; this sequencing statement is historical and is superseded by the later completed P14, P15 and P16 canonical baselines.
 
 <!-- P16-09-LOCAL-FINAL-GATE -->
 
