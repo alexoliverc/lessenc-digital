@@ -1311,9 +1311,22 @@ Current hosted authority includes:
 - P17-P05 GTM = `NOT_APPLICABLE`;
 - P17-P06 Meta browser provider = `NOT_APPLICABLE`.
 
-Gate D remains fail-closed. Real Mercado Pago TEST webhook delivery P17-E05 remains `NOT PROVEN`; P17-F01–F08, P17-B01 and P17-B03–B07 retain unresolved validation authority; P17-R01–R03 remain `PENDING_EXTERNAL` because the real interactive Payment Brick has not been proven across mobile, tablet and desktop; and P17-PR01–PR04 remain pending an owner-approved numeric performance budget and evaluation.
+Gate D remains fail-closed. Real Mercado Pago TEST webhook delivery P17-E05 remains `NOT PROVEN`; P17-F01 remains PENDING_EXTERNAL; P17-F02–F08 are PASS / TEST PROVEN only in isolated local validation, with F06 also REGRESSION PROVEN / PUBLISHED on P17; P17-B01 and P17-B03–B07 retain unresolved validation authority; P17-R01–R03 remain `PENDING_EXTERNAL` because the real interactive Payment Brick has not been proven across mobile, tablet and desktop; and P17-PR01–PR04 remain pending an owner-approved numeric performance budget and evaluation.
 
 Production remains unauthorized.
+
+<!-- P17-R15-I8-F06-RECONCILIATION -->
+### R15 — F06 implementation and Failure Matrix reconciliation
+
+F06-POLICY-R1 is implemented on the P17 branch: provider-confirmed Order expiration is terminal and idempotent, blocks a new attempt, records `expiredAt`, and routes late approval to REVIEW without fulfillment. Generic cancellation and timeout do not independently expire the Order.
+
+The F06 migration was applied and verified only on isolated local `lessenc_test`; no hosted database migration or Hostinger deployment was performed.
+
+P17 implementation commits: `920283ae473a12bbfcbacb1020bb6cb8dd3c7194` (F06) and `fbf45f146c7796956ca9263dbc46bec2996c4f27` (test hygiene). Full regression: lint PASS, typecheck PASS, 1,030 unit tests PASS, 199 MySQL integration tests PASS and matching 27-table database snapshots.
+
+Failure Matrix authority: F01 PENDING_EXTERNAL; F02-F08 PASS / TEST PROVEN locally; F06 additionally REGRESSION PROVEN / PUBLISHED. These results do not prove real Mercado Pago TEST webhook delivery (E05), do not establish hosted F06 deployment and do not close the remaining Buyer Access, responsive or performance requirements.
+
+Gate D = NOT READY. Production = UNAUTHORIZED.
 
 ### Objective
 

@@ -352,6 +352,21 @@ P17 must validate:
 
 Fault injection must be controlled and bounded.
 
+<!-- P17-R15-I8-F06-RECONCILIATION -->
+### R15 — F06-POLICY-R1 implemented expiration boundary
+
+The implemented order domain adds terminal `OrderStatus.EXPIRED`, nullable `Order.expiredAt`, and the provider-confirmation transition from PENDING. EXPIRED-to-EXPIRED is idempotent; EXPIRED cannot reopen as PENDING or PAID.
+
+Expiration authority is restricted to the provider snapshot pairs `expired/expired` and `canceled/expired`. The Payment normalizes to CANCELED, including resolution from UNKNOWN, and the active attempt is released. The same persistence transaction records the terminal Order state. No PAYMENT_APPROVED or ORDER_PAID outbox item and no entitlement grant results from expiration.
+
+A generic `canceled/canceled` provider result remains distinct and may permit a further attempt while the Order is PENDING. Local elapsed time, token expiry, timeout, a missing provider response and UNKNOWN are not independent Order-expiration triggers.
+
+If APPROVED arrives after Order.EXPIRED, payment processing requires REVIEW while the Order remains EXPIRED; there is no automatic fulfillment. The public payment state exposes `expired` for an expired Order.
+
+The schema migration was exercised only against isolated `lessenc_test` with separate DDL migrator and DML runtime identities. R15-I5 and R15-I6 proved transactional behavior and full regression. The P17 branch contains implementation commit `920283ae473a12bbfcbacb1020bb6cb8dd3c7194` and hygiene commit `fbf45f146c7796956ca9263dbc46bec2996c4f27`.
+
+This is local implementation authority, not hosted deployment proof and not real provider webhook evidence. E05 remains PENDING_EXTERNAL; Gate D remains NOT READY; production is unauthorized.
+
 ## Release binding
 
 The immutable P16 checkpoint remains:

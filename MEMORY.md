@@ -2495,3 +2495,18 @@ Hosted reconciliation results:
 No second payment or commercial mutation was performed.
 
 Gate D remains `NOT READY`.
+
+<!-- P17-R15-I8-F06-RECONCILIATION -->
+## P17 R15 — F06 technical closeout (07/10/2026)
+
+The F06 provider-confirmed order-expiration functional gap is implemented and locally proven on P17. Implementation commit: `920283ae473a12bbfcbacb1020bb6cb8dd3c7194`. Admin integration test-hygiene repair: `fbf45f146c7796956ca9263dbc46bec2996c4f27`. Published branch HEAD is `fbf45f146c7796956ca9263dbc46bec2996c4f27`.
+
+F06-POLICY-R1: only provider-confirmed expiration creates terminal Order.EXPIRED and `expiredAt`; generic cancellation remains distinct; timeout/UNKNOWN does not expire an Order; late approval after EXPIRED requires REVIEW with no automatic entitlement or paid outbox.
+
+Local MySQL `lessenc_test` migration `20261007_p17_f06_expired_order` applied using `lessenc_migrate`; historical failed journal attempt resolved as rolled back. Runtime `lessenc_test` preserved DML-only authority. R15-I5 completed 124 targeted tests. R15-I6 completed lint, typecheck, 1,030 unit tests and 199 integration tests PASS, with exact restoration of all 27 application-table counts.
+
+Admin test-hygiene corrections prevent Better Auth base64url challenge and null-actor audit fixture residue. No production-code modification was part of those two hygiene changes.
+
+Current Failure Matrix: F01 PENDING_EXTERNAL; F02-F08 PASS / TEST PROVEN locally; F06 additionally REGRESSION PROVEN / PUBLISHED. No hosted F06 deployment or migration was executed. Current Hostinger deployed release remains `0f6534fcf1d5b87588f21f6dd64005309a50c786`.
+
+E05 real Mercado Pago TEST webhook NOT PROVEN. B01/B03-B07, R01-R03 and PR01-PR04 remain independently unresolved. G5 and P9 remain closed. Gate D NOT READY. Production UNAUTHORIZED. Main and P16 checkpoint unchanged.

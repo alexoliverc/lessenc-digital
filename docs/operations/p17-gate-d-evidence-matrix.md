@@ -40,16 +40,33 @@ real-provider or complete-journey evidence.
 
 ## Failure matrix
 
-| ID | Scenario | Gate D criticality | Initial state |
+| ID | Scenario | Gate D criticality | Current state |
 | --- | --- | --- | --- |
-| P17-F01 | Declined payment | CRITICAL | NOT_EXECUTED |
-| P17-F02 | Timeout | CRITICAL | NOT_EXECUTED |
-| P17-F03 | Duplicate webhook | CRITICAL | NOT_EXECUTED |
-| P17-F04 | Out-of-order webhook | CRITICAL | NOT_EXECUTED |
-| P17-F05 | Retry | CRITICAL | NOT_EXECUTED |
-| P17-F06 | Expired order | CRITICAL | NOT_EXECUTED |
-| P17-F07 | Duplicate attempt | CRITICAL | NOT_EXECUTED |
-| P17-F08 | Invalid webhook authorization | CRITICAL | NOT_EXECUTED |
+| P17-F01 | Declined payment | CRITICAL | PENDING_EXTERNAL |
+| P17-F02 | Timeout | CRITICAL | PASS / TEST PROVEN |
+| P17-F03 | Duplicate webhook | CRITICAL | PASS / TEST PROVEN |
+| P17-F04 | Out-of-order webhook | CRITICAL | PASS / TEST PROVEN |
+| P17-F05 | Retry | CRITICAL | PASS / TEST PROVEN |
+| P17-F06 | Expired order | CRITICAL | PASS / TEST PROVEN / REGRESSION PROVEN |
+| P17-F07 | Duplicate attempt | CRITICAL | PASS / TEST PROVEN |
+| P17-F08 | Invalid webhook authorization | CRITICAL | PASS / TEST PROVEN |
+
+<!-- P17-R15-I8-F06-RECONCILIATION -->
+### R15 — Failure Matrix technical reconciliation (07/10/2026)
+
+R15 local validation establishes F02-F08 as PASS / TEST PROVEN. These are isolated local technical results, not proof of real hosted Mercado Pago webhook delivery. F01 remains PENDING_EXTERNAL.
+
+F06-POLICY-R1 is implemented and regression proven. Only provider-confirmed `expired/expired` or `canceled/expired` expires a PENDING Order. The transition records `Order.EXPIRED` and `expiredAt`, resolves the Payment as CANCELED and releases the active attempt in the persistence transaction. An expired Order cannot accept another attempt. A later approval enters REVIEW without reopening the Order, granting entitlement or emitting a paid outbox event.
+
+Generic `canceled/canceled`, local elapsed time, HTTP timeout, token expiry and UNKNOWN do not independently expire an Order. Provider-confirmed expiration may resolve a previously UNKNOWN Payment to CANCELED.
+
+Implementation authority: commit `920283ae473a12bbfcbacb1020bb6cb8dd3c7194` (20 files). Test-hygiene authority: commit `fbf45f146c7796956ca9263dbc46bec2996c4f27` (2 integration-test files). Both were published exclusively on the P17 branch; neither was merged into main or deployed to Hostinger.
+
+Local migration `20261007_p17_f06_expired_order` was applied to isolated `lessenc_test` using the canonical `lessenc_migrate` identity. The schema contains `OrderStatus.EXPIRED` and nullable `expired_at DATETIME(3)`. The earlier failed journal attempt was marked rolled back; the subsequent attempt applied successfully, with no unresolved migration. The runtime identity `lessenc_test` retained DML-only privileges.
+
+R15-I5: 55 Order, 47 Payment and 22 transactional MySQL tests passed (124 total). R15-I6-R4: lint PASS, typecheck PASS, 1,030 unit tests PASS and 199 integration tests PASS. All 27 application-table row counts matched before and after regression. Administrative integration fixture hygiene was independently repaired and verified.
+
+Authority boundaries: F06 is TEST PROVEN / REGRESSION PROVEN / PUBLISHED ON P17, but not HOSTED PROVEN. P17-E05 remains PENDING_EXTERNAL / NOT PROVEN. P17-B01, P17-B03-B07, P17-R01-R03 and P17-PR01-PR04 preserve their separate unresolved requirements. Gate D remains NOT READY and production remains unauthorized.
 
 ## Buyer and delivery matrix
 
