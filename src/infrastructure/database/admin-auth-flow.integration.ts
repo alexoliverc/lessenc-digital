@@ -79,7 +79,7 @@ function challengeCookie(response: Response): string {
     .filter((line) => line.includes("two_factor="))
     .map((line) => line.split(";", 1)[0])
     .join("; ");
-  const identifier = value.match(/2fa-[A-Za-z0-9]+/u)?.[0];
+  const identifier = value.match(/2fa-[A-Za-z0-9_-]+/u)?.[0];
   if (identifier) challengeIdentifiers.push(identifier);
   return value;
 }
