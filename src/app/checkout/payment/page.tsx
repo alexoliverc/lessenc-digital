@@ -32,7 +32,7 @@ export default async function PaymentPage() {
     const order = await db.order.findUnique({ where: { id: claims.orderId } });
     if (
       !order ||
-      !["PENDING", "PAID", "REFUNDED"].includes(order.status) ||
+      !["PENDING", "PAID", "REFUNDED", "EXPIRED"].includes(order.status) ||
       order.currency !== "BRL"
     ) {
       throw new Error("ORDER_UNAVAILABLE");

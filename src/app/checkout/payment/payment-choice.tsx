@@ -343,7 +343,7 @@ export function PaymentChoice({
       disposed = true;
     };
   }, [state, gtmContainerId]);
-  const terminal = ["approved", "refunded", "review_required"].includes(state);
+  const terminal = ["approved", "refunded", "expired", "review_required"].includes(state);
   return (
     <section className={styles.choice} aria-live="polite">
       {publicKey && (
@@ -381,6 +381,9 @@ export function PaymentChoice({
       )}
       {state === "canceled" && (
         <p role="status">Tentativa encerrada. Você pode escolher outra forma de pagamento.</p>
+      )}
+      {state === "expired" && (
+        <p role="status">Pedido expirado. Reinicie o checkout para tentar novamente.</p>
       )}
       {state === "refunded" && <p role="status">Este pagamento foi reembolsado.</p>}{" "}
       {state === "review_required" && (

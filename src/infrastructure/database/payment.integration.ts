@@ -284,8 +284,10 @@ describe("P10 financial persistence on isolated MySQL", () => {
     ).toBe("NOOP");
   });
 
-  it("releases an expired attempt without canceling its order", async () => {
+  it("expires the order on provider-confirmed expiration and blocks another attempt", async () => {
     const { attempt } = await repo.reserve(ids.order, "PIX");
+    const outboxBefore = await db.outboxEvent.count({ where: { orderId: ids.order } });
+
     expect(
       await repo.applyObservation({
         paymentId: attempt.paymentId,
@@ -297,11 +299,117 @@ describe("P10 financial persistence on isolated MySQL", () => {
         source: "RECONCILIATION",
       }),
     ).toBe("APPLIED");
-    expect((await db.order.findUniqueOrThrow({ where: { id: ids.order } })).status).toBe("PENDING");
+
+    const order = await db.order.findUniqueOrThrow({ where: { id: ids.order } });
+    const payment = await db.payment.findUniqueOrThrow({
+      where: { id: attempt.paymentId },
+    });
+
+    expect(order.status).toBe("EXPIRED");
+    expect(order.paidAt).toBeNull();
+    expect(order.expiredAt).not.toBeNull();
+    expect(payment.status).toBe("CANCELED");
+    expect(payment.activeAttemptKey).toBeNull();
+    expect((await repo.state(ids.order))?.state).toBe("expired");
+    expect(await db.outboxEvent.count({ where: { orderId: ids.order } })).toBe(outboxBefore);
+    expect(await db.entitlement.count({ where: { orderItemId: ids.item } })).toBe(0);
+
+    await expect(repo.reserve(ids.order, "PIX")).rejects.toThrow("PAYMENT_ORDER_INELIGIBLE");
+  });
+
+  it("keeps a generic provider cancellation retryable without expiring the order", async () => {
+    const { attempt } = await repo.reserve(ids.order, "PIX");
+
     expect(
-      (await db.payment.findUniqueOrThrow({ where: { id: attempt.paymentId } })).activeAttemptKey,
-    ).toBeNull();
+      await repo.applyObservation({
+        paymentId: attempt.paymentId,
+        snapshot: snapshot({
+          status: "CANCELED",
+          providerStatus: "canceled",
+          providerStatusDetail: "canceled",
+        }),
+        source: "RECONCILIATION",
+      }),
+    ).toBe("APPLIED");
+
+    const order = await db.order.findUniqueOrThrow({ where: { id: ids.order } });
+
+    expect(order.status).toBe("PENDING");
+    expect(order.expiredAt).toBeNull();
     expect((await repo.reserve(ids.order, "PIX")).send).toBe(true);
+  });
+
+  it("resolves UNKNOWN to expiration and reviews a late approval without financial side effects", async () => {
+    const { attempt } = await repo.reserve(ids.order, "PIX");
+    const unknown = snapshot({
+      status: "UNKNOWN",
+      requiresReview: true,
+      reviewReason: "UNKNOWN_STATUS",
+      providerStatus: "future_status",
+      providerStatusDetail: "future_detail",
+    });
+
+    expect(
+      await repo.applyObservation({
+        paymentId: attempt.paymentId,
+        snapshot: unknown,
+        source: "RECONCILIATION",
+      }),
+    ).toBe("APPLIED");
+
+    expect(
+      await repo.applyObservation({
+        paymentId: attempt.paymentId,
+        snapshot: snapshot({
+          providerOrderId: unknown.providerOrderId,
+          providerPaymentId: unknown.providerPaymentId,
+          status: "CANCELED",
+          providerStatus: "canceled",
+          providerStatusDetail: "expired",
+          occurredAt: "2026-09-13T12:01:00Z",
+        }),
+        source: "RECONCILIATION",
+      }),
+    ).toBe("APPLIED");
+
+    let order = await db.order.findUniqueOrThrow({ where: { id: ids.order } });
+    let payment = await db.payment.findUniqueOrThrow({
+      where: { id: attempt.paymentId },
+    });
+
+    expect(order.status).toBe("EXPIRED");
+    expect(order.expiredAt).not.toBeNull();
+    expect(payment.status).toBe("CANCELED");
+    expect(payment.activeAttemptKey).toBeNull();
+    expect((await repo.state(ids.order))?.state).toBe("expired");
+    expect(await db.outboxEvent.count({ where: { orderId: ids.order } })).toBe(0);
+
+    expect(
+      await repo.applyObservation({
+        paymentId: attempt.paymentId,
+        snapshot: snapshot({
+          providerOrderId: unknown.providerOrderId,
+          providerPaymentId: unknown.providerPaymentId,
+          occurredAt: "2026-09-13T12:02:00Z",
+        }),
+        source: "WEBHOOK",
+      }),
+    ).toBe("REVIEW");
+
+    order = await db.order.findUniqueOrThrow({ where: { id: ids.order } });
+    payment = await db.payment.findUniqueOrThrow({
+      where: { id: attempt.paymentId },
+    });
+
+    expect(order.status).toBe("EXPIRED");
+    expect(order.paidAt).toBeNull();
+    expect(order.expiredAt).not.toBeNull();
+    expect(payment.status).toBe("CANCELED");
+    expect(payment.requiresReview).toBe(true);
+    expect(payment.reviewReason).toBe("INCOMPATIBLE_FINANCIAL_STATE");
+    expect((await repo.state(ids.order))?.state).toBe("review_required");
+    expect(await db.outboxEvent.count({ where: { orderId: ids.order } })).toBe(0);
+    expect(await db.entitlement.count({ where: { orderItemId: ids.item } })).toBe(0);
   });
 
   it("selects the latest attempt deterministically by attempt number", async () => {

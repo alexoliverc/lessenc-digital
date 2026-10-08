@@ -91,6 +91,7 @@ function orderCreateData(order: Order) {
     createdAt: new Date(order.createdAt),
     updatedAt: new Date(order.updatedAt),
     paidAt: order.paidAt === null ? null : new Date(order.paidAt),
+    expiredAt: order.expiredAt === null ? null : new Date(order.expiredAt),
   };
 }
 

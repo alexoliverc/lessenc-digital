@@ -4,7 +4,7 @@ import { isUtcInstant } from "../../../shared/clock";
 import { Money } from "../../../shared/money";
 import { requirePurchasable, type CatalogOffer } from "../../catalog/domain/catalog";
 
-export const orderStatuses = ["PENDING", "PAID", "FAILED", "CANCELED", "REFUNDED"] as const;
+export const orderStatuses = ["PENDING", "PAID", "FAILED", "CANCELED", "REFUNDED", "EXPIRED"] as const;
 export type OrderStatus = (typeof orderStatuses)[number];
 
 export type OrderItem = Readonly<{
@@ -29,6 +29,7 @@ export type Order = Readonly<{
   createdAt: string;
   updatedAt: string;
   paidAt: string | null;
+  expiredAt: string | null;
 }>;
 
 export function buildOrderItem(
@@ -94,14 +95,20 @@ export function validateOrder(order: Order): void {
     case "PENDING":
     case "FAILED":
     case "CANCELED":
-      if (order.paidAt !== null) {
+      if (order.paidAt !== null || order.expiredAt !== null) {
         throw new ApplicationError("INVALID_SNAPSHOT");
       }
       break;
 
     case "PAID":
     case "REFUNDED":
-      if (!isUtcInstant(order.paidAt)) {
+      if (!isUtcInstant(order.paidAt) || order.expiredAt !== null) {
+        throw new ApplicationError("INVALID_SNAPSHOT");
+      }
+      break;
+
+    case "EXPIRED":
+      if (order.paidAt !== null || !isUtcInstant(order.expiredAt)) {
         throw new ApplicationError("INVALID_SNAPSHOT");
       }
       break;

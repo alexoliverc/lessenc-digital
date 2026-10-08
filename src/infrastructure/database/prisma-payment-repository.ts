@@ -62,6 +62,7 @@ export type PublicPaymentState = Readonly<{
     | "approved"
     | "rejected"
     | "canceled"
+    | "expired"
     | "refunded"
     | "unknown"
     | "review_required";
@@ -337,6 +338,7 @@ export class PrismaPaymentRepository {
     else if (order.status === "REFUNDED" && payment?.status === "REFUNDED") state = "refunded";
     else if (order.status === "PAID" && payment?.status === "APPROVED") state = "approved";
     else if (payment?.status === "REJECTED") state = "rejected";
+    else if (order.status === "EXPIRED") state = "expired";
     else if (payment?.status === "CANCELED") state = "canceled";
     else if (payment?.status === "UNKNOWN") state = "unknown";
     else if (payment?.status === "PENDING") state = "processing";
@@ -392,6 +394,15 @@ export class PrismaPaymentRepository {
           snapshot.requiresReview &&
           snapshot.reviewReason === "UNKNOWN_STATUS" &&
           (payment.status === "PENDING" || payment.status === "UNKNOWN");
+
+        const providerConfirmedExpiration =
+          snapshot.status === "CANCELED" &&
+          (
+            (snapshot.providerStatus === "expired" &&
+              snapshot.providerStatusDetail === "expired") ||
+            (snapshot.providerStatus === "canceled" &&
+              snapshot.providerStatusDetail === "expired")
+          );
 
         const incompatibleFinancialState =
           (snapshot.status === "APPROVED" &&
@@ -489,6 +500,7 @@ export class PrismaPaymentRepository {
               createdAt: order.createdAt.toISOString(),
               updatedAt: order.updatedAt.toISOString(),
               paidAt: order.paidAt?.toISOString() ?? null,
+              expiredAt: order.expiredAt?.toISOString() ?? null,
             };
             if (nextPayment.status === "APPROVED" && order.status === "PENDING") {
               nextOrder = applyOrderFact(
@@ -500,6 +512,28 @@ export class PrismaPaymentRepository {
               nextOrder = applyOrderFact(
                 domainOrder,
                 fact as Extract<typeof fact, { kind: "FULL_REFUND_COMPLETED" }>,
+                clock,
+              );
+            } else if (
+              nextPayment.status === "CANCELED" &&
+              providerConfirmedExpiration &&
+              order.status === "PENDING"
+            ) {
+              const hasApprovedPayment =
+                (await tx.payment.count({
+                  where: {
+                    orderId: order.id,
+                    status: "APPROVED",
+                  },
+                })) > 0;
+
+              nextOrder = applyOrderFact(
+                domainOrder,
+                {
+                  kind: "PROVIDER_EXPIRATION_CONFIRMED",
+                  orderId: order.id,
+                  hasApprovedPayment,
+                },
                 clock,
               );
             }
@@ -563,21 +597,26 @@ export class PrismaPaymentRepository {
             data: {
               status: nextOrder.status,
               paidAt: nextOrder.paidAt ? new Date(nextOrder.paidAt) : null,
+              expiredAt: nextOrder.expiredAt ? new Date(nextOrder.expiredAt) : null,
             },
           });
-          const type = nextOrder.status === "PAID" ? "PAYMENT_APPROVED" : "REFUND_COMPLETED";
-          const deduplicationKey =
-            nextOrder.status === "PAID"
-              ? `payment-approved:${payment.id}`
-              : `refund-completed:${payment.id}`;
-          await tx.outboxEvent.create({
-            data: {
-              orderId: order.id,
-              type,
-              deduplicationKey,
-              payload: { version: 1, orderId: order.id, paymentId: payment.id },
-            },
-          });
+
+          if (nextOrder.status === "PAID" || nextOrder.status === "REFUNDED") {
+            const type = nextOrder.status === "PAID" ? "PAYMENT_APPROVED" : "REFUND_COMPLETED";
+            const deduplicationKey =
+              nextOrder.status === "PAID"
+                ? `payment-approved:${payment.id}`
+                : `refund-completed:${payment.id}`;
+
+            await tx.outboxEvent.create({
+              data: {
+                orderId: order.id,
+                type,
+                deduplicationKey,
+                payload: { version: 1, orderId: order.id, paymentId: payment.id },
+              },
+            });
+          }
         }
         return result;
       },

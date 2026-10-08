@@ -26,6 +26,7 @@ describe("Payment transitions", () => {
     "PENDING:UNKNOWN",
     "UNKNOWN:APPROVED",
     "UNKNOWN:REJECTED",
+    "UNKNOWN:CANCELED",
     "APPROVED:REFUNDED",
   ]);
   for (const from of paymentStatuses)
@@ -50,6 +51,7 @@ describe("Payment transitions", () => {
     expect(unknown).toMatchObject({ status: "UNKNOWN", approvedAt: null });
     expect(() => applyPaymentFact(unknown, factFor("PENDING"), fixedClock)).toThrow();
     expect(applyPaymentFact(unknown, factFor("APPROVED"), fixedClock).approvedAt).toBe(instant);
+    expect(applyPaymentFact(unknown, factFor("CANCELED"), fixedClock).status).toBe("CANCELED");
   });
   it("preserves approval timestamp on duplicate and refund, rejecting delayed negative information", () => {
     const approved = applyPaymentFact(paymentFixture(), factFor("APPROVED"), fixedClock);

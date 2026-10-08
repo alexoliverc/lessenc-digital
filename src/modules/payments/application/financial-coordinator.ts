@@ -69,6 +69,7 @@ export type BuyerPaymentState = Readonly<{
     | "approved"
     | "rejected"
     | "canceled"
+    | "expired"
     | "refunded"
     | "unknown"
     | "review_required";
@@ -82,6 +83,7 @@ function publicState(value: string, presentation: PaymentPresentation = null): B
     "approved",
     "rejected",
     "canceled",
+    "expired",
     "refunded",
     "unknown",
     "review_required",

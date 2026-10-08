@@ -43,6 +43,7 @@ describe("Order preparation and historical snapshots", () => {
       createdAt: instant,
       total: { amountMinor: 2990, currency: "BRL" },
       paidAt: null,
+      expiredAt: null,
     });
     expect(result.value.items[0]).toMatchObject({
       productId: "product",
@@ -116,7 +117,7 @@ describe("Order preparation and historical snapshots", () => {
 });
 
 describe("Order state machine", () => {
-  const allowed = new Set(["PENDING:PAID", "PENDING:FAILED", "PENDING:CANCELED", "PAID:REFUNDED"]);
+  const allowed = new Set(["PENDING:PAID", "PENDING:FAILED", "PENDING:CANCELED", "PENDING:EXPIRED", "PAID:REFUNDED"]);
   for (const from of orderStatuses)
     for (const to of orderStatuses) {
       it(`${from} -> ${to} follows the canonical matrix including idempotent repeats`, () => {
@@ -181,8 +182,49 @@ describe("Order state machine", () => {
       applyOrderFact(paid, { ...fact, amount: Money.of(1, "BRL") }, fixedClock),
     ).toThrow();
   });
+  it("expires only from PENDING with confirmed provider evidence and preserves the timestamp", () => {
+    const order = orderFixture();
+    const fact = {
+      kind: "PROVIDER_EXPIRATION_CONFIRMED" as const,
+      orderId: order.id,
+      hasApprovedPayment: false,
+    };
+
+    const expired = applyOrderFact(order, fact, fixedClock);
+
+    expect(expired.status).toBe("EXPIRED");
+    expect(expired.paidAt).toBeNull();
+    expect(expired.expiredAt).toBe(instant);
+
+    expect(
+      applyOrderFact(expired, fact, {
+        now: () => {
+          throw new Error("clock must not be consulted for repeat");
+        },
+      }),
+    ).toBe(expired);
+
+    expect(() =>
+      applyOrderFact(
+        order,
+        { ...fact, hasApprovedPayment: true },
+        fixedClock,
+      ),
+    ).toThrow(expect.objectContaining({ code: "INVALID_FINANCIAL_ORIGIN" }));
+
+    const paid = {
+      ...order,
+      status: "PAID" as const,
+      paidAt: instant,
+    };
+
+    expect(() => applyOrderFact(paid, fact, fixedClock)).toThrow(
+      expect.objectContaining({ code: "INVALID_ORDER_TRANSITION" }),
+    );
+  });
+
   it("rejects unexpected states at runtime", () => {
-    expect(() => canTransitionOrder("EXPIRED" as OrderStatus, "PAID")).toThrow(
+    expect(() => canTransitionOrder("CREATED" as OrderStatus, "PAID")).toThrow(
       "Unexpected internal discriminant",
     );
     expect(() => canTransitionOrder("PENDING", "CREATED" as OrderStatus)).toThrow(
@@ -200,6 +242,40 @@ describe("Order snapshot timestamp invariants", () => {
         paidAt: instant,
       }),
     ).toThrow(expect.objectContaining({ code: "INVALID_SNAPSHOT" }));
+  });
+
+  it("requires expiredAt only for EXPIRED snapshots", () => {
+    expect(() =>
+      validateOrder({
+        ...orderFixture(),
+        status: "EXPIRED",
+        expiredAt: null,
+      }),
+    ).toThrow(expect.objectContaining({ code: "INVALID_SNAPSHOT" }));
+
+    expect(() =>
+      validateOrder({
+        ...orderFixture(),
+        expiredAt: instant,
+      }),
+    ).toThrow(expect.objectContaining({ code: "INVALID_SNAPSHOT" }));
+
+    expect(() =>
+      validateOrder({
+        ...orderFixture(),
+        status: "EXPIRED",
+        paidAt: instant,
+        expiredAt: instant,
+      }),
+    ).toThrow(expect.objectContaining({ code: "INVALID_SNAPSHOT" }));
+
+    expect(() =>
+      validateOrder({
+        ...orderFixture(),
+        status: "EXPIRED",
+        expiredAt: instant,
+      }),
+    ).not.toThrow();
   });
 
   it.each(["PAID", "REFUNDED"] as const)("%s requires a valid paidAt timestamp", (status) => {

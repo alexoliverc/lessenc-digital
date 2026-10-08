@@ -96,7 +96,7 @@ export function canTransitionPayment(from: PaymentStatus, to: PaymentStatus): bo
       );
 
     case "UNKNOWN":
-      return to === "UNKNOWN" || to === "APPROVED" || to === "REJECTED";
+      return to === "UNKNOWN" || to === "APPROVED" || to === "REJECTED" || to === "CANCELED";
 
     case "APPROVED":
       return to === "APPROVED" || to === "REFUNDED";

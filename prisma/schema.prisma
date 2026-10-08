@@ -20,6 +20,7 @@ enum OrderStatus {
   FAILED
   CANCELED
   REFUNDED
+  EXPIRED
 }
 
 enum PaymentStatus {
@@ -129,6 +130,7 @@ model Order {
   createdAt              DateTime                @default(now()) @map("created_at") @db.DateTime(3)
   updatedAt              DateTime                @updatedAt @map("updated_at") @db.DateTime(3)
   paidAt                 DateTime?               @map("paid_at") @db.DateTime(3)
+  expiredAt              DateTime?               @map("expired_at") @db.DateTime(3)
   customer               Customer                @relation(fields: [customerId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   items                  OrderItem[]
   payments               Payment[]

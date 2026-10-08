@@ -36,6 +36,7 @@ export function orderFixture(): Order {
     createdAt: instant,
     updatedAt: instant,
     paidAt: null,
+    expiredAt: null,
   };
 }
 
