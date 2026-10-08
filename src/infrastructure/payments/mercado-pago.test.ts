@@ -522,7 +522,7 @@ describe("P10 webhook signature", () => {
     for (const ts of [String(now / 1000), String(now)]) {
       const dataId = "ORD01J49MMW3SSBK5PSV3DFR32959";
       const requestId = "request-123";
-      const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
+      const manifest = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
       const digest = createHmac("sha256", secret).update(manifest).digest("hex");
       const signature = `ts=${ts},v1=${digest}`;
       expect(verifyMercadoPagoWebhook({ dataId, requestId, signature, secret, now })).toBe(true);
@@ -542,5 +542,87 @@ describe("P10 webhook signature", () => {
         verifyMercadoPagoWebhook({ dataId, requestId: undefined, signature, secret, now }),
       ).toBe(false);
     }
+  });
+});
+
+describe("R16 E05 order webhook HMAC canonicalization", () => {
+  it("accepts a provider-canonical signed uppercase Order ID", () => {
+    const now = 1_780_000_000_000;
+    const ts = String(now / 1000);
+    const dataId = "ORD01J49MMW3SSBK5PSV3DFR32959";
+    const requestId = "r16-synthetic-request";
+
+    const canonical = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
+    const digest = createHmac("sha256", secret)
+      .update(canonical)
+      .digest("hex");
+
+    expect(
+      verifyMercadoPagoWebhook({
+        dataId,
+        requestId,
+        signature: `ts=${ts},v1=${digest}`,
+        secret,
+        now,
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects a mismatched manifest, changed resource and changed request ID", () => {
+    const now = 1_780_000_000_000;
+    const ts = String(now / 1000);
+    const dataId = "ORD01J49MMW3SSBK5PSV3DFR32959";
+    const requestId = "r16-synthetic-request";
+
+    const sign = (resource: string) =>
+      createHmac("sha256", secret)
+        .update(`id:${resource};request-id:${requestId};ts:${ts};`)
+        .digest("hex");
+
+    const canonicalSignature =
+      `ts=${ts},v1=${sign(dataId.toLowerCase())}`;
+
+    const uppercaseSignature =
+      `ts=${ts},v1=${sign(dataId)}`;
+
+    expect(
+      verifyMercadoPagoWebhook({
+        dataId,
+        requestId,
+        signature: uppercaseSignature,
+        secret,
+        now,
+      }),
+    ).toBe(false);
+
+    expect(
+      verifyMercadoPagoWebhook({
+        dataId: "ORD01J49MMW3SSBK5PSV3DFR3295X",
+        requestId,
+        signature: canonicalSignature,
+        secret,
+        now,
+      }),
+    ).toBe(false);
+
+    expect(
+      verifyMercadoPagoWebhook({
+        dataId,
+        requestId: "another-request",
+        signature: canonicalSignature,
+        secret,
+        now,
+      }),
+    ).toBe(false);
+
+    expect(
+      verifyMercadoPagoWebhook({
+        dataId,
+        requestId,
+        signature: canonicalSignature,
+        secret,
+        now: now + 301_000,
+      }),
+    ).toBe(false);
   });
 });

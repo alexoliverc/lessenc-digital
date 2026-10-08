@@ -36,7 +36,7 @@ export function verifyMercadoPagoWebhook(
   const signedTimeMs = ts.length === 10 ? Number(ts) * 1000 : Number(ts);
   const now = input.now ?? Date.now();
   if (!Number.isSafeInteger(now) || Math.abs(now - signedTimeMs) > 300_000) return false;
-  const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
+  const manifest = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
   const expected = createHmac("sha256", secret).update(manifest).digest();
   const actual = Buffer.from(digest, "hex");
   return actual.length === expected.length && timingSafeEqual(actual, expected);

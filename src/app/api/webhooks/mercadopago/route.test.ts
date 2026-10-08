@@ -19,7 +19,7 @@ function signedRequestAt(
   query = `?type=order&data.id=${id}`,
 ): Request {
   const ts = String(timestamp);
-  const manifest = `id:${id};request-id:${requestId};ts:${ts};`;
+  const manifest = `id:${id.toLowerCase()};request-id:${requestId};ts:${ts};`;
   const digest = createHmac("sha256", secret).update(manifest).digest("hex");
   return new Request(`http://localhost/api/webhooks/mercadopago${query}`, {
     method: "POST",
