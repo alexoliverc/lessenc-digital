@@ -118,6 +118,13 @@ The four Playwright skips are deliberate: database-mutating checkout and securit
 on desktop, while public rendering, navigation, CSP, keyboard and liveness execute on mobile, tablet
 and desktop. These skips are not failed or omitted scenarios.
 
+The exact post-E2E table-count audit found synthetic residue in four tables inside the disposable
+database: 127 `acquisition_journeys`, 127 `attribution_touches`, one
+`admin_auth_rate_limit_buckets` row and two `buyer_access_rate_limit_buckets` rows. The database
+container and its `tmpfs` were removed, so no persistent or protected database was affected. This is
+a local fixture-cleanup limitation; the passing suite does not prove zero residual rows after a full
+combined run.
+
 ## Performance diagnostic
 
 The isolated production build collected 240 valid navigation samples: 40 per route and viewport
