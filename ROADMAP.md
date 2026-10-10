@@ -1311,7 +1311,7 @@ Current hosted authority includes:
 - P17-P05 GTM = `NOT_APPLICABLE`;
 - P17-P06 Meta browser provider = `NOT_APPLICABLE`.
 
-Gate D remains fail-closed. Real Mercado Pago TEST webhook delivery P17-E05 remains `NOT PROVEN`; P17-F01 remains PENDING_EXTERNAL; P17-F02–F08 are PASS / TEST PROVEN only in isolated local validation, with F06 also REGRESSION PROVEN / PUBLISHED on P17; P17-B01 and P17-B03–B07 retain unresolved validation authority; P17-R01–R03 remain `PENDING_EXTERNAL` because the real interactive Payment Brick has not been proven across mobile, tablet and desktop; and P17-PR01–PR04 remain pending an owner-approved numeric performance budget and evaluation.
+Gate D remains fail-closed. Real Mercado Pago TEST webhook delivery P17-E05 remains `NOT PROVEN`; P17-F01 remains PENDING_EXTERNAL; P17-F02–F08 are PASS / TEST PROVEN only in isolated local validation, with F06 also REGRESSION PROVEN / PUBLISHED on P17; P17-B01 and P17-B03–B07 retain unresolved validation authority; P17-R01–R03 remain `PENDING_EXTERNAL` because the real interactive Payment Brick has not been proven across mobile, tablet and desktop; and P17-PR01–PR04 remain pending execution and evaluation against the numeric budget approved by the owner on 10/10/2026.
 
 Production remains unauthorized.
 
@@ -1344,6 +1344,18 @@ in the lint dependency chain without runtime impact.
 P17-PR01 has 240 unthrottled loopback navigation samples and is
 `DIAGNOSTIC_ONLY / BLOCKED_OWNER_BUDGET`. P17-PR02–PR04 are `NOT_EXECUTED`. This local closeout does
 not change the remaining hosted/provider/responsive authority and does not make Gate D ready.
+
+### Owner-approved performance budget — 10/10/2026
+
+The owner expressly approved `LES-P17-PERFORMANCE-BUDGET-R01` as an acceptance policy, without authorizing implementation, tests or deployment.
+
+Numeric acceptance limits: PR01 LCP P75 <= 2,500 ms; PR02 INP P75 <= 200 ms; PR03 browser-side payment initiation P95 <= 1,000 ms; PR04 protected delivery TTFB P95 <= 2,000 ms.
+
+The approved methodology covers 15 independent cohorts, 3 warmups and 40 valid samples per cohort, nearest-rank, zero retries, the three canonical viewports and the calibrated 10 Mbps / 2 Mbps / 80 ms profile with +/-10% tolerance.
+
+The earlier local-closeout statements are historical. PR01 remains diagnostic-only without acceptance proof; PR02-PR04 remain not executed. Provider, buyer, responsive and release evidence authority is unchanged.
+
+Document synchronization does not authorize tests, code edits, payment operations, deploy or production. Gate D remains NOT READY.
 
 ### Objective
 

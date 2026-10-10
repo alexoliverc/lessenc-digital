@@ -158,3 +158,15 @@ The local work is exhausted, but the phase cannot close. The following authoriti
 
 No evidence was fabricated or promoted across authority boundaries. Production remains
 unauthorized, and Gate D remains `NOT READY`.
+
+## Subsequent owner performance budget decision — 10/10/2026
+
+This addendum records a governance decision made after the local validation documented above. It does not alter the results or conditions of the historical local run.
+
+The owner approved `LES-P17-PERFORMANCE-BUDGET-R01` with LCP P75 <= 2,500 ms (PR01), INP P75 <= 200 ms (PR02), browser-side payment initiation P95 <= 1,000 ms (PR03), and protected buyer delivery TTFB P95 <= 2,000 ms (PR04).
+
+The approved protocol requires 15 independent cohorts, 3 warmups and 40 valid measurements per cohort, nearest-rank, zero Playwright retries, the documented mobile/tablet/desktop viewports, 10/2 Mbps with RTT 80 ms, and +/-10% network calibration tolerance.
+
+The prior 240 navigation samples were collected without network throttling or calibration and cannot be reused for acceptance. PR01 remains DIAGNOSTIC_ONLY / ACCEPTANCE NOT PROVEN; PR02-PR04 remain NOT_EXECUTED.
+
+The owner approved the policy only. No new test, provider access, hosted mutation, database operation, code change, deploy or production authorization follows from this decision. Gate D remains NOT READY.

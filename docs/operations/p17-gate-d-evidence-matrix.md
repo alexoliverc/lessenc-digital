@@ -202,14 +202,33 @@ Real Mercado Pago TEST webhook delivery remains `NOT PROVEN`.
 
 ## Performance matrix
 
-| ID | Surface | Criticality | Current state |
-| --- | --- | --- | --- |
-| P17-PR01 | Public navigation | PENDING BUDGET | DIAGNOSTIC_ONLY / BLOCKED_OWNER_BUDGET |
-| P17-PR02 | Checkout interaction | PENDING BUDGET | NOT_EXECUTED |
-| P17-PR03 | Payment initiation | PENDING BUDGET | NOT_EXECUTED |
-| P17-PR04 | Buyer delivery start | PENDING BUDGET | NOT_EXECUTED |
+| ID | Surface | Gate D requirement | Budget authority | Current state |
+| --- | --- | --- | --- | --- |
+| P17-PR01 | Public navigation | REQUIRED | OWNER APPROVED | DIAGNOSTIC_ONLY / ACCEPTANCE NOT PROVEN |
+| P17-PR02 | Checkout interaction | REQUIRED | OWNER APPROVED | NOT_EXECUTED |
+| P17-PR03 | Payment initiation | REQUIRED | OWNER APPROVED | NOT_EXECUTED |
+| P17-PR04 | Buyer delivery start | REQUIRED | OWNER APPROVED | NOT_EXECUTED |
 
-No performance item can become PASS until a numeric acceptance budget is approved.
+REQUIRED denotes a mandatory Gate D acceptance requirement, not a CRITICAL/HIGH severity assignment. The owner approved LES-P17-PERFORMANCE-BUDGET-R01 on 10/10/2026. This resolves the budget-approval dependency only. No performance item can become PASS without authorized execution and valid measurements against the approved acceptance criteria.
+
+### Owner performance budget reconciliation — 10/10/2026
+
+The owner explicitly approved the numeric limits and methodology defined in `LES-P17-PERFORMANCE-BUDGET-R01`:
+
+- PR01: LCP P75 <= 2,500 ms.
+- PR02: INP P75 <= 200 ms.
+- PR03: browser-side payment POST initiation P95 <= 1,000 ms.
+- PR04: protected delivery HTTP TTFB P95 <= 2,000 ms.
+
+The approval covers 15 independent cohorts, 40 valid measurements and 3 valid warmups per cohort; nearest-rank; zero retries; mobile 390x844, tablet 768x1024, desktop 1440x900; 10 Mbps download, 2 Mbps upload, RTT 80 ms and +/-10% network calibration tolerance.
+
+The historical 240 unthrottled, uncalibrated loopback samples remain diagnostic-only. PR01 has no acceptance PASS. PR02-PR04 remain NOT_EXECUTED.
+
+This section supersedes the historical owner-budget-blocked wording solely as to the later budget decision; it does not change the historical measurement facts or promote existing local evidence to hosted/provider authority.
+
+The approval does not authorize implementation, testing, payment operations, database operations, deployment or production. All unresolved E05, F01, B01/B03-B07 and R01-R03 requirements remain unchanged. G5, F3, P9 and release-identity evidence retain their established scopes.
+
+GATE D = NOT READY. PRODUCTION = UNAUTHORIZED.
 
 ## Release identity matrix
 

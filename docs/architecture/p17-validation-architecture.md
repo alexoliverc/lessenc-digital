@@ -326,14 +326,37 @@ Responsive PASS requires functional usability, not merely absence of exceptions.
 
 The roadmap requires performance validation.
 
-No authoritative numeric P17 performance budget currently exists.
+The owner explicitly approved the numeric P17 performance budget on 10/10/2026 under LES-P17-PERFORMANCE-BUDGET-R01. This authorizes acceptance criteria only. Implementation, test execution, deployment, external operations and production remain unauthorized.
 
 P17 therefore requires:
 
 1. deterministic timing evidence;
 2. explicit measured stages;
 3. no fabricated PASS threshold;
-4. approved numeric acceptance budget before Gate D performance PASS.
+4. valid evaluation of every required cohort against the owner-approved numeric budget before Gate D performance PASS.
+
+### Owner-approved performance acceptance policy — 10/10/2026
+
+Authority: `LES-P17-PERFORMANCE-BUDGET-R01 / OWNER APPROVED / ACCEPTANCE NOT PROVEN`.
+
+| Control | Approved measurement | Acceptance limit |
+| --- | --- | --- |
+| P17-PR01 | Public-page Largest Contentful Paint, P75 | <= 2,500 ms |
+| P17-PR02 | Checkout Interaction to Next Paint, P75 | <= 200 ms |
+| P17-PR03 | Browser interaction to HTTP payment POST `requestStart`, P95 | <= 1,000 ms |
+| P17-PR04 | Protected buyer delivery `responseStart - requestStart`, P95 | <= 2,000 ms |
+
+PR03 measures browser-side initiation of `/checkout/payment/start`, not backend or Mercado Pago provider latency. PIX and card are separate cohorts. PR04 measures HTTP response start, not complete file download.
+
+The approved methodology comprises 15 independent cohorts: PR01 (3 viewports), PR02 (3), PR03 PIX (3), PR03 card (3) and PR04 (3). Each cohort requires 3 valid warmups excluded from percentiles and 40 valid measured samples, totaling at least 45 warmups and 600 valid samples. Playwright retries are zero, and percentile calculation uses nearest-rank. Neither viewports nor payment methods may be aggregated to conceal a failing cohort.
+
+Viewport profiles: mobile 390x844, tablet 768x1024 and desktop 1440x900. Network profile: 10 Mbps download, 2 Mbps upload and RTT 80 ms. Network calibration tolerance is +/-10% for each approved dimension. Calibration failure blocks acceptance.
+
+No additional CPU throttling profile is approved. Future measurements must identify the hardware and environment. Laboratory timings cannot be represented as hosted-provider performance or real-user field metrics.
+
+This policy does not retrospectively convert the 240 historical unthrottled and uncalibrated navigation diagnostics into PR01 acceptance measurements. PR01 remains diagnostic-only / acceptance not proven; PR02-PR04 remain not executed.
+
+No performance PASS may be assigned before separately authorized execution, valid measurements and reconciliation with the applicable Gate D evidence authority.
 
 ### Isolated local execution capsule — 10/10/2026
 
@@ -351,7 +374,7 @@ Prisma generation and the Next production build replay from a lock-bound npm cac
 Implementation commit `7ab1777a3363c969cd882d8bac0ffee25afe1b13` passed the offline build,
 runtime/browser smoke, 199 MySQL integration tests and 14 executable real-Chromium E2E scenarios.
 The capsule also produced 240 unthrottled loopback navigation samples. Those samples are diagnostic
-support only because no owner-approved numeric acceptance budget exists. The capsule does not grant
+support only because no owner-approved numeric acceptance budget existed at the time of those measurements. The capsule does not grant
 provider, hosted or Gate D authority.
 
 ## Failure scenarios

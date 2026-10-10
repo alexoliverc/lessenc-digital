@@ -2534,3 +2534,17 @@ image builds fully offline. P17-PR01 has 240 unthrottled loopback navigation sam
 No hosted/provider/payment/deploy operation occurred. P17-E05, P17-F01, P17-B01/P17-B03–B07,
 P17-R01–R03 and owner-approved performance acceptance remain external. Gate D remains `NOT READY`;
 production remains unauthorized.
+
+## P17 owner-approved performance budget — 10/10/2026
+
+The owner expressly approved `LES-P17-PERFORMANCE-BUDGET-R01` as a numeric acceptance policy only. This later decision supersedes prior statements that owner budget approval was absent, without changing the historical status of the local measurements.
+
+PR01 LCP P75 <= 2,500 ms; PR02 INP P75 <= 200 ms; PR03 browser-side payment POST initiation P95 <= 1,000 ms; PR04 protected delivery HTTP TTFB P95 <= 2,000 ms.
+
+The approved methodology covers 15 independent cohorts, 3 valid warmups and 40 valid samples each, 600 valid samples minimum, nearest-rank, zero retries, mobile 390x844, tablet 768x1024, desktop 1440x900, 10 Mbps download, 2 Mbps upload, RTT 80 ms and +/-10% network calibration tolerance. No additional CPU throttling is authorized; hardware identification is required.
+
+Historical PR01 navigation measurements remain DIAGNOSTIC_ONLY / ACCEPTANCE NOT PROVEN. PR02-PR04 remain NOT_EXECUTED. No new performance evidence has been collected.
+
+Only canonical documentation synchronization was subsequently authorized. No code edit, test execution, commit, push, merge, deployment, external payment operation or production authorization is granted.
+
+Gate D NOT READY. Production UNAUTHORIZED.
