@@ -202,9 +202,9 @@ Real Mercado Pago TEST webhook delivery remains `NOT PROVEN`.
 
 ## Performance matrix
 
-| ID | Surface | Criticality | Initial state |
+| ID | Surface | Criticality | Current state |
 | --- | --- | --- | --- |
-| P17-PR01 | Public navigation | PENDING BUDGET | NOT_EXECUTED |
+| P17-PR01 | Public navigation | PENDING BUDGET | DIAGNOSTIC_ONLY / BLOCKED_OWNER_BUDGET |
 | P17-PR02 | Checkout interaction | PENDING BUDGET | NOT_EXECUTED |
 | P17-PR03 | Payment initiation | PENDING BUDGET | NOT_EXECUTED |
 | P17-PR04 | Buyer delivery start | PENDING BUDGET | NOT_EXECUTED |
@@ -315,3 +315,27 @@ Confirmed remaining authorities include real Mercado Pago TEST webhook P17-E05; 
 P17-P02 is `NOT_APPLICABLE` for F3 because TEST did not trigger 3DS/challenge.
 
 G5 and P9 remain closed and are not reopened by this reconciliation.
+
+## Autonomous local closeout reconciliation — 10/10/2026
+
+Implementation commit `7ab1777a3363c969cd882d8bac0ffee25afe1b13` closes the work that can be
+proved safely and locally without provider, hosted-database or deployment authority.
+
+Fresh local supporting evidence includes:
+
+- a digest-pinned, non-root Docker capsule built offline with Node 24.21.0, npm 11.19.1,
+  Playwright 1.63.0, Chromium 153.0.8010.12, Prisma 7.10.0 and a separately verified Prisma Schema
+  Engine for `debian-openssl-3.0.x`;
+- a Linux npm cache tied to the final lockfile and verified for all 390 target entries, 13 required
+  packages, 786 files and a successful network-disabled replay;
+- zero runtime dependency vulnerabilities after `sharp 0.35.5` and `source-map-js 1.2.2` security
+  overrides; four HIGH findings remain confined to the development lint chain;
+- 104 files / 1,032 unit tests, 22 files / 199 isolated MySQL integration tests, 7 files / 42
+  performance-infrastructure tests and 14 real-Chromium E2E scenarios passing;
+- 240 unthrottled loopback navigation samples for `/` and the product route across mobile, tablet
+  and desktop.
+
+The navigation samples make P17-PR01 `DIAGNOSTIC_ONLY / BLOCKED_OWNER_BUDGET`; they do not create an
+acceptance PASS. P17-PR02–PR04 remain `NOT_EXECUTED`. The authoritative unresolved Gate D list is
+unchanged: P17-E05, P17-F01, P17-B01/P17-B03–B07, P17-R01–R03 and approved-budget performance
+evaluation. Production remains unauthorized and `GATE D = NOT READY`.

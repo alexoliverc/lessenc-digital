@@ -420,4 +420,9 @@ Canonical P17 validation documents:
 P17 requires real browser/provider E2E, complete business-journey reconciliation, hosted protected
 buyer-delivery validation, responsive validation and performance evidence before Gate D may pass.
 
+The 10/10/2026 autonomous local closeout is recorded in the local validation report and implementation
+commit `7ab1777a3363c969cd882d8bac0ffee25afe1b13`. It proves the isolated offline capsule, local
+regressions and diagnostic public-navigation measurements only; external Gate D authority remains
+open.
+
 Production remains unauthorized.

@@ -335,6 +335,25 @@ P17 therefore requires:
 3. no fabricated PASS threshold;
 4. approved numeric acceptance budget before Gate D performance PASS.
 
+### Isolated local execution capsule — 10/10/2026
+
+The local performance and regression harness is now materialized as a two-container capsule. MySQL
+runs in an isolated network namespace and disposable `tmpfs`; the application shares only that
+namespace and publishes no port. Both services run with fixed non-root identities, dropped
+capabilities, `no-new-privileges`, no persistent volume and only allowlisted writable paths. Runtime
+procfs validation rejects non-loopback interfaces, default routes and external resolvers.
+
+The application image uses digest-pinned Node and Playwright bases. npm 11.19.1, Debian OpenSSL 3
+libraries and the Prisma 7.10.0 Schema Engine are hash-verified local inputs. Dependency installation,
+Prisma generation and the Next production build replay from a lock-bound npm cache under
+`--network=none`; no implicit engine or browser download is allowed.
+
+Implementation commit `7ab1777a3363c969cd882d8bac0ffee25afe1b13` passed the offline build,
+runtime/browser smoke, 199 MySQL integration tests and 14 executable real-Chromium E2E scenarios.
+The capsule also produced 240 unthrottled loopback navigation samples. Those samples are diagnostic
+support only because no owner-approved numeric acceptance budget exists. The capsule does not grant
+provider, hosted or Gate D authority.
+
 ## Failure scenarios
 
 P17 must validate:

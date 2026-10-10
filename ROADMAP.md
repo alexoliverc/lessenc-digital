@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment is COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED and its permanent checkpoint remains immutable at `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P17 — End-to-End & Business Validation is IN PROGRESS on branch `phase/p17-end-to-end-business-validation`. Current Hostinger deployed Git release is `0f6534fcf1d5b87588f21f6dd64005309a50c786`. Hosted G5 and P9 are COMPLETE / PASS / HOSTED PROVEN. P17-E01 and P17-L04 are PASS / HOSTED PROVEN. P17-P05 GTM and P17-P06 Meta browser provider are NOT_APPLICABLE. P17-R01–R03 remain PENDING_EXTERNAL because real Payment Brick multi-viewport proof is NOT PROVEN. Real Mercado Pago TEST webhook delivery remains NOT PROVEN. Gate D remains NOT READY. Production remains unauthorized.
+**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment is COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED and its permanent checkpoint remains immutable at `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P17 — End-to-End & Business Validation is IN PROGRESS on branch `phase/p17-end-to-end-business-validation`. Current Hostinger deployed Git release is `0f6534fcf1d5b87588f21f6dd64005309a50c786`. Hosted G5 and P9 are COMPLETE / PASS / HOSTED PROVEN. P17-E01 and P17-L04 are PASS / HOSTED PROVEN. P17-P05 GTM and P17-P06 Meta browser provider are NOT_APPLICABLE. P17-R01–R03 remain PENDING_EXTERNAL because real Payment Brick multi-viewport proof is NOT PROVEN. Real Mercado Pago TEST webhook delivery remains NOT PROVEN. The 10/10/2026 autonomous local closeout exhausted safe local work in implementation commit `7ab1777a3363c969cd882d8bac0ffee25afe1b13`; P17-PR01 now has DIAGNOSTIC_ONLY evidence and remains BLOCKED_OWNER_BUDGET. Gate D remains NOT READY. Production remains unauthorized.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1327,6 +1327,23 @@ P17 implementation commits: `920283ae473a12bbfcbacb1020bb6cb8dd3c7194` (F06) and
 Failure Matrix authority: F01 PENDING_EXTERNAL; F02-F08 PASS / TEST PROVEN locally; F06 additionally REGRESSION PROVEN / PUBLISHED. These results do not prove real Mercado Pago TEST webhook delivery (E05), do not establish hosted F06 deployment and do not close the remaining Buyer Access, responsive or performance requirements.
 
 Gate D = NOT READY. Production = UNAUTHORIZED.
+
+### Autonomous local closeout — 10/10/2026
+
+The isolated supply-chain and validation capsule is implemented in commit
+`7ab1777a3363c969cd882d8bac0ffee25afe1b13`. The final lock-bound npm cache replays offline, the
+Prisma 7.10.0 Schema Engine and OpenSSL 3 inputs are hash-verified, the digest-pinned application
+image builds without network access, and non-root runtime isolation is proved for Node and real
+Chromium.
+
+Final local regression: lint and typecheck PASS; 1,032 unit tests PASS; 199 MySQL integration tests
+PASS; 42 performance-infrastructure tests PASS; 14 executable real-Chromium E2E scenarios PASS; and
+runtime dependency audit reports zero vulnerabilities. Four HIGH development-tooling findings remain
+in the lint dependency chain without runtime impact.
+
+P17-PR01 has 240 unthrottled loopback navigation samples and is
+`DIAGNOSTIC_ONLY / BLOCKED_OWNER_BUDGET`. P17-PR02–PR04 are `NOT_EXECUTED`. This local closeout does
+not change the remaining hosted/provider/responsive authority and does not make Gate D ready.
 
 ### Objective
 

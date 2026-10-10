@@ -2510,3 +2510,27 @@ Admin test-hygiene corrections prevent Better Auth base64url challenge and null-
 Current Failure Matrix: F01 PENDING_EXTERNAL; F02-F08 PASS / TEST PROVEN locally; F06 additionally REGRESSION PROVEN / PUBLISHED. No hosted F06 deployment or migration was executed. Current Hostinger deployed release remains `0f6534fcf1d5b87588f21f6dd64005309a50c786`.
 
 E05 real Mercado Pago TEST webhook NOT PROVEN. B01/B03-B07, R01-R03 and PR01-PR04 remain independently unresolved. G5 and P9 remain closed. Gate D NOT READY. Production UNAUTHORIZED. Main and P16 checkpoint unchanged.
+
+## P17 autonomous local closeout — 10/10/2026
+
+The owner-authorized autonomous local closeout exhausted the safe executable P17 work on branch
+`phase/p17-end-to-end-business-validation`. Implementation commit:
+`7ab1777a3363c969cd882d8bac0ffee25afe1b13`.
+
+The digest-pinned two-container capsule now has verified Debian OpenSSL 3 input, Prisma 7.10.0 Schema
+Engine for `debian-openssl-3.0.x`, npm 11.19.1 bootstrap, lock-bound Linux cache and network-disabled
+dependency/build replay. Final runtime is non-root and read-only, publishes no port, uses disposable
+MySQL storage and proves loopback-only Node/Chromium execution with external egress blocked.
+
+Security closeout updated `sharp` to 0.35.5 and `source-map-js` to 1.2.2. Runtime audit is zero;
+four HIGH findings remain confined to the development lint dependency chain because npm's proposed
+automatic fix is an incompatible downgrade.
+
+Final local gates: 1,032 unit tests, 199 isolated MySQL integration tests, 42
+performance-infrastructure tests and 14 executable real-Chromium E2E scenarios pass. The production
+image builds fully offline. P17-PR01 has 240 unthrottled loopback navigation samples and is
+`DIAGNOSTIC_ONLY / BLOCKED_OWNER_BUDGET`; P17-PR02–PR04 remain `NOT_EXECUTED`.
+
+No hosted/provider/payment/deploy operation occurred. P17-E05, P17-F01, P17-B01/P17-B03–B07,
+P17-R01–R03 and owner-approved performance acceptance remain external. Gate D remains `NOT READY`;
+production remains unauthorized.

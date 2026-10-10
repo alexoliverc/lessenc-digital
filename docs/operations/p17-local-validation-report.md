@@ -2,164 +2,152 @@
 
 ## Result first
 
-P17-01 and the locally executable portions of P17-02 through P17-11 are implemented and validated
-on isolated branch `codex/p17-end-to-end-validation`.
+The owner-authorized autonomous local closeout was completed on 10/10/2026 on branch
+`phase/p17-end-to-end-business-validation`. Every locally safe and executable item in the brief was
+implemented or revalidated. Implementation commit:
+`7ab1777a3363c969cd882d8bac0ffee25afe1b13`.
 
-Local gates currently pass. Gate D does not pass.
+The isolated supply chain, offline build, runtime, synthetic MySQL integration, real-Chromium E2E,
+dependency audit and diagnostic navigation measurements pass within their stated local authority.
+Gate D remains `NOT READY`. No local result in this report is hosted or provider authority.
 
-The remaining critical evidence requires an owner-controlled P17 hosted release, Mercado Pago TEST
-credentials/provider interaction, hosted private delivery, positive real-admin MFA/browser
-validation and an approved numeric performance budget. These are `PENDING_EXTERNAL`; no PASS is
-inferred from P10–P16 history or local tests.
-
-## Baseline and isolation
+## Baseline preservation and boundaries
 
 - repository: `C:\Projetos\lessenc-digital`;
-- canonical P17 branch preserved: `phase/p17-end-to-end-business-validation`;
-- isolated execution branch: `codex/p17-end-to-end-validation`;
-- initial HEAD and `origin/P17`: `cda824ce151d75e7dc2f496101d03d1ccd474d14`;
-- initial `origin/main`: `6e269e6db928b228babd8ffd44c3f55574cade4c`;
-- P16 checkpoint target: `22fad0f690618c27cabcfa58528a76ce0a580ad3`;
-- initial worktree and staging: clean;
-- push, PR, merge, tag, checkpoint, hosted deploy and provider mutation: not performed.
+- branch: `phase/p17-end-to-end-business-validation`;
+- initial HEAD: `7f28c6f6bfcea034571e94e0306ff242a26e12fd`;
+- initial state: 28 modified or untracked paths, empty staging and 534 index entries semantically
+  equivalent to HEAD;
+- external audit root:
+  `C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\autonomous-closeout-20261010-090152`;
+- captured before mutation: branch, HEAD, full status, staged and unstaged patches, untracked-file
+  inventory, file hashes, semantic index and Docker containers/images/volumes;
+- the unexplained historical `.git/index` hash divergence remains `UNKNOWN`; no reset, rebase or
+  index replacement was used;
+- protected pre-existing Docker resources were not modified or removed;
+- push, PR, merge, tag, deploy, hosted database access, production credential use and real payment:
+  not performed.
 
-## Implemented validation infrastructure
+## Supply-chain closeout
 
-- `playwright.config.ts` with a dedicated `e2e` test directory;
-- exact local target `http://127.0.0.1:3100` or exact hosted target
-  `https://lessenc.com.br` only;
-- explicit hosted read-only attestation requirement;
-- accidental arbitrary/credential-bearing base URLs rejected;
-- per-run `P17_RUN_ID` and ignored artifacts under `output/p17/<run-id>`;
-- list, JSON and HTML reporters;
-- trace, screenshot and video retained only for failures;
-- 30-second test timeout, 5-second expect timeout, one worker and no local retry;
-- deterministic Chromium viewports: 390x844, 768x1024 and 1440x900;
-- local Next server launcher with synthetic process-only secrets and optional guarded test database;
-- sanitized scenario evidence attachments without cookies, credentials, raw IDs or provider material;
-- Playwright artifacts excluded from ESLint without weakening source linting;
-- Next `agentRules: false` so browser runs cannot rewrite canonical `AGENTS.md`.
-
-No dependency was added: `@playwright/test@1.63.0` was already locked before this execution.
-Chromium 153.0.8010.12, its headless shell and FFmpeg were provisioned outside Git.
-
-## Release identity reconciliation
-
-Staging preflight and migration guard now accept the phase-neutral `STAGING_RELEASE_COMMIT`.
-`P16_RELEASE_COMMIT` remains a compatibility alias for the frozen P16 hosted release. If both are
-present they must match. Missing/malformed values, alias conflict, HEAD mismatch and unverifiable
-HEAD all fail closed with phase-neutral diagnostics.
-
-No real Hostinger environment variable was read, changed or published. The code is deployment-ready,
-but P17 hosted source/runtime binding remains `PENDING_EXTERNAL`.
-
-## Browser scenarios executed
-
-Final intended local matrix:
-
-- public home in Chromium mobile, tablet and desktop;
-- real DOM/hydration/navigation entry and critical CTA visibility;
-- keyboard skip-link focus and horizontal-overflow checks;
-- CSP and security-header checks, including absence of `unsafe-eval`;
-- exact public liveness and `no-store`;
-- product → checkout on desktop with isolated MySQL fixture;
-- invalid checkout input rejected without persistence;
-- valid checkout persisted one `Order.PENDING`, one item snapshot, BRL 2990 and zero Payment;
-- post-success form/input disabled to prevent duplicate UI submission;
-- unauthenticated `/admin` redirect to login;
-- invalid admin identity denied generically with no admin session cookie;
-- invalid well-shaped buyer credential denied generically with no buyer session cookie.
-
-The database fixture is synthetic, targets only `127.0.0.1:3307/lessenc_test`, is guarded before
-connection and is removed after the successful scenario.
-
-## Validation results
-
-| Command/gate | Result |
+| Component | Verified result |
 | --- | --- |
-| `npm ci` | PASS; 387 packages installed deterministically |
-| focused release binding/staging contract | 2 files / 29 tests PASS |
-| `npm run check` | 101 files / 999 tests PASS; lint, typecheck and format PASS |
-| `npm run test:integration` | 22 files / 191 tests PASS on isolated MySQL |
-| final Playwright matrix | 14 PASS / 0 FAIL / 4 intentional project skips in 20.3 seconds |
-| `npm run db:validate` | PASS |
-| `npm run build` | PASS; 11 static pages generated and all dynamic routes compiled |
-| `npm audit --omit=dev --audit-level=high` | PASS; 0 runtime vulnerabilities |
-| `npm audit --audit-level=high` | 4 HIGH, development tooling only |
-| `git diff --check` | required again after documentation/commit reconciliation |
+| OpenSSL | Debian `libssl3` `3.0.22-1~deb12u1`, amd64, SHA-256 `F0A8AA8429209E556C278A9936BBD5F7D2CDB9F7E4E23B1E43ED399217BA80C1` |
+| Debian provenance | signed index SHA-256 `E6223F7DE5FC427E898EA17683A2900785FE9E33015DB0CA976C9BA49E16F0E6`, trusted signer `B0CAB9266E8C3929798B3EEEBDE6D2B9216EC7A8` |
+| OpenSSL libraries | `libssl.so.3` SHA-256 `DF53C8F504722CACD8035111FDAED5151CE17B79FD380EFCF28B3B4A1CA70CD5`; `libcrypto.so.3` SHA-256 `76DD3D93E5EE48950A92A58D59B94DE8143847F91A80D9682C938767B991577D` |
+| Prisma Schema Engine | Prisma `7.10.0`, commit `0edf323efd1d98336f3f0a68684b56f689b900d3`, effective target `debian-openssl-3.0.x` |
+| Prisma compressed artifact | SHA-256 `B7210B525A6E592C0D5DB7E7D48EDBC0F334E14E212AF7AF11C0D4A8DE755A31` |
+| Prisma executable | ELF64 little-endian amd64, SHA-256 `29557C21D47DA6F1695EC1A747CB6C607DADE5E44E8B3E4FA687BD4DC226956D`, version execution PASS |
+| npm bootstrap | npm `11.19.1` tarball SHA-256 `9F58BFF01604CB1B14008FEF14DCEB14D836A49225E45C6C2E37DE3BE3E707F0` |
 
-The four full-tree HIGH findings are the existing `braces` → `micromatch` → `fast-glob` →
-`@next/eslint-plugin-next` development-only chain. The suggested automatic fix is a breaking major
-downgrade to Next ESLint 14 and was not applied. Runtime audit remains clean.
+The original `dpkg-deb` extraction failed because its target had no writable temporary filesystem.
+Extraction then passed in isolated Linux `tmpfs` with `--network none`, a read-only root filesystem
+and a non-root user. A later Windows bind-mount reproduction returned exit 0, so this execution does
+not assign the historical failure to the Windows filesystem.
 
-## P17-01 through P17-11
+Prisma target detection initially selected OpenSSL 1.1 when libraries existed only through
+`LD_LIBRARY_PATH`. Installing the verified libraries into the standard isolated Debian library path
+made Prisma select `debian-openssl-3.0.x`; the engine then loaded and executed without database
+access. No implicit engine download is part of the build.
 
-| Phase item | Current classification | Evidence boundary |
+## Offline dependency cache and security reconciliation
+
+The security update changed `package-lock.json`, so the earlier approved cache remains preserved as
+historical evidence but could no longer be the canonical build input. The refreshed Linux cache is
+bound to:
+
+- Node.js `24.21.0` and npm `11.19.1`;
+- lockfile SHA-256
+  `E93A35F25C59CADF6BEA860759B447CC2F86DEC16CA562B0182BB5AC02902720`;
+- 445 lock entries, 390/390 Linux-target entries and 13/13 mandatory packages;
+- 786 cache files and 277,883,978 bytes;
+- inventory SHA-256
+  `E44A77D985BEE7299B9A27552274E19D8C2327DBDC1C56926654FFB534E839BC`;
+- online acquisition in a disposable Linux container followed by a successful `npm ci --offline
+  --ignore-scripts` replay with `--network none`;
+- no `.npmrc`, log, credential file, symbolic link, hard link or unapproved registry origin in the
+  sealed cache.
+
+`sharp` was raised to `0.35.5` and `source-map-js` to `1.2.2` through root overrides. The final
+runtime audit reports zero vulnerabilities. The full audit retains four HIGH findings only in the
+development lint chain (`@next/eslint-plugin-next` → `fast-glob` → `micromatch` → `braces`); npm's
+suggested fix would downgrade the Next ESLint plugin incompatibly and was not applied.
+
+## Docker capsule and isolation
+
+The application capsule uses digest-pinned Node 24.21.0, Playwright 1.63.0 and MySQL 8.4.11 images.
+All build steps that consume the application dependencies execute with `--network=none`. The final
+application image manifest was
+`sha256:f8c9adb358d747cd7997c21282660a3e6be857bdfbd92b4aa25f4ca86d2ef199`.
+
+Runtime validation proved:
+
+- UID/GID `17017:17017`, non-root;
+- Node `v24.21.0`, npm `11.19.1`, Prisma `7.10.0`, Next `16.3.8`, Playwright `1.63.0`;
+- corrected `sharp 0.35.5` and `source-map-js 1.2.2` are present;
+- Chromium `153.0.8010.12` launches with the Playwright sandbox defaults;
+- Node and Chromium can reach only the loopback test server and cannot reach an external address;
+- no non-loopback interface, IPv4/IPv6 default route or external resolver exists in the capsule;
+- application root is read-only at runtime, with only explicit `tmpfs` paths writable;
+- the application and MySQL share only the database container network namespace, publish no port
+  and mount no persistent volume;
+- MySQL runs as UID/GID `999:999` in disposable `tmpfs` storage;
+- no provider endpoint or production credential was accessed.
+
+The disposable database container and the two locally built images were removed after validation.
+No container with label `com.lessenc.scope=p17-autonomous-closeout-r01` remains.
+
+## Final validation results
+
+| Command or gate | Environment | Result |
 | --- | --- | --- |
-| P17-01 | PASS locally | architecture, runner, browser and evidence baseline implemented |
-| P17-02 | PASS locally / PENDING_EXTERNAL for staging | real browser checkout and authoritative local persistence passed |
-| P17-03 | PENDING_EXTERNAL | server/provider regressions pass; no live Mercado Pago TEST run |
-| P17-04 | PENDING_EXTERNAL | local buyer/delivery contracts pass; no hosted R2 protected delivery |
-| P17-05 | PARTIAL PASS / PENDING_EXTERNAL | invalid admin browser boundary and integration pass; positive real admin/MFA browser flow pending |
-| P17-06 | PASS locally / PENDING_EXTERNAL where provider-dependent | 191 integration tests cover failure, ordering, retry and idempotency contracts |
-| P17-07 | PARTIAL PASS / PENDING_EXTERNAL | real local Chromium passed; Payment Brick/provider/3DS not executed |
-| P17-08 | PARTIAL PASS / PENDING_EXTERNAL | public entry passed all three viewports; remaining critical surfaces pending |
-| P17-09 | PASS locally / PENDING_EXTERNAL | storage failure/recovery regressions pass; hosted R2 fault run prohibited |
-| P17-10 | PENDING_EXTERNAL | no single correlated provider-to-delivery-to-admin hosted journey exists |
-| P17-11 | LOCAL GATES PASS / GATE D NOT READY | final commit/source identity and external evidence remain pending |
+| `node scripts/p17-npm-cache-verify.mjs verify-cache ...` | sealed Linux cache | PASS; 390 target entries, 13 required packages, 786 files |
+| toolchain and procfs verifier tests | host Node 24 | 5/5 PASS |
+| `npm run test:performance:infra` | local, provider-free | 7 files / 42 tests PASS |
+| offline Docker build | digest-pinned images, `--network=none` | PASS; Prisma generate and Next production build PASS |
+| runtime validation and smoke | read-only, non-root, network-isolated capsule | PASS |
+| integration suite | disposable MySQL 8.4.11, TLS, DML-only runtime user | 22 files / 199 tests PASS |
+| Playwright E2E | production build, real Chromium, synthetic MySQL | 14 PASS / 0 FAIL / 4 intentional viewport skips |
+| `npm run check` | `APP_ENV=test` | lint PASS; typecheck PASS; 104 files / 1,032 tests PASS; format PASS |
+| `npm audit --omit=dev` | final lockfile | PASS; zero vulnerabilities |
+| full `npm audit` | final lockfile | 4 HIGH development-tooling findings; runtime unaffected |
+| `git diff --check` | implementation candidate | PASS |
+| changed-file secret scan | 48 implementation paths | PASS; no private filename, key, provider token or unclassified credential literal |
 
-## Performance measurements
+The four Playwright skips are deliberate: database-mutating checkout and security cases execute once
+on desktop, while public rendering, navigation, CSP, keyboard and liveness execute on mobile, tablet
+and desktop. These skips are not failed or omitted scenarios.
 
-Development-mode timing evidence was collected in the Playwright reports. Representative local
-observations include a cold public navigation around 2.7 seconds, hot public responses around
-40–50 milliseconds, product rendering around 0.7 seconds after compilation, checkout navigation
-around 0.2 seconds after compilation and the guarded checkout business scenario around 3.4 seconds.
+## Performance diagnostic
 
-These are development-machine baselines only. They are not performance PASS criteria. No numeric
-owner-approved P17 budget exists, so P17-PR01 through P17-PR04 remain `PENDING_EXTERNAL`.
+The isolated production build collected 240 valid navigation samples: 40 per route and viewport
+group after two warmups. The loopback run was unthrottled and uncalibrated, so it is
+`DIAGNOSTIC_ONLY`, not an acceptance PASS.
 
-## Defects found and corrected
+| Viewport | Route | TTFB p50/p95 | DOMContentLoaded p50/p95 |
+| --- | --- | --- | --- |
+| mobile | `/` | 2.70 / 4.60 ms | 36.30 / 47.10 ms |
+| mobile | product | 18.40 / 24.80 ms | 55.30 / 64.30 ms |
+| tablet | `/` | 2.50 / 3.10 ms | 33.40 / 39.60 ms |
+| tablet | product | 14.60 / 17.50 ms | 48.70 / 57.50 ms |
+| desktop | `/` | 2.30 / 2.90 ms | 35.20 / 40.90 ms |
+| desktop | product | 14.80 / 19.50 ms | 47.50 / 58.00 ms |
 
-1. Chromium runtime was absent after the Playwright package installation. The exact approved
-   browser/runtime bundle was provisioned outside Git.
-2. `next dev` rewrote canonical `AGENTS.md`. `agentRules: false` now prevents test execution from
-   mutating governance files; the generated block was removed without changing original content.
-3. ESLint scanned ignored Playwright HTML artifacts. Generated artifact directories are now
-   explicitly ignored by ESLint while source and specs remain linted.
-4. Staging release binding was P16-specific. It is now phase-neutral with strict backward-compatible
-   aliasing and conflict rejection.
+Raw diagnostic evidence remains outside Git under the external audit root. P17-PR01 is
+`DIAGNOSTIC_ONLY / BLOCKED_OWNER_BUDGET`. P17-PR02 through P17-PR04 remain `NOT_EXECUTED` because no
+numeric acceptance budget exists and provider-sensitive execution is outside this local authority.
 
-No application authority, payment, webhook, entitlement, authentication or storage control was
-disabled to make tests pass.
+## Gate D and external blockers
 
-## External blockers and residual risks
+The local work is exhausted, but the phase cannot close. The following authorities remain external:
 
-- P17 hosted deploy/source binding requires later owner-controlled Hostinger mutation and deploy;
-- Mercado Pago TEST credentials/provider/Brick/3DS are unavailable in this process;
-- no new hosted webhook, payment, entitlement or protected R2 delivery run was executed;
-- no positive real admin login/MFA/projection browser journey was executed;
-- responsive coverage is not yet complete for checkout payment, buyer library/delivery and admin;
-- performance has measurements but no authorized acceptance budget;
-- four HIGH development-tooling findings remain, with runtime audit clean;
-- local Next development emits the expected React development CSP/eval diagnostic; hosted
-  production-runtime CSP must be revalidated on the P17 release;
-- P16 retention/off-R2/atomicity residuals remain P16 context and are not rewritten as P17 proof.
+- P17-E05: real Mercado Pago TEST webhook delivery and correlation;
+- P17-F01: real declined-payment evidence;
+- P17-B01 and P17-B03–B07: remaining hosted buyer, failure and recovery evidence as classified by
+  the canonical matrix;
+- P17-R01–R03: real interactive Payment Brick proved in mobile, tablet and desktop;
+- P17-PR01–PR04: owner-approved numeric performance budget followed by authoritative evaluation;
+- final hosted/source reconciliation after any later P17 publication.
 
-## Gate D recommendation
-
-`NO PASS / NOT READY`.
-
-The local candidate is suitable for technical review and later controlled hosted certification.
-Gate D must remain open until every critical hosted/provider/business-journey requirement and the
-performance decision are resolved with fresh P17 evidence.
-
-## External execution boundary reconciliation
-
-For this local P17 execution:
-
-- Provider TEST executions: 0.
-- Hosted P17 executions: 0.
-- Pagamentos reais: 0.
-- Mercado Pago production credentials used: 0.
-- Hosted P17 evidence remains PENDING_EXTERNAL.
-- These local results MUST NOT be promoted to Gate D hosted PASS.
+No evidence was fabricated or promoted across authority boundaries. Production remains
+unauthorized, and Gate D remains `NOT READY`.
