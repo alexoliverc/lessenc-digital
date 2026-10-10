@@ -117,7 +117,13 @@ describe("Order preparation and historical snapshots", () => {
 });
 
 describe("Order state machine", () => {
-  const allowed = new Set(["PENDING:PAID", "PENDING:FAILED", "PENDING:CANCELED", "PENDING:EXPIRED", "PAID:REFUNDED"]);
+  const allowed = new Set([
+    "PENDING:PAID",
+    "PENDING:FAILED",
+    "PENDING:CANCELED",
+    "PENDING:EXPIRED",
+    "PAID:REFUNDED",
+  ]);
   for (const from of orderStatuses)
     for (const to of orderStatuses) {
       it(`${from} -> ${to} follows the canonical matrix including idempotent repeats`, () => {
@@ -204,13 +210,9 @@ describe("Order state machine", () => {
       }),
     ).toBe(expired);
 
-    expect(() =>
-      applyOrderFact(
-        order,
-        { ...fact, hasApprovedPayment: true },
-        fixedClock,
-      ),
-    ).toThrow(expect.objectContaining({ code: "INVALID_FINANCIAL_ORIGIN" }));
+    expect(() => applyOrderFact(order, { ...fact, hasApprovedPayment: true }, fixedClock)).toThrow(
+      expect.objectContaining({ code: "INVALID_FINANCIAL_ORIGIN" }),
+    );
 
     const paid = {
       ...order,

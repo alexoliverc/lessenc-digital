@@ -4,7 +4,14 @@ import { isUtcInstant } from "../../../shared/clock";
 import { Money } from "../../../shared/money";
 import { requirePurchasable, type CatalogOffer } from "../../catalog/domain/catalog";
 
-export const orderStatuses = ["PENDING", "PAID", "FAILED", "CANCELED", "REFUNDED", "EXPIRED"] as const;
+export const orderStatuses = [
+  "PENDING",
+  "PAID",
+  "FAILED",
+  "CANCELED",
+  "REFUNDED",
+  "EXPIRED",
+] as const;
 export type OrderStatus = (typeof orderStatuses)[number];
 
 export type OrderItem = Readonly<{

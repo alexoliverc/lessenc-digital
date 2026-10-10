@@ -397,12 +397,9 @@ export class PrismaPaymentRepository {
 
         const providerConfirmedExpiration =
           snapshot.status === "CANCELED" &&
-          (
-            (snapshot.providerStatus === "expired" &&
-              snapshot.providerStatusDetail === "expired") ||
+          ((snapshot.providerStatus === "expired" && snapshot.providerStatusDetail === "expired") ||
             (snapshot.providerStatus === "canceled" &&
-              snapshot.providerStatusDetail === "expired")
-          );
+              snapshot.providerStatusDetail === "expired"));
 
         const incompatibleFinancialState =
           (snapshot.status === "APPROVED" &&

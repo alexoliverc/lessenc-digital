@@ -553,9 +553,7 @@ describe("R16 E05 order webhook HMAC canonicalization", () => {
     const requestId = "r16-synthetic-request";
 
     const canonical = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
-    const digest = createHmac("sha256", secret)
-      .update(canonical)
-      .digest("hex");
+    const digest = createHmac("sha256", secret).update(canonical).digest("hex");
 
     expect(
       verifyMercadoPagoWebhook({
@@ -579,11 +577,9 @@ describe("R16 E05 order webhook HMAC canonicalization", () => {
         .update(`id:${resource};request-id:${requestId};ts:${ts};`)
         .digest("hex");
 
-    const canonicalSignature =
-      `ts=${ts},v1=${sign(dataId.toLowerCase())}`;
+    const canonicalSignature = `ts=${ts},v1=${sign(dataId.toLowerCase())}`;
 
-    const uppercaseSignature =
-      `ts=${ts},v1=${sign(dataId)}`;
+    const uppercaseSignature = `ts=${ts},v1=${sign(dataId)}`;
 
     expect(
       verifyMercadoPagoWebhook({

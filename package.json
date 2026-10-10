@@ -23,6 +23,9 @@
     "test:e2e": "playwright test",
     "test:e2e:list": "playwright test --list",
     "test:e2e:install": "playwright install chromium",
+    "test:performance:infra": "vitest run --config vitest.performance.config.mts",
+    "performance:infra:describe": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/p17-performance-runner.mjs describe",
+    "performance:infra:validate": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/p17-performance-runner.mjs validate-config",
     "typecheck": "npm run db:generate && tsc --noEmit",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
@@ -78,7 +81,9 @@
   "overrides": {
     "mariadb": "3.5.4",
     "mysql2": "3.24.4",
-    "deepmerge-ts": "8.0.2"
+    "deepmerge-ts": "8.0.2",
+    "sharp": "0.35.5",
+    "source-map-js": "1.2.2"
   },
   "engines": {
     "node": "24.x"

@@ -2,16 +2,28 @@
 import { spawn } from "node:child_process";
 import process from "node:process";
 
+const production = process.env.P17_E2E_SERVER_MODE === "production";
+if (process.env.P17_E2E_SERVER_MODE && !production) {
+  throw new Error("P17_E2E_SERVER_MODE_INVALID");
+}
+
 const child = spawn(
   process.execPath,
-  ["node_modules/next/dist/bin/next", "dev", "-H", "127.0.0.1", "-p", "3100"],
+  [
+    "node_modules/next/dist/bin/next",
+    production ? "start" : "dev",
+    "-H",
+    "127.0.0.1",
+    "-p",
+    "3100",
+  ],
   {
     cwd: process.cwd(),
     env: {
       ...process.env,
       APP_ENV: "local",
       APP_URL: "http://127.0.0.1:3100",
-      NODE_ENV: "development",
+      NODE_ENV: production ? "production" : "development",
       ...(process.env.P17_E2E_DATABASE === "true"
         ? {
             DB_RUNTIME_URL: process.env.TEST_DATABASE_URL,

@@ -44,6 +44,7 @@ const evidenceRoot = join("output", "p17", runId);
 
 export default defineConfig({
   testDir: "./e2e",
+  testMatch: "**/*.spec.ts",
   outputDir: join(evidenceRoot, "artifacts"),
   fullyParallel: false,
   forbidOnly: true,
