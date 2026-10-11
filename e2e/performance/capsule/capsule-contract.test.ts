@@ -9,6 +9,9 @@ const read = (path: string) => readFileSync(resolve(repositoryRoot, path), "utf8
 const dockerfile = read("e2e/performance/capsule/Dockerfile");
 const entrypoint = read("e2e/performance/capsule/entrypoint.sh");
 const networkVerifier = read("scripts/p17-capsule-network.mjs");
+const performanceController = read("scripts/p17-performance-controller.mjs");
+const specSupport = read("e2e/performance/helpers/spec-support.ts");
+const calibrationServer = read("scripts/p17-performance-calibration-server.mjs");
 const buildScript = read("e2e/performance/capsule/build-app.sh");
 const compose = read("e2e/performance/capsule/compose.yaml");
 const dockerignore = read(".dockerignore");
@@ -54,13 +57,17 @@ describe("P17 two-container performance capsule contract", () => {
     expect(buildScript).not.toContain("npm run build");
   });
 
-  it("shares only the database network namespace and publishes no ports or volumes", () => {
+  it("shares only loopback networking and an ephemeral read-only TLS trust path", () => {
     expect(compose).toContain("network_mode: none");
     expect(compose).toContain("network_mode: service:p17-db");
     expect(compose).toContain("--bind-address=127.0.0.1");
     expect(compose).toContain("--port=3307");
     expect(compose).not.toMatch(/^\s+ports:/mu);
-    expect(compose).not.toMatch(/^\s+volumes:/mu);
+    expect(compose).toContain("p17-db-data:/var/lib/mysql");
+    expect(compose).toContain("p17-db-data:/workspace/tmp/p17-db-data:ro");
+    expect(compose).toContain("p17-output-data:/workspace/output");
+    expect(compose).toContain("DB_TLS_CA_FILE: /workspace/tmp/p17-db-data/ca.pem");
+    expect(compose).toContain("type: tmpfs");
     expect(compose).not.toMatch(/^networks:/mu);
     expect(compose).not.toMatch(/^\s+privileged:/mu);
     expect(compose).not.toMatch(/^\s+extra_hosts:/mu);
@@ -69,7 +76,7 @@ describe("P17 two-container performance capsule contract", () => {
     expect(compose).toContain("no-new-privileges:true");
   });
 
-  it("keeps runtime commands blocked and requires loopback-only networking", () => {
+  it("governs runtime commands and requires loopback-only networking", () => {
     expect(entrypoint).not.toContain("P17_CAPSULE_MYSQL_MISSING");
     expect(networkVerifier).toContain("P17_CAPSULE_NON_LOOPBACK_INTERFACE_PRESENT");
     expect(networkVerifier).toContain("P17_CAPSULE_IPV4_DEFAULT_ROUTE_PRESENT");
@@ -77,11 +84,25 @@ describe("P17 two-container performance capsule contract", () => {
     expect(networkVerifier).toContain("P17_CAPSULE_EXTERNAL_DNS_PRESENT");
     expect(entrypoint).toContain("P17_ALLOW_HOSTED_READ_ONLY");
     expect(entrypoint).toContain("MERCADOPAGO_ACCESS_TOKEN");
-    expect(entrypoint).toMatch(/collect \| run \| server\)/u);
-    expect(entrypoint).toContain("P17_PERFORMANCE_I04_B_NOT_AUTHORIZED");
+    expect(entrypoint).toMatch(/^ {2}run\)$/mu);
+    expect(entrypoint).toMatch(/^ {2}collect \| server\)$/mu);
+    expect(entrypoint).toContain("P17_PERFORMANCE_COMMAND_NOT_AUTHORIZED");
+    expect(entrypoint).toContain("P17_CAPSULE_EXECUTION_AUTHORITY_INVALID");
     expect(entrypoint).toContain("P17_CAPSULE_STATIC_ISOLATION_VALIDATED");
     expect(entrypoint).toContain("P17_CAPSULE_SHARP_VERSION_INVALID");
     expect(entrypoint).toContain("P17_CAPSULE_SOURCE_MAP_JS_VERSION_INVALID");
+    expect(performanceController).toContain("runLocalPerformanceAcceptance");
+    expect(performanceController).toContain("assertLocalPerformanceExecutionAuthorized");
+    expect(performanceController).toContain("P17_PERFORMANCE_CALIBRATION_SMOKE_INVALID");
+    expect(specSupport).toContain("bypassCSP: true");
+    expect(calibrationServer).toContain("P17_PERFORMANCE_CALIBRATION_SERVER_NOT_AUTHORIZED");
+    expect(dockerfile).toContain("P17_SOURCE_COMMIT=UNVERIFIED");
+    expect(dockerfile).toContain("/workspace/.p17-declared-commit");
+    expect(dockerfile).toContain("/workspace/.p17-source-tree.sha256");
+    expect(compose).toContain("P17_SOURCE_COMMIT: ${P17_SOURCE_COMMIT:-UNVERIFIED}");
+    expect(compose).toContain("P17_PERF_COMMIT: ${P17_SOURCE_COMMIT:-UNVERIFIED}");
+    expect(compose).toContain("P17_SOURCE_TREE_SHA256: ${P17_SOURCE_TREE_SHA256:-UNVERIFIED}");
+    expect(entrypoint).toContain("LES-P17-AUTONOMOUS-CLOSEOUT-R01");
   });
 
   it("uses an allowlisted build context with explicit secret exclusions", () => {
@@ -106,7 +127,13 @@ describe("P17 two-container performance capsule contract", () => {
   });
 
   it("preserves isolation and separates performance acceptance from execution", () => {
-    expect(contract.status.performanceAcceptance).toBe("BLOCKED_OWNER_BUDGET");
+    expect(contract.status.ownerPerformanceBudget).toBe("APPROVED_LES_P17_PERFORMANCE_BUDGET_R01");
+    expect(contract.status.performanceExecutionAuthorization).toBe(
+      "AUTHORIZED_LOCAL_ONLY_LES_P17_AUTONOMOUS_CLOSEOUT_R01",
+    );
+    expect(contract.status.performanceAcceptance).toBe("NOT_PROVEN");
+    expect(contract.status.gateD).toBe("NOT_READY");
+    expect(contract.status.productionAuthorization).toBe("UNAUTHORIZED");
     expect(contract.network.databaseMode).toBe("none");
     expect(contract.network.applicationMode).toBe("service:p17-db");
     expect(contract.network.publishedPorts).toBe(0);

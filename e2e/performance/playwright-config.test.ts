@@ -9,9 +9,16 @@ describe("P17 dedicated Playwright performance configuration", () => {
     expect(config.retries).toBe(0);
     expect(config.workers).toBe(1);
     expect(config.fullyParallel).toBe(false);
+    expect(config.maxFailures).toBe(1);
     expect(config.use?.baseURL).toBe("http://127.0.0.1:3100");
     expect(config.use?.serviceWorkers).toBe("block");
+    expect(config.use?.trace).toBe("off");
     expect(config.webServer).toBeUndefined();
+    expect(config.reporter).toEqual(
+      expect.arrayContaining([
+        expect.arrayContaining(["./e2e/performance/helpers/acceptance-reporter.ts"]),
+      ]),
+    );
   });
 
   it("contains only the three approved Chromium viewports", () => {

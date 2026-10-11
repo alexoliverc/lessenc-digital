@@ -11,6 +11,7 @@ FROM node-runtime AS app-build
 
 ARG P17_PERF_UID=17017
 ARG P17_PERF_GID=17017
+ARG P17_SOURCE_COMMIT=UNVERIFIED
 
 ENV APP_ENV=local \
     NODE_ENV=production \
@@ -20,6 +21,7 @@ ENV APP_ENV=local \
     NPM_CONFIG_OFFLINE=true \
     NPM_CONFIG_UPDATE_NOTIFIER=false \
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
+    NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY=p17_perf_public_key_synthetic_only \
     PRISMA_SCHEMA_ENGINE_BINARY=/opt/p17-toolchain/schema-engine \
     HOME=/home/p17perf \
     P17_OFFLINE_NPM_CACHE=/opt/p17-offline/npm-cache/npm-11.19.1/node-24.21.0/linux-amd64-glibc/E93A35F25C59CADF6BEA860759B447CC2F86DEC16CA562B0182BB5AC02902720/cache \
@@ -47,18 +49,24 @@ COPY --chown=p17perf:p17perf e2e/performance/capsule/offline/ /opt/p17-offline/
 
 USER p17perf
 
+RUN --network=none node -e 'const value = process.argv[1]; if (value !== "UNVERIFIED" && !/^[0-9a-f]{40}$/.test(value)) process.exit(1);' "${P17_SOURCE_COMMIT}" \
+    && printf '%s\n' "${P17_SOURCE_COMMIT}" > /workspace/.p17-declared-commit \
+    && chmod 0444 /workspace/.p17-declared-commit
+
 RUN --network=none /bin/sh ./e2e/performance/capsule/build-app.sh
 
 FROM ${P17_PLAYWRIGHT_IMAGE} AS app-runtime
 
 ARG P17_PERF_UID=17017
 ARG P17_PERF_GID=17017
+ARG P17_SOURCE_TREE_SHA256=UNVERIFIED
 
 ENV APP_ENV=local \
     NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
+    NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY=p17_perf_public_key_synthetic_only \
     HOME=/home/p17perf \
     PRISMA_SCHEMA_ENGINE_BINARY=/opt/p17-toolchain/schema-engine \
     LD_LIBRARY_PATH=/opt/p17-toolchain/openssl/usr/lib/x86_64-linux-gnu \
@@ -95,8 +103,18 @@ COPY --chown=p17perf:p17perf scripts/p06-db-guard.mjs scripts/p17-e2e-server.mjs
 COPY --chown=p17perf:p17perf prisma/migrations/ /workspace/prisma/migrations/
 COPY --chown=p17perf:p17perf e2e/*.spec.ts /workspace/e2e/
 COPY --chown=p17perf:p17perf e2e/helpers/ /workspace/e2e/helpers/
+COPY --chown=p17perf:p17perf playwright.performance.config.ts vitest.performance.config.mts /workspace/
+COPY --chown=p17perf:p17perf e2e/performance/helpers/ /workspace/e2e/performance/helpers/
+COPY --chown=p17perf:p17perf e2e/performance/fixtures/ /workspace/e2e/performance/fixtures/
+COPY --chown=p17perf:p17perf e2e/performance/*.perf.spec.ts /workspace/e2e/performance/
+# Next regenerates this declaration during build. Restore the reviewed build-context bytes so the
+# final source manifest binds the exact declared input rather than an incidental generated variant.
+COPY --chown=p17perf:p17perf next-env.d.ts /workspace/next-env.d.ts
 
-RUN --network=none chmod 0550 /workspace/e2e/performance/capsule/entrypoint.sh \
+RUN --network=none /opt/node24/bin/node /workspace/scripts/p17-source-provenance.mjs write /workspace /workspace/.p17-source-tree.sha256 \
+    && /opt/node24/bin/node -e 'const fs = require("node:fs"); const expected = process.argv[1]; const observed = fs.readFileSync("/workspace/.p17-source-tree.sha256", "utf8").trim(); if (expected !== "UNVERIFIED" && (!/^[0-9a-f]{64}$/.test(expected) || observed !== expected)) process.exit(1);' "${P17_SOURCE_TREE_SHA256}" \
+    && chmod 0444 /workspace/.p17-source-tree.sha256 \
+    && chmod 0550 /workspace/e2e/performance/capsule/entrypoint.sh \
     && find /workspace -perm /022 -exec chmod go-w {} + \
     && chmod 0700 /home/p17perf/.cache /workspace/output/p17-performance /workspace/tmp/p17-performance-storage
 

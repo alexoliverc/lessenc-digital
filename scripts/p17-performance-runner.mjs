@@ -12,8 +12,10 @@ import {
   NETWORK_CALIBRATION_TOLERANCE,
   PERFORMANCE_NETWORK_PROFILE,
 } from "../e2e/performance/helpers/network-profile.ts";
+import { createP17ExecutionPlan } from "../e2e/performance/helpers/orchestration.ts";
 
 const command = process.argv[2] ?? "describe";
+const executionPlan = createP17ExecutionPlan();
 
 function report(value) {
   process.stdout.write(`${JSON.stringify(value, null, 2)}\n`);
@@ -25,6 +27,7 @@ function validateConfiguration() {
     repositoryRoot: process.cwd(),
     storagePath: process.env.P17_PERF_STORAGE_PATH,
     runId: process.env.P17_PERF_RUN_ID ?? "p17-perf-infrastructure-validation",
+    commit: process.env.P17_PERF_COMMIT,
   });
 
   report({
@@ -59,7 +62,20 @@ try {
         calibrationTolerance: NETWORK_CALIBRATION_TOLERANCE,
         retries: 0,
         workers: 1,
-        scenariosImplemented: false,
+        policy: "LES-P17-PERFORMANCE-BUDGET-R01",
+        cohorts: new Set(executionPlan.map((attempt) => attempt.cohortKey)).size,
+        warmupsPerCohort: 3,
+        validSamplesPerCohort: 40,
+        plannedWarmups: executionPlan.filter((attempt) => attempt.phase === "WARMUP").length,
+        plannedMeasurements: executionPlan.filter((attempt) => attempt.phase === "MEASUREMENT")
+          .length,
+        scenariosImplemented: true,
+        implementationReadiness: "IMPLEMENTED_RUNTIME_VALIDATION_PENDING",
+        executionAuthorization: "AUTHORIZED_LOCAL_ONLY_FAIL_CLOSED",
+        measurementProvenance: "HISTORICAL_DIAGNOSTIC_ONLY",
+        acceptanceEvidence: "NOT_PROVEN",
+        gateD: "NOT_READY",
+        production: "UNAUTHORIZED",
       });
       break;
 

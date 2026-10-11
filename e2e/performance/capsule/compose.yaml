@@ -29,9 +29,10 @@ services:
       MYSQL_TCP_PORT: "3307"
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev,size=64m,uid=999,gid=999,mode=0700
-      - /var/lib/mysql:rw,noexec,nosuid,nodev,size=1g,uid=999,gid=999,mode=0700
       - /var/lib/mysql-files:rw,noexec,nosuid,nodev,size=16m,uid=999,gid=999,mode=0700
       - /var/run/mysqld:rw,noexec,nosuid,nodev,size=16m,uid=999,gid=999,mode=0700
+    volumes:
+      - p17-db-data:/var/lib/mysql
 
   p17-app:
     profiles: ["p17-performance-authorized"]
@@ -42,6 +43,9 @@ services:
       dockerfile: e2e/performance/capsule/Dockerfile
       network: none
       pull: false
+      args:
+        P17_SOURCE_COMMIT: ${P17_SOURCE_COMMIT:-UNVERIFIED}
+        P17_SOURCE_TREE_SHA256: ${P17_SOURCE_TREE_SHA256:-UNVERIFIED}
     network_mode: service:p17-db
     depends_on:
       p17-db:
@@ -49,6 +53,8 @@ services:
     restart: "no"
     read_only: true
     user: "17017:17017"
+    group_add:
+      - "999"
     labels:
       com.lessenc.scope: p17-performance-capsule
     cap_drop:
@@ -62,11 +68,16 @@ services:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
       P17_TARGET: local
-      P17_PERF_MODE: infrastructure-only
-      P17_PERF_RUN_ID: p17-perf-capsule-static-validation
+      P17_PERF_MODE: ${P17_PERF_MODE:-infrastructure-only}
+      P17_PERF_RUN_ID: ${P17_PERF_RUN_ID:-p17-perf-capsule-static-validation}
+      P17_PERF_COMMIT: ${P17_SOURCE_COMMIT:-UNVERIFIED}
+      P17_SOURCE_TREE_SHA256: ${P17_SOURCE_TREE_SHA256:-UNVERIFIED}
+      P17_PERF_EXECUTION_AUTHORITY: ${P17_PERF_EXECUTION_AUTHORITY:-NOT_AUTHORIZED}
+      NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY: p17_perf_public_key_synthetic_only
       APP_URL: http://127.0.0.1:3100
       DATABASE_URL: mysql://lessenc_p17_perf:p17_perf_database_synthetic_only@127.0.0.1:3307/lessenc_p17_perf_test
       DB_RUNTIME_URL: mysql://lessenc_p17_perf:p17_perf_database_synthetic_only@127.0.0.1:3307/lessenc_p17_perf_test
+      DB_TLS_CA_FILE: /workspace/tmp/p17-db-data/ca.pem
       P17_PERF_DB_RUNTIME_URL: mysql://lessenc_p17_perf:p17_perf_database_synthetic_only@127.0.0.1:3307/lessenc_p17_perf_test
       PRIVATE_STORAGE_DRIVER: local-filesystem
       PRIVATE_FILE_STORAGE_PATH: /workspace/tmp/p17-performance-storage
@@ -74,6 +85,18 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev,size=256m,uid=17017,gid=17017,mode=0700
       - /home/p17perf/.cache:rw,noexec,nosuid,nodev,size=256m,uid=17017,gid=17017,mode=0700
-      - /workspace/output:rw,noexec,nosuid,nodev,size=256m,uid=17017,gid=17017,mode=0700
       - /workspace/tmp/p17-performance-storage:rw,noexec,nosuid,nodev,size=256m,uid=17017,gid=17017,mode=0700
-    command: ["validate"]
+    volumes:
+      - p17-db-data:/workspace/tmp/p17-db-data:ro
+      - p17-output-data:/workspace/output
+    command: ["${P17_CAPSULE_COMMAND:-validate}"]
+
+volumes:
+  p17-db-data:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: size=1g,uid=999,gid=999,mode=0750
+  p17-output-data:
+    driver: local

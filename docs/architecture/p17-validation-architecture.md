@@ -487,3 +487,34 @@ P16_RELEASE_COMMIT: HOSTED 0f6534fcf1d5b87588f21f6dd64005309a50c786 / COMPATIBIL
 STAGING_RELEASE_COMMIT: HOSTED 0f6534fcf1d5b87588f21f6dd64005309a50c786 / MATCHES HEAD / FAIL-CLOSED PREFLIGHT PASS
 P17 DEPLOYMENT: HOSTED / 0f6534fcf1d5b87588f21f6dd64005309a50c786 / CERTIFIED BUILD + PUBLISH + RESTART
 PRODUCTION: NOT AUTHORIZED
+
+## Local performance acceptance implementation addendum — 11/10/2026
+
+The local validation architecture now includes a fail-closed acceptance controller for the owner
+approved `LES-P17-PERFORMANCE-BUDGET-R01` protocol. It orchestrates 15 independent cohorts with
+three excluded warmups and forty valid measurements per cohort, nearest-rank percentiles, zero
+retries and one worker. Mobile, tablet and desktop cohorts remain independent, as do PIX and card
+payment-initiation cohorts.
+
+The controller owns only disposable local state. It rejects provider environment variables,
+publishes no database port and uses a read-only non-root application runtime sharing the isolated
+MySQL network namespace. The browser network guard allows loopback resources only, with the exact
+local consent endpoint admitted for the acquisition-to-checkout setup. Provider, hosted and
+production authority remain outside this architecture.
+
+Calibration measures gross download, upload and RTT values against the approved 10 Mbps, 2 Mbps and
+80 ms profile with 10% tolerance. A loopback baseline may be captured as diagnostic provenance but
+is never subtracted from the approved targets. First-warmup smoke and all later observations stop
+the cohort on invalid calibration, missing browser performance entries, functional mismatch or
+isolation failure.
+
+Browser metrics use native LCP, Performance Event Timing and resource/navigation timing. INP
+correlation permits zero-ID auxiliary events only when the same observation contains a qualifying
+positive interaction ID; a zero-only or missing observation remains invalid. Missing browser
+evidence is never replaced by wall-clock timing.
+
+The 11/10 execution proved the implementation and its fail-closed behavior but did not prove the
+acceptance policy end to end: PR01 completed only the mobile cohort, PR02 stopped on a missing
+Event Timing entry, and PR03/PR04 were not reached. The architectural state is therefore
+`IMPLEMENTED_RUNTIME_VALIDATION_PENDING`; acceptance is `NOT_PROVEN`, Gate D is `NOT_READY` and
+production is `UNAUTHORIZED`.

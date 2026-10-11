@@ -1,10 +1,10 @@
-import { calculatePerformancePercentiles, REQUIRED_VALID_SAMPLES } from "./percentiles";
+import { calculatePerformancePercentiles, REQUIRED_VALID_SAMPLES } from "./percentiles.ts";
 import {
   evaluateNetworkCalibration,
   NETWORK_CALIBRATION_TOLERANCE,
   PERFORMANCE_NETWORK_PROFILE,
   type NetworkCalibration,
-} from "./network-profile";
+} from "./network-profile.ts";
 
 export const ATTEMPT_STATES = [
   "WARMUP_VALID",
@@ -74,6 +74,10 @@ function assertNoSensitiveKeys(value: unknown, path = "evidence"): void {
     }
     assertNoSensitiveKeys(child, `${path}.${key}`);
   }
+}
+
+export function assertSanitizedEvidenceObject(value: unknown): void {
+  assertNoSensitiveKeys(value);
 }
 
 function assertAttemptEvidence(evidence: AttemptEvidence): void {

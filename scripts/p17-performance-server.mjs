@@ -11,6 +11,7 @@ try {
     repositoryRoot: process.cwd(),
     storagePath: process.env.P17_PERF_STORAGE_PATH,
     runId: process.env.P17_PERF_RUN_ID ?? "p17-perf-server-validation",
+    commit: process.env.P17_PERF_COMMIT,
   });
 
   if (command !== "validate-config") {

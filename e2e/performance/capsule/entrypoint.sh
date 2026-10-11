@@ -65,9 +65,9 @@ esac
 require_value "${APP_ENV:-}" local P17_CAPSULE_APP_ENV_INVALID
 require_value "${NODE_ENV:-}" production P17_CAPSULE_NODE_ENV_INVALID
 require_value "${P17_TARGET:-}" local P17_CAPSULE_TARGET_INVALID
-require_value "${P17_PERF_MODE:-}" infrastructure-only P17_CAPSULE_MODE_INVALID
 require_value "${APP_URL:-}" http://127.0.0.1:3100 P17_CAPSULE_APP_URL_INVALID
 require_value "${PRIVATE_STORAGE_DRIVER:-}" local-filesystem P17_CAPSULE_STORAGE_DRIVER_INVALID
+require_value "${NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY:-}" p17_perf_public_key_synthetic_only P17_CAPSULE_PUBLIC_KEY_NOT_SYNTHETIC
 
 case "${P17_PERF_RUN_ID:-}" in
   p17-perf-[a-z0-9][a-z0-9._-][a-z0-9._-][a-z0-9._-][a-z0-9._-][a-z0-9._-][a-z0-9._-][a-z0-9._-]*) ;;
@@ -95,13 +95,25 @@ fi
 
 node /workspace/scripts/p17-capsule-network.mjs
 
+observed_source_tree="$(tr -d '\r\n' < /workspace/.p17-source-tree.sha256)" || fail P17_CAPSULE_SOURCE_TREE_MISSING
+printf '%s' "$observed_source_tree" | grep -Eq '^[0-9a-f]{64}$' || fail P17_CAPSULE_SOURCE_TREE_INVALID
+
 case "${1:-validate}" in
   validate)
+    require_value "${P17_PERF_MODE:-}" infrastructure-only P17_CAPSULE_MODE_INVALID
     printf '%s\n' P17_CAPSULE_RUNTIME_PREREQUISITES_VALIDATED
     printf '%s\n' P17_CAPSULE_STATIC_ISOLATION_VALIDATED
     ;;
-  collect | run | server)
-    fail P17_PERFORMANCE_I04_B_NOT_AUTHORIZED
+  run)
+    require_value "${P17_PERF_MODE:-}" acceptance-local P17_CAPSULE_MODE_INVALID
+    require_value "${P17_PERF_EXECUTION_AUTHORITY:-}" LES-P17-AUTONOMOUS-CLOSEOUT-R01 P17_CAPSULE_EXECUTION_AUTHORITY_INVALID
+    require_value "${P17_SOURCE_TREE_SHA256:-}" "$observed_source_tree" P17_CAPSULE_SOURCE_TREE_MISMATCH
+    printf '%s' "${P17_PERF_COMMIT:-}" | grep -Eq '^[0-9a-f]{40}$' || fail P17_CAPSULE_COMMIT_INVALID
+    exec node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON \
+      /workspace/scripts/p17-performance-controller.mjs run-local-acceptance
+    ;;
+  collect | server)
+    fail P17_PERFORMANCE_COMMAND_NOT_AUTHORIZED
     ;;
   *)
     fail P17_CAPSULE_COMMAND_INVALID

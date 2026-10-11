@@ -13,8 +13,14 @@
     "ipToolRuntime": "NOT_APPLICABLE_PROCFS_VERIFIER",
     "mysqlEffectiveUid": "PASS_999",
     "processBindingEvidence": "PASS_RUNTIME_SMOKE_LOOPBACK_ONLY",
-    "performanceExecution": "DIAGNOSTIC_ONLY_240_SAMPLES",
-    "performanceAcceptance": "BLOCKED_OWNER_BUDGET",
+    "ownerPerformanceBudget": "APPROVED_LES_P17_PERFORMANCE_BUDGET_R01",
+    "performanceImplementation": "IMPLEMENTED_RUNTIME_VALIDATION_PENDING",
+    "performanceExecutionAuthorization": "AUTHORIZED_LOCAL_ONLY_LES_P17_AUTONOMOUS_CLOSEOUT_R01",
+    "performanceMeasurementProvenance": "HISTORICAL_DIAGNOSTIC_ONLY_240_UNTHROTTLED_UNCALIBRATED",
+    "performanceAcceptance": "NOT_PROVEN",
+    "gateD": "NOT_READY",
+    "productionAuthorization": "UNAUTHORIZED",
+    "sourceProvenance": "BUILD_INPUT_BYTES_SHA256_REQUIRED_COMMIT_IDENTITY_SEPARATE",
     "runtimeDependencyAudit": "PASS_ZERO_VULNERABILITIES",
     "developmentToolingAudit": "RESIDUAL_FOUR_HIGH_INCOMPATIBLE_DOWNGRADE"
   },
@@ -62,7 +68,9 @@
     "network": "none",
     "npmMode": "ci-offline-ignore-scripts",
     "prismaCommand": "./node_modules/.bin/prisma generate",
-    "nextCommand": "./node_modules/.bin/next build"
+    "nextCommand": "./node_modules/.bin/next build",
+    "declaredCommitAuthority": "METADATA_ONLY_NOT_SOURCE_BYTE_PROOF",
+    "sourceTreeAuthority": "CANONICAL_SHA256_OVER_NON_DERIVED_BUILD_INPUT_BYTES"
   },
   "offlineCache": {
     "schemaVersion": 1,

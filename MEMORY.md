@@ -2548,3 +2548,27 @@ Historical PR01 navigation measurements remain DIAGNOSTIC_ONLY / ACCEPTANCE NOT 
 Only canonical documentation synchronization was subsequently authorized. No code edit, test execution, commit, push, merge, deployment, external payment operation or production authorization is granted.
 
 Gate D NOT READY. Production UNAUTHORIZED.
+
+## P17 autonomous acceptance closeout — 11/10/2026
+
+`LES-P17-AUTONOMOUS-CLOSEOUT-R01` materialized a local-only, fail-closed implementation of the
+owner-approved performance protocol: 15 independent cohorts, 45 excluded warmups, 600 valid
+measurements, calibrated 10/2 Mbps and 80 ms RTT, zero retries and one worker. Source provenance,
+network isolation, consent setup and native browser timing are explicit and auditable.
+
+Local gates pass: `npm run check` (104 files / 1,032 tests), performance infrastructure (14 files /
+78 tests), offline cache/build and zero runtime dependency vulnerabilities. Four HIGH findings
+remain restricted to the development lint chain.
+
+The latest bounded runtime attempt completed only PR01 mobile (3 warmups + 40 observations) and
+stopped fail-closed at the first PR02 mobile warmup because Chromium emitted no qualifying Event
+Timing entry. PR01 is partial-cohort support only; PR02 acceptance is blocked on local browser
+observability; PR03/PR04 are not executed. Acceptance remains `NOT_PROVEN`.
+
+Two disposable MySQL launches applied all nine migrations, but Vitest could not create internal
+runtime files inside the read-only capsule and collected no tests. This is
+`NOT_EXECUTED / BLOCKED_LOCAL_CAPSULE_WRITABLE_RUNTIME_PATH`, not PASS. Cleanup passed.
+
+No hosted/provider/payment/deploy or Git publication occurred. E05, F01, provider-sensitive B/R
+requirements and complete performance evaluation remain unresolved. `P17 = PARTIALLY COMPLETE`,
+`GATE D = NOT READY`, and production remains unauthorized.

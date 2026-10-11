@@ -5,11 +5,13 @@ import { describe, expect, it } from "vitest";
 import {
   assertCapsuleNetworkSnapshot,
   assertNoExternalServiceEnvironment,
+  assertLocalPerformanceExecutionAuthorized,
   assertOperationalIsolation,
   assertPerformanceExecutionContract,
   assertPerformanceStorage,
   assertPerformanceTargetEnvironment,
   buildPerformanceChildEnvironment,
+  PERFORMANCE_EXECUTION_AUTHORITY,
   performanceStorageRoot,
   validatePerformanceDatabaseUrl,
 } from "./isolation";
@@ -108,6 +110,7 @@ describe("P17 performance isolation guards", () => {
         databaseUrl,
         repositoryRoot,
         runId: "p17-perf-isolation-unit-test",
+        commit: "d73b2d678686fc805c6eb5f26a852ae60f870b91",
       },
     );
 
@@ -115,6 +118,7 @@ describe("P17 performance isolation guards", () => {
     expect(child.APP_ENV).toBe("local");
     expect(child.NODE_ENV).toBe("production");
     expect(child.P17_TARGET).toBe("local");
+    expect(child.P17_PERF_COMMIT).toBe("d73b2d678686fc805c6eb5f26a852ae60f870b91");
     expect(child.MERCADOPAGO_ACCESS_TOKEN).toBeUndefined();
     expect(child.PRIVATE_STORAGE_S3_SECRET_ACCESS_KEY).toBeUndefined();
     expect(child.UNRELATED_PARENT_VALUE).toBeUndefined();
@@ -124,6 +128,42 @@ describe("P17 performance isolation guards", () => {
     expect(() =>
       assertNoExternalServiceEnvironment({ MERCADOPAGO_ACCESS_TOKEN: "synthetic-hidden-value" }),
     ).toThrow("P17_PERFORMANCE_EXTERNAL_SERVICE_ENV_FORBIDDEN");
+  });
+
+  it("authorizes only the exact local acceptance contract with complete provenance", () => {
+    const sourceTreeSha256 = "a".repeat(64);
+    const child = buildPerformanceChildEnvironment(
+      { PATH: "synthetic-path" },
+      {
+        databaseUrl,
+        repositoryRoot,
+        runId: "p17-perf-authorized-local-test",
+        commit: "d73b2d678686fc805c6eb5f26a852ae60f870b91",
+        sourceTreeSha256,
+        mode: "acceptance-local",
+        executionAuthority: PERFORMANCE_EXECUTION_AUTHORITY,
+      },
+    );
+
+    expect(() => assertLocalPerformanceExecutionAuthorized(child, repositoryRoot)).not.toThrow();
+    expect(child.P17_PERF_MODE).toBe("acceptance-local");
+    expect(child.P17_SOURCE_TREE_SHA256).toBe(sourceTreeSha256);
+    expect(child.P17_PERF_EXECUTION_AUTHORITY).toBe(PERFORMANCE_EXECUTION_AUTHORITY);
+
+    expect(() =>
+      buildPerformanceChildEnvironment(
+        { PATH: "synthetic-path" },
+        {
+          databaseUrl,
+          repositoryRoot,
+          runId: "p17-perf-unauthorized-local-test",
+          commit: "d73b2d678686fc805c6eb5f26a852ae60f870b91",
+          sourceTreeSha256,
+          mode: "acceptance-local",
+          executionAuthority: "NOT_AUTHORIZED",
+        },
+      ),
+    ).toThrow("P17_PERFORMANCE_EXECUTION_AUTHORITY_INVALID");
   });
 
   it("requires loopback-only interfaces, no default route and no external DNS", () => {

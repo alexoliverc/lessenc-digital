@@ -266,6 +266,60 @@ Gate D may be PASS only when:
 
 GATE D = NOT READY
 
+## Autonomous acceptance closeout — 11/10/2026
+
+The owner-authorized local-only execution of `LES-P17-AUTONOMOUS-CLOSEOUT-R01` materialized and
+exercised the approved `LES-P17-PERFORMANCE-BUDGET-R01` harness without using hosted/provider
+authority. The execution remained fail-closed and did not produce a performance acceptance PASS.
+
+| ID | Executed local evidence | Acceptance classification | Gate D classification |
+| --- | --- | --- | --- |
+| P17-PR01 | Mobile cohort completed 3 warmups plus 40 valid LCP observations in the latest run | PARTIAL COHORT SUPPORT ONLY / ACCEPTANCE NOT PROVEN | NOT READY |
+| P17-PR02 | First mobile warmup reached the expected functional post-click state, but Chromium emitted no qualifying Event Timing entry | BLOCKED_LOCAL_OBSERVABILITY / ACCEPTANCE NOT PROVEN | NOT READY |
+| P17-PR03 | Not reached after the PR02 fail-closed stop | NOT_EXECUTED | NOT READY |
+| P17-PR04 | Not reached after the PR02 fail-closed stop | NOT_EXECUTED | NOT READY |
+
+The latest run is `p17-perf-acceptance-20261011-1312`. It stopped at PR02 with
+`ENTRY_MISSING`; no arbitrary duration, synthetic Event Timing entry or retry was substituted.
+Earlier attempts identified and corrected local harness defects in loader selection, TLS CA
+delivery, calibration transport, click targeting, consent setup and interaction correlation.
+Invalid or incomplete attempts remain historical diagnostics and are not acceptance samples.
+
+The accepted network profile continues to be evaluated on gross observed calibration values.
+Baseline loopback timing is attached only as diagnostic context and is not subtracted from the
+approved 80 ms RTT target. This preserves the policy's explicit 10% tolerance instead of silently
+changing the metric.
+
+The historical 10/10 wording `BLOCKED_OWNER_BUDGET` is superseded by the approved-budget state.
+It remains historically accurate for the earlier run, but the current state is
+`ACCEPTANCE NOT PROVEN`, not budget-blocked.
+
+Local regression authority established during closeout:
+
+- `npm run check`: lint, Prisma generation/typecheck, 104 test files / 1,032 tests and formatting
+  PASS;
+- `npm run test:performance:infra`: 14 files / 78 tests PASS;
+- runtime dependency audit: zero vulnerabilities;
+- full dependency audit: four HIGH findings confined to the development lint chain; the offered
+  automatic remediation is breaking and was not applied;
+- two isolated MySQL integration launches applied all nine migrations, but Vitest stopped before
+  collecting tests because its internal token path was not writable in the read-only capsule.
+
+The integration result is therefore `NOT_EXECUTED / BLOCKED_LOCAL_CAPSULE_WRITABLE_RUNTIME_PATH`,
+not a test failure and not a PASS. Both disposable database executions were cleaned up. No hosted
+database, provider endpoint, production credential, real payment, deployment or Git publication
+was used.
+
+P17-E05 real Mercado Pago TEST webhook evidence remains `PENDING_EXTERNAL`; P17-F01 remains
+`PENDING_EXTERNAL`; the provider-sensitive responsive matrix remains `PENDING_EXTERNAL`.
+Consequently:
+
+`P17 = PARTIALLY COMPLETE`
+
+`GATE D = NOT READY`
+
+`PRODUCTION = UNAUTHORIZED`
+
 ## Local execution snapshot — 04/10/2026
 
 This snapshot records evidence produced on the isolated local Codex branch. It does not rewrite the

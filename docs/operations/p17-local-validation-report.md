@@ -170,3 +170,79 @@ The approved protocol requires 15 independent cohorts, 3 warmups and 40 valid me
 The prior 240 navigation samples were collected without network throttling or calibration and cannot be reused for acceptance. PR01 remains DIAGNOSTIC_ONLY / ACCEPTANCE NOT PROVEN; PR02-PR04 remain NOT_EXECUTED.
 
 The owner approved the policy only. No new test, provider access, hosted mutation, database operation, code change, deploy or production authorization follows from this decision. Gate D remains NOT READY.
+
+## Autonomous local acceptance closeout — 11/10/2026
+
+### Scope and provenance
+
+Execution remained on `phase/p17-end-to-end-business-validation` at initial HEAD
+`d73b2d678686fc805c6eb5f26a852ae60f870b91`, with an initially empty staging area and the existing
+dirty baseline preserved. No reset, restore, rebase, commit, push, merge, tag, PR, deploy or
+external mutation was performed.
+
+The acceptance controller is bound to authority `LES-P17-AUTONOMOUS-CLOSEOUT-R01`, rejects
+provider-bearing environment variables, creates only disposable local database/storage state and
+uses loopback-only browser/application communication. Build input provenance is a SHA-256 digest
+of 436 non-derived source inputs; the declared Git commit remains separate metadata and is not used
+as a substitute for dirty-worktree provenance.
+
+The last executed application image candidate was
+`sha256:1fe580f50dde922297c139450ce7736e5c885fd68b10b496f0ea54d63878b4a7`, built from source digest
+`6371612ba5bdfd62511a0365b7bd192cc8180e0b2763769f4b297df62c6d9461`. Later lint/configuration and
+closeout-document edits mean the final worktree bytes are not represented by that runtime image;
+that limitation is explicit and prevents a false final-image claim.
+
+### Engineering changes
+
+- added a fail-closed local performance controller, calibration server and source-provenance tool;
+- materialized PR01 LCP, PR02 INP, PR03 PIX/card initiation and PR04 protected-delivery TTFB specs;
+- added policy, orchestration, calibration, isolation, browser-network, browser-metric, acceptance
+  evidence and reporting helpers with unit coverage;
+- made the capsule's build input, output volume, source digest and declared commit independently
+  auditable;
+- supplied the shared MySQL TLS CA through a temporary read-only volume without weakening TLS;
+- used the acquisition route to establish a real local consent journey and then validated the
+  denied-consent projection before checkout;
+- retained genuine Performance Event Timing semantics: auxiliary zero interaction IDs may be
+  ignored only when a qualifying positive interaction exists, while zero-only or missing entries
+  fail closed;
+- declared `APP_ENV=test` in Vitest configuration and reconciled strict lint/format/type rules.
+
+### Validation results
+
+| Validation | Result |
+| --- | --- |
+| Offline cache verification | PASS; 390 target entries, 13 required packages, 786 cache files |
+| Offline capsule build | PASS for the last executed image candidate |
+| `npm run check` | PASS; lint, Prisma generate/typecheck, 104 files / 1,032 tests, format |
+| `npm run test:performance:infra` | PASS; 14 files / 78 tests |
+| Performance contract description | PASS; 15 cohorts, 45 warmups, 600 measurements, retries 0, worker 1 |
+| Runtime dependency audit | PASS; zero vulnerabilities |
+| Full dependency audit | 4 HIGH development-only lint-chain findings; no safe non-breaking automatic fix applied |
+| Isolated MySQL integration attempt 1 | NOT_EXECUTED; Vitest could not create `.vite-temp` under the read-only image |
+| Isolated MySQL integration attempt 2 | NOT_EXECUTED; Vitest could not create its API token in either read-only fallback path |
+| Disposable resource cleanup | PASS after both integration attempts |
+
+Both integration attempts applied all nine migrations successfully before the Vitest bootstrap
+blocker. Because no test was collected, they provide migration/capsule diagnostics only and do not
+replace the previously recorded 199-test evidence.
+
+### Performance execution
+
+Fifteen bounded attempts were preserved under
+`C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\autonomous-closeout-20261011-0719`. The final run,
+`p17-perf-acceptance-20261011-1312`, completed PR01 mobile with 3 warmups and 40 valid observations,
+then stopped on the first PR02 mobile warmup with `ENTRY_MISSING`. The expected order-creation
+outcome occurred, but Chromium supplied no qualifying Event Timing entry above the approved
+observation threshold. The runner did not fabricate a duration and did not continue to PR03/PR04.
+
+Therefore PR01 is only partial-cohort support, PR02 is blocked on local browser observability, and
+PR03/PR04 are not executed. No one of PR01–PR04 has authoritative acceptance PASS.
+
+### Closeout classification
+
+- `P17 / PARTIALLY COMPLETE`;
+- `GATE D / NOT READY`;
+- `PRODUCTION / UNAUTHORIZED`;
+- E05 real TEST webhook, F01 provider failure, provider-sensitive B/R rows and complete performance
+  acceptance remain outside the authority proved by this local closeout.

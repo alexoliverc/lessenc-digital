@@ -30,6 +30,7 @@ if (!/^p17-perf-[a-z0-9][a-z0-9._-]{7,80}$/u.test(runId)) {
 }
 
 const evidenceRoot = join("output", "p17-performance", runId);
+const acceptanceOutput = join(evidenceRoot, "acceptance-package.json");
 
 export default defineConfig({
   testDir: "./e2e/performance",
@@ -37,15 +38,20 @@ export default defineConfig({
   outputDir: join(evidenceRoot, "artifacts"),
   fullyParallel: false,
   forbidOnly: true,
+  maxFailures: 1,
   retries: executionContract.retries,
   workers: executionContract.workers,
-  timeout: 30_000,
+  timeout: 1_800_000,
   expect: { timeout: 5_000 },
-  reporter: [["list"], ["json", { outputFile: join(evidenceRoot, "results.json") }]],
+  reporter: [
+    ["list"],
+    ["./e2e/performance/helpers/acceptance-reporter.ts", { outputFile: acceptanceOutput }],
+    ["json", { outputFile: join(evidenceRoot, "results.json") }],
+  ],
   use: {
     baseURL: executionContract.baseURL,
     serviceWorkers: executionContract.serviceWorkers,
-    trace: "retain-on-failure",
+    trace: "off",
     screenshot: "only-on-failure",
     video: "off",
     actionTimeout: 10_000,

@@ -65,7 +65,7 @@ try {
     schemaVersion: 1,
     indicator: "PR01",
     result: "DIAGNOSTIC_ONLY",
-    acceptance: "BLOCKED_OWNER_BUDGET",
+    acceptance: "DIAGNOSTIC_ONLY_APPROVED_BUDGET_NOT_EVALUATED",
     network: "LOOPBACK_UNTHROTTLED_UNCALIBRATED",
     browser: browser.version(),
     rows,

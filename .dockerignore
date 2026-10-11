@@ -25,6 +25,11 @@
 !e2e/performance/capsule/build-app.sh
 !e2e/performance/capsule/entrypoint.sh
 !e2e/performance/capsule/contract.json
+!e2e/performance/helpers/
+!e2e/performance/helpers/**
+!e2e/performance/fixtures/
+!e2e/performance/fixtures/**
+!e2e/performance/*.perf.spec.ts
 
 # Defense in depth: these remain excluded even if a broader source tree is
 # explicitly allowed above in a future revision.
@@ -106,6 +111,8 @@ e2e/performance/capsule/offline/npm-cache/**/*.pfx
 !vitest.config.mts
 !vitest.integration.config.mjs
 !playwright.config.ts
+!playwright.performance.config.ts
+!vitest.performance.config.mts
 !prisma/migrations/
 !prisma/migrations/**
 !e2e/*.spec.ts

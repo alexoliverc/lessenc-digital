@@ -7,6 +7,7 @@ export const PERFORMANCE_NETWORK_PROFILE = Object.freeze({
 });
 
 export const NETWORK_CALIBRATION_TOLERANCE = 0.1;
+export const PERFORMANCE_CALIBRATION_ORIGIN = "http://127.0.0.1:3101";
 
 export type NetworkCalibration = Readonly<{
   downloadBitsPerSecond: number;
