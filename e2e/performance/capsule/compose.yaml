@@ -22,7 +22,7 @@ services:
       - --mysqlx=0
       - --skip-name-resolve
     environment:
-      MYSQL_DATABASE: lessenc_p17_perf_test
+      MYSQL_DATABASE: lessenc_test
       MYSQL_USER: lessenc_p17_perf
       MYSQL_PASSWORD: p17_perf_database_synthetic_only
       MYSQL_ROOT_PASSWORD: p17_perf_root_synthetic_only
@@ -34,9 +34,59 @@ services:
     volumes:
       - p17-db-data:/var/lib/mysql
 
+  p17-db-ca-volume-init:
+    profiles: ["p17-performance-authorized"]
+    image: mysql:8.4.11@sha256:b3b90af2a6552ae30c266fdb7d5dd55f3afb72404bb78d37fe8a23eb857fd3fb
+    pull_policy: never
+    network_mode: none
+    dns: ["127.0.0.1"]
+    user: "0:0"
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+    labels:
+      com.lessenc.scope: p17-performance-capsule
+    restart: "no"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - p17-db-ca:/p17-ca
+      - ./init-db-ca-volume.sh:/usr/local/bin/p17-init-db-ca-volume.sh:ro
+    entrypoint: ["/bin/sh", "/usr/local/bin/p17-init-db-ca-volume.sh"]
+
+  p17-db-ca-exporter:
+    profiles: ["p17-performance-authorized"]
+    image: mysql:8.4.11@sha256:b3b90af2a6552ae30c266fdb7d5dd55f3afb72404bb78d37fe8a23eb857fd3fb
+    pull_policy: never
+    network_mode: none
+    dns: ["127.0.0.1"]
+    user: "999:999"
+    cap_drop:
+      - ALL
+    labels:
+      com.lessenc.scope: p17-performance-capsule
+    restart: "no"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      p17-db:
+        condition: service_started
+      p17-db-ca-volume-init:
+        condition: service_completed_successfully
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=8m,uid=999,gid=999,mode=0700
+    volumes:
+      - p17-db-data:/var/lib/mysql:ro
+      - p17-db-ca:/p17-ca
+      - ./export-db-ca.sh:/usr/local/bin/p17-export-db-ca.sh:ro
+    entrypoint: ["/bin/sh", "/usr/local/bin/p17-export-db-ca.sh"]
+
   p17-app:
     profiles: ["p17-performance-authorized"]
-    image: lessenc/p17-performance-app:closeout-r01
+    image: lessenc/p17-performance-app:remediation-r02
     pull_policy: never
     build:
       context: ../../..
@@ -50,6 +100,8 @@ services:
     depends_on:
       p17-db:
         condition: service_started
+      p17-db-ca-exporter:
+        condition: service_completed_successfully
     restart: "no"
     read_only: true
     user: "17017:17017"
@@ -73,21 +125,25 @@ services:
       P17_PERF_COMMIT: ${P17_SOURCE_COMMIT:-UNVERIFIED}
       P17_SOURCE_TREE_SHA256: ${P17_SOURCE_TREE_SHA256:-UNVERIFIED}
       P17_PERF_EXECUTION_AUTHORITY: ${P17_PERF_EXECUTION_AUTHORITY:-NOT_AUTHORIZED}
+      P17_OCI_IMAGE_DIGEST: ${P17_OCI_IMAGE_DIGEST:-UNVERIFIED}
       NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY: p17_perf_public_key_synthetic_only
       APP_URL: http://127.0.0.1:3100
-      DATABASE_URL: mysql://lessenc_p17_perf:p17_perf_database_synthetic_only@127.0.0.1:3307/lessenc_p17_perf_test
-      DB_RUNTIME_URL: mysql://lessenc_p17_perf:p17_perf_database_synthetic_only@127.0.0.1:3307/lessenc_p17_perf_test
-      DB_TLS_CA_FILE: /workspace/tmp/p17-db-data/ca.pem
-      P17_PERF_DB_RUNTIME_URL: mysql://lessenc_p17_perf:p17_perf_database_synthetic_only@127.0.0.1:3307/lessenc_p17_perf_test
+      DATABASE_URL: mysql://lessenc_p17_perf:p17_perf_database_synthetic_only@127.0.0.1:3307/lessenc_test
+      DB_RUNTIME_URL: mysql://lessenc_p17_perf:p17_perf_database_synthetic_only@127.0.0.1:3307/lessenc_test
+      DB_TLS_CA_FILE: /workspace/tmp/p17-db-ca/ca.pem
+      P17_PERF_DB_RUNTIME_URL: mysql://lessenc_p17_perf:p17_perf_database_synthetic_only@127.0.0.1:3307/lessenc_test
       PRIVATE_STORAGE_DRIVER: local-filesystem
       PRIVATE_FILE_STORAGE_PATH: /workspace/tmp/p17-performance-storage
       P17_PERF_STORAGE_PATH: /workspace/tmp/p17-performance-storage
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev,size=256m,uid=17017,gid=17017,mode=0700
       - /home/p17perf/.cache:rw,noexec,nosuid,nodev,size=256m,uid=17017,gid=17017,mode=0700
+      - /home/p17perf/.local/share/vitest:rw,noexec,nosuid,nodev,size=8m,uid=17017,gid=17017,mode=0700
+      - /workspace/node_modules/.vite-temp:rw,noexec,nosuid,nodev,size=64m,uid=17017,gid=17017,mode=0700
+      - /workspace/node_modules/.vitest:rw,noexec,nosuid,nodev,size=8m,uid=17017,gid=17017,mode=0700
       - /workspace/tmp/p17-performance-storage:rw,noexec,nosuid,nodev,size=256m,uid=17017,gid=17017,mode=0700
     volumes:
-      - p17-db-data:/workspace/tmp/p17-db-data:ro
+      - p17-db-ca:/workspace/tmp/p17-db-ca:ro
       - p17-output-data:/workspace/output
     command: ["${P17_CAPSULE_COMMAND:-validate}"]
 
@@ -99,4 +155,6 @@ volumes:
       device: tmpfs
       o: size=1g,uid=999,gid=999,mode=0750
   p17-output-data:
+    driver: local
+  p17-db-ca:
     driver: local

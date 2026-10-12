@@ -21,6 +21,10 @@ const executionContract = Object.freeze({
 assertPerformanceExecutionContract(executionContract);
 
 const configuredRunId = process.env.P17_PERF_RUN_ID;
+const configuredScope = process.env.P17_PERF_SCOPE ?? "FULL";
+if (configuredScope !== "FULL" && configuredScope !== "PR03_PIX_MOBILE") {
+  throw new Error("P17_PERFORMANCE_SCOPE_INVALID");
+}
 const runId =
   configuredRunId ??
   `p17-perf-${new Date().toISOString().replaceAll(/[-:.TZ]/gu, "")}-${randomUUID().slice(0, 8)}`;
@@ -45,7 +49,10 @@ export default defineConfig({
   expect: { timeout: 5_000 },
   reporter: [
     ["list"],
-    ["./e2e/performance/helpers/acceptance-reporter.ts", { outputFile: acceptanceOutput }],
+    [
+      "./e2e/performance/helpers/acceptance-reporter.ts",
+      { outputFile: acceptanceOutput, scope: configuredScope },
+    ],
     ["json", { outputFile: join(evidenceRoot, "results.json") }],
   ],
   use: {

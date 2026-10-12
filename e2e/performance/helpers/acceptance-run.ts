@@ -46,6 +46,7 @@ export type P17RunManifest = Readonly<{
   runId: string;
   commit: string;
   sourceTreeSha256: string;
+  imageDigest: string;
   browser: Readonly<{
     engine: "chromium";
     version: string;
@@ -154,6 +155,7 @@ export function inspectP17AcceptanceRun(
     !/^p17-perf-[a-z0-9][a-z0-9._-]{7,80}$/u.test(manifest.runId) ||
     !/^[0-9a-f]{40}$/u.test(manifest.commit) ||
     !/^[0-9a-f]{64}$/u.test(manifest.sourceTreeSha256) ||
+    !/^sha256:[0-9a-f]{64}$/u.test(manifest.imageDigest) ||
     manifest.browser.engine !== "chromium" ||
     !validVersion(manifest.browser.version) ||
     !validVersion(manifest.browser.playwrightVersion) ||

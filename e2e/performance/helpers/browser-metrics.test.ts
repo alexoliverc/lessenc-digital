@@ -20,9 +20,13 @@ describe("P17 browser metric validation", () => {
       state: "INCONCLUSIVE",
       reason: "OBSERVATION_NOT_FINALIZED",
     });
-    expect(evaluateInpEntries({ supported: true, interactions: [] })).toEqual({
+    expect(evaluateInpEntries({ supported: true, markerEventCount: 0, interactions: [] })).toEqual({
       state: "INCONCLUSIVE",
-      reason: "ENTRY_MISSING",
+      reason: "INTERACTION_MARKER_MISSING",
+    });
+    expect(evaluateInpEntries({ supported: true, markerEventCount: 1, interactions: [] })).toEqual({
+      state: "INCONCLUSIVE",
+      reason: "BELOW_REPORTING_THRESHOLD_OR_ENTRY_MISSING",
     });
   });
 
@@ -30,6 +34,7 @@ describe("P17 browser metric validation", () => {
     expect(
       evaluateInpEntries({
         supported: true,
+        markerEventCount: 2,
         interactions: [
           { marker: "checkout-create-order", interactionId: 0, durationMs: 16, startTimeMs: 100 },
           { marker: "checkout-create-order", interactionId: 7, durationMs: 32, startTimeMs: 101 },
@@ -40,6 +45,7 @@ describe("P17 browser metric validation", () => {
     expect(
       evaluateInpEntries({
         supported: true,
+        markerEventCount: 1,
         interactions: [
           { marker: "checkout-create-order", interactionId: 0, durationMs: 16, startTimeMs: 100 },
         ],
@@ -50,11 +56,11 @@ describe("P17 browser metric validation", () => {
   it("requires a coherent browser-clock interaction to requestStart interval", () => {
     expect(
       evaluatePaymentInitiationTiming({
-        interaction: {
+        activation: {
           marker: "payment-start-pix",
-          interactionId: 1,
-          durationMs: 16,
+          name: "click",
           startTimeMs: 100,
+          isTrusted: true,
         },
         resource: {
           pathname: "/checkout/payment/start",
@@ -116,6 +122,12 @@ describe("P17 browser metric validation", () => {
   });
 
   it("requires one proven synthetic POST and one local resource", () => {
+    const activation = {
+      marker: "payment-start-pix",
+      name: "click",
+      startTimeMs: 100,
+      isTrusted: true,
+    };
     const interaction = {
       marker: "payment-start-pix",
       interactionId: 7,
@@ -134,9 +146,16 @@ describe("P17 browser metric validation", () => {
       responseStatus: 200,
     };
     const valid = {
+      activations: [activation],
       interactions: [interaction],
       resources: [resource],
-      capture: { acceptedPostCount: 1, rejectedAttemptCount: 0 },
+      expectedFlow: "PIX" as const,
+      capture: {
+        expectedFlow: "PIX" as const,
+        matchedPostCount: 1,
+        methodMismatchCount: 0,
+        rejectedAttemptCount: 0,
+      },
     };
 
     expect(evaluateCorrelatedPaymentInitiationTiming(valid)).toEqual({
@@ -184,7 +203,7 @@ describe("P17 browser metric validation", () => {
     expect(
       evaluateCorrelatedPaymentInitiationTiming({
         ...valid,
-        interactions: [interaction, { ...interaction, interactionId: 8 }],
+        activations: [activation, { ...activation, startTimeMs: 101 }],
       }),
     ).toEqual({
       state: "INCONCLUSIVE",
@@ -194,7 +213,47 @@ describe("P17 browser metric validation", () => {
     expect(
       evaluateCorrelatedPaymentInitiationTiming({
         ...valid,
-        capture: { acceptedPostCount: 2, rejectedAttemptCount: 1 },
+        activations: [{ ...activation, isTrusted: false }],
+      }),
+    ).toEqual({
+      state: "INCONCLUSIVE",
+      reason: "REQUEST_CORRELATION_INVALID",
+    });
+
+    expect(
+      evaluateCorrelatedPaymentInitiationTiming({
+        ...valid,
+        capture: {
+          expectedFlow: "PIX",
+          matchedPostCount: 2,
+          methodMismatchCount: 0,
+          rejectedAttemptCount: 1,
+        },
+      }),
+    ).toEqual({
+      state: "INCONCLUSIVE",
+      reason: "REQUEST_CORRELATION_INVALID",
+    });
+
+    expect(
+      evaluateCorrelatedPaymentInitiationTiming({
+        ...valid,
+        expectedFlow: "CREDIT_CARD",
+      }),
+    ).toEqual({
+      state: "INCONCLUSIVE",
+      reason: "REQUEST_CORRELATION_INVALID",
+    });
+
+    expect(
+      evaluateCorrelatedPaymentInitiationTiming({
+        ...valid,
+        capture: {
+          expectedFlow: "PIX",
+          matchedPostCount: 0,
+          methodMismatchCount: 1,
+          rejectedAttemptCount: 0,
+        },
       }),
     ).toEqual({
       state: "INCONCLUSIVE",

@@ -16,6 +16,9 @@ export const PERFORMANCE_OFFER_ID = "17000000-0000-4000-8000-000000000102";
 export const PERFORMANCE_RESOURCE_ID = "17000000-0000-4000-8000-000000000103";
 const PERFORMANCE_STORAGE_KEY = "p17-performance/protected-delivery.zip";
 const EMPTY_ZIP_ARCHIVE = Buffer.from("UEsFBgAAAAAAAAAAAAAAAAAAAAAAAA==", "base64");
+const syntheticCheckoutEmail =
+  /^p17\.performance\.inp\.(mobile|tablet|desktop)\.([1-9]|[1-3][0-9]|4[0-3])@example\.invalid$/u;
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/u;
 
 export type PendingPaymentFixture = Readonly<{
   customerId: string;
@@ -47,6 +50,46 @@ function storageRoot(): string {
     path: process.env.PRIVATE_FILE_STORAGE_PATH,
     repositoryRoot: process.cwd(),
   });
+}
+
+export function assertSyntheticAttemptNumber(attempt: number): number {
+  if (!Number.isSafeInteger(attempt) || attempt < 1 || attempt > 43) {
+    throw new Error("P17_PERFORMANCE_FIXTURE_ATTEMPT_INVALID");
+  }
+  return attempt;
+}
+
+export function createSyntheticCheckoutEmail(
+  viewport: "mobile" | "tablet" | "desktop",
+  attempt: number,
+): string {
+  return `p17.performance.inp.${viewport}.${assertSyntheticAttemptNumber(attempt)}@example.invalid`;
+}
+
+export function assertSyntheticCheckoutEmail(email: string): void {
+  if (!syntheticCheckoutEmail.test(email)) {
+    throw new Error("P17_PERFORMANCE_FIXTURE_EMAIL_INVALID");
+  }
+}
+
+function assertSyntheticOrderIdentity(input: {
+  customerId: string;
+  orderId: string;
+  orderItemId: string;
+  entitlementId?: string;
+  credentialId?: string;
+}): void {
+  for (const value of [
+    input.customerId,
+    input.orderId,
+    input.orderItemId,
+    input.entitlementId,
+    input.credentialId,
+  ]) {
+    if (value !== undefined && !uuid.test(value)) {
+      throw new Error("P17_PERFORMANCE_FIXTURE_IDENTITY_INVALID");
+    }
+  }
 }
 
 export async function prepareSyntheticPerformanceCatalog(): Promise<void> {
@@ -130,6 +173,7 @@ export async function prepareSyntheticPerformanceCatalog(): Promise<void> {
 }
 
 export async function createPendingPaymentFixture(attempt: number): Promise<PendingPaymentFixture> {
+  assertSyntheticAttemptNumber(attempt);
   const secret = process.env.P10_PAYMENT_CONTINUATION_SECRET;
   if (!secret) throw new Error("P17_PERFORMANCE_PAYMENT_SESSION_SECRET_MISSING");
   const paymentSession = new HmacPaymentContinuation(secret);
@@ -182,6 +226,7 @@ export async function createPendingPaymentFixture(attempt: number): Promise<Pend
 export async function createProtectedDeliveryFixture(
   attempt: number,
 ): Promise<ProtectedDeliveryFixture> {
+  assertSyntheticAttemptNumber(attempt);
   const secret = process.env.P11_BUYER_SESSION_SECRET;
   if (!secret) throw new Error("P17_PERFORMANCE_BUYER_SESSION_SECRET_MISSING");
   const buyerSession = new HmacBuyerSession(secret);
@@ -316,6 +361,7 @@ export async function cleanupSyntheticOrder(
     credentialId?: string;
   }>,
 ): Promise<void> {
+  assertSyntheticOrderIdentity(input);
   const db = database();
 
   await db.$transaction(async (tx) => {
@@ -343,6 +389,7 @@ export async function cleanupSyntheticOrder(
 }
 
 export async function cleanupCheckoutAttempt(email: string): Promise<void> {
+  assertSyntheticCheckoutEmail(email);
   const db = database();
   const customers = await db.customer.findMany({
     where: { email },

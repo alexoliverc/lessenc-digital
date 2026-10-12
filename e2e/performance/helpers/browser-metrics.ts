@@ -9,6 +9,8 @@ export type BrowserMetricResult =
         | "API_UNAVAILABLE"
         | "OBSERVATION_NOT_FINALIZED"
         | "ENTRY_MISSING"
+        | "INTERACTION_MARKER_MISSING"
+        | "BELOW_REPORTING_THRESHOLD_OR_ENTRY_MISSING"
         | "INTERACTION_ID_MISSING"
         | "REQUEST_START_MISSING"
         | "REQUEST_CORRELATION_INVALID"
@@ -19,10 +21,23 @@ export type BrowserMetricResult =
         | "DELIVERY_AUDIT_NOT_PROVEN"
         | "REDIRECT_OBSERVED"
         | "NAVIGATION_FAILED"
+        | "FIXTURE_SETUP_FAILED"
+        | "COOKIE_SETUP_FAILED"
+        | "PAYMENT_CAPTURE_FAILED"
+        | "SYNTHETIC_BRICK_FAILED"
         | "FORM_FILL_FAILED"
         | "CONSENT_SETUP_FAILED"
+        | "ACQUISITION_SETUP_FAILED"
+        | "CONSENT_ORIGIN_REJECTED"
+        | "CONSENT_JOURNEY_UNAVAILABLE"
+        | "CONSENT_SERVICE_UNAVAILABLE"
+        | "CONSENT_PROJECTION_INVALID"
+        | "CONSENT_RETURN_NAVIGATION_FAILED"
+        | "HYDRATION_WAIT_FAILED"
+        | "INTERACTION_ALIGNMENT_FAILED"
         | "MARK_TARGET_FAILED"
         | "CLICK_FAILED"
+        | "SETTLE_INTERACTION_FAILED"
         | "OUTCOME_NOT_OBSERVED"
         | "OBSERVER_READ_FAILED"
         | "FIXTURE_CLEANUP_FAILED";
@@ -56,6 +71,7 @@ type BrowserMetricState = {
     marker: string;
     name: string;
     startTimeMs: number;
+    isTrusted: boolean;
   }>;
   interactions: Array<{
     marker: string;
@@ -140,7 +156,12 @@ function installObservers(): void {
               ? event.target.closest("[data-p17-interaction]")?.getAttribute("data-p17-interaction")
               : null;
           if (marker) {
-            state.markerEvents.push({ marker, name: event.type, startTimeMs: event.timeStamp });
+            state.markerEvents.push({
+              marker,
+              name: event.type,
+              startTimeMs: event.timeStamp,
+              isTrusted: event.isTrusted,
+            });
           }
         },
         { capture: true },
@@ -148,37 +169,45 @@ function installObservers(): void {
     }
     const consumeEventEntries = (entries: PerformanceEntry[]) => {
       for (const entry of entries) {
-        const timing = entry as PerformanceEntry & {
-          interactionId?: unknown;
-          target?: EventTarget | null;
-        };
-        const interactionId = timing.interactionId;
-        const duration = timing.duration;
-        const target = timing.target;
-        const directMarker =
-          target instanceof Element
-            ? target.closest("[data-p17-interaction]")?.getAttribute("data-p17-interaction")
-            : null;
-        const marker =
-          directMarker ??
-          state.markerEvents.find(
+        try {
+          const timing = entry as PerformanceEntry & {
+            interactionId?: unknown;
+            target?: EventTarget | null;
+          };
+          const interactionId = timing.interactionId;
+          const duration = timing.duration;
+          const observedMarker = state.markerEvents.find(
             (observed) =>
               observed.name === entry.name && Math.abs(observed.startTimeMs - entry.startTime) <= 1,
           )?.marker;
+          let directMarker: string | null = null;
+          if (observedMarker === undefined) {
+            const target = timing.target;
+            directMarker =
+              target instanceof Element
+                ? (target.closest("[data-p17-interaction]")?.getAttribute("data-p17-interaction") ??
+                  null)
+                : null;
+          }
+          const marker = observedMarker ?? directMarker;
 
-        if (
-          marker &&
-          typeof interactionId === "number" &&
-          typeof duration === "number" &&
-          Number.isFinite(duration) &&
-          Number.isFinite(entry.startTime)
-        ) {
-          state.interactions.push({
-            marker,
-            interactionId,
-            durationMs: duration,
-            startTimeMs: entry.startTime,
-          });
+          if (
+            marker &&
+            typeof interactionId === "number" &&
+            typeof duration === "number" &&
+            Number.isFinite(duration) &&
+            Number.isFinite(entry.startTime)
+          ) {
+            state.interactions.push({
+              marker,
+              interactionId,
+              durationMs: duration,
+              startTimeMs: entry.startTime,
+            });
+          }
+        } catch {
+          // A detached Event Timing target must not make observer flushing throw into Playwright.
+          // Skipping the unreadable entry keeps the attempt fail-closed as missing/inconclusive.
         }
       }
     };
@@ -308,6 +337,20 @@ export async function markInteractionTarget(
   }, marker);
 }
 
+/**
+ * Starts the trusted input immediately after a completed animation frame. This adds no synthetic
+ * work or substitute duration; it only removes random frame phase from repeated lab interactions
+ * so Chromium can publish the native PerformanceEventTiming entry for the following paint.
+ */
+export async function alignInteractionAfterFrame(page: Page): Promise<void> {
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => resolve());
+      }),
+  );
+}
+
 export async function settleInteractionEntries(page: Page): Promise<void> {
   await page.evaluate(
     () =>
@@ -321,12 +364,21 @@ export async function settleInteractionEntries(page: Page): Promise<void> {
   });
 }
 
+export async function settlePaymentResourceEntries(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    globalThis.__p17PerformanceMetrics?.flushResourceEntries?.();
+  });
+}
+
 export async function readInpMetric(page: Page, marker: string): Promise<BrowserMetricResult> {
   const snapshot = await page.evaluate((expectedMarker) => {
     const state = globalThis.__p17PerformanceMetrics;
     state?.flushEventEntries?.();
     return {
       supported: state?.eventTimingSupported ?? false,
+      markerEventCount: (state?.markerEvents ?? []).filter(
+        (entry) => entry.marker === expectedMarker,
+      ).length,
       interactions: (state?.interactions ?? []).filter((entry) => entry.marker === expectedMarker),
     };
   }, marker);
@@ -337,6 +389,7 @@ export async function readInpMetric(page: Page, marker: string): Promise<Browser
 export function evaluateInpEntries(
   input: Readonly<{
     supported: boolean;
+    markerEventCount: number;
     interactions: readonly InteractionTiming[];
   }>,
 ): BrowserMetricResult {
@@ -344,7 +397,18 @@ export function evaluateInpEntries(
     return Object.freeze({ state: "INCONCLUSIVE", reason: "API_UNAVAILABLE" });
   }
   if (input.interactions.length === 0) {
-    return Object.freeze({ state: "INCONCLUSIVE", reason: "ENTRY_MISSING" });
+    if (!Number.isSafeInteger(input.markerEventCount) || input.markerEventCount <= 0) {
+      return Object.freeze({ state: "INCONCLUSIVE", reason: "INTERACTION_MARKER_MISSING" });
+    }
+
+    // PerformanceEventTiming applies a minimum effective durationThreshold of 16 ms. A DOM event
+    // observed by our marker without a corresponding PerformanceEventTiming entry is therefore
+    // ambiguous: the interaction may have completed below the reporting floor, or the browser may
+    // have omitted the entry for another reason. Do not fabricate a duration or coerce it to zero.
+    return Object.freeze({
+      state: "INCONCLUSIVE",
+      reason: "BELOW_REPORTING_THRESHOLD_OR_ENTRY_MISSING",
+    });
   }
   if (
     input.interactions.some(
@@ -372,8 +436,20 @@ export function evaluateInpEntries(
 }
 
 export type PaymentPostCaptureSnapshot = Readonly<{
-  acceptedPostCount: number;
+  expectedFlow: "PIX" | "CREDIT_CARD";
+  matchedPostCount: number;
+  methodMismatchCount: number;
   rejectedAttemptCount: number;
+}>;
+
+export type PaymentActivationTiming = BrowserMetricState["markerEvents"][number];
+
+export type PaymentPostInitiationDiagnostic = Readonly<{
+  activations: readonly PaymentActivationTiming[];
+  interactions: readonly InteractionTiming[];
+  resources: readonly ResourceTiming[];
+  expectedFlow: "PIX" | "CREDIT_CARD";
+  capture?: PaymentPostCaptureSnapshot | undefined;
 }>;
 
 /**
@@ -383,13 +459,28 @@ export type PaymentPostCaptureSnapshot = Readonly<{
 export async function readPaymentPostInitiationMetric(
   page: Page,
   marker: string,
+  expectedFlow: "PIX" | "CREDIT_CARD",
   capture?: PaymentPostCaptureSnapshot,
 ): Promise<BrowserMetricResult> {
+  const snapshot = await readPaymentPostInitiationDiagnostic(page, marker, expectedFlow, capture);
+
+  return evaluateCorrelatedPaymentInitiationTiming(snapshot);
+}
+
+export async function readPaymentPostInitiationDiagnostic(
+  page: Page,
+  marker: string,
+  expectedFlow: "PIX" | "CREDIT_CARD",
+  capture?: PaymentPostCaptureSnapshot,
+): Promise<PaymentPostInitiationDiagnostic> {
   const snapshot = await page.evaluate((expectedMarker) => {
     const state = globalThis.__p17PerformanceMetrics;
     state?.flushEventEntries?.();
     state?.flushResourceEntries?.();
     return {
+      activations: (state?.markerEvents ?? []).filter(
+        (entry) => entry.marker === expectedMarker && entry.name === "click",
+      ),
       interactions: (state?.interactions ?? []).filter((entry) => entry.marker === expectedMarker),
       resources: (state?.resources ?? []).filter(
         (entry) => entry.pathname === "/checkout/payment/start" && entry.initiatorType === "fetch",
@@ -397,9 +488,11 @@ export async function readPaymentPostInitiationMetric(
     };
   }, marker);
 
-  return evaluateCorrelatedPaymentInitiationTiming({
+  return Object.freeze({
+    activations: snapshot.activations,
     interactions: snapshot.interactions,
     resources: snapshot.resources,
+    expectedFlow,
     capture,
   });
 }
@@ -410,44 +503,43 @@ export async function readPaymentPostInitiationMetric(
  */
 export function evaluateCorrelatedPaymentInitiationTiming(
   input: Readonly<{
-    interactions: readonly InteractionTiming[];
+    activations: readonly PaymentActivationTiming[];
+    interactions?: readonly InteractionTiming[];
     resources: readonly ResourceTiming[];
+    expectedFlow: "PIX" | "CREDIT_CARD";
     capture?: PaymentPostCaptureSnapshot | undefined;
   }>,
 ): BrowserMetricResult {
-  if (input.capture?.acceptedPostCount !== 1 || input.capture.rejectedAttemptCount !== 0) {
+  if (
+    input.capture?.expectedFlow !== input.expectedFlow ||
+    input.capture.matchedPostCount !== 1 ||
+    input.capture.methodMismatchCount !== 0 ||
+    input.capture.rejectedAttemptCount !== 0
+  ) {
     return Object.freeze({
       state: "INCONCLUSIVE",
       reason: "REQUEST_CORRELATION_INVALID",
     });
   }
 
+  if (input.activations.length === 0) {
+    return Object.freeze({
+      state: "INCONCLUSIVE",
+      reason: "INTERACTION_MARKER_MISSING",
+    });
+  }
+
   if (
-    input.interactions.length === 0 ||
-    input.interactions.some(
+    input.activations.length !== 1 ||
+    input.resources.length !== 1 ||
+    input.activations.some(
       (entry) =>
-        !Number.isFinite(entry.interactionId) ||
-        entry.interactionId < 0 ||
-        !Number.isFinite(entry.startTimeMs),
+        entry.name !== "click" ||
+        entry.isTrusted !== true ||
+        !Number.isFinite(entry.startTimeMs) ||
+        entry.startTimeMs < 0,
     )
   ) {
-    return Object.freeze({
-      state: "INCONCLUSIVE",
-      reason: "INTERACTION_ID_MISSING",
-    });
-  }
-
-  const interactions = input.interactions.filter((entry) => entry.interactionId > 0);
-  if (interactions.length === 0) {
-    return Object.freeze({
-      state: "INCONCLUSIVE",
-      reason: "INTERACTION_ID_MISSING",
-    });
-  }
-
-  const interactionIds = new Set(interactions.map((entry) => entry.interactionId));
-
-  if (interactionIds.size !== 1 || input.resources.length !== 1) {
     return Object.freeze({
       state: "INCONCLUSIVE",
       reason: "REQUEST_CORRELATION_INVALID",
@@ -472,26 +564,30 @@ export function evaluateCorrelatedPaymentInitiationTiming(
     });
   }
 
-  const interaction = interactions.reduce((earliest, current) =>
-    current.startTimeMs < earliest.startTimeMs ? current : earliest,
-  );
+  const activation = input.activations[0];
 
-  return evaluatePaymentInitiationTiming({ interaction, resource });
+  return evaluatePaymentInitiationTiming({ activation: activation ?? null, resource });
 }
 
 export function evaluatePaymentInitiationTiming(
   input: Readonly<{
-    interaction: InteractionTiming | null;
+    activation: PaymentActivationTiming | null;
     resource: ResourceTiming | null;
   }>,
 ): BrowserMetricResult {
-  if (!input.interaction || input.interaction.interactionId <= 0) {
-    return Object.freeze({ state: "INCONCLUSIVE", reason: "INTERACTION_ID_MISSING" });
+  if (
+    !input.activation ||
+    input.activation.name !== "click" ||
+    input.activation.isTrusted !== true ||
+    !Number.isFinite(input.activation.startTimeMs) ||
+    input.activation.startTimeMs < 0
+  ) {
+    return Object.freeze({ state: "INCONCLUSIVE", reason: "INTERACTION_MARKER_MISSING" });
   }
   if (!input.resource || input.resource.requestStartMs <= 0) {
     return Object.freeze({ state: "INCONCLUSIVE", reason: "REQUEST_START_MISSING" });
   }
-  const valueMs = input.resource.requestStartMs - input.interaction.startTimeMs;
+  const valueMs = input.resource.requestStartMs - input.activation.startTimeMs;
   if (!Number.isFinite(valueMs) || valueMs < 0) {
     return Object.freeze({ state: "INCONCLUSIVE", reason: "TIMING_INCONSISTENT" });
   }

@@ -9,9 +9,9 @@ import type { IsolationEvidenceState } from "./evidence.ts";
 export const PERFORMANCE_BASE_URL = "http://127.0.0.1:3100";
 export const PERFORMANCE_DATABASE_HOST = "127.0.0.1";
 export const PERFORMANCE_DATABASE_PORT = "3307";
-export const PERFORMANCE_DATABASE_NAME = "lessenc_p17_perf_test";
+export const PERFORMANCE_DATABASE_NAME = "lessenc_test";
 export const PERFORMANCE_DATABASE_USER = "lessenc_p17_perf";
-export const PERFORMANCE_EXECUTION_AUTHORITY = "LES-P17-AUTONOMOUS-CLOSEOUT-R01";
+export const PERFORMANCE_EXECUTION_AUTHORITY = "LES-P17-AUTONOMOUS-COMPLETION-R01";
 
 const forbiddenExternalEnvironmentNames = [
   "MERCADOPAGO_ACCESS_TOKEN",
@@ -185,8 +185,10 @@ export type PerformanceEnvironmentInput = Readonly<{
   runId: string;
   commit?: string;
   sourceTreeSha256?: string;
+  imageDigest?: string;
   mode?: "infrastructure-only" | "acceptance-local";
   executionAuthority?: string;
+  scope?: "FULL" | "PR03_PIX_MOBILE";
 }>;
 
 export function buildPerformanceChildEnvironment(
@@ -208,12 +210,24 @@ export function buildPerformanceChildEnvironment(
     throw new Error("P17_PERFORMANCE_SOURCE_TREE_INVALID");
   }
 
+  if (input.imageDigest !== undefined && !/^sha256:[0-9a-f]{64}$/u.test(input.imageDigest)) {
+    throw new Error("P17_PERFORMANCE_OCI_IMAGE_DIGEST_INVALID");
+  }
+
   const mode = input.mode ?? "infrastructure-only";
+  const scope = input.scope ?? "FULL";
+  if (scope !== "FULL" && scope !== "PR03_PIX_MOBILE") {
+    throw new Error("P17_PERFORMANCE_SCOPE_INVALID");
+  }
   if (mode === "acceptance-local") {
     if (input.executionAuthority !== PERFORMANCE_EXECUTION_AUTHORITY) {
       throw new Error("P17_PERFORMANCE_EXECUTION_AUTHORITY_INVALID");
     }
-    if (input.commit === undefined || input.sourceTreeSha256 === undefined) {
+    if (
+      input.commit === undefined ||
+      input.sourceTreeSha256 === undefined ||
+      input.imageDigest === undefined
+    ) {
       throw new Error("P17_PERFORMANCE_ACCEPTANCE_PROVENANCE_MISSING");
     }
   } else if (input.executionAuthority !== undefined) {
@@ -240,6 +254,7 @@ export function buildPerformanceChildEnvironment(
     P17_TARGET: "local",
     P17_PERF_MODE: mode,
     P17_PERF_RUN_ID: input.runId,
+    P17_PERF_SCOPE: scope,
     NEXT_TELEMETRY_DISABLED: "1",
     DATABASE_URL: input.databaseUrl,
     DB_RUNTIME_URL: input.databaseUrl,
@@ -262,6 +277,9 @@ export function buildPerformanceChildEnvironment(
   }
   if (input.sourceTreeSha256 !== undefined) {
     child.P17_SOURCE_TREE_SHA256 = input.sourceTreeSha256;
+  }
+  if (input.imageDigest !== undefined) {
+    child.P17_OCI_IMAGE_DIGEST = input.imageDigest;
   }
   if (mode === "acceptance-local") {
     child.P17_PERF_EXECUTION_AUTHORITY = PERFORMANCE_EXECUTION_AUTHORITY;
@@ -289,7 +307,8 @@ export function assertLocalPerformanceExecutionAuthorized(
     environment.P17_PERF_MODE !== "acceptance-local" ||
     environment.P17_PERF_EXECUTION_AUTHORITY !== PERFORMANCE_EXECUTION_AUTHORITY ||
     !/^[0-9a-f]{40}$/u.test(environment.P17_PERF_COMMIT ?? "") ||
-    !/^[0-9a-f]{64}$/u.test(environment.P17_SOURCE_TREE_SHA256 ?? "")
+    !/^[0-9a-f]{64}$/u.test(environment.P17_SOURCE_TREE_SHA256 ?? "") ||
+    !/^sha256:[0-9a-f]{64}$/u.test(environment.P17_OCI_IMAGE_DIGEST ?? "")
   ) {
     throw new Error("P17_PERFORMANCE_LOCAL_EXECUTION_NOT_AUTHORIZED");
   }

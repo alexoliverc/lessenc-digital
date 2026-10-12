@@ -59,7 +59,13 @@ FROM ${P17_PLAYWRIGHT_IMAGE} AS app-runtime
 
 ARG P17_PERF_UID=17017
 ARG P17_PERF_GID=17017
+ARG P17_SOURCE_COMMIT=UNVERIFIED
 ARG P17_SOURCE_TREE_SHA256=UNVERIFIED
+
+LABEL org.opencontainers.image.revision="${P17_SOURCE_COMMIT}" \
+      com.lessenc.p17.declared-commit-authority="METADATA_ONLY_NOT_SOURCE_BYTE_PROOF" \
+      com.lessenc.p17.source-provenance.sha256="${P17_SOURCE_TREE_SHA256}" \
+      com.lessenc.p17.source-provenance.schema="2"
 
 ENV APP_ENV=local \
     NODE_ENV=production \
@@ -95,6 +101,10 @@ RUN --network=none groupadd --gid "${P17_PERF_GID}" p17perf \
       /workspace/tmp/p17-performance-storage
 
 COPY --from=app-build --chown=p17perf:p17perf /workspace/ /workspace/
+COPY --chown=p17perf:p17perf e2e/performance/capsule/dockerignore.snapshot /workspace/.dockerignore
+COPY --chown=p17perf:p17perf e2e/performance/capsule/Dockerfile e2e/performance/capsule/compose.yaml e2e/performance/capsule/context-audit.Dockerfile e2e/performance/capsule/dockerignore.snapshot e2e/performance/capsule/bootstrap-toolchain.sh e2e/performance/capsule/export-db-ca.sh e2e/performance/capsule/init-db-ca-volume.sh e2e/performance/capsule/supply-chain.json /workspace/e2e/performance/capsule/
+COPY --chown=p17perf:p17perf e2e/performance/capsule/offline/artifacts/ /workspace/e2e/performance/capsule/offline/artifacts/
+COPY --chown=p17perf:p17perf e2e/performance/capsule/offline/manifests/ /workspace/e2e/performance/capsule/offline/manifests/
 COPY --chown=p17perf:p17perf e2e/performance/capsule/entrypoint.sh /workspace/e2e/performance/capsule/entrypoint.sh
 COPY --chown=p17perf:p17perf scripts/p17-capsule-network.mjs /workspace/scripts/p17-capsule-network.mjs
 COPY --chown=p17perf:p17perf scripts/p17-runtime-smoke.mjs scripts/p17-navigation-diagnostics.mjs /workspace/scripts/
@@ -111,9 +121,14 @@ COPY --chown=p17perf:p17perf e2e/performance/*.perf.spec.ts /workspace/e2e/perfo
 # final source manifest binds the exact declared input rather than an incidental generated variant.
 COPY --chown=p17perf:p17perf next-env.d.ts /workspace/next-env.d.ts
 
-RUN --network=none /opt/node24/bin/node /workspace/scripts/p17-source-provenance.mjs write /workspace /workspace/.p17-source-tree.sha256 \
+RUN --network=none install -d -o p17perf -g p17perf -m 0700 \
+      /home/p17perf/.local/share/vitest \
+      /workspace/node_modules/.vite-temp \
+      /workspace/node_modules/.vitest \
+    && /opt/node24/bin/node /workspace/scripts/p17-source-provenance.mjs write /workspace /workspace/.p17-source-tree.sha256 \
     && /opt/node24/bin/node -e 'const fs = require("node:fs"); const expected = process.argv[1]; const observed = fs.readFileSync("/workspace/.p17-source-tree.sha256", "utf8").trim(); if (expected !== "UNVERIFIED" && (!/^[0-9a-f]{64}$/.test(expected) || observed !== expected)) process.exit(1);' "${P17_SOURCE_TREE_SHA256}" \
     && chmod 0444 /workspace/.p17-source-tree.sha256 \
+    && chmod 0444 /workspace/.p17-source-provenance.json \
     && chmod 0550 /workspace/e2e/performance/capsule/entrypoint.sh \
     && find /workspace -perm /022 -exec chmod go-w {} + \
     && chmod 0700 /home/p17perf/.cache /workspace/output/p17-performance /workspace/tmp/p17-performance-storage

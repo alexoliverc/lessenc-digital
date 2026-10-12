@@ -94,6 +94,7 @@ describe("P17 performance orchestration contract", () => {
       runId: "p17-perf-sensitive-field-test",
       commit: "d73b2d678686fc805c6eb5f26a852ae60f870b91",
       sourceTreeSha256: "a".repeat(64),
+      imageDigest: `sha256:${"b".repeat(64)}`,
       browser: { engine: "chromium", version: "153.0.0", playwrightVersion: "1.63.0" },
       nodeVersion: "24.21.0",
       environment: "ISOLATED_LOCAL_CAPSULE",

@@ -68,11 +68,11 @@ NODE
 "$PRISMA_SCHEMA_ENGINE_BINARY" --version | grep -F '0edf323efd1d98336f3f0a68684b56f689b900d3' >/dev/null || fail P17_CAPSULE_SCHEMA_ENGINE_VERSION_INVALID
 node -e 'require("@prisma/get-platform").getBinaryTargetForCurrentPlatform().then(t => { if(t !== "debian-openssl-3.0.x") process.exit(1); console.log("P17_PRISMA_TARGET=" + t); });'
 
-APP_ENV=local DATABASE_URL='mysql://lessenc_p17_perf:p17_perf_build_synthetic_only@127.0.0.1:3307/lessenc_p17_perf_test' \
+APP_ENV=local DATABASE_URL='mysql://lessenc_p17_perf:p17_perf_build_synthetic_only@127.0.0.1:3307/lessenc_test' \
   ./node_modules/.bin/prisma generate
 
 APP_ENV=local NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 \
-  DATABASE_URL='mysql://lessenc_p17_perf:p17_perf_build_synthetic_only@127.0.0.1:3307/lessenc_p17_perf_test' \
+  DATABASE_URL='mysql://lessenc_p17_perf:p17_perf_build_synthetic_only@127.0.0.1:3307/lessenc_test' \
   ./node_modules/.bin/next build
 
 [ -f .next/BUILD_ID ] || fail P17_CAPSULE_NEXT_BUILD_MISSING

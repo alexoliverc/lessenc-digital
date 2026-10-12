@@ -8,6 +8,7 @@ import { PERFORMANCE_NETWORK_PROFILE } from "./network-profile";
 
 const commit = "d73b2d678686fc805c6eb5f26a852ae60f870b91";
 const sourceTreeSha256 = "a".repeat(64);
+const imageDigest = `sha256:${"b".repeat(64)}`;
 const runId = "p17-perf-complete-run-test";
 
 function manifest(): P17RunManifest {
@@ -17,6 +18,7 @@ function manifest(): P17RunManifest {
     runId,
     commit,
     sourceTreeSha256,
+    imageDigest,
     browser: { engine: "chromium", version: "153.0.8010.12", playwrightVersion: "1.63.0" },
     nodeVersion: "24.21.0",
     environment: "ISOLATED_LOCAL_CAPSULE",

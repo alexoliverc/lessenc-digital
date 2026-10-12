@@ -217,6 +217,7 @@ export function createRunManifest(
     runId: string;
     commit: string;
     sourceTreeSha256: string;
+    imageDigest: string;
     browserVersion: string;
     playwrightVersion: string;
     nodeVersion: string;
@@ -235,6 +236,7 @@ export function createRunManifest(
     runId: input.runId,
     commit: input.commit,
     sourceTreeSha256: input.sourceTreeSha256,
+    imageDigest: input.imageDigest,
     browser: Object.freeze({
       engine: "chromium",
       version: input.browserVersion,

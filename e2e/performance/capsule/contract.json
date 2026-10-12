@@ -15,7 +15,7 @@
     "processBindingEvidence": "PASS_RUNTIME_SMOKE_LOOPBACK_ONLY",
     "ownerPerformanceBudget": "APPROVED_LES_P17_PERFORMANCE_BUDGET_R01",
     "performanceImplementation": "IMPLEMENTED_RUNTIME_VALIDATION_PENDING",
-    "performanceExecutionAuthorization": "AUTHORIZED_LOCAL_ONLY_LES_P17_AUTONOMOUS_CLOSEOUT_R01",
+    "performanceExecutionAuthorization": "AUTHORIZED_LOCAL_ONLY_LES_P17_AUTONOMOUS_COMPLETION_R01",
     "performanceMeasurementProvenance": "HISTORICAL_DIAGNOSTIC_ONLY_240_UNTHROTTLED_UNCALIBRATED",
     "performanceAcceptance": "NOT_PROVEN",
     "gateD": "NOT_READY",

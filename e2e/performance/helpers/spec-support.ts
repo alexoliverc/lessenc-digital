@@ -31,6 +31,11 @@ export type PerformanceCohortCollection = Readonly<{
   attempts: readonly AttemptEvidence[];
 }>;
 
+export function performanceCollectionAttachmentName(cohort: P17PerformanceCohort): string {
+  const flow = cohort.flow === undefined ? "" : `-${cohort.flow.toLowerCase()}`;
+  return `p17-${cohort.viewport}-${cohort.indicator.toLowerCase()}${flow}-attempts`;
+}
+
 function requiredIdentity(name: string, value: string | undefined, pattern: RegExp): string {
   if (!value || !pattern.test(value)) {
     throw new Error(`P17_PERFORMANCE_${name}_INVALID`);
@@ -128,61 +133,79 @@ export async function collectPerformanceCohort(
     contentType: "application/json",
   });
 
-  if (calibration.evaluation.state !== "VALID") {
-    throw new Error("P17_PERFORMANCE_CALIBRATION_NOT_VALID");
-  }
-
   const attempts: AttemptEvidence[] = [];
 
-  for (const planned of selectedPlan) {
-    const context = await input.browser.newContext({
-      viewport,
-      baseURL: PERFORMANCE_BASE_URL,
-      serviceWorkers: "block",
-    });
-
-    try {
-      await installPerformanceObservers(context);
-      const page = await context.newPage();
-      await installPerformanceRequestGuard(page);
-      const session = await context.newCDPSession(page);
-      await applyPerformanceNetworkProfile(session);
-
-      let metric: BrowserMetricResult;
-      try {
-        metric = await input.measure({
-          page,
-          attempt: planned.attempt,
-          phase: planned.phase,
-        });
-      } catch {
-        metric = Object.freeze({ state: "INCONCLUSIVE", reason: "TIMING_INCONSISTENT" });
-      }
-
-      const evidence = createAttemptEvidence({
-        plan: planned,
-        runId,
-        commit,
-        browserVersion,
-        playwrightVersion,
-        metric,
-        calibration,
-        isolation: provenIsolation,
-      });
-      attempts.push(evidence);
-
-      if (planned.attempt === 1 && evidence.state !== "WARMUP_VALID") {
-        await input.testInfo.attach(`p17-${p17CohortKey(input.cohort)}-smoke-failure`, {
-          body: Buffer.from(`${JSON.stringify(evidence, null, 2)}\n`, "utf8"),
-          contentType: "application/json",
-        });
-        throw new Error(
-          `P17_PERFORMANCE_COHORT_SMOKE_NOT_VALID_${evidence.reason ?? evidence.state}`,
-        );
-      }
-    } finally {
-      await context.close();
+  try {
+    if (calibration.evaluation.state !== "VALID") {
+      throw new Error("P17_PERFORMANCE_CALIBRATION_NOT_VALID");
     }
+
+    for (const planned of selectedPlan) {
+      const context = await input.browser.newContext({
+        viewport,
+        baseURL: PERFORMANCE_BASE_URL,
+        serviceWorkers: "block",
+      });
+
+      try {
+        await installPerformanceObservers(context);
+        const page = await context.newPage();
+        await installPerformanceRequestGuard(page);
+        const session = await context.newCDPSession(page);
+        await applyPerformanceNetworkProfile(session);
+
+        let metric: BrowserMetricResult;
+        try {
+          metric = await input.measure({
+            page,
+            attempt: planned.attempt,
+            phase: planned.phase,
+          });
+        } catch {
+          metric = Object.freeze({ state: "INCONCLUSIVE", reason: "TIMING_INCONSISTENT" });
+        }
+
+        const evidence = createAttemptEvidence({
+          plan: planned,
+          runId,
+          commit,
+          browserVersion,
+          playwrightVersion,
+          metric,
+          calibration,
+          isolation: provenIsolation,
+        });
+        attempts.push(evidence);
+
+        const expectedState = planned.phase === "WARMUP" ? "WARMUP_VALID" : "VALID";
+        if (evidence.state !== expectedState) {
+          const classification = planned.attempt === 1 ? "smoke-failure" : "invalid-attempt";
+          await input.testInfo.attach(
+            `p17-${p17CohortKey(input.cohort)}-${classification}-${planned.attempt}`,
+            {
+              body: Buffer.from(`${JSON.stringify(evidence, null, 2)}\n`, "utf8"),
+              contentType: "application/json",
+            },
+          );
+          throw new Error(
+            `P17_PERFORMANCE_COHORT_${planned.attempt === 1 ? "SMOKE" : "ATTEMPT"}_NOT_VALID_${evidence.reason ?? evidence.state}`,
+          );
+        }
+      } finally {
+        await context.close();
+      }
+    }
+  } catch (error) {
+    const partial = Object.freeze({
+      cohort: input.cohort,
+      calibration,
+      attempts: Object.freeze([...attempts]),
+    });
+    await input.testInfo.attach(performanceCollectionAttachmentName(input.cohort), {
+      body: Buffer.from(`${JSON.stringify(partial, null, 2)}\n`, "utf8"),
+      contentType: "application/json",
+    });
+    throw error;
   }
 
   return Object.freeze({

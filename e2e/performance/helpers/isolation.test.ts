@@ -17,8 +17,7 @@ import {
 } from "./isolation";
 
 const repositoryRoot = resolve("C:/synthetic/lessenc-digital");
-const databaseUrl =
-  "mysql://lessenc_p17_perf:p17_perf_password@127.0.0.1:3307/lessenc_p17_perf_test";
+const databaseUrl = "mysql://lessenc_p17_perf:p17_perf_password@127.0.0.1:3307/lessenc_test";
 
 describe("P17 performance isolation guards", () => {
   it("rejects hosted and any base URL override", () => {
@@ -56,13 +55,13 @@ describe("P17 performance isolation guards", () => {
     expect(validatePerformanceDatabaseUrl(databaseUrl)).toEqual({
       host: "127.0.0.1",
       port: "3307",
-      database: "lessenc_p17_perf_test",
+      database: "lessenc_test",
       user: "lessenc_p17_perf",
     });
 
     expect(() =>
       validatePerformanceDatabaseUrl(
-        "mysql://lessenc_p17_perf:p17_perf_password@db.example.invalid:3307/lessenc_p17_perf_test",
+        "mysql://lessenc_p17_perf:p17_perf_password@db.example.invalid:3307/lessenc_test",
       ),
     ).toThrow("P17_PERFORMANCE_DATABASE_HOST_NOT_LOOPBACK");
     expect(() =>
@@ -72,7 +71,7 @@ describe("P17 performance isolation guards", () => {
     ).toThrow("P17_PERFORMANCE_DATABASE_NAME_INVALID");
     expect(() =>
       validatePerformanceDatabaseUrl(
-        "mysql://lessenc_p17_perf:p17_perf_password@127.0.0.1:3306/lessenc_p17_perf_test",
+        "mysql://lessenc_p17_perf:p17_perf_password@127.0.0.1:3306/lessenc_test",
       ),
     ).toThrow("P17_PERFORMANCE_DATABASE_PORT_NOT_AUTHORIZED");
   });
@@ -132,6 +131,7 @@ describe("P17 performance isolation guards", () => {
 
   it("authorizes only the exact local acceptance contract with complete provenance", () => {
     const sourceTreeSha256 = "a".repeat(64);
+    const imageDigest = `sha256:${"b".repeat(64)}`;
     const child = buildPerformanceChildEnvironment(
       { PATH: "synthetic-path" },
       {
@@ -140,6 +140,7 @@ describe("P17 performance isolation guards", () => {
         runId: "p17-perf-authorized-local-test",
         commit: "d73b2d678686fc805c6eb5f26a852ae60f870b91",
         sourceTreeSha256,
+        imageDigest,
         mode: "acceptance-local",
         executionAuthority: PERFORMANCE_EXECUTION_AUTHORITY,
       },
@@ -148,6 +149,7 @@ describe("P17 performance isolation guards", () => {
     expect(() => assertLocalPerformanceExecutionAuthorized(child, repositoryRoot)).not.toThrow();
     expect(child.P17_PERF_MODE).toBe("acceptance-local");
     expect(child.P17_SOURCE_TREE_SHA256).toBe(sourceTreeSha256);
+    expect(child.P17_OCI_IMAGE_DIGEST).toBe(imageDigest);
     expect(child.P17_PERF_EXECUTION_AUTHORITY).toBe(PERFORMANCE_EXECUTION_AUTHORITY);
 
     expect(() =>
@@ -159,6 +161,7 @@ describe("P17 performance isolation guards", () => {
           runId: "p17-perf-unauthorized-local-test",
           commit: "d73b2d678686fc805c6eb5f26a852ae60f870b91",
           sourceTreeSha256,
+          imageDigest,
           mode: "acceptance-local",
           executionAuthority: "NOT_AUTHORIZED",
         },

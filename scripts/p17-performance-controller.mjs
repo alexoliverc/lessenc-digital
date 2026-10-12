@@ -86,11 +86,49 @@ async function stopChild(child) {
   if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
 }
 
+export function selectPerformancePlaywrightArgs(scope = "FULL") {
+  const full = ["test", "--config=playwright.performance.config.ts"];
+
+  if (scope === "FULL") return full;
+
+  if (scope === "PR03_PIX_MOBILE") {
+    return [
+      ...full,
+      "pr03-payment-initiation.perf.spec.ts",
+      "--project=chromium-mobile",
+      "--grep=measures PIX interaction to browser requestStart",
+    ];
+  }
+
+  throw new Error("P17_PERFORMANCE_SELECTION_NOT_AUTHORIZED");
+}
+
+export async function executePerformanceControllerPlan(operations, scope = "FULL") {
+  const playwrightArgs = selectPerformancePlaywrightArgs(scope);
+
+  let application = null;
+  let calibrationStarted = false;
+
+  try {
+    await operations.waitForDatabase();
+    await operations.runCommand("./node_modules/.bin/prisma", ["migrate", "deploy"]);
+    await operations.startCalibration();
+    calibrationStarted = true;
+    await operations.verifyCalibration();
+    application = operations.startApplication();
+    await operations.waitForApplication();
+    await operations.runCommand("./node_modules/.bin/playwright", playwrightArgs);
+  } finally {
+    if (application !== null) await operations.stopApplication(application);
+    if (calibrationStarted) await operations.stopCalibration();
+  }
+}
+
 /**
  * Runs only under the exact local-only authority, provenance and isolation contract validated by
  * the capsule entrypoint. Hosted targets and inherited provider credentials remain fail-closed.
  */
-export async function runLocalPerformanceAcceptance() {
+export async function runLocalPerformanceAcceptance(scope = "FULL") {
   assertLocalPerformanceExecutionAuthorized(process.env, process.cwd());
   const childEnvironment = buildPerformanceChildEnvironment(process.env, {
     databaseUrl: process.env.P17_PERF_DB_RUNTIME_URL,
@@ -99,45 +137,41 @@ export async function runLocalPerformanceAcceptance() {
     runId: process.env.P17_PERF_RUN_ID,
     commit: process.env.P17_PERF_COMMIT,
     sourceTreeSha256: process.env.P17_SOURCE_TREE_SHA256,
+    imageDigest: process.env.P17_OCI_IMAGE_DIGEST,
     mode: "acceptance-local",
     executionAuthority: process.env.P17_PERF_EXECUTION_AUTHORITY,
+    scope,
   });
   const calibrationServer = createPerformanceCalibrationServer();
-  let application = null;
 
-  try {
-    await waitForDatabase();
-    await runFixedChild("./node_modules/.bin/prisma", ["migrate", "deploy"], childEnvironment);
-
-    calibrationServer.listen(3101, "127.0.0.1");
-    await once(calibrationServer, "listening");
-    await verifyCalibrationServer();
-
-    application = spawn(
-      "./node_modules/.bin/next",
-      ["start", "--hostname", "127.0.0.1", "--port", "3100"],
-      {
-        cwd: process.cwd(),
-        env: childEnvironment,
-        shell: false,
-        stdio: "inherit",
-        windowsHide: true,
+  await executePerformanceControllerPlan(
+    {
+      waitForDatabase,
+      runCommand: (executable, args) => runFixedChild(executable, args, childEnvironment),
+      startCalibration: async () => {
+        calibrationServer.listen(3101, "127.0.0.1");
+        await once(calibrationServer, "listening");
       },
-    );
-    await waitForApplication();
-
-    await runFixedChild(
-      "./node_modules/.bin/playwright",
-      ["test", "--config=playwright.performance.config.ts"],
-      childEnvironment,
-    );
-  } finally {
-    if (application !== null) await stopChild(application);
-    if (calibrationServer.listening) {
-      calibrationServer.close();
-      await once(calibrationServer, "close");
-    }
-  }
+      verifyCalibration: verifyCalibrationServer,
+      startApplication: () =>
+        spawn("./node_modules/.bin/next", ["start", "--hostname", "127.0.0.1", "--port", "3100"], {
+          cwd: process.cwd(),
+          env: childEnvironment,
+          shell: false,
+          stdio: "inherit",
+          windowsHide: true,
+        }),
+      waitForApplication,
+      stopApplication: stopChild,
+      stopCalibration: async () => {
+        if (calibrationServer.listening) {
+          calibrationServer.close();
+          await once(calibrationServer, "close");
+        }
+      },
+    },
+    scope,
+  );
 }
 
 export const PERFORMANCE_CONTROLLER_PLAN = Object.freeze({
@@ -152,11 +186,16 @@ export const PERFORMANCE_CONTROLLER_PLAN = Object.freeze({
 });
 
 if (process.argv[1]?.endsWith("p17-performance-controller.mjs")) {
-  if (process.argv[2] !== "run-local-acceptance") {
+  if (
+    process.argv[2] !== "run-local-acceptance" &&
+    process.argv[2] !== "run-local-pr03-pix-mobile"
+  ) {
     process.stderr.write("P17_PERFORMANCE_CONTROLLER_COMMAND_INVALID\n");
     process.exitCode = 1;
   } else {
-    runLocalPerformanceAcceptance().catch((error) => {
+    runLocalPerformanceAcceptance(
+      process.argv[2] === "run-local-pr03-pix-mobile" ? "PR03_PIX_MOBILE" : "FULL",
+    ).catch((error) => {
       process.stderr.write(
         `${error instanceof Error ? error.message : "P17_PERFORMANCE_CONTROLLER_FAILED"}\n`,
       );

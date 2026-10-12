@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { inspectPerformanceRequest } from "./browser-network-guard";
+import {
+  inspectPerformanceRequest,
+  inspectSyntheticPaymentStartBody,
+  inspectSyntheticPaymentStartResponse,
+} from "./browser-network-guard";
 
 describe("P17 browser egress guard", () => {
   it("allows only explicit local application paths and methods", () => {
@@ -82,5 +86,78 @@ describe("P17 browser egress guard", () => {
         method: "POST",
       }),
     ).toEqual({ state: "REJECT", reason: "METHOD_NOT_ALLOWED" });
+  });
+
+  it("binds PR03 synthetic capture to the exact cohort method without retaining card data", () => {
+    expect(inspectSyntheticPaymentStartBody({ method: "PIX" }, "PIX")).toEqual({
+      state: "MATCH",
+      flow: "PIX",
+    });
+    expect(inspectSyntheticPaymentStartBody({ method: "PIX" }, "CREDIT_CARD")).toEqual({
+      state: "REJECT",
+      reason: "METHOD_MISMATCH",
+    });
+    expect(
+      inspectSyntheticPaymentStartBody(
+        {
+          method: "CREDIT_CARD",
+          card: {
+            token: "synthetic-sensitive-value-must-not-be-returned",
+            paymentMethodId: "visa",
+            installments: 1,
+            paymentType: "credit_card",
+          },
+        },
+        "CREDIT_CARD",
+      ),
+    ).toEqual({ state: "MATCH", flow: "CREDIT_CARD" });
+    expect(
+      inspectSyntheticPaymentStartBody(
+        {
+          method: "CREDIT_CARD",
+          card: {
+            token: "synthetic-sensitive-value-must-not-be-returned",
+            paymentMethodId: "visa",
+            installments: 1,
+            paymentType: "credit_card",
+          },
+        },
+        "PIX",
+      ),
+    ).toEqual({ state: "REJECT", reason: "METHOD_MISMATCH" });
+  });
+
+  it("recognizes only the exact successful local POST response used for PR03 synchronization", () => {
+    expect(
+      inspectSyntheticPaymentStartResponse({
+        rawUrl: "http://127.0.0.1:3100/checkout/payment/start",
+        method: "POST",
+        status: 200,
+      }),
+    ).toBe(true);
+    for (const candidate of [
+      {
+        rawUrl: "http://127.0.0.1:3100/checkout/payment/start?unexpected=1",
+        method: "POST",
+        status: 200,
+      },
+      {
+        rawUrl: "https://api.mercadopago.com/checkout/payment/start",
+        method: "POST",
+        status: 200,
+      },
+      {
+        rawUrl: "http://127.0.0.1:3100/checkout/payment/start",
+        method: "GET",
+        status: 200,
+      },
+      {
+        rawUrl: "http://127.0.0.1:3100/checkout/payment/start",
+        method: "POST",
+        status: 500,
+      },
+    ]) {
+      expect(inspectSyntheticPaymentStartResponse(candidate)).toBe(false);
+    }
   });
 });

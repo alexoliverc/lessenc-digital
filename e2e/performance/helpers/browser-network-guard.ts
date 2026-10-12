@@ -1,4 +1,4 @@
-import type { Page, Request, Route } from "@playwright/test";
+import type { Page, Request, Response, Route } from "@playwright/test";
 
 import { parsePaymentStartInput } from "../../../src/app/checkout/payment/request.ts";
 import { PERFORMANCE_BASE_URL } from "./isolation.ts";
@@ -101,7 +101,10 @@ export function inspectPerformanceRequest(
   return Object.freeze({ state: "REJECT", reason: "METHOD_NOT_ALLOWED" });
 }
 
-export async function denyOptionalMeasurement(page: Page): Promise<void> {
+export async function denyOptionalMeasurement(
+  page: Page,
+  options: Readonly<{ requireReturnPageBoundary?: boolean }> = {},
+): Promise<void> {
   const returnUrl = page.url();
   const acquisitionResponse = await page.goto("/cronograma-capilar-inteligente", {
     waitUntil: "domcontentloaded",
@@ -122,11 +125,23 @@ export async function denyOptionalMeasurement(page: Page): Promise<void> {
       body: JSON.stringify({ analytics: "DENIED", advertising: "DENIED" }),
     });
     const body: unknown = await response.json();
-    return { ok: response.ok, body };
+    return { ok: response.ok, status: response.status, body };
   });
 
+  if (!projection.ok) {
+    switch (projection.status) {
+      case 403:
+        throw new Error("P17_PERFORMANCE_CONSENT_ORIGIN_REJECTED");
+      case 409:
+        throw new Error("P17_PERFORMANCE_CONSENT_JOURNEY_UNAVAILABLE");
+      case 503:
+        throw new Error("P17_PERFORMANCE_CONSENT_SERVICE_UNAVAILABLE");
+      default:
+        throw new Error("P17_PERFORMANCE_CONSENT_PROJECTION_INVALID");
+    }
+  }
+
   if (
-    !projection.ok ||
     !projection.body ||
     typeof projection.body !== "object" ||
     Array.isArray(projection.body) ||
@@ -142,6 +157,8 @@ export async function denyOptionalMeasurement(page: Page): Promise<void> {
   if (returnResponse?.status() !== 200) {
     throw new Error("P17_PERFORMANCE_CONSENT_RETURN_NAVIGATION_FAILED");
   }
+  if (options.requireReturnPageBoundary === false) return;
+
   await page.waitForFunction(() => {
     const element = document.querySelector<HTMLDetailsElement>(
       'aside[aria-label="Preferências de privacidade"] details',
@@ -172,10 +189,78 @@ export async function installPerformanceRequestGuard(page: Page): Promise<void> 
 
 export type SyntheticPaymentStartCapture = Readonly<{
   snapshot(): Readonly<{
-    acceptedPostCount: number;
+    expectedFlow: "PIX" | "CREDIT_CARD";
+    matchedPostCount: number;
+    methodMismatchCount: number;
     rejectedAttemptCount: number;
   }>;
 }>;
+
+export function inspectSyntheticPaymentStartResponse(
+  input: Readonly<{ rawUrl: string; method: string; status: number }>,
+): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(input.rawUrl);
+  } catch {
+    return false;
+  }
+  return (
+    parsed.origin === PERFORMANCE_BASE_URL &&
+    parsed.pathname === "/checkout/payment/start" &&
+    parsed.search === "" &&
+    input.method === "POST" &&
+    input.status === 200
+  );
+}
+
+export async function observeSyntheticPaymentStartAction(
+  page: Page,
+  action: () => Promise<void>,
+): Promise<void> {
+  const observedResponse = page.waitForResponse(
+    (response) =>
+      inspectSyntheticPaymentStartResponse({
+        rawUrl: response.url(),
+        method: response.request().method(),
+        status: response.status(),
+      }),
+    { timeout: 10_000 },
+  );
+
+  await action();
+  const response: Response = await observedResponse;
+  const failure = await response.finished();
+  if (failure !== null) throw new Error("P17_SYNTHETIC_PAYMENT_RESPONSE_FAILED");
+}
+
+export type SyntheticPaymentMethodDecision =
+  | Readonly<{ state: "MATCH"; flow: "PIX" | "CREDIT_CARD" }>
+  | Readonly<{ state: "REJECT"; reason: "PAYLOAD_INVALID" | "METHOD_MISMATCH" }>;
+
+/**
+ * Validates the request with the production parser and retains only the method classification.
+ * Card tokens and the rest of the financial payload are deliberately never returned or stored.
+ */
+export function inspectSyntheticPaymentStartBody(
+  body: unknown,
+  expectedFlow: "PIX" | "CREDIT_CARD",
+): SyntheticPaymentMethodDecision {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return Object.freeze({ state: "REJECT", reason: "PAYLOAD_INVALID" });
+  }
+
+  const parsed = parsePaymentStartInput(body);
+  if (parsed === null) {
+    return Object.freeze({ state: "REJECT", reason: "PAYLOAD_INVALID" });
+  }
+
+  if (parsed.method !== expectedFlow) {
+    return Object.freeze({ state: "REJECT", reason: "METHOD_MISMATCH" });
+  }
+
+  return Object.freeze({ state: "MATCH", flow: expectedFlow });
+}
 
 /**
  * Records only synthetic route handling counts.
@@ -183,8 +268,10 @@ export type SyntheticPaymentStartCapture = Readonly<{
  */
 export async function fulfillSyntheticPaymentStart(
   page: Page,
+  expectedFlow: "PIX" | "CREDIT_CARD",
 ): Promise<SyntheticPaymentStartCapture> {
-  let acceptedPostCount = 0;
+  let matchedPostCount = 0;
+  let methodMismatchCount = 0;
   let rejectedAttemptCount = 0;
 
   await page.route(`${PERFORMANCE_BASE_URL}/checkout/payment/start`, async (route) => {
@@ -206,14 +293,10 @@ export async function fulfillSyntheticPaymentStart(
       return;
     }
 
-    if (!body || typeof body !== "object" || Array.isArray(body)) {
-      rejectedAttemptCount += 1;
-      await route.abort("blockedbyclient");
-      return;
-    }
-
-    if (parsePaymentStartInput(body) === null) {
-      rejectedAttemptCount += 1;
+    const decision = inspectSyntheticPaymentStartBody(body, expectedFlow);
+    if (decision.state === "REJECT") {
+      if (decision.reason === "METHOD_MISMATCH") methodMismatchCount += 1;
+      else rejectedAttemptCount += 1;
       await route.abort("blockedbyclient");
       return;
     }
@@ -234,13 +317,15 @@ export async function fulfillSyntheticPaymentStart(
       }),
     });
 
-    acceptedPostCount += 1;
+    matchedPostCount += 1;
   });
 
   return Object.freeze({
     snapshot: () =>
       Object.freeze({
-        acceptedPostCount,
+        expectedFlow,
+        matchedPostCount,
+        methodMismatchCount,
         rejectedAttemptCount,
       }),
   });
