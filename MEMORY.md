@@ -1,6 +1,6 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 04/10/2026
+**Última atualização:** 12/10/2026
 **Projeto:** LES-DIG — L'Essenc Digital
 **Estado documental:** P00–P15 permanecem nas respectivas baselines canônicas integradas/checkpointed. P16 — Staging Deployment concluiu a validação técnica e hosted na release técnica congelada `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 está `COMPLETE / PASS / HOSTED VALIDATED`. O closeout documental foi integrado em `main` por fast-forward no commit `6c60441e00e4520b8c689f8c4944c36c73d80d12`. O checkpoint permanente P16 `checkpoint/p16-staging-deployment-complete` foi criado e publicado como tag anotada, dereferencia exatamente a release técnica `22fad0f690618c27cabcfa58528a76ce0a580ad3` e não deve ser movido por documentação posterior. A release operacional histórica da P16-08 permanece `976a0472382abc0597996366db63c981b5733d6e` e não é reescrita como se tivesse sido a release técnica final.
 **Estado atual:** P16 está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`. A release técnica final validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`. O scheduler real da Hostinger executou essa release em 04/10/2026 01:17 UTC; o backup `p16-hosted-auto-20261004T011702683Z-9fc2be680257402a94a041ef40e2ae4f` foi correlacionado independentemente e o evaluator hardened retornou RPO autoritativo `PASS / WITHIN_TARGET` em 888 ms contra o objetivo <= 24 h. A compatibilidade de rollback para `976a0472382abc0597996366db63c981b5733d6e` foi revalidada sem deploy: Prisma schema e migration tree são byte-identical e não existe delta de runtime de aplicação não-teste em `src/`; esse target é break-glass e reverteria também o patch Next.js 16.3.8. Retenção 7/4/3 continua `PLAN_ONLY`; não há prova de cópia final independente off-R2; DB/R2 permanecem sequenciais e não atômicos; quatro HIGH de development tooling permanecem dívida explícita. Produção continua fora do escopo e não autorizada.
@@ -2572,3 +2572,61 @@ runtime files inside the read-only capsule and collected no tests. This is
 No hosted/provider/payment/deploy or Git publication occurred. E05, F01, provider-sensitive B/R
 requirements and complete performance evaluation remain unresolved. `P17 = PARTIALLY COMPLETE`,
 `GATE D = NOT READY`, and production remains unauthorized.
+
+## P17 autonomous closeout interrupted by owner — 12/10/2026
+
+The local-only continuation of `LES-P17-AUTONOMOUS-CLOSEOUT-R01` was stopped immediately at the
+owner's request. No commit, push, merge, tag, deployment, hosted-database access or real payment
+operation occurred.
+
+A fail-closed audit of the effective Docker Compose environment now distinguishes the authorized
+synthetic capsule variables from forbidden provider credentials. The inspected effective
+configuration contained no Mercado Pago secret, S3 credential, GTM identifier or Meta Pixel
+identifier; the prior generic `DATABASE_URL` name finding was a false positive because the value
+was the exact isolated synthetic database contract. The audit and its negative fixtures passed.
+
+One bounded runtime cohort, `PR03 / PIX / mobile`, completed with 3 valid excluded warmups and
+40/40 valid measurements. The native trusted click timestamp was correlated with exactly one
+successful local `POST /checkout/payment/start` Resource Timing entry. Nearest-rank p95 was 3.5 ms
+against the 1,000 ms budget, with valid 10/2 Mbps and 80 ms calibration. This proves only that
+single local cohort; it is not a full PR03 or global performance PASS.
+
+The selective reporter contract was then corrected so a `PR03_PIX_MOBILE` execution can finish
+successfully while the global result remains `NOT_PROVEN`. Its source tests passed, but the final
+OCI rebuild for the resulting source tree failed during the application-runtime layer export with
+a Docker/BuildKit RPC `Unavailable` / `EOF`. Docker Desktop subsequently stopped responding; the
+bounded restart attempt was interrupted and its remaining CLI process terminated when the owner
+ordered the stop. The final source tree therefore has no newly validated OCI image or runtime run.
+
+Local source validation completed before interruption: `npm run check` passed 104 files / 1,032
+tests; the performance-infrastructure suite passed 24 files / 109 tests; Prettier, typecheck,
+targeted ESLint, offline-cache verification and Docker-context audit passed; runtime dependencies
+reported zero vulnerabilities. Four HIGH findings remain confined to the development lint chain.
+
+The full 15-cohort matrix was not executed, the isolated MySQL integration suite was not rerun,
+and hosted/provider evidence remains absent. `P17 = PARTIALLY COMPLETE`, `GATE D = NOT READY`, and
+production remains unauthorized.
+
+## P17 R49 commit-bound local remediation closeout — 12/10/2026
+
+R49 F01/F02/F03 passed local remediation on implementation commit
+`7ddfbf668d1648cf968eb3243748c89f288539cc`, OCI image
+`sha256:22c54f0c643615677bd0e6921b5c4f92ac609748ece66ea92ab6d600fd0c8ece` and source-tree SHA-256
+`8f961f5bbb2e54e8a95ffc13005581d4ad2c3db5b0a89b805e761d24443a2bea` over 467 files. The
+image revision label and in-image declared commit match the implementation commit.
+
+The real image entrypoint now has a preflight-only mode that reuses the production-path authenticated
+MySQL TLS function. The positive R34 proof negotiated `TLS_AES_256_GCM_SHA384`; an incompatible
+independent CA failed closed with exit 1 before any controller. R34 logical application data, active
+CA and container/data-volume identity were unchanged. The proof authenticates the CA chain, not the
+hostname, because synthetic loopback keeps an explicit `checkServerIdentity` override.
+
+Final local gates passed: 104 files / 1,032 general tests, 25 files / 117 performance-infrastructure
+tests and a fresh isolated 22-file / 199-test MySQL integration run after nine migrations. F01 covers
+provenance preservation across success/failure/cleanup; F02 redacts all archived args, removes
+sensitive argument/environment values from output and avoids a command shell on Windows. Disposable
+proof/integration resources were removed; R34 and historical images/volumes remain preserved.
+
+R42 performance remains immutable and `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`; no post-R49 full
+performance run was executed. P17 remains partially complete, Gate D remains `NOT_READY`, and
+production remains unauthorized.

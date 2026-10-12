@@ -320,6 +320,34 @@ Consequently:
 
 `PRODUCTION = UNAUTHORIZED`
 
+## Interrupted autonomous closeout evidence — 12/10/2026
+
+<!-- LES-P17-AUTONOMOUS-CLOSEOUT-R01-INTERRUPTED-MATRIX -->
+
+The bounded local `PR03 / PIX / mobile` cohort is supported by 3 valid excluded warmups and 40/40
+valid measured samples, with nearest-rank p95 3.5 ms against a 1,000 ms budget and valid network
+calibration. It proves only that one browser/payment-mode/viewport combination. It does not close
+PR03, the 15-cohort performance package, any hosted row or Gate D.
+
+The effective Compose environment audit passed against the exact synthetic capsule contract and
+rejected forbidden provider credentials and unexpected environment names. This corrects the prior
+classification of the synthetic `DATABASE_URL` name as a provider-sensitive false positive; it
+does not authorize or evidence a hosted database connection.
+
+The post-cohort selective-reporter correction passed source tests but could not be rebuilt and
+executed after Docker/BuildKit failed with RPC `Unavailable` / `EOF`. Execution was then stopped by
+owner instruction. No final-source image, full performance run, isolated MySQL rerun, external
+provider operation or hosted correlation was produced.
+
+The authoritative unresolved Gate D list remains unchanged, including P17-E05, P17-F01,
+provider-sensitive buyer/responsive scenarios and the complete performance package.
+
+`P17 = PARTIALLY COMPLETE`
+
+`GATE D = NOT READY`
+
+`PRODUCTION = UNAUTHORIZED`
+
 ## Local execution snapshot — 04/10/2026
 
 This snapshot records evidence produced on the isolated local Codex branch. It does not rewrite the
@@ -412,3 +440,84 @@ The navigation samples make P17-PR01 `DIAGNOSTIC_ONLY / BLOCKED_OWNER_BUDGET`; t
 acceptance PASS. P17-PR02–PR04 remain `NOT_EXECUTED`. The authoritative unresolved Gate D list is
 unchanged: P17-E05, P17-F01, P17-B01/P17-B03–B07, P17-R01–R03 and approved-budget performance
 evaluation. Production remains unauthorized and `GATE D = NOT READY`.
+
+## R02-C5 — F6-CA / OCI local infrastructure supporting evidence — 11/10/2026
+
+<!-- LES-P17-R02-C5-T06-F01-CA-OCI-EVIDENCE -->
+
+The local CA-volume initialization and export correction (`F6-CA`) was validated against OCI image `lessenc/p17-performance-app:r02-source-23a6187f`, with source-tree SHA-256 `23a6187f3829c3729230da6d23dfe774bef9022997f224664dedd2b1054868fc`. The source manifest contains 462 files, including 11 container-recipe inputs. The BuildKit context audit, 14 targeted regression tests, in-image provenance recomputation, isolated Prisma SQL/TLS-positive smoke test and disposable resource cleanup passed within local technical authority.
+
+Detailed execution identifiers, image identity, test results and limitations are recorded in [p17-local-validation-report.md](p17-local-validation-report.md), section `R02-C5 — Local F6-CA and OCI technical evidence`.
+
+This evidence concerns infrastructure, not the `P17-F06` expired-order scenario. It does not change any core journey, failure, buyer, browser, responsive, performance, administrative or release-identity matrix row. The exact Prisma negative TLS error classification and any independent archival of raw execution logs remain separate evidence limitations.
+
+The complete P17 Gate D acceptance requirements remain applicable.
+
+`F6-CA LOCAL TECHNICAL VALIDATION = PASS`
+
+`GATE D = NOT READY`
+
+`PRODUCTION = UNAUTHORIZED`
+
+## LES-P17-R49 — Remediation authorized, execution not yet revalidated — 12/10/2026
+
+<!-- LES-P17-R49-REMEDIATION-STARTED-20261012 -->
+
+Owner authorized remediation of the three R48 review findings. This entry documents the proposed
+local source changes, not completed acceptance. The R42 evidence package remains immutable with
+SHA-256 `76ce09696341d38a4b2d72a1004add2bbe2015a7f122367d0fd3dd090472fbd7`.
+
+- F01: acceptance reporter unit-test provenance must be isolated in a disposable test directory;
+  existing root provenance files must not be replaced or deleted.
+- F02: validation evidence must not store raw command arguments and must constrain subprocess
+  execution on Windows; redact all argument values in archived command metadata.
+- F03: perform a fail-closed authenticated TLS SQL handshake against the running disposable
+  MySQL before any integration or performance execution. Re-export the active CA when MySQL
+  is recreated; a stale exported CA must fail prior to migration or Playwright.
+
+Prior R38 integration (199/199) and R42 performance (15/15 calibrated cohorts, 600 valid samples)
+refer exclusively to the pre-R49 source digest `06ba5492eb69f797de8cf2b13d1e07aaa3c56d6503f18a66d78897efe3502ff3`.
+After R49 edits, source provenance and OCI image identity change and require new validation.
+No historical evidence is rewritten, and the R42 official reviewer remains
+`PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`.
+
+`R49 = IMPLEMENTATION PENDING REGRESSION`
+
+`GATE D = NOT_READY`
+
+`PRODUCTION = UNAUTHORIZED`
+
+## LES-P17-R49 — Commit-bound local remediation evidence — 12/10/2026
+
+<!-- LES-P17-R49-FINAL-LOCAL-REMEDIATION-CLOSEOUT-20261012 -->
+
+R49 F01, F02 and F03 are locally revalidated on implementation commit
+`7ddfbf668d1648cf968eb3243748c89f288539cc`, source-tree SHA-256
+`8f961f5bbb2e54e8a95ffc13005581d4ad2c3db5b0a89b805e761d24443a2bea` and commit-bound OCI image
+`sha256:22c54f0c643615677bd0e6921b5c4f92ac609748ece66ea92ab6d600fd0c8ece`. The image revision
+label and in-image declared commit match the implementation commit.
+
+| R49 control | Local result | Gate D authority |
+| --- | --- | --- |
+| F01 provenance preservation | PASS; disposable sandbox covers success, malformed intermediate evidence and output cleanup without changing preexisting provenance bytes | Local regression only |
+| F02 evidence confidentiality | PASS; archived args fully redacted, path-selected executables rejected, Windows npm execution has no shell, synthetic argument/environment values absent from captured output | Local regression only |
+| F03 positive preflight | PASS; real image entrypoint, loopback namespace, read-only active CA, exit 0, `TLS_AES_256_GCM_SHA384`, authenticated CA chain | Local synthetic OCI runtime only |
+| F03 negative preflight | PASS; incompatible independent CA, exit 1, fail-closed marker, no later controller/migration/test marker | Local synthetic OCI runtime only |
+| R34 preservation | PASS; identical 28-table/9-row logical digest, active CA hash and container/data-volume identity before/after | Local preservation evidence only |
+| Isolated MySQL regression | PASS; fresh project, 9 migrations, 22 files / 199 tests, complete project cleanup | Local integration only |
+| General quality | PASS; 104 files / 1,032 tests and 25 files / 117 performance-infrastructure tests | Local source evidence only |
+
+Because the synthetic certificate lacks a loopback SAN, `checkServerIdentity` remains overridden.
+F03 therefore authenticates the CA chain and TLS cipher but does not prove hostname identity. This
+limitation is emitted explicitly at runtime and is not promoted.
+
+R42 remains immutable with reviewer authority `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`; no post-R49
+15-cohort/600-measurement performance run was executed. Real Mercado Pago TEST webhook, declined
+provider result, remaining provider-sensitive buyer/responsive controls and hosted release
+correlation remain unresolved.
+
+`R49 F01 / F02 / F03 LOCAL REMEDIATION = PASS`
+
+`GATE D = NOT_READY`
+
+`PRODUCTION = UNAUTHORIZED`

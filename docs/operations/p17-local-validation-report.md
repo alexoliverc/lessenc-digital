@@ -246,3 +246,232 @@ PR03/PR04 are not executed. No one of PR01–PR04 has authoritative acceptance P
 - `PRODUCTION / UNAUTHORIZED`;
 - E05 real TEST webhook, F01 provider failure, provider-sensitive B/R rows and complete performance
   acceptance remain outside the authority proved by this local closeout.
+
+## R02-C5 — Local F6-CA and OCI technical evidence — 11/10/2026
+
+<!-- LES-P17-R02-C5-T06-F01-CA-OCI-EVIDENCE -->
+
+### Classification and identity
+
+This addendum records local infrastructure evidence only. F6-CA identifies the disposable database CA-volume initialization and export mechanism. It is not the Gate D failure scenario `P17-F06`, which concerns expired orders.
+
+- Scope: `LES-P17-R02-C5-T05`, local isolated testing.
+- Repository branch: `phase/p17-end-to-end-business-validation`.
+- Git HEAD metadata: `e484f35352ec9bcedde645239342e15d3327cc25`.
+- Worktree during validation: 23 modified and 16 untracked paths, staging empty.
+- Provenance schema: 2; 462 source inputs, including 11 container-recipe inputs.
+- Source-tree SHA-256: `23a6187f3829c3729230da6d23dfe774bef9022997f224664dedd2b1054868fc`.
+- Local OCI tag: `lessenc/p17-performance-app:r02-source-23a6187f`.
+- Local Docker image ID: `sha256:73aa9f79f9b11e6196d6f0b33e4f4eb8d5f27d5da37a741b8ad031fa02e888a7`.
+
+The Git HEAD is declared metadata, not proof that the uncommitted worktree matches that commit. This OCI image is not identified as the current Hostinger deployment.
+
+### Validated local execution ledger
+
+| Execution | Observed result | Evidence boundary |
+| --- | --- | --- |
+| T05-T02 | PASS; BuildKit context audit, 2,061 effective files and zero forbidden negative-fixture files | Local Docker context |
+| T05-T03 | PASS; 3 Vitest files, 14 tests, Prettier, ESLint and source integrity | Local regression |
+| T05-T04 | PASS; local OCI application build (`--pull=false`; Dockerfile `RUN --network=none`; BuildKit-wide offline operation not attested), OCI labels, 462-file in-image provenance recomputation and F6 initializer byte identity | Local OCI image |
+| T05-T05 | PASS; canonical CA-volume initializer and exporter, genuine Prisma Client authenticated SQL and negotiated TLS cipher | Isolated synthetic MySQL |
+| T05-T05 cleanup | PASS; disposable containers, volumes and temporary harness removed; Git integrity preserved | Local cleanup |
+
+The CA initializer was included in the Docker context, OCI runtime filesystem and canonical provenance. The tested Prisma connection used the synthetic isolated MySQL service, without application-server startup, hosted database access, migration execution or payment-provider activity.
+
+Earlier negative TLS investigations proved that the MariaDB driver rejects an untrusted CA and a hostname mismatch. The Prisma Client also rejected the corresponding negative configurations, but the recorded `P2010` / driver-adapter error did not independently establish the precise TLS cause. Prisma negative-error classification remains pending; no TLS validation rule was weakened.
+
+### Evidence limitations and authority
+
+The execution identifiers above refer to operator-provided console transcripts reviewed during the R02-C5 session. This addendum does not claim an independently archived, immutable transcript bundle, complete per-run timestamps or a new hosted/provider execution. It does not promote local infrastructure results into a Gate D scenario PASS.
+
+Existing hosted evidence remains bound to its separately documented release authority. Real Mercado Pago TEST webhook evidence, declined-payment evidence, outstanding buyer and responsive cases, and full PR01-PR04 performance acceptance remain unresolved.
+
+`F6-CA LOCAL TECHNICAL VALIDATION = PASS`
+
+`P17 = PARTIALLY COMPLETE`
+
+`GATE D = NOT READY`
+
+`PRODUCTION = UNAUTHORIZED`
+
+## Autonomous closeout interrupted state — 12/10/2026
+
+<!-- LES-P17-AUTONOMOUS-CLOSEOUT-R01-INTERRUPTED-20261012 -->
+
+This entry records the verified local state when the owner ordered the active execution to stop.
+The Docker Desktop start command that remained active after interruption was terminated. No
+additional repair, implementation or runtime acceptance attempt was performed afterward.
+
+### Newly verified local evidence
+
+| Item | Observed result | Evidence boundary |
+| --- | --- | --- |
+| Effective Compose environment audit | PASS; exact synthetic database and public-key contract accepted, provider-secret and unexpected-variable fixtures rejected | Static/local Compose configuration only |
+| PR03 / PIX / mobile | 3 valid excluded warmups; 40/40 valid measured samples; nearest-rank p95 3.5 ms; min 2.9 ms; max 3.7 ms; 1,000 ms budget | One local Chromium cohort only |
+| PR03 calibration | VALID; download 9,626,955.475 bps, upload 1,971,025.919 bps, RTT 86.3 ms | Local CDP calibration only |
+| PR03 action identity | One trusted click correlated with exactly one successful local `POST /checkout/payment/start` resource | Local synthetic endpoint only |
+| General source checks | PASS; `npm run check` 104 files / 1,032 tests, performance infrastructure 24 files / 109 tests, Prettier, typecheck and targeted ESLint | Local source validation |
+| Dependency audit | Runtime: zero findings; full development tree: four HIGH findings in the lint toolchain | Local lockfile/dependency evidence |
+| Offline inputs | PASS; npm cache 390 target entries / 13 required packages / 786 files; Docker context 2,067 files and zero forbidden negative-fixture files | Local capsule inputs |
+
+The successful bounded cohort used Chromium 153.0.8010.12, Playwright 1.63.0, source-tree SHA-256
+`836221e17fd76eb5e1455187499d21d9171ba874a275bbc8aed41dbaebf24e84` and image digest
+`sha256:5d7ba9397dc66711f7686c787a91c4bbd398a2227934d06692b2f372817386f9`.
+Git HEAD `e484f35352ec9bcedde645239342e15d3327cc25` is metadata only, not source authority.
+
+### Interruption and unverified final source state
+
+After the cohort, the selective reporter was changed so `PR03_PIX_MOBILE` can record a selective
+PASS while deliberately retaining global `NOT_PROVEN / FULL_ACCEPTANCE_SCOPE_NOT_EXECUTED`.
+Source tests for that contract passed. The subsequent local OCI rebuild failed while copying or
+exporting the application-runtime layer with a Docker/BuildKit RPC `Unavailable` / `EOF`. Docker
+Desktop then became unavailable. The final worktree has not been rebuilt into a validated image,
+and the reporter correction has no post-change runtime execution.
+
+The full 15-cohort matrix, isolated MySQL integration rerun, hosted correlation, Mercado Pago TEST
+webhook, provider-declined payment and remaining buyer/responsive cases were not completed. The
+single PR03 cohort must not be promoted to a PR03 scenario PASS or a global performance PASS.
+
+`LOCAL PR03 / PIX / MOBILE COHORT = PASS`
+
+`FULL PERFORMANCE ACCEPTANCE = NOT_PROVEN`
+
+`P17 = PARTIALLY COMPLETE`
+
+`GATE D = NOT READY`
+
+`PRODUCTION = UNAUTHORIZED`
+
+## LES-P17-R49 — Remediation authorized, execution not yet revalidated — 12/10/2026
+
+<!-- LES-P17-R49-REMEDIATION-STARTED-20261012 -->
+
+Owner authorized remediation of the three R48 review findings. This entry documents the proposed
+local source changes, not completed acceptance. The R42 evidence package remains immutable with
+SHA-256 `76ce09696341d38a4b2d72a1004add2bbe2015a7f122367d0fd3dd090472fbd7`.
+
+- F01: acceptance reporter unit-test provenance must be isolated in a disposable test directory;
+  existing root provenance files must not be replaced or deleted.
+- F02: validation evidence must not store raw command arguments and must constrain subprocess
+  execution on Windows; redact all argument values in archived command metadata.
+- F03: perform a fail-closed authenticated TLS SQL handshake against the running disposable
+  MySQL before any integration or performance execution. Re-export the active CA when MySQL
+  is recreated; a stale exported CA must fail prior to migration or Playwright.
+
+Prior R38 integration (199/199) and R42 performance (15/15 calibrated cohorts, 600 valid samples)
+refer exclusively to the pre-R49 source digest `06ba5492eb69f797de8cf2b13d1e07aaa3c56d6503f18a66d78897efe3502ff3`.
+After R49 edits, source provenance and OCI image identity change and require new validation.
+No historical evidence is rewritten, and the R42 official reviewer remains
+`PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`.
+
+`R49 = IMPLEMENTATION PENDING REGRESSION`
+
+`GATE D = NOT_READY`
+
+`PRODUCTION = UNAUTHORIZED`
+
+## LES-P17-R49 — Commit-bound local remediation closeout — 12/10/2026
+
+<!-- LES-P17-R49-FINAL-LOCAL-REMEDIATION-CLOSEOUT-20261012 -->
+
+### Baseline and recoverability
+
+- Branch: `phase/p17-end-to-end-business-validation`.
+- HEAD: `e484f35352ec9bcedde645239342e15d3327cc25`; five commits ahead of upstream.
+- Initial pending tree: 52 paths, comprising 28 tracked modifications and 24 untracked files;
+  staging was empty.
+- External pre-change backup:
+  `C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\master-continuation-r01\20261012-190210`;
+  52/52 file hashes verified, manifest SHA-256
+  `0b3221c2e6cf5ab4fa7416bbbf65b068f61ed050b0cfc00341d6d40a825ed4a4` and tracked binary
+  patch SHA-256 `58235e6c9bdf277f950077dbbc77cd48328a0b88c0fa5fcf6ec79164b858d9b6`.
+- Sensitive-filename and credential-pattern scans over the 52 pending paths returned zero hits.
+
+### F01 and F02 audit
+
+F01 now exercises success, malformed intermediate attachment and explicit output cleanup using
+disposable provenance sandboxes. Preexisting `.p17-source-tree.sha256` and
+`.p17-source-provenance.json` bytes remain unchanged in all covered paths; cleanup is restricted to
+the randomized reporter output directory.
+
+F02 keeps every archived argument value as `<ARGUMENT_REDACTED>`, rejects an allowlisted executable
+when selected through an arbitrary path, runs subprocesses with `shell: false`, and executes npm on
+Windows through the trusted current Node runtime plus `npm-cli.js` instead of `cmd.exe`. Values
+derived from command arguments and sensitive environment variables are also removed from captured
+stdout/stderr. Negative tests use recognizable synthetic values and persist neither value.
+
+### F03 isolated runtime proof
+
+The entrypoint now exposes `tls-preflight`, a narrowly authorized mode that calls the same
+`wait_for_loopback_database` and `verify_authenticated_mysql_tls` functions used by `run`,
+`run-pr03-pix-mobile` and `integration`, then exits before controller, Prisma migration or Vitest
+execution.
+
+Final commit/image identity:
+
+- commit: `7ddfbf668d1648cf968eb3243748c89f288539cc`;
+- tag: `lessenc/p17-performance-app:r49-final-7ddfbf6-8f961f5b`;
+- OCI ID: `sha256:22c54f0c643615677bd0e6921b5c4f92ac609748ece66ea92ab6d600fd0c8ece`;
+- source schema/file count: 2 / 467;
+- source-tree SHA-256:
+  `8f961f5bbb2e54e8a95ffc13005581d4ad2c3db5b0a89b805e761d24443a2bea`;
+- image revision label and in-image declared commit exactly match the implementation commit.
+
+The positive execution shared only the R34 network namespace, mounted the active CA volume read-only
+and completed with exit code 0, `P17_CAPSULE_LOOPBACK_ONLY_PASS`,
+`P17_CAPSULE_DB_TLS_HANDSHAKE_PASS`, cipher `TLS_AES_256_GCM_SHA384` and
+`P17_CAPSULE_DB_TLS_PREFLIGHT_ONLY_COMPLETE`.
+
+The negative execution mounted an independently generated incompatible CA in a separate labeled
+ephemeral volume. It exited 1 with `P17_CAPSULE_DB_TLS_HANDSHAKE_FAILED`; no PASS, cipher,
+preflight-complete, controller, migration, Vitest or performance-acceptance marker followed. The
+negative volume and synthetic environment file were removed after verification.
+
+The active CA retained SHA-256
+`b2bd505b16822486a1f1800494f8c330b4a06abd18bccc0739f79fdcb033f869`. The R34 container ID,
+start time, restart count and historical data-volume identity were unchanged. A read-only logical
+snapshot over 28 application tables and 9 rows was identical before and after:
+`7dfda28cc61a0d60c4109f97989744fa5f3be053dcfd3ed2d3d81de194f3d8ea`.
+
+The implementation deliberately retains `rejectUnauthorized: true` but overrides
+`checkServerIdentity` because the synthetic loopback certificate lacks a loopback SAN. The runtime
+emits `P17_CAPSULE_DB_TLS_HOSTNAME_IDENTITY=NOT_VERIFIED_LOOPBACK_OVERRIDE`. This proves CA-chain
+authentication and encrypted cipher negotiation, not complete hostname identity.
+
+Sanitized final F03 evidence is stored outside the repository at
+`C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\r49-final-tls-preflight\20261012-193758`;
+summary SHA-256: `58d8fb13ccc3484ed0d725cce225a211fa0eeae96f5f7e481543323c4b043761`.
+
+### Final regression
+
+| Validation | Result |
+| --- | --- |
+| F01/F02/F03 targeted regression | PASS; 3 files / 20 tests at the targeted checkpoint |
+| Performance infrastructure | PASS; 25 files / 117 tests |
+| `npm run check` | PASS; lint, Prisma generate/typecheck, 104 files / 1,032 tests, Prettier |
+| Offline npm cache | PASS; 390 target entries, 13 required packages, 786 files |
+| Docker context audit | PASS; 2,068 effective files, zero forbidden negative-fixture files |
+| Commit-bound R49 production build | PASS; commit, offline inputs and in-image provenance recomputation matched |
+| Fresh isolated MySQL integration | PASS; authenticated TLS preflight, 9/9 migrations, 22 files / 199 tests |
+| Disposable integration cleanup | PASS; zero project containers and zero project volumes remain |
+| `git diff --check` | PASS |
+
+The isolated integration summary is outside the repository at
+`C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\r49-a5-integration\20261012-192500`;
+summary SHA-256: `59a9db5e730e89f3f9aa5f8bdb5202fa79de463de9a81ec02fe21ed61d00c0ba`.
+
+The 199-test integration run used A5 with the exact same source digest as the final commit-bound
+image; the final image then repeated the positive and negative F03 runtime proof. No full 15-cohort
+performance rerun was performed after R49. R42 remains immutable historical evidence with official
+authority `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`; it is not attributed to the final R49 image.
+Hosted/provider/payment evidence and hosted release identity are unchanged.
+
+`R49 F01 / F02 / F03 LOCAL REMEDIATION = PASS`
+
+`FULL PERFORMANCE ACCEPTANCE = NOT_PROVEN FOR FINAL R49 SOURCE`
+
+`P17 = PARTIALLY COMPLETE`
+
+`GATE D = NOT_READY`
+
+`PRODUCTION = UNAUTHORIZED`
