@@ -320,6 +320,42 @@ Consequently:
 
 `PRODUCTION = UNAUTHORIZED`
 
+## LES-P17-R50 — R49 final-image full local performance evidence — 12/10/2026
+
+<!-- LES-P17-R50-R49-FINAL-IMAGE-FULL-LOCAL-PERFORMANCE-20261012 -->
+
+The commit-bound R49 final image completed a new full local matrix after the remediation checkpoint.
+This supersedes only the prior statement that no post-R49 full run existed; it does not mutate or
+relabel historical R42 evidence.
+
+| Performance control | Local result | Gate D authority |
+| --- | --- | --- |
+| Image/source identity | OCI `sha256:22c54f0c643615677bd0e6921b5c4f92ac609748ece66ea92ab6d600fd0c8ece`; source SHA-256 `8f961f5bbb2e54e8a95ffc13005581d4ad2c3db5b0a89b805e761d24443a2bea` verified | Source bytes verified; commit remains declared-only in the capsule |
+| Browser matrix | PASS locally; 15 expected, 0 unexpected, 0 skipped, 0 flaky | Local Playwright execution only |
+| Coverage | 15 cohorts, 45 warmups, 600 valid samples; zero missing, duplicate or unexpected cohorts | Structurally complete local package only |
+| Calibration | 15 cohorts and 45 download/upload/RTT probes per axis | `STRUCTURALLY_COMPLETE_ONLY`; recomputed from raw probes |
+| Numeric budgets | `ALL_COHORTS_WITHIN_LIMIT`; all 15 p95 values within their configured limits | `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY` |
+| Isolation/cleanup | Fresh disposable MySQL project; zero project containers, volumes or networks after evidence export | Local cleanup evidence only |
+| R34 preservation | Same container/start/restart/data-volume identity and active CA hash | Local preservation evidence only |
+
+The official package state is `PROVISIONAL_NUMERIC_REVIEW_ONLY`, reason
+`SOURCE_BYTES_VERIFIED_COMMIT_IDENTITY_NOT_VERIFIED`. Each cohort remains
+`NUMERIC_ONLY_NOT_GATE_D_PROOF`. Sanitized evidence is outside the repository at
+`C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\r49-final-performance\20261012-194500`;
+summary SHA-256 `275c3c6a72610560a41648976c021920f6cb75b8bc5ff575a3f45dc97af9eabb`.
+
+Real Mercado Pago TEST webhook delivery, provider-declined behavior, provider-sensitive buyer and
+responsive proof, and hosted release correlation remain unresolved. No provider, hosted, deployment
+or production authority is inferred from the local matrix.
+
+`R49 FINAL-SOURCE LOCAL PERFORMANCE NUMERIC REVIEW = ALL_COHORTS_WITHIN_LIMIT`
+
+`P17 = PARTIALLY COMPLETE`
+
+`GATE D = NOT_READY`
+
+`PRODUCTION = UNAUTHORIZED`
+
 ## Interrupted autonomous closeout evidence — 12/10/2026
 
 <!-- LES-P17-AUTONOMOUS-CLOSEOUT-R01-INTERRUPTED-MATRIX -->
@@ -511,12 +547,15 @@ Because the synthetic certificate lacks a loopback SAN, `checkServerIdentity` re
 F03 therefore authenticates the CA chain and TLS cipher but does not prove hostname identity. This
 limitation is emitted explicitly at runtime and is not promoted.
 
-R42 remains immutable with reviewer authority `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`; no post-R49
-15-cohort/600-measurement performance run was executed. Real Mercado Pago TEST webhook, declined
-provider result, remaining provider-sensitive buyer/responsive controls and hosted release
-correlation remain unresolved.
+R42 remains immutable with reviewer authority `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`. At this R49
+checkpoint, no post-R49 15-cohort/600-measurement performance run had been executed; the R50
+entry in this matrix records the final-image local numeric run without altering R42. Real Mercado
+Pago TEST webhook, declined provider result, remaining provider-sensitive buyer/responsive controls
+and hosted release correlation remain unresolved.
 
 `R49 F01 / F02 / F03 LOCAL REMEDIATION = PASS`
+
+`FINAL R49 SOURCE LOCAL NUMERIC REVIEW = ALL_COHORTS_WITHIN_LIMIT / PROVISIONAL_ONLY`
 
 `GATE D = NOT_READY`
 

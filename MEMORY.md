@@ -2627,6 +2627,28 @@ provenance preservation across success/failure/cleanup; F02 redacts all archived
 sensitive argument/environment values from output and avoids a command shell on Windows. Disposable
 proof/integration resources were removed; R34 and historical images/volumes remain preserved.
 
-R42 performance remains immutable and `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`; no post-R49 full
-performance run was executed. P17 remains partially complete, Gate D remains `NOT_READY`, and
-production remains unauthorized.
+At this remediation checkpoint, R42 performance remained immutable and
+`PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`; no post-R49 full performance run had yet been executed.
+P17 remained partially complete, Gate D remained `NOT_READY`, and production remained unauthorized.
+
+## P17 R49 final-image full local performance — 12/10/2026
+
+After the R49 remediation checkpoint, the final commit-bound image
+`sha256:22c54f0c643615677bd0e6921b5c4f92ac609748ece66ea92ab6d600fd0c8ece` ran the complete local
+performance matrix against a fresh disposable MySQL project. All 15 Playwright cohorts passed with
+45 excluded warmups, 600 valid measurements, 15 structurally complete calibrations and no missing,
+duplicate or unexpected cohort. Every p95 was within its approved numeric limit.
+
+The reporter correctly classified the package as `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`, reason
+`SOURCE_BYTES_VERIFIED_COMMIT_IDENTITY_NOT_VERIFIED`, and numeric result
+`ALL_COHORTS_WITHIN_LIMIT`. The source-tree SHA-256 was independently verified as
+`8f961f5bbb2e54e8a95ffc13005581d4ad2c3db5b0a89b805e761d24443a2bea`; the commit inside the image
+remains `DECLARED_COMMIT_FILE_ONLY`, so this is not promoted to complete provenance or Gate D proof.
+
+Sanitized evidence is outside the repository at
+`C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\r49-final-performance\20261012-194500`;
+summary SHA-256 `275c3c6a72610560a41648976c021920f6cb75b8bc5ff575a3f45dc97af9eabb`. The disposable project was
+removed after export with zero project containers, volumes or networks remaining. R34 retained its
+container/start/restart/data-volume identity and active CA hash. Historical R42 remains immutable.
+Hosted/provider/payment/release-correlation evidence is unchanged: P17 remains partially complete,
+Gate D remains `NOT_READY`, and production remains unauthorized.

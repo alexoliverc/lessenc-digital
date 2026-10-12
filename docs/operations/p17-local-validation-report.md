@@ -370,6 +370,66 @@ No historical evidence is rewritten, and the R42 official reviewer remains
 
 `PRODUCTION = UNAUTHORIZED`
 
+## LES-P17-R50 — R49 final-image full local performance closeout — 12/10/2026
+
+<!-- LES-P17-R50-R49-FINAL-IMAGE-FULL-LOCAL-PERFORMANCE-20261012 -->
+
+The final image `lessenc/p17-performance-app:r49-final-7ddfbf6-8f961f5b` ran the complete
+performance command against fresh disposable MySQL and CA/output volumes. The process exited `0`;
+Playwright reported 15 expected tests, zero unexpected, zero skipped and zero flaky in
+`1086667.865 ms`.
+
+Package identity and classification:
+
+- declared commit: `7ddfbf668d1648cf968eb3243748c89f288539cc`;
+- source-tree SHA-256: `8f961f5bbb2e54e8a95ffc13005581d4ad2c3db5b0a89b805e761d24443a2bea`;
+- OCI image ID: `sha256:22c54f0c643615677bd0e6921b5c4f92ac609748ece66ea92ab6d600fd0c8ece`;
+- 15 cohorts, 45 excluded warmups, 600 valid samples and zero invalid/inconclusive/blocked samples;
+- 15 calibrations with 45 download, 45 upload and 45 RTT probes;
+- coverage had zero missing, duplicate or unexpected cohorts;
+- review state `PROVISIONAL_NUMERIC_REVIEW_ONLY`;
+- reason `SOURCE_BYTES_VERIFIED_COMMIT_IDENTITY_NOT_VERIFIED`;
+- numeric result `ALL_COHORTS_WITHIN_LIMIT`;
+- `GATE D = NOT_READY`; `PRODUCTION = UNAUTHORIZED`.
+
+| Indicator | Mobile p95 / limit | Tablet p95 / limit | Desktop p95 / limit |
+| --- | ---: | ---: | ---: |
+| PR01 | 240.0 / 2,500 ms | 240.0 / 2,500 ms | 240.0 / 2,500 ms |
+| PR02 | 32.0 / 200 ms | 32.0 / 200 ms | 32.0 / 200 ms |
+| PR03 PIX | 3.6 / 1,000 ms | 4.0 / 1,000 ms | 3.8 / 1,000 ms |
+| PR03 credit card | 2.1 / 1,000 ms | 1.9 / 1,000 ms | 2.1 / 1,000 ms |
+| PR04 | 18.3 / 2,000 ms | 27.2 / 2,000 ms | 21.7 / 2,000 ms |
+
+The package independently verified source bytes through the read-only source-tree digest. Commit
+identity remains `NOT_VERIFIED / DECLARED_COMMIT_FILE_ONLY`, so the result is intentionally local
+numeric review, not complete provenance and not Gate D proof.
+
+Evidence was exported before cleanup to
+`C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\r49-final-performance\20261012-194500`.
+The summary SHA-256 is `275c3c6a72610560a41648976c021920f6cb75b8bc5ff575a3f45dc97af9eabb`;
+the acceptance package SHA-256 is
+`515858e46d2b46505f66d8e38a0d4c38352a83f78ab8391636d05b805c9eae89`.
+
+The first Compose down command returned exit `0` but left three containers and three volumes. Their
+exact names and Compose project labels were verified, then only those disposable resources were
+removed. Final inventory is zero project containers, zero project volumes and zero project networks.
+R34 retained container ID `b13b5ac4bcd44ce6b73bc782d4375131e89a5435e0362c667cac8bce2432615e`,
+start time, restart count zero, network `none`, data-volume identity and active CA SHA-256
+`b2bd505b16822486a1f1800494f8c330b4a06abd18bccc0739f79fdcb033f869`. Final, A5, A3 and
+`remediation-r02` images remain preserved.
+
+Hosted/provider/payment evidence and hosted release identity are unchanged. The new matrix closes
+the final-source local numeric gap only; real Mercado Pago TEST, provider-declined, buyer/responsive
+and release-correlation requirements remain external.
+
+`R49 FINAL-SOURCE LOCAL PERFORMANCE NUMERIC REVIEW = ALL_COHORTS_WITHIN_LIMIT`
+
+`P17 = PARTIALLY COMPLETE`
+
+`GATE D = NOT_READY`
+
+`PRODUCTION = UNAUTHORIZED`
+
 ## LES-P17-R49 — Commit-bound local remediation closeout — 12/10/2026
 
 <!-- LES-P17-R49-FINAL-LOCAL-REMEDIATION-CLOSEOUT-20261012 -->
@@ -461,14 +521,15 @@ The isolated integration summary is outside the repository at
 summary SHA-256: `59a9db5e730e89f3f9aa5f8bdb5202fa79de463de9a81ec02fe21ed61d00c0ba`.
 
 The 199-test integration run used A5 with the exact same source digest as the final commit-bound
-image; the final image then repeated the positive and negative F03 runtime proof. No full 15-cohort
-performance rerun was performed after R49. R42 remains immutable historical evidence with official
-authority `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`; it is not attributed to the final R49 image.
-Hosted/provider/payment evidence and hosted release identity are unchanged.
+image; the final image then repeated the positive and negative F03 runtime proof. At this R49
+checkpoint, no full 15-cohort performance rerun had yet been performed. The R50 section in
+this report records the final-image matrix without rewriting R42. R42 remains immutable historical
+evidence with official authority `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`; it is not attributed to
+the final R49 image. Hosted/provider/payment evidence and hosted release identity are unchanged.
 
 `R49 F01 / F02 / F03 LOCAL REMEDIATION = PASS`
 
-`FULL PERFORMANCE ACCEPTANCE = NOT_PROVEN FOR FINAL R49 SOURCE`
+`FINAL R49 SOURCE LOCAL NUMERIC REVIEW = ALL_COHORTS_WITHIN_LIMIT / PROVISIONAL_ONLY`
 
 `P17 = PARTIALLY COMPLETE`
 
