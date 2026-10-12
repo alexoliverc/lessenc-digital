@@ -392,13 +392,13 @@ Package identity and classification:
 - numeric result `ALL_COHORTS_WITHIN_LIMIT`;
 - `GATE D = NOT_READY`; `PRODUCTION = UNAUTHORIZED`.
 
-| Indicator | Mobile p95 / limit | Tablet p95 / limit | Desktop p95 / limit |
-| --- | ---: | ---: | ---: |
-| PR01 | 240.0 / 2,500 ms | 240.0 / 2,500 ms | 240.0 / 2,500 ms |
-| PR02 | 32.0 / 200 ms | 32.0 / 200 ms | 32.0 / 200 ms |
-| PR03 PIX | 3.6 / 1,000 ms | 4.0 / 1,000 ms | 3.8 / 1,000 ms |
-| PR03 credit card | 2.1 / 1,000 ms | 1.9 / 1,000 ms | 2.1 / 1,000 ms |
-| PR04 | 18.3 / 2,000 ms | 27.2 / 2,000 ms | 21.7 / 2,000 ms |
+| Indicator | Governing percentile | Mobile / limit | Tablet / limit | Desktop / limit |
+| --- | --- | ---: | ---: | ---: |
+| PR01 | p75 | 236.0 / 2,500 ms | 240.0 / 2,500 ms | 240.0 / 2,500 ms |
+| PR02 | p75 | 24.0 / 200 ms | 16.0 / 200 ms | 32.0 / 200 ms |
+| PR03 PIX | p95 | 3.6 / 1,000 ms | 4.0 / 1,000 ms | 3.8 / 1,000 ms |
+| PR03 credit card | p95 | 2.1 / 1,000 ms | 1.9 / 1,000 ms | 2.1 / 1,000 ms |
+| PR04 | p95 | 18.3 / 2,000 ms | 27.2 / 2,000 ms | 21.7 / 2,000 ms |
 
 The package independently verified source bytes through the read-only source-tree digest. Commit
 identity remains `NOT_VERIFIED / DECLARED_COMMIT_FILE_ONLY`, so the result is intentionally local
@@ -406,7 +406,7 @@ numeric review, not complete provenance and not Gate D proof.
 
 Evidence was exported before cleanup to
 `C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\r49-final-performance\20261012-194500`.
-The summary SHA-256 is `275c3c6a72610560a41648976c021920f6cb75b8bc5ff575a3f45dc97af9eabb`;
+The summary SHA-256 is `28c2a449c653d1e918382f6033053f5c813b05b422c70a412b3d70fbb190a124`;
 the acceptance package SHA-256 is
 `515858e46d2b46505f66d8e38a0d4c38352a83f78ab8391636d05b805c9eae89`.
 

@@ -2637,7 +2637,8 @@ After the R49 remediation checkpoint, the final commit-bound image
 `sha256:22c54f0c643615677bd0e6921b5c4f92ac609748ece66ea92ab6d600fd0c8ece` ran the complete local
 performance matrix against a fresh disposable MySQL project. All 15 Playwright cohorts passed with
 45 excluded warmups, 600 valid measurements, 15 structurally complete calibrations and no missing,
-duplicate or unexpected cohort. Every p95 was within its approved numeric limit.
+duplicate or unexpected cohort. Every governing percentile value was within its approved numeric
+limit: p75 for PR01/PR02 and p95 for PR03/PR04.
 
 The reporter correctly classified the package as `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`, reason
 `SOURCE_BYTES_VERIFIED_COMMIT_IDENTITY_NOT_VERIFIED`, and numeric result
@@ -2647,7 +2648,7 @@ remains `DECLARED_COMMIT_FILE_ONLY`, so this is not promoted to complete provena
 
 Sanitized evidence is outside the repository at
 `C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\r49-final-performance\20261012-194500`;
-summary SHA-256 `275c3c6a72610560a41648976c021920f6cb75b8bc5ff575a3f45dc97af9eabb`. The disposable project was
+summary SHA-256 `28c2a449c653d1e918382f6033053f5c813b05b422c70a412b3d70fbb190a124`. The disposable project was
 removed after export with zero project containers, volumes or networks remaining. R34 retained its
 container/start/restart/data-volume identity and active CA hash. Historical R42 remains immutable.
 Hosted/provider/payment/release-correlation evidence is unchanged: P17 remains partially complete,

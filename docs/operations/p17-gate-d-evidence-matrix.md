@@ -334,7 +334,7 @@ relabel historical R42 evidence.
 | Browser matrix | PASS locally; 15 expected, 0 unexpected, 0 skipped, 0 flaky | Local Playwright execution only |
 | Coverage | 15 cohorts, 45 warmups, 600 valid samples; zero missing, duplicate or unexpected cohorts | Structurally complete local package only |
 | Calibration | 15 cohorts and 45 download/upload/RTT probes per axis | `STRUCTURALLY_COMPLETE_ONLY`; recomputed from raw probes |
-| Numeric budgets | `ALL_COHORTS_WITHIN_LIMIT`; all 15 p95 values within their configured limits | `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY` |
+| Numeric budgets | `ALL_COHORTS_WITHIN_LIMIT`; all 15 governing values within their configured limits (p75 for PR01/PR02, p95 for PR03/PR04) | `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY` |
 | Isolation/cleanup | Fresh disposable MySQL project; zero project containers, volumes or networks after evidence export | Local cleanup evidence only |
 | R34 preservation | Same container/start/restart/data-volume identity and active CA hash | Local preservation evidence only |
 
@@ -342,7 +342,7 @@ The official package state is `PROVISIONAL_NUMERIC_REVIEW_ONLY`, reason
 `SOURCE_BYTES_VERIFIED_COMMIT_IDENTITY_NOT_VERIFIED`. Each cohort remains
 `NUMERIC_ONLY_NOT_GATE_D_PROOF`. Sanitized evidence is outside the repository at
 `C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\r49-final-performance\20261012-194500`;
-summary SHA-256 `275c3c6a72610560a41648976c021920f6cb75b8bc5ff575a3f45dc97af9eabb`.
+summary SHA-256 `28c2a449c653d1e918382f6033053f5c813b05b422c70a412b3d70fbb190a124`.
 
 Real Mercado Pago TEST webhook delivery, provider-declined behavior, provider-sensitive buyer and
 responsive proof, and hosted release correlation remain unresolved. No provider, hosted, deployment
