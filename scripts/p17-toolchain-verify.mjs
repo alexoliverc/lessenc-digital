@@ -2,7 +2,15 @@ import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
 import process from "node:process";
 import { createHash } from "node:crypto";
-import { lstatSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  closeSync,
+  constants,
+  fstatSync,
+  lstatSync,
+  openSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { gunzipSync } from "node:zlib";
@@ -26,9 +34,38 @@ export function verifyElf(bytes) {
 }
 
 function regularBytes(path) {
-  const stat = lstatSync(path);
-  assert.ok(stat.isFile() && !stat.isSymbolicLink(), "P17_TOOLCHAIN_REGULAR_FILE_REQUIRED");
-  return readFileSync(path);
+  const noFollow = constants.O_NOFOLLOW;
+
+  if (process.platform !== "win32") {
+    assert.ok(Number.isInteger(noFollow), "P17_TOOLCHAIN_NOFOLLOW_REQUIRED");
+  }
+
+  const flags =
+    constants.O_RDONLY |
+    (process.platform === "win32" ? 0 : noFollow | (constants.O_NONBLOCK ?? 0));
+
+  const fd = openSync(path, flags);
+
+  try {
+    const opened = fstatSync(fd);
+    assert.ok(opened.isFile(), "P17_TOOLCHAIN_REGULAR_FILE_REQUIRED");
+
+    if (process.platform === "win32") {
+      const entry = lstatSync(path);
+
+      assert.ok(
+        entry.isFile() &&
+          !entry.isSymbolicLink() &&
+          entry.dev === opened.dev &&
+          entry.ino === opened.ino,
+        "P17_TOOLCHAIN_REGULAR_FILE_REQUIRED",
+      );
+    }
+
+    return readFileSync(fd);
+  } finally {
+    closeSync(fd);
+  }
 }
 
 export function verifyInputs(manifest, input) {
