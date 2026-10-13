@@ -1,3 +1,5 @@
+import { resolve } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { validateStagingEnvironment } from "../../../scripts/lib/p16-staging-contract.mjs";
@@ -16,7 +18,7 @@ function validEnvironment(): Record<string, string> {
     P16_RELEASE_COMMIT: "a".repeat(40),
     DATABASE_URL: "mysql://migrate:secret@db.example/staging_lessenc",
     DB_RUNTIME_URL: "mysql://runtime:secret@db.example/staging_lessenc",
-    DB_TLS_CA_FILE: "C:\\hosted\\ca.pem",
+    DB_TLS_CA_FILE: resolve("synthetic", "hosted-ca.pem"),
     PRIVATE_STORAGE_DRIVER: "hosted",
     P16_PRIVATE_STORAGE_PROVIDER: "r2",
     PRIVATE_STORAGE_S3_ENDPOINT:
