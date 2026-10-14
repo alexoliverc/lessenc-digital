@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "riskId": "LES-SEC-RA-001",
+  "status": "TEMPORARY_ACCEPTED_RISK",
+  "decisionOwner": "L'Essenc Digital owner",
+  "decisionDate": "2026-10-14",
+  "approvedScope": "P17_DEVELOPMENT_CI_PRE_PRODUCTION",
+  "allowedApplicationEnvironments": ["test"],
+  "effectiveAt": "2026-10-14T00:00:00-03:00",
+  "expiresAt": "2026-11-13T23:59:59-03:00",
+  "expirationRatification": "OWNER_RATIFIED",
+  "ratificationDate": "2026-10-14",
+  "mandatoryReviewMilestone": "P19_CLOSEOUT_OR_EARLIER",
+  "productionAllowed": false,
+  "advisory": {
+    "id": "GHSA-vfj7-8cjw-p6xm",
+    "source": 1240992,
+    "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+    "package": "braces",
+    "version": "3.0.3",
+    "severity": "high",
+    "range": "<=3.0.3",
+    "cwe": ["CWE-674"],
+    "cvssScore": 7.5,
+    "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+  },
+  "allowedVulnerabilityNodes": [
+    {
+      "name": "@next/eslint-plugin-next",
+      "version": "16.3.8",
+      "path": "node_modules/@next/eslint-plugin-next",
+      "isDirect": true,
+      "via": ["fast-glob"],
+      "effects": []
+    },
+    {
+      "name": "fast-glob",
+      "version": "3.3.1",
+      "path": "node_modules/fast-glob",
+      "isDirect": false,
+      "via": ["micromatch"],
+      "effects": ["@next/eslint-plugin-next"]
+    },
+    {
+      "name": "micromatch",
+      "version": "4.0.8",
+      "path": "node_modules/micromatch",
+      "isDirect": false,
+      "via": ["braces"],
+      "effects": ["fast-glob"]
+    },
+    {
+      "name": "braces",
+      "version": "3.0.3",
+      "path": "node_modules/braces",
+      "isDirect": false,
+      "via": ["GHSA-vfj7-8cjw-p6xm"],
+      "effects": ["micromatch"]
+    }
+  ],
+  "installedChain": [
+    "lessenc-digital@0.1.0>@next/eslint-plugin-next@16.3.8",
+    "lessenc-digital@0.1.0>@next/eslint-plugin-next@16.3.8>fast-glob@3.3.1",
+    "lessenc-digital@0.1.0>@next/eslint-plugin-next@16.3.8>fast-glob@3.3.1>micromatch@4.0.8",
+    "lessenc-digital@0.1.0>@next/eslint-plugin-next@16.3.8>fast-glob@3.3.1>micromatch@4.0.8>braces@3.0.3"
+  ],
+  "lockEdges": [
+    {
+      "from": "node_modules/@next/eslint-plugin-next",
+      "to": "fast-glob",
+      "specifier": "3.3.1"
+    },
+    {
+      "from": "node_modules/fast-glob",
+      "to": "micromatch",
+      "specifier": "^4.0.4"
+    },
+    {
+      "from": "node_modules/micromatch",
+      "to": "braces",
+      "specifier": "^3.0.3"
+    }
+  ],
+  "currentFix": {
+    "name": "@next/eslint-plugin-next",
+    "version": "14.2.35",
+    "isSemVerMajor": true
+  }
+}

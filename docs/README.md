@@ -417,6 +417,9 @@ Canonical P17 validation documents:
 - [P17 Gate D evidence matrix](operations/p17-gate-d-evidence-matrix.md)
 - [P17 local validation report](operations/p17-local-validation-report.md)
 - [P17 CI verification build contract](operations/p17-ci-build-contract.md)
+- [LES-SEC-RA-001 temporary braces risk acceptance](security/les-sec-ra-001-temporary-braces-risk-acceptance.md)
+- [LES-P17-CODEX-EXEC-R13 temporary risk acceptance validation report](operations/les-p17-codex-exec-r13-temporary-risk-acceptance-validation-report.md)
+- [LES-P17-CODEX-EXEC-R14-A pre-publication validation report](operations/les-p17-codex-exec-r14-a-pre-publication-validation-report.md)
 
 P17 requires real browser/provider E2E, complete business-journey reconciliation, hosted protected
 buyer-delivery validation, responsive validation and performance evidence before Gate D may pass.

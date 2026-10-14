@@ -43,6 +43,9 @@ exact release binding.
 
 The workflow runs this build in an independent job, without `needs`, so it can provide Linux build
 evidence even when the complete dependency audit blocks `Application gates`. The application job
-continues to run the explicit R51 regression before the unchanged
-`npm audit --audit-level=high`. A successful verification-build job does not override a failed
-application job, authorize a merge or prove a staging/production release.
+continues to run the explicit R51 regression and the complete dependency audit. Under the temporary
+owner decision recorded by `LES-SEC-RA-001`, the audit is evaluated from structured JSON and may
+return success only for zero vulnerabilities or the exact visible `GHSA-vfj7-8cjw-p6xm`
+development-chain finding. Any other finding, graph drift, runtime occurrence, expiry, malformed
+evidence or operational failure remains blocking. A successful verification-build job does not
+override a failed application job, authorize a merge or prove a staging/production release.

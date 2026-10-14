@@ -1,6 +1,6 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 12/10/2026
+**Última atualização:** 14/10/2026
 **Projeto:** LES-DIG — L'Essenc Digital
 **Estado documental:** P00–P15 permanecem nas respectivas baselines canônicas integradas/checkpointed. P16 — Staging Deployment concluiu a validação técnica e hosted na release técnica congelada `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 está `COMPLETE / PASS / HOSTED VALIDATED`. O closeout documental foi integrado em `main` por fast-forward no commit `6c60441e00e4520b8c689f8c4944c36c73d80d12`. O checkpoint permanente P16 `checkpoint/p16-staging-deployment-complete` foi criado e publicado como tag anotada, dereferencia exatamente a release técnica `22fad0f690618c27cabcfa58528a76ce0a580ad3` e não deve ser movido por documentação posterior. A release operacional histórica da P16-08 permanece `976a0472382abc0597996366db63c981b5733d6e` e não é reescrita como se tivesse sido a release técnica final.
 **Estado atual:** P16 está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`. A release técnica final validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`. O scheduler real da Hostinger executou essa release em 04/10/2026 01:17 UTC; o backup `p16-hosted-auto-20261004T011702683Z-9fc2be680257402a94a041ef40e2ae4f` foi correlacionado independentemente e o evaluator hardened retornou RPO autoritativo `PASS / WITHIN_TARGET` em 888 ms contra o objetivo <= 24 h. A compatibilidade de rollback para `976a0472382abc0597996366db63c981b5733d6e` foi revalidada sem deploy: Prisma schema e migration tree são byte-identical e não existe delta de runtime de aplicação não-teste em `src/`; esse target é break-glass e reverteria também o patch Next.js 16.3.8. Retenção 7/4/3 continua `PLAN_ONLY`; não há prova de cópia final independente off-R2; DB/R2 permanecem sequenciais e não atômicos; quatro HIGH de development tooling permanecem dívida explícita. Produção continua fora do escopo e não autorizada.
@@ -2653,3 +2653,19 @@ removed after export with zero project containers, volumes or networks remaining
 container/start/restart/data-volume identity and active CA hash. Historical R42 remains immutable.
 Hosted/provider/payment/release-correlation evidence is unchanged: P17 remains partially complete,
 Gate D remains `NOT_READY`, and production remains unauthorized.
+
+## P17 LES-SEC-RA-001 temporary braces risk acceptance — 14/10/2026
+
+The owner expressly accepted `GHSA-vfj7-8cjw-p6xm` in `braces@3.0.3` temporarily and only for the
+pre-production development/CI path. `LES-SEC-RA-001` keeps the HIGH finding visible and allows only
+the exact four-node chain `@next/eslint-plugin-next@16.3.8 -> fast-glob@3.3.1 ->
+micromatch@4.0.8 -> braces@3.0.3`. The deterministic evaluator runs the complete npm audit and
+fails closed for another advisory or vulnerability, chain/version drift, runtime inclusion,
+invalid/incomplete evidence, operational/network failure, unauthorized scope or expiry.
+
+The owner ratified on 14/10/2026 the exact expiry of 13/11/2026 23:59:59 America/Sao_Paulo, with
+scope restricted to development/CI, mandatory review by P19 closeout or earlier and no automatic
+acceptance of any other vulnerability. Production remains hard-blocked while the record is active,
+and definitive remediation is mandatory before production. This acceptance does not declare the
+vulnerability fixed, does not close P17, does not make Gate D ready and does not authorize P18,
+production, deploy or provider/database operations.
