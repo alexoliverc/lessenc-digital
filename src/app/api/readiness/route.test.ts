@@ -6,7 +6,7 @@ import {
 } from "@/lib/observability/correlation";
 import { evaluateReadiness } from "@/modules/health/readiness";
 
-import { createReadinessHandler } from "./route";
+import { createReadinessHandler } from "./readiness-handler";
 
 const correlationId = "11111111-1111-4111-8111-111111111111";
 
