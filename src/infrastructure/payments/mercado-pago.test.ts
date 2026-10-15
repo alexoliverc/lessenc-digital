@@ -522,7 +522,7 @@ describe("P10 webhook signature", () => {
     for (const ts of [String(now / 1000), String(now)]) {
       const dataId = "ORD01J49MMW3SSBK5PSV3DFR32959";
       const requestId = "request-123";
-      const manifest = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
+      const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
       const digest = createHmac("sha256", secret).update(manifest).digest("hex");
       const signature = `ts=${ts},v1=${digest}`;
       expect(verifyMercadoPagoWebhook({ dataId, requestId, signature, secret, now })).toBe(true);
@@ -552,7 +552,7 @@ describe("R16 E05 order webhook HMAC canonicalization", () => {
     const dataId = "ORD01J49MMW3SSBK5PSV3DFR32959";
     const requestId = "r16-synthetic-request";
 
-    const canonical = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
+    const canonical = `id:${dataId};request-id:${requestId};ts:${ts};`;
     const digest = createHmac("sha256", secret).update(canonical).digest("hex");
 
     expect(
@@ -577,15 +577,15 @@ describe("R16 E05 order webhook HMAC canonicalization", () => {
         .update(`id:${resource};request-id:${requestId};ts:${ts};`)
         .digest("hex");
 
-    const canonicalSignature = `ts=${ts},v1=${sign(dataId.toLowerCase())}`;
+    const canonicalSignature = `ts=${ts},v1=${sign(dataId)}`;
 
-    const uppercaseSignature = `ts=${ts},v1=${sign(dataId)}`;
+    const lowercasedSignature = `ts=${ts},v1=${sign(dataId.toLowerCase())}`;
 
     expect(
       verifyMercadoPagoWebhook({
         dataId,
         requestId,
-        signature: uppercaseSignature,
+        signature: lowercasedSignature,
         secret,
         now,
       }),
