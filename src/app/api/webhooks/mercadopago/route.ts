@@ -94,6 +94,9 @@ export async function POST(request: Request): Promise<Response> {
     logger.warn("webhook_invalid_signature", {
       correlationId,
       rejectionReason: verification.reason,
+      ...(verification.reason === "HMAC_MISMATCH"
+        ? { hmacDifferential: verification.hmacDifferential }
+        : {}),
     });
     return finish(new Response(null, { status: 401, headers }), "DENIED", "SIGNATURE_INVALID");
   }
