@@ -8,6 +8,9 @@
 - [P16-07 Hosted Security Validation](p16-hosted-security-validation.md): inventário, TLS/headers,
   auth/readiness, disclosure, isolamento, negativos controlados e remediação dos dois findings
   externos de staging; COMPLETE / PASS / DOCUMENTED / HOSTED VALIDATED.
+- [LES-SEC-RA-001](les-sec-ra-001-temporary-braces-risk-acceptance.md): aceitação temporária,
+  limitada a development/CI pré-produção, do advisory `GHSA-vfj7-8cjw-p6xm` em `braces@3.0.3`;
+  finding permanece visível, expiração ratificada é fail-closed e produção continua bloqueada.
 - [Revisão histórica extensa](../architecture/LES-SEC-DIG-R01.md): referência anterior, válida apenas onde compatível com a decisão LES-DIG P00–P04.
 
 Documentação não representa implementação ou conformidade atestada.

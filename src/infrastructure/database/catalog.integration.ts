@@ -15,6 +15,7 @@ describe("P07 catalog adapter on isolated P06 MySQL", () => {
   let resolveOffer: ResolvePurchasableOffer;
   const productId = randomUUID();
   const offerId = randomUUID();
+  const resourceId = randomUUID();
   const input = {
     productId,
     offerId,
@@ -37,12 +38,31 @@ describe("P07 catalog adapter on isolated P06 MySQL", () => {
         offers: { create: { id: offerId, priceMinor: 2990, currency: "BRL", isActive: true } },
       },
     });
+    await database.digitalResource.create({
+      data: {
+        id: resourceId,
+        logicalKey: `p07-catalog-${resourceId}`,
+        version: 1,
+        storageKey: `p07-fixtures/${resourceId}`,
+        filename: `${resourceId}.pdf`,
+        mediaType: "application/pdf",
+        status: "ACTIVE",
+      },
+    });
+    await database.productDigitalResource.create({
+      data: {
+        productId,
+        resourceId,
+      },
+    });
     resolveOffer = new ResolvePurchasableOffer(new PrismaCatalogRepository(database));
   });
 
   afterAll(async () => {
     if (!database) return;
     try {
+      await database.productDigitalResource.deleteMany({ where: { productId } });
+      await database.digitalResource.deleteMany({ where: { id: resourceId } });
       await database.offer.deleteMany({ where: { id: offerId } });
       await database.product.deleteMany({ where: { id: productId } });
       expect(await database.offer.count({ where: { id: offerId } })).toBe(0);
@@ -112,6 +132,36 @@ describe("P07 catalog adapter on isolated P06 MySQL", () => {
       ok: false,
       error: { code: "OFFER_UNAVAILABLE" },
     });
+  });
+
+  it("requires at least one ACTIVE mapped resource", async () => {
+    await database.product.update({ where: { id: productId }, data: { status: "ACTIVE" } });
+    await database.offer.update({
+      where: { id: offerId },
+      data: { isActive: true, currency: "BRL" },
+    });
+
+    await database.productDigitalResource.deleteMany({ where: { productId } });
+    expect(await resolveOffer.execute(input)).toMatchObject({
+      ok: false,
+      error: { code: "PRODUCT_UNAVAILABLE" },
+    });
+
+    await database.productDigitalResource.create({ data: { productId, resourceId } });
+    await database.digitalResource.update({
+      where: { id: resourceId },
+      data: { status: "INACTIVE" },
+    });
+    expect(await resolveOffer.execute(input)).toMatchObject({
+      ok: false,
+      error: { code: "PRODUCT_UNAVAILABLE" },
+    });
+
+    await database.digitalResource.update({
+      where: { id: resourceId },
+      data: { status: "ACTIVE" },
+    });
+    expect(await resolveOffer.execute(input)).toMatchObject({ ok: true });
   });
 
   it("rejects a persisted currency outside the commercial baseline", async () => {

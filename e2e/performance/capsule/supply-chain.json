@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "platform": "linux/amd64",
+  "npm": {
+    "version": "11.19.1",
+    "file": "npm-11.19.1.tgz",
+    "url": "https://registry.npmjs.org/npm/-/npm-11.19.1.tgz",
+    "sha256": "9F58BFF01604CB1B14008FEF14DCEB14D836A49225E45C6C2E37DE3BE3E707F0"
+  },
+  "openssl": {
+    "version": "3.0.22-1~deb12u1",
+    "file": "libssl3_3.0.22-1~deb12u1_amd64.deb",
+    "url": "https://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl3_3.0.22-1~deb12u1_amd64.deb",
+    "sha256": "F0A8AA8429209E556C278A9936BBD5F7D2CDB9F7E4E23B1E43ED399217BA80C1",
+    "signedIndexSha256": "E6223F7DE5FC427E898EA17683A2900785FE9E33015DB0CA976C9BA49E16F0E6",
+    "trustedSigner": "B0CAB9266E8C3929798B3EEEBDE6D2B9216EC7A8",
+    "libraries": {
+      "libssl.so.3": "DF53C8F504722CACD8035111FDAED5151CE17B79FD380EFCF28B3B4A1CA70CD5",
+      "libcrypto.so.3": "76DD3D93E5EE48950A92A58D59B94DE8143847F91A80D9682C938767B991577D"
+    }
+  },
+  "prisma": {
+    "version": "7.10.0",
+    "commit": "0edf323efd1d98336f3f0a68684b56f689b900d3",
+    "target": "debian-openssl-3.0.x",
+    "file": "schema-engine.gz",
+    "url": "https://binaries.prisma.sh/all_commits/0edf323efd1d98336f3f0a68684b56f689b900d3/debian-openssl-3.0.x/schema-engine.gz",
+    "sha256": "B7210B525A6E592C0D5DB7E7D48EDBC0F334E14E212AF7AF11C0D4A8DE755A31",
+    "executableSha256": "29557C21D47DA6F1695EC1A747CB6C607DADE5E44E8B3E4FA687BD4DC226956D",
+    "executable": "/opt/p17-toolchain/schema-engine"
+  }
+}

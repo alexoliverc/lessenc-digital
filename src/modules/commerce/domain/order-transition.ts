@@ -15,6 +15,11 @@ export type OrderFact =
       orderId: string;
       hasApprovedPayment: boolean;
     }>
+  | Readonly<{
+      kind: "PROVIDER_EXPIRATION_CONFIRMED";
+      orderId: string;
+      hasApprovedPayment: boolean;
+    }>
   | FullRefundConfirmation;
 
 export function canTransitionOrder(from: OrderStatus, to: OrderStatus): boolean {
@@ -24,13 +29,20 @@ export function canTransitionOrder(from: OrderStatus, to: OrderStatus): boolean 
     case "FAILED":
     case "CANCELED":
     case "REFUNDED":
+    case "EXPIRED":
       break;
     default:
       return assertNever(to);
   }
   switch (from) {
     case "PENDING":
-      return to === "PENDING" || to === "PAID" || to === "FAILED" || to === "CANCELED";
+      return (
+        to === "PENDING" ||
+        to === "PAID" ||
+        to === "FAILED" ||
+        to === "CANCELED" ||
+        to === "EXPIRED"
+      );
     case "PAID":
       return to === "PAID" || to === "REFUNDED";
     case "FAILED":
@@ -39,6 +51,8 @@ export function canTransitionOrder(from: OrderStatus, to: OrderStatus): boolean 
       return to === "CANCELED";
     case "REFUNDED":
       return to === "REFUNDED";
+    case "EXPIRED":
+      return to === "EXPIRED";
     default:
       return assertNever(from);
   }
@@ -62,6 +76,12 @@ export function applyOrderFact(order: Order, fact: OrderFact, clock: Clock): Ord
       }
       target = fact.kind === "INTERNAL_FAILURE_CONFIRMED" ? "FAILED" : "CANCELED";
       break;
+    case "PROVIDER_EXPIRATION_CONFIRMED":
+      if (fact.orderId !== order.id || fact.hasApprovedPayment !== false) {
+        throw new ApplicationError("INVALID_FINANCIAL_ORIGIN");
+      }
+      target = "EXPIRED";
+      break;
     case "FULL_REFUND_COMPLETED":
       requireFinancialMatch({ orderId: order.id, amount: order.total }, fact);
       target = "REFUNDED";
@@ -79,5 +99,6 @@ export function applyOrderFact(order: Order, fact: OrderFact, clock: Clock): Ord
     status: target,
     updatedAt: now,
     paidAt: target === "PAID" ? now : order.paidAt,
+    expiredAt: target === "EXPIRED" ? now : order.expiredAt,
   });
 }

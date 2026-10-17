@@ -3,12 +3,12 @@ import { access, readFile } from "node:fs/promises";
 import process from "node:process";
 import { URL } from "node:url";
 
-import { validateReleaseCommitBinding } from "./lib/p16-release-binding.mjs";
+import { validateStagingReleaseCommitBinding } from "./lib/p16-release-binding.mjs";
 import { validateStagingEnvironment } from "./lib/p16-staging-contract.mjs";
 
 const failures = [
   ...validateStagingEnvironment(process.env),
-  ...validateReleaseCommitBinding(process.env.P16_RELEASE_COMMIT),
+  ...validateStagingReleaseCommitBinding(process.env),
 ];
 
 if (process.versions.node.split(".")[0] !== "24") failures.push("NODE_RUNTIME_NOT_24_X");
@@ -31,8 +31,8 @@ try {
 
 const uniqueFailures = [...new Set(failures)].sort();
 if (uniqueFailures.length > 0) {
-  process.stderr.write(`P16 staging preflight refused operation: ${uniqueFailures.join(",")}\n`);
+  process.stderr.write(`Staging preflight refused operation: ${uniqueFailures.join(",")}\n`);
   process.exitCode = 1;
 } else {
-  process.stdout.write("P16 staging preflight passed without disclosing configuration values.\n");
+  process.stdout.write("Staging preflight passed without disclosing configuration values.\n");
 }

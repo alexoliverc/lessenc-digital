@@ -80,3 +80,18 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
   candidate for encrypted recovery units, guarded database dumps, deterministic 7/4/3 retention,
   integrity verification, isolated local restore, RPO/RTO evidence classification and plan-only
   application rollback. Hosted execution remains pending.
+
+## P17 validation operations
+
+- [P17 Gate D evidence matrix](./p17-gate-d-evidence-matrix.md) — current evidence authority and
+  unresolved Gate D boundaries.
+- [P17 local validation report](./p17-local-validation-report.md) — local browser, integration,
+  performance-capsule and provenance evidence with explicit authority limits.
+- [P17 CI verification build contract](./p17-ci-build-contract.md) — synthetic, non-deployable-by-
+  authority CI build contract and independent job boundary.
+- [LES-P17-CODEX-EXEC-R13 validation report](./les-p17-codex-exec-r13-temporary-risk-acceptance-validation-report.md)
+  — local deterministic audit-policy implementation for `LES-SEC-RA-001`, fail-closed regression
+  evidence and production hard-stop boundary.
+- [LES-P17-CODEX-EXEC-R14-A pre-publication report](./les-p17-codex-exec-r14-a-pre-publication-validation-report.md)
+  — owner ratification, complete R13 diff audit, regression evidence and controlled-publication
+  readiness without performing Git publication.

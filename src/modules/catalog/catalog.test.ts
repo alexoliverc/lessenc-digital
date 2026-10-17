@@ -18,7 +18,14 @@ describe("Catalog eligibility", () => {
   it("rejects inactive offer, missing offer and either product association mismatch", async () => {
     const catalog = catalogFixture();
     expect(() =>
-      requirePurchasable({ ...catalog, offer: { ...catalog.offer, isActive: false } }, "product"),
+      requirePurchasable(
+        {
+          ...catalog,
+          offer: { ...catalog.offer, isActive: false },
+          deliveryReady: false,
+        },
+        "product",
+      ),
     ).toThrow(expect.objectContaining({ code: "OFFER_UNAVAILABLE" }));
     expect(() =>
       requirePurchasable(
@@ -34,6 +41,15 @@ describe("Catalog eligibility", () => {
       offerId: "missing",
     });
     expect(missing).toMatchObject({ ok: false, error: { code: "OFFER_UNAVAILABLE" } });
+  });
+  it("fails closed when the active product has no active deliverable resource", () => {
+    const catalog = catalogFixture();
+
+    expect(() => requirePurchasable({ ...catalog, deliveryReady: false }, "product")).toThrow(
+      expect.objectContaining({ code: "PRODUCT_UNAVAILABLE" }),
+    );
+
+    expect(() => requirePurchasable(catalog, "product")).not.toThrow();
   });
   it("checks returned offer identity and preserves typed repository failures", async () => {
     const input = { productId: "product", offerId: "other" };

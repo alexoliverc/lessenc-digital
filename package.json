@@ -5,8 +5,9 @@
   "description": "Plataforma digital inicial da L'Essenc para venda de infoprodutos autorais.",
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run db:generate",
+    "prebuild": "npm run ops:p16:preflight && npm run db:generate",
     "build": "next build",
+    "build:ci": "node scripts/p17-ci-build.mjs",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
@@ -20,6 +21,12 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:list": "playwright test --list",
+    "test:e2e:install": "playwright install chromium",
+    "test:performance:infra": "vitest run --config vitest.performance.config.mts",
+    "performance:infra:describe": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/p17-performance-runner.mjs describe",
+    "performance:infra:validate": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/p17-performance-runner.mjs validate-config",
     "typecheck": "npm run db:generate && tsc --noEmit",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
@@ -60,6 +67,7 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@next/eslint-plugin-next": "16.3.8",
+    "@playwright/test": "1.63.0",
     "@types/node": "24.13.4",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
@@ -74,7 +82,9 @@
   "overrides": {
     "mariadb": "3.5.4",
     "mysql2": "3.24.4",
-    "deepmerge-ts": "8.0.2"
+    "deepmerge-ts": "8.0.2",
+    "sharp": "0.35.5",
+    "source-map-js": "1.2.2"
   },
   "engines": {
     "node": "24.x"

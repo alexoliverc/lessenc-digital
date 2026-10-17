@@ -100,7 +100,20 @@ describe("P12 authoritative admin session and audit", () => {
   });
 
   afterAll(async () => {
-    await db.adminAuditEvent.deleteMany({ where: { actorAdminUserId: { in: ownedIds } } });
+    await db.adminAuditEvent.deleteMany({
+      where: {
+        OR: [
+          { actorAdminUserId: { in: ownedIds } },
+          {
+            actorAdminUserId: null,
+            action: "ADMIN_ROLE_CHANGE_DENIED",
+            targetType: "AdminUser",
+            targetId: adminId,
+            outcome: "DENIED",
+          },
+        ],
+      },
+    });
     await db.adminSession.deleteMany({ where: { userId: { in: ownedIds } } });
     await db.adminTwoFactor.deleteMany({ where: { userId: { in: ownedIds } } });
     await db.adminUser.deleteMany({ where: { id: { in: ownedIds } } });

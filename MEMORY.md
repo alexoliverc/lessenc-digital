@@ -1,6 +1,6 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 04/10/2026
+**Última atualização:** 14/10/2026
 **Projeto:** LES-DIG — L'Essenc Digital
 **Estado documental:** P00–P15 permanecem nas respectivas baselines canônicas integradas/checkpointed. P16 — Staging Deployment concluiu a validação técnica e hosted na release técnica congelada `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 está `COMPLETE / PASS / HOSTED VALIDATED`. O closeout documental foi integrado em `main` por fast-forward no commit `6c60441e00e4520b8c689f8c4944c36c73d80d12`. O checkpoint permanente P16 `checkpoint/p16-staging-deployment-complete` foi criado e publicado como tag anotada, dereferencia exatamente a release técnica `22fad0f690618c27cabcfa58528a76ce0a580ad3` e não deve ser movido por documentação posterior. A release operacional histórica da P16-08 permanece `976a0472382abc0597996366db63c981b5733d6e` e não é reescrita como se tivesse sido a release técnica final.
 **Estado atual:** P16 está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`. A release técnica final validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`. O scheduler real da Hostinger executou essa release em 04/10/2026 01:17 UTC; o backup `p16-hosted-auto-20261004T011702683Z-9fc2be680257402a94a041ef40e2ae4f` foi correlacionado independentemente e o evaluator hardened retornou RPO autoritativo `PASS / WITHIN_TARGET` em 888 ms contra o objetivo <= 24 h. A compatibilidade de rollback para `976a0472382abc0597996366db63c981b5733d6e` foi revalidada sem deploy: Prisma schema e migration tree são byte-identical e não existe delta de runtime de aplicação não-teste em `src/`; esse target é break-glass e reverteria também o patch Next.js 16.3.8. Retenção 7/4/3 continua `PLAN_ONLY`; não há prova de cópia final independente off-R2; DB/R2 permanecem sequenciais e não atômicos; quatro HIGH de development tooling permanecem dívida explícita. Produção continua fora do escopo e não autorizada.
@@ -404,12 +404,141 @@ Security and delivery behavior:
 - `Cache-Control: private, no-store`.
 - `Referrer-Policy: no-referrer`.
 - `X-Content-Type-Options: nosniff`.
-- `Accept-Ranges: none`.
-- Range/partial delivery is not implemented.
+- Byte-range behavior is transport-layer behavior, not authentication or authorization authority.
+- Hosted transport may return HTTP 206 only after the protected backend path has enforced Buyer Session validation and protected resource authorization.
 - `highWaterMark: 0` prevents automatic stream prefetch.
 - `SUCCEEDED` is persisted only when body consumption actually begins and before requesting the first resource chunk.
 - Stream failure after start records `FAILED / STREAM_FAILED`.
 - If the `SUCCEEDED` audit cannot be persisted, resource bytes are not released.
+
+#### P17 hosted transport reconciliation — 06/10/2026
+
+P17 hosted validation superseded the earlier transport assumption that partial delivery was disabled end-to-end.
+
+The hosted transport may materialize a client Range request as HTTP 206 after the application has already completed the authenticated protected-delivery path.
+
+The canonical security sequence is:
+
+`Buyer Session -> rate limit -> resource authorization -> private storage -> backend protected response -> optional hosted byte-range transport -> delivery audit`
+
+Range is not authentication or authorization authority.
+
+Missing or invalid Buyer Session remains fail-closed.
+
+Unauthorized resources remain unavailable.
+
+R2 credentials, storage keys and direct private-storage URLs remain server-only.
+
+#### P17 G5 hosted closeout — 06/10/2026
+
+Hosted release authority:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+The final G5-D adversarial matrix proved:
+
+- missing Buyer Session + Range -> `401 SESSION_INVALID`;
+- invalid Buyer Session + Range -> `401 SESSION_INVALID`;
+- valid Buyer Session + unauthorized resource + Range -> `404 RESOURCE_NOT_AVAILABLE`;
+- unauthorized resource produced no delivery audit;
+- valid Buyer Session + authorized resource + Range -> `206 Partial Content`;
+- authorized Range delivery produced exactly one `DigitalDeliveryEvent / SUCCEEDED`;
+- Range remained transport-only authority;
+- Buyer Session remained mandatory;
+- resource authorization remained mandatory;
+- R2 remained private;
+- storage key and direct R2 URL remained server-only;
+- protected response retained `Cache-Control: private, no-store`, `Referrer-Policy: no-referrer` and `X-Content-Type-Options: nosniff`;
+- Order remained `PAID`;
+- Payment remained `APPROVED`;
+- PAYMENT_APPROVED outbox remained `PROCESSED`;
+- Entitlement remained `ACTIVE`;
+- no new payment or commercial-right mutation occurred.
+
+Final status:
+
+`P17-HV-P8-F3-G5-D = COMPLETE / PASS / HOSTED PROVEN`
+
+`P17-HV-P8-F3-G5 = COMPLETE / PASS / HOSTED PROVEN`
+
+Gate D remains `NOT READY`; G5 closeout does not close the remaining P17 validation matrix.
+
+#### P17 F3 hosted browser/provider reconciliation — 05/10/2026
+
+Hosted technical release authority:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+Owner-observed hosted F3 browser evidence established the following without a second payment:
+
+- the real Mercado Pago Card Payment Brick reached its interactive rendered state after the P17 CSP, `mlstatic` and mandatory `onReady` corrections;
+- the hosted checkout/payment browser path was exercised against the F3 Order;
+- exactly one Mercado Pago TEST payment attempt was submitted;
+- the application displayed server-confirmed payment success;
+- Order `e56f6f12-a1f2-489e-8f88-5c626aabc402` became `PAID`;
+- Payment `408c927d-67d6-4e5c-92ff-05cfff704cbf` became `APPROVED`;
+- provider result was `processed / accredited`;
+- authoritative PaymentEvent origin/outcome was `CREATE_RESPONSE / APPLIED`;
+- no provider 3DS/challenge flow was triggered during the successful F3 TEST execution;
+- no new hosted CSP or `unsafe-eval` violation was observed after the final Brick fixes;
+- real Mercado Pago TEST webhook delivery was not observed and remains `NOT PROVEN`.
+
+Gate D reconciliation from that evidence:
+
+- `P17-E02 Checkout = PASS / HOSTED PROVEN`;
+- `P17-E03 Order = PASS / HOSTED PROVEN`;
+- `P17-E04 Mercado Pago TEST = PASS / HOSTED PROVEN`;
+- `P17-E05 Webhook = PENDING_EXTERNAL / NOT PROVEN`;
+- `P17-E06 Payment = PASS / HOSTED PROVEN`;
+- `P17-P01 Payment Brick = PASS / HOSTED PROVEN`;
+- `P17-P02 3DS/challenge = NOT_APPLICABLE for the F3 run because TEST did not trigger challenge`;
+- `P17-P03 CSP = PASS / HOSTED PROVEN`;
+- `P17-P04 unsafe-eval = PASS / HOSTED PROVEN`.
+
+This reconciliation does not authorize or require another payment.
+
+#### P17 administrative hosted closeout — 06/10/2026
+
+Hosted release authority:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+`P17-HV-P9-A` completed the read-only administrative preflight and reconciled the existing F3 commercial authority without mutation.
+
+`P17-HV-P9-B` executed the real hosted administrative browser matrix using only the existing OWNER identity. Password, TOTP, recovery codes and session cookies remained browser-only and were not captured in project evidence.
+
+Hosted results:
+
+- `A01` real administrative login -> `PASS / HOSTED PROVEN`;
+- `A02` real MFA -> `PASS / HOSTED PROVEN`;
+- `A03` authenticated administrative session -> `PASS / HOSTED PROVEN`;
+- `A04` OWNER RBAC and protected administrative resource access -> `PASS / HOSTED PROVEN`;
+- `A05` Order `e56f6f12-a1f2-489e-8f88-5c626aabc402` -> `PAID / PASS / HOSTED PROVEN`;
+- `A06` Payment `408c927d-67d6-4e5c-92ff-05cfff704cbf` -> `APPROVED`, `MERCADO_PAGO`, provider `processed / accredited`, `CREATE_RESPONSE / APPLIED`;
+- `A07` Entitlement `3e05674c-dc24-4713-9515-148162a36825` -> `ACTIVE / PASS / HOSTED PROVEN`;
+- `A08` four `DigitalDeliveryEvent` records -> all `SUCCEEDED / PASS / HOSTED PROVEN`;
+- `A09` administrative audit surface -> accessible through OWNER RBAC with legitimate empty state and `AdminAuditEvent.totalCount = 0`.
+
+`AdminAuditEvent` is administrative audit authority and is not interchangeable with `PaymentEvent`, `OutboxEvent`, `Entitlement` or `DigitalDeliveryEvent`.
+
+The A09 PASS proves the hosted administrative audit surface, RBAC access, append-only/read-only presentation and legitimate zero-event state. It does not claim that the administrative audit event write path has been exercised.
+
+Preserved limitations:
+
+- real Mercado Pago TEST webhook delivery remains `NOT PROVEN`;
+- administrative `AdminAuditEvent` write-path execution remains `NOT PROVEN`.
+
+No new AdminUser was created. No role or MFA configuration was changed. No second payment occurred. No Order, Payment, Outbox, Entitlement, R2 object or Buyer Access state was mutated. G5 was not reopened.
+
+Final administrative hosted validation status:
+
+`P17-HV-P9-A = PASS`
+
+`P17-HV-P9-B = COMPLETE / PASS / HOSTED PROVEN`
+
+`P17-HV-P9 = COMPLETE / PASS / HOSTED PROVEN`
+
+Gate D remains `NOT READY`; administrative hosted validation is complete, but the remaining P17 browser/provider, responsive, performance and release-closeout requirements retain their independent authority.
 
 ### C5.4 — Full Protected Delivery Security Review
 
@@ -2282,3 +2411,261 @@ DB/R2 capture is sequential, not atomic; production remains unauthorized.
 Current P16 classification:
 
 `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`
+
+<!-- P17-01-VALIDATION-ARCHITECTURE-OPENING -->
+
+## P17 — End-to-End & Business Validation — Opening State
+
+P17 is OPEN on local branch `phase/p17-end-to-end-business-validation` from canonical baseline
+`6e269e6db928b228babd8ffd44c3f55574cade4c`.
+
+P17-00 opening audits passed. P17-01 discovery established the validation architecture.
+
+The approved real-browser direction is `@playwright/test`, but it is not installed by this
+documentation gate.
+
+Existing Vitest `browser` tests remain Node-based regression/contract tests and are not evidence of
+real browser E2E.
+
+The current hosted P16 technical release remains
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`.
+
+The permanent checkpoint `checkpoint/p16-staging-deployment-complete` continues to dereference to
+that exact technical release and must not move.
+
+`P16_RELEASE_COMMIT` remains unchanged while that P16 release remains the hosted application release.
+
+Any future P17 application deployment is blocked until controlled release-binding reconciliation is
+implemented and validated.
+
+Mercado Pago remains TEST-only for P17.
+
+Production is not authorized.
+
+P17-01 architecture documents:
+
+- `docs/architecture/p17-validation-architecture.md`
+- `docs/operations/p17-gate-d-evidence-matrix.md`
+
+No package installation, provider mutation, deploy, tag or production action is authorized by this
+entry.
+
+<!-- P17-LOCAL-VALIDATION-CANDIDATE -->
+
+## P17 local end-to-end validation candidate — 04/10/2026
+
+The owner-authorized P17 execution is in progress on isolated branch
+`codex/p17-end-to-end-validation` from `cda824ce151d75e7dc2f496101d03d1ccd474d14`.
+
+Playwright 1.63.0 now has an isolated real-Chromium configuration, deterministic mobile/tablet/
+desktop viewports, sanitized per-run evidence and guarded local/hosted targets. Local public browser,
+checkout/order persistence, invalid admin identity and invalid buyer credential scenarios pass.
+The isolated MySQL integration suite passes 22 files / 191 tests and the full unit/application gate
+passes 101 files / 999 tests.
+
+Staging release binding is phase-neutral through `STAGING_RELEASE_COMMIT` while preserving the
+frozen P16 variable as a strict compatibility alias. No Hostinger variable or hosted release was
+mutated.
+
+Gate D remains NOT READY. Real Mercado Pago TEST webhook delivery, the unresolved failure matrix, P17-B01 and P17-B03-B07, real Payment Brick multi-viewport responsive proof, and an owner-approved performance budget with P17-PR01–PR04 evaluation remain mandatory authorities. Hosted P17 source/runtime, protected hosted delivery and positive real-admin browser evidence are now proven. Production remains unauthorized.
+
+## P17 R13/R14 hosted public/provider/release/responsive reconciliation — 06/10/2026
+
+Current Hostinger deployed Git release:
+
+`0f6534fcf1d5b87588f21f6dd64005309a50c786`
+
+Original hosted G5/F3/P9 application-evidence execution release:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+The Git delta from `9e2ef25f4667b19f727c6ba1e277a79f55e3086f` to `0f6534fcf1d5b87588f21f6dd64005309a50c786` contains only canonical documentation; application-code delta is zero.
+
+Hosted reconciliation results:
+
+- `P17-E01 Public Experience = PASS / HOSTED PROVEN`;
+- `P17-P05 GTM = NOT_APPLICABLE / DISABLED HOSTED PROVEN`;
+- `P17-P06 Meta browser provider = NOT_APPLICABLE / DISABLED HOSTED PROVEN`;
+- `P17-L04 release binding = PASS / HOSTED PROVEN`;
+- public, checkout guard, payment guard, unauthenticated admin and authenticated admin responsive boundaries were exercised in mobile, tablet and desktop viewport classes;
+- current MVP has no separate buyer-facing `page.tsx`;
+- real hosted Mercado Pago Payment Brick multi-viewport execution remains `NOT PROVEN`;
+- therefore `P17-R01`, `P17-R02` and `P17-R03` remain `PENDING_EXTERNAL`, not PASS.
+
+No second payment or commercial mutation was performed.
+
+Gate D remains `NOT READY`.
+
+<!-- P17-R15-I8-F06-RECONCILIATION -->
+## P17 R15 — F06 technical closeout (07/10/2026)
+
+The F06 provider-confirmed order-expiration functional gap is implemented and locally proven on P17. Implementation commit: `920283ae473a12bbfcbacb1020bb6cb8dd3c7194`. Admin integration test-hygiene repair: `fbf45f146c7796956ca9263dbc46bec2996c4f27`. Published branch HEAD is `fbf45f146c7796956ca9263dbc46bec2996c4f27`.
+
+F06-POLICY-R1: only provider-confirmed expiration creates terminal Order.EXPIRED and `expiredAt`; generic cancellation remains distinct; timeout/UNKNOWN does not expire an Order; late approval after EXPIRED requires REVIEW with no automatic entitlement or paid outbox.
+
+Local MySQL `lessenc_test` migration `20261007_p17_f06_expired_order` applied using `lessenc_migrate`; historical failed journal attempt resolved as rolled back. Runtime `lessenc_test` preserved DML-only authority. R15-I5 completed 124 targeted tests. R15-I6 completed lint, typecheck, 1,030 unit tests and 199 integration tests PASS, with exact restoration of all 27 application-table counts.
+
+Admin test-hygiene corrections prevent Better Auth base64url challenge and null-actor audit fixture residue. No production-code modification was part of those two hygiene changes.
+
+Current Failure Matrix: F01 PENDING_EXTERNAL; F02-F08 PASS / TEST PROVEN locally; F06 additionally REGRESSION PROVEN / PUBLISHED. No hosted F06 deployment or migration was executed. Current Hostinger deployed release remains `0f6534fcf1d5b87588f21f6dd64005309a50c786`.
+
+E05 real Mercado Pago TEST webhook NOT PROVEN. B01/B03-B07, R01-R03 and PR01-PR04 remain independently unresolved. G5 and P9 remain closed. Gate D NOT READY. Production UNAUTHORIZED. Main and P16 checkpoint unchanged.
+
+## P17 autonomous local closeout — 10/10/2026
+
+The owner-authorized autonomous local closeout exhausted the safe executable P17 work on branch
+`phase/p17-end-to-end-business-validation`. Implementation commit:
+`7ab1777a3363c969cd882d8bac0ffee25afe1b13`.
+
+The digest-pinned two-container capsule now has verified Debian OpenSSL 3 input, Prisma 7.10.0 Schema
+Engine for `debian-openssl-3.0.x`, npm 11.19.1 bootstrap, lock-bound Linux cache and network-disabled
+dependency/build replay. Final runtime is non-root and read-only, publishes no port, uses disposable
+MySQL storage and proves loopback-only Node/Chromium execution with external egress blocked.
+
+Security closeout updated `sharp` to 0.35.5 and `source-map-js` to 1.2.2. Runtime audit is zero;
+four HIGH findings remain confined to the development lint dependency chain because npm's proposed
+automatic fix is an incompatible downgrade.
+
+Final local gates: 1,032 unit tests, 199 isolated MySQL integration tests, 42
+performance-infrastructure tests and 14 executable real-Chromium E2E scenarios pass. The production
+image builds fully offline. P17-PR01 has 240 unthrottled loopback navigation samples and is
+`DIAGNOSTIC_ONLY / BLOCKED_OWNER_BUDGET`; P17-PR02–PR04 remain `NOT_EXECUTED`.
+
+No hosted/provider/payment/deploy operation occurred. P17-E05, P17-F01, P17-B01/P17-B03–B07,
+P17-R01–R03 and owner-approved performance acceptance remain external. Gate D remains `NOT READY`;
+production remains unauthorized.
+
+## P17 owner-approved performance budget — 10/10/2026
+
+The owner expressly approved `LES-P17-PERFORMANCE-BUDGET-R01` as a numeric acceptance policy only. This later decision supersedes prior statements that owner budget approval was absent, without changing the historical status of the local measurements.
+
+PR01 LCP P75 <= 2,500 ms; PR02 INP P75 <= 200 ms; PR03 browser-side payment POST initiation P95 <= 1,000 ms; PR04 protected delivery HTTP TTFB P95 <= 2,000 ms.
+
+The approved methodology covers 15 independent cohorts, 3 valid warmups and 40 valid samples each, 600 valid samples minimum, nearest-rank, zero retries, mobile 390x844, tablet 768x1024, desktop 1440x900, 10 Mbps download, 2 Mbps upload, RTT 80 ms and +/-10% network calibration tolerance. No additional CPU throttling is authorized; hardware identification is required.
+
+Historical PR01 navigation measurements remain DIAGNOSTIC_ONLY / ACCEPTANCE NOT PROVEN. PR02-PR04 remain NOT_EXECUTED. No new performance evidence has been collected.
+
+Only canonical documentation synchronization was subsequently authorized. No code edit, test execution, commit, push, merge, deployment, external payment operation or production authorization is granted.
+
+Gate D NOT READY. Production UNAUTHORIZED.
+
+## P17 autonomous acceptance closeout — 11/10/2026
+
+`LES-P17-AUTONOMOUS-CLOSEOUT-R01` materialized a local-only, fail-closed implementation of the
+owner-approved performance protocol: 15 independent cohorts, 45 excluded warmups, 600 valid
+measurements, calibrated 10/2 Mbps and 80 ms RTT, zero retries and one worker. Source provenance,
+network isolation, consent setup and native browser timing are explicit and auditable.
+
+Local gates pass: `npm run check` (104 files / 1,032 tests), performance infrastructure (14 files /
+78 tests), offline cache/build and zero runtime dependency vulnerabilities. Four HIGH findings
+remain restricted to the development lint chain.
+
+The latest bounded runtime attempt completed only PR01 mobile (3 warmups + 40 observations) and
+stopped fail-closed at the first PR02 mobile warmup because Chromium emitted no qualifying Event
+Timing entry. PR01 is partial-cohort support only; PR02 acceptance is blocked on local browser
+observability; PR03/PR04 are not executed. Acceptance remains `NOT_PROVEN`.
+
+Two disposable MySQL launches applied all nine migrations, but Vitest could not create internal
+runtime files inside the read-only capsule and collected no tests. This is
+`NOT_EXECUTED / BLOCKED_LOCAL_CAPSULE_WRITABLE_RUNTIME_PATH`, not PASS. Cleanup passed.
+
+No hosted/provider/payment/deploy or Git publication occurred. E05, F01, provider-sensitive B/R
+requirements and complete performance evaluation remain unresolved. `P17 = PARTIALLY COMPLETE`,
+`GATE D = NOT READY`, and production remains unauthorized.
+
+## P17 autonomous closeout interrupted by owner — 12/10/2026
+
+The local-only continuation of `LES-P17-AUTONOMOUS-CLOSEOUT-R01` was stopped immediately at the
+owner's request. No commit, push, merge, tag, deployment, hosted-database access or real payment
+operation occurred.
+
+A fail-closed audit of the effective Docker Compose environment now distinguishes the authorized
+synthetic capsule variables from forbidden provider credentials. The inspected effective
+configuration contained no Mercado Pago secret, S3 credential, GTM identifier or Meta Pixel
+identifier; the prior generic `DATABASE_URL` name finding was a false positive because the value
+was the exact isolated synthetic database contract. The audit and its negative fixtures passed.
+
+One bounded runtime cohort, `PR03 / PIX / mobile`, completed with 3 valid excluded warmups and
+40/40 valid measurements. The native trusted click timestamp was correlated with exactly one
+successful local `POST /checkout/payment/start` Resource Timing entry. Nearest-rank p95 was 3.5 ms
+against the 1,000 ms budget, with valid 10/2 Mbps and 80 ms calibration. This proves only that
+single local cohort; it is not a full PR03 or global performance PASS.
+
+The selective reporter contract was then corrected so a `PR03_PIX_MOBILE` execution can finish
+successfully while the global result remains `NOT_PROVEN`. Its source tests passed, but the final
+OCI rebuild for the resulting source tree failed during the application-runtime layer export with
+a Docker/BuildKit RPC `Unavailable` / `EOF`. Docker Desktop subsequently stopped responding; the
+bounded restart attempt was interrupted and its remaining CLI process terminated when the owner
+ordered the stop. The final source tree therefore has no newly validated OCI image or runtime run.
+
+Local source validation completed before interruption: `npm run check` passed 104 files / 1,032
+tests; the performance-infrastructure suite passed 24 files / 109 tests; Prettier, typecheck,
+targeted ESLint, offline-cache verification and Docker-context audit passed; runtime dependencies
+reported zero vulnerabilities. Four HIGH findings remain confined to the development lint chain.
+
+The full 15-cohort matrix was not executed, the isolated MySQL integration suite was not rerun,
+and hosted/provider evidence remains absent. `P17 = PARTIALLY COMPLETE`, `GATE D = NOT READY`, and
+production remains unauthorized.
+
+## P17 R49 commit-bound local remediation closeout — 12/10/2026
+
+R49 F01/F02/F03 passed local remediation on implementation commit
+`7ddfbf668d1648cf968eb3243748c89f288539cc`, OCI image
+`sha256:22c54f0c643615677bd0e6921b5c4f92ac609748ece66ea92ab6d600fd0c8ece` and source-tree SHA-256
+`8f961f5bbb2e54e8a95ffc13005581d4ad2c3db5b0a89b805e761d24443a2bea` over 467 files. The
+image revision label and in-image declared commit match the implementation commit.
+
+The real image entrypoint now has a preflight-only mode that reuses the production-path authenticated
+MySQL TLS function. The positive R34 proof negotiated `TLS_AES_256_GCM_SHA384`; an incompatible
+independent CA failed closed with exit 1 before any controller. R34 logical application data, active
+CA and container/data-volume identity were unchanged. The proof authenticates the CA chain, not the
+hostname, because synthetic loopback keeps an explicit `checkServerIdentity` override.
+
+Final local gates passed: 104 files / 1,032 general tests, 25 files / 117 performance-infrastructure
+tests and a fresh isolated 22-file / 199-test MySQL integration run after nine migrations. F01 covers
+provenance preservation across success/failure/cleanup; F02 redacts all archived args, removes
+sensitive argument/environment values from output and avoids a command shell on Windows. Disposable
+proof/integration resources were removed; R34 and historical images/volumes remain preserved.
+
+At this remediation checkpoint, R42 performance remained immutable and
+`PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`; no post-R49 full performance run had yet been executed.
+P17 remained partially complete, Gate D remained `NOT_READY`, and production remained unauthorized.
+
+## P17 R49 final-image full local performance — 12/10/2026
+
+After the R49 remediation checkpoint, the final commit-bound image
+`sha256:22c54f0c643615677bd0e6921b5c4f92ac609748ece66ea92ab6d600fd0c8ece` ran the complete local
+performance matrix against a fresh disposable MySQL project. All 15 Playwright cohorts passed with
+45 excluded warmups, 600 valid measurements, 15 structurally complete calibrations and no missing,
+duplicate or unexpected cohort. Every governing percentile value was within its approved numeric
+limit: p75 for PR01/PR02 and p95 for PR03/PR04.
+
+The reporter correctly classified the package as `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY`, reason
+`SOURCE_BYTES_VERIFIED_COMMIT_IDENTITY_NOT_VERIFIED`, and numeric result
+`ALL_COHORTS_WITHIN_LIMIT`. The source-tree SHA-256 was independently verified as
+`8f961f5bbb2e54e8a95ffc13005581d4ad2c3db5b0a89b805e761d24443a2bea`; the commit inside the image
+remains `DECLARED_COMMIT_FILE_ONLY`, so this is not promoted to complete provenance or Gate D proof.
+
+Sanitized evidence is outside the repository at
+`C:\Users\Alex Oliveira\AppData\Local\Lessenc\P17\r49-final-performance\20261012-194500`;
+summary SHA-256 `28c2a449c653d1e918382f6033053f5c813b05b422c70a412b3d70fbb190a124`. The disposable project was
+removed after export with zero project containers, volumes or networks remaining. R34 retained its
+container/start/restart/data-volume identity and active CA hash. Historical R42 remains immutable.
+Hosted/provider/payment/release-correlation evidence is unchanged: P17 remains partially complete,
+Gate D remains `NOT_READY`, and production remains unauthorized.
+
+## P17 LES-SEC-RA-001 temporary braces risk acceptance — 14/10/2026
+
+The owner expressly accepted `GHSA-vfj7-8cjw-p6xm` in `braces@3.0.3` temporarily and only for the
+pre-production development/CI path. `LES-SEC-RA-001` keeps the HIGH finding visible and allows only
+the exact four-node chain `@next/eslint-plugin-next@16.3.8 -> fast-glob@3.3.1 ->
+micromatch@4.0.8 -> braces@3.0.3`. The deterministic evaluator runs the complete npm audit and
+fails closed for another advisory or vulnerability, chain/version drift, runtime inclusion,
+invalid/incomplete evidence, operational/network failure, unauthorized scope or expiry.
+
+The owner ratified on 14/10/2026 the exact expiry of 13/11/2026 23:59:59 America/Sao_Paulo, with
+scope restricted to development/CI, mandatory review by P19 closeout or earlier and no automatic
+acceptance of any other vulnerability. Production remains hard-blocked while the record is active,
+and definitive remediation is mandatory before production. This acceptance does not declare the
+vulnerability fixed, does not close P17, does not make Gate D ready and does not authorize P18,
+production, deploy or provider/database operations.

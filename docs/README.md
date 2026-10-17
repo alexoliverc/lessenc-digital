@@ -404,3 +404,29 @@ P16 classification:
 `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`
 
 Production remains out of scope and unauthorized.
+
+<!-- P17-01-VALIDATION-ARCHITECTURE-INDEX -->
+
+## P17 — End-to-End & Business Validation
+
+P17 is the active validation phase after the completed P16 staging lifecycle.
+
+Canonical P17 validation documents:
+
+- [P17 validation architecture](architecture/p17-validation-architecture.md)
+- [P17 Gate D evidence matrix](operations/p17-gate-d-evidence-matrix.md)
+- [P17 local validation report](operations/p17-local-validation-report.md)
+- [P17 CI verification build contract](operations/p17-ci-build-contract.md)
+- [LES-SEC-RA-001 temporary braces risk acceptance](security/les-sec-ra-001-temporary-braces-risk-acceptance.md)
+- [LES-P17-CODEX-EXEC-R13 temporary risk acceptance validation report](operations/les-p17-codex-exec-r13-temporary-risk-acceptance-validation-report.md)
+- [LES-P17-CODEX-EXEC-R14-A pre-publication validation report](operations/les-p17-codex-exec-r14-a-pre-publication-validation-report.md)
+
+P17 requires real browser/provider E2E, complete business-journey reconciliation, hosted protected
+buyer-delivery validation, responsive validation and performance evidence before Gate D may pass.
+
+The 10/10/2026 autonomous local closeout is recorded in the local validation report and implementation
+commit `7ab1777a3363c969cd882d8bac0ffee25afe1b13`. It proves the isolated offline capsule, local
+regressions and diagnostic public-navigation measurements only; external Gate D authority remains
+open.
+
+Production remains unauthorized.

@@ -16,7 +16,11 @@ export type Offer = Readonly<{
   price: Money;
   isActive: boolean;
 }>;
-export type CatalogOffer = Readonly<{ product: Product; offer: Offer }>;
+export type CatalogOffer = Readonly<{
+  product: Product;
+  offer: Offer;
+  deliveryReady: boolean;
+}>;
 
 export function requirePurchasable(catalog: CatalogOffer, productId: string): void {
   const { product, offer } = catalog;
@@ -34,5 +38,8 @@ export function requirePurchasable(catalog: CatalogOffer, productId: string): vo
       assertNever(product.status);
   }
   if (!offer.isActive) throw new ApplicationError("OFFER_UNAVAILABLE");
+  if (catalog.deliveryReady !== true) {
+    throw new ApplicationError("PRODUCT_UNAVAILABLE");
+  }
   offer.price.requireCurrency("BRL");
 }

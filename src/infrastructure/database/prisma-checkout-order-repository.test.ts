@@ -69,6 +69,7 @@ function order(): Order {
     createdAt: instant,
     updatedAt: instant,
     paidAt: null,
+    expiredAt: null,
   });
 }
 
@@ -229,6 +230,7 @@ describe("PrismaCheckoutOrderRepository", () => {
         createdAt: new Date(instant),
         updatedAt: new Date(instant),
         paidAt: null,
+        expiredAt: null,
       },
     });
 

@@ -44,6 +44,7 @@ export class PrepareOrder {
         createdAt: now,
         updatedAt: now,
         paidAt: null,
+        expiredAt: null,
       });
       validateOrder(order);
       return order;

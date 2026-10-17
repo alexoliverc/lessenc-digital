@@ -101,6 +101,7 @@ function createInput(
     createdAt,
     updatedAt: createdAt,
     paidAt: null,
+    expiredAt: null,
   });
 
   return Object.freeze({

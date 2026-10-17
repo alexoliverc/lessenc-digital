@@ -34,11 +34,15 @@ function delivery(overrides: Partial<PreparedProtectedDelivery> = {}): PreparedP
   });
 }
 
-function request(cookie?: string) {
+function request(cookie?: string, range?: string) {
   const headers = new Headers();
 
   if (cookie) {
     headers.set("cookie", cookie);
+  }
+
+  if (range) {
+    headers.set("range", range);
   }
 
   return new NextRequest(`https://lessenc.example/api/buyer-access/resources/${RESOURCE_ID}`, {
@@ -87,6 +91,8 @@ describe("P11 protected download HTTP boundary", () => {
 
     expect(response.headers.get("x-content-type-options")).toBe("nosniff");
 
+    expect(response.headers.get("accept-ranges")).toBeNull();
+
     const bytes = new Uint8Array(await response.arrayBuffer());
 
     expect([...bytes]).toEqual([1, 2, 3]);
@@ -124,6 +130,53 @@ describe("P11 protected download HTTP boundary", () => {
     });
 
     expect(prepareDelivery).not.toHaveBeenCalled();
+  });
+
+  it("keeps Range subordinate to the normal authenticated protected-delivery path", async () => {
+    const prepareDelivery = vi.fn().mockResolvedValue(delivery());
+
+    const succeeded = vi.fn().mockResolvedValue(undefined);
+
+    const streamFailed = vi.fn();
+
+    const handler = createProtectedDownloadHandler({
+      validateSession: {
+        execute: vi.fn().mockResolvedValue(SUBJECT),
+      },
+      prepareDelivery: {
+        execute: prepareDelivery,
+      },
+      recordOutcome: {
+        succeeded,
+        streamFailed,
+      },
+      appEnv: "production",
+    });
+
+    const response = await handler(
+      request(`__Host-lessenc_buyer=${SESSION_TOKEN}`, "bytes=0-0"),
+      RESOURCE_ID,
+    );
+
+    /*
+     * The application itself does not perform byte slicing.
+     * The hosted transport may subsequently materialize the
+     * already-authorized backend response as HTTP 206.
+     */
+    expect(response.status).toBe(200);
+
+    expect(response.headers.get("accept-ranges")).toBeNull();
+
+    expect(prepareDelivery).toHaveBeenCalledWith(SUBJECT, RESOURCE_ID);
+
+    expect(succeeded).not.toHaveBeenCalled();
+
+    const bytes = new Uint8Array(await response.arrayBuffer());
+
+    expect([...bytes]).toEqual([1, 2, 3]);
+
+    expect(succeeded).toHaveBeenCalledTimes(1);
+    expect(streamFailed).not.toHaveBeenCalled();
   });
 
   it("rejects an invalid persisted Buyer Session before protected delivery", async () => {
