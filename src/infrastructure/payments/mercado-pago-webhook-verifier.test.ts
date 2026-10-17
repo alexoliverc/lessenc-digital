@@ -3,8 +3,10 @@ import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 import {
+  classifyMercadoPagoWebhookHmacDifferential,
   diagnoseMercadoPagoWebhook,
   verifyMercadoPagoWebhook,
+  type MercadoPagoWebhookHmacDifferential,
   type MercadoPagoWebhookRejectionReason,
 } from "./mercado-pago-webhook-verifier";
 
@@ -48,6 +50,25 @@ function expectRejection(
   ).toEqual({ valid: false, reason });
 }
 
+function differentialFor(
+  signature: string,
+  overrides: Readonly<{
+    resource?: unknown;
+    request?: unknown;
+    key?: unknown;
+    timestamp?: unknown;
+  }> = {},
+): MercadoPagoWebhookHmacDifferential {
+  const [timestampPart, digestPart] = signature.split(",");
+  return classifyMercadoPagoWebhookHmacDifferential({
+    dataId: "resource" in overrides ? overrides.resource : dataId,
+    requestId: "request" in overrides ? overrides.request : requestId,
+    secret: "key" in overrides ? overrides.key : secret,
+    timestamp: "timestamp" in overrides ? overrides.timestamp : timestampPart?.slice(3),
+    digest: digestPart?.slice(3),
+  });
+}
+
 describe("P17-E05 Mercado Pago webhook rejection diagnostics", () => {
   it.each([String(now / 1000), String(now)])(
     "accepts the real TEST Order ID shape with timestamp %s",
@@ -74,7 +95,11 @@ describe("P17-E05 Mercado Pago webhook rejection diagnostics", () => {
       now,
     });
 
-    expect(result).toEqual({ valid: false, reason: "HMAC_MISMATCH" });
+    expect(result).toEqual({
+      valid: false,
+      reason: "HMAC_MISMATCH",
+      hmacDifferential: "NEITHER_MATCH",
+    });
     expect(JSON.stringify(result)).not.toContain(dataId);
     expect(JSON.stringify(result)).not.toContain(requestId);
     expect(JSON.stringify(result)).not.toContain(secret);
@@ -93,6 +118,7 @@ describe("P17-E05 Mercado Pago webhook rejection diagnostics", () => {
         now,
       }),
     ).toEqual({ valid: true });
+    expect(differentialFor(casePreservingSignature)).toBe("ORIGINAL_CASE_MATCH");
 
     const result = diagnoseMercadoPagoWebhook({
       dataId,
@@ -102,7 +128,41 @@ describe("P17-E05 Mercado Pago webhook rejection diagnostics", () => {
       now,
     });
 
-    expect(result).toEqual({ valid: false, reason: "HMAC_MISMATCH" });
+    expect(result).toEqual({
+      valid: false,
+      reason: "HMAC_MISMATCH",
+      hmacDifferential: "LOWERCASE_CASE_MATCH",
+    });
+    expect(differentialFor(lowercasedSignature)).toBe("LOWERCASE_CASE_MATCH");
+  });
+
+  it("keeps divergent secrets and tampered signatures in the value-free NEITHER category", () => {
+    const differentSecretSignature = signatureFor(String(now), { key: "different-test-key" });
+    const validSignature = signatureFor(String(now));
+    const tamperedSignature = validSignature.replace(/v1=([0-9a-f])/u, (_match, first: string) =>
+      first === "0" ? "v1=1" : "v1=0",
+    );
+
+    for (const signature of [differentSecretSignature, tamperedSignature]) {
+      expect(diagnoseMercadoPagoWebhook({ dataId, requestId, signature, secret, now })).toEqual({
+        valid: false,
+        reason: "HMAC_MISMATCH",
+        hmacDifferential: "NEITHER_MATCH",
+      });
+      expect(differentialFor(signature)).toBe("NEITHER_MATCH");
+    }
+  });
+
+  it("returns NOT_COMPARABLE only for structurally unusable differential inputs", () => {
+    const signature = signatureFor(String(now));
+
+    expect(differentialFor(signature, { resource: null })).toBe("NOT_COMPARABLE");
+    expect(differentialFor(signature, { request: "request id with spaces" })).toBe(
+      "NOT_COMPARABLE",
+    );
+    expect(differentialFor(signature, { key: "" })).toBe("NOT_COMPARABLE");
+    expect(differentialFor(signature, { timestamp: "not-a-timestamp" })).toBe("NOT_COMPARABLE");
+    expect(differentialFor("ts=1792100000000,v1=not-a-digest")).toBe("NOT_COMPARABLE");
   });
 
   it("classifies timestamps outside the unchanged five-minute window", () => {

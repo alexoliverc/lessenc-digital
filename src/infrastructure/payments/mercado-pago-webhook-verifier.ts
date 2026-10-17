@@ -18,8 +18,22 @@ export type MercadoPagoWebhookRejectionReason =
   | "TIMESTAMP_OUT_OF_WINDOW"
   | "HMAC_MISMATCH";
 
+export type MercadoPagoWebhookHmacDifferential =
+  "ORIGINAL_CASE_MATCH" | "LOWERCASE_CASE_MATCH" | "NEITHER_MATCH" | "NOT_COMPARABLE";
+
+type MercadoPagoWebhookNonHmacRejectionReason = Exclude<
+  MercadoPagoWebhookRejectionReason,
+  "HMAC_MISMATCH"
+>;
+
 export type MercadoPagoWebhookVerification =
-  Readonly<{ valid: true }> | Readonly<{ valid: false; reason: MercadoPagoWebhookRejectionReason }>;
+  | Readonly<{ valid: true }>
+  | Readonly<{ valid: false; reason: MercadoPagoWebhookNonHmacRejectionReason }>
+  | Readonly<{
+      valid: false;
+      reason: "HMAC_MISMATCH";
+      hmacDifferential: MercadoPagoWebhookHmacDifferential;
+    }>;
 
 type MercadoPagoWebhookVerificationInput = Readonly<{
   dataId: unknown;
@@ -29,8 +43,67 @@ type MercadoPagoWebhookVerificationInput = Readonly<{
   now?: number;
 }>;
 
-function rejected(reason: MercadoPagoWebhookRejectionReason): MercadoPagoWebhookVerification {
+type MercadoPagoWebhookHmacDifferentialInput = Readonly<{
+  dataId: unknown;
+  requestId: unknown;
+  timestamp: unknown;
+  digest: unknown;
+  secret: unknown;
+}>;
+
+function rejected(
+  reason: MercadoPagoWebhookNonHmacRejectionReason,
+): MercadoPagoWebhookVerification {
   return { valid: false, reason };
+}
+
+function hmacMatches(
+  dataId: string,
+  requestId: string,
+  timestamp: string,
+  digest: string,
+  secret: string,
+): boolean {
+  const manifest = `id:${dataId};request-id:${requestId};ts:${timestamp};`;
+  const expected = createHmac("sha256", secret).update(manifest).digest();
+  const actual = Buffer.from(digest, "hex");
+
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
+}
+
+/**
+ * Compares only synthetic/in-memory HMAC candidates and returns a closed, value-free category.
+ * ORIGINAL_CASE_MATCH is a consistency control: diagnoseMercadoPagoWebhook accepts that case, so
+ * the route never emits it as a rejection diagnostic.
+ */
+export function classifyMercadoPagoWebhookHmacDifferential(
+  input: MercadoPagoWebhookHmacDifferentialInput,
+): MercadoPagoWebhookHmacDifferential {
+  const { dataId, requestId, timestamp, digest, secret } = input;
+  if (
+    typeof secret !== "string" ||
+    secret.length === 0 ||
+    typeof dataId !== "string" ||
+    !ID.test(dataId) ||
+    typeof requestId !== "string" ||
+    !REQUEST_ID.test(requestId) ||
+    typeof timestamp !== "string" ||
+    !/^(\d{10}|\d{13})$/u.test(timestamp) ||
+    typeof digest !== "string" ||
+    !/^[0-9a-f]{64}$/u.test(digest)
+  ) {
+    return "NOT_COMPARABLE";
+  }
+
+  if (hmacMatches(dataId, requestId, timestamp, digest, secret)) {
+    return "ORIGINAL_CASE_MATCH";
+  }
+
+  if (hmacMatches(dataId.toLowerCase(), requestId, timestamp, digest, secret)) {
+    return "LOWERCASE_CASE_MATCH";
+  }
+
+  return "NEITHER_MATCH";
 }
 
 /**
@@ -66,14 +139,19 @@ export function diagnoseMercadoPagoWebhook(
   const now = input.now ?? Date.now();
   if (!Number.isSafeInteger(now) || Math.abs(now - signedTimeMs) > 300_000)
     return rejected("TIMESTAMP_OUT_OF_WINDOW");
-  // Mercado Pago Orders signs data.id with the exact case received in the notification URL.
-  const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
-  const expected = createHmac("sha256", secret).update(manifest).digest();
-  const actual = Buffer.from(digest, "hex");
+  // Acceptance remains case-preserving. The lowercase candidate is diagnostic-only after this
+  // original-case comparison fails and is never accepted as a fallback.
+  const hmacDifferential = classifyMercadoPagoWebhookHmacDifferential({
+    dataId,
+    requestId,
+    timestamp: ts,
+    digest,
+    secret,
+  });
 
-  return actual.length === expected.length && timingSafeEqual(actual, expected)
+  return hmacDifferential === "ORIGINAL_CASE_MATCH"
     ? { valid: true }
-    : rejected("HMAC_MISMATCH");
+    : { valid: false, reason: "HMAC_MISMATCH", hmacDifferential };
 }
 
 /** Preserves the boolean verification API for existing callers. */
