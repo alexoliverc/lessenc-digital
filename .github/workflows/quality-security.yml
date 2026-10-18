@@ -55,14 +55,14 @@ jobs:
       - name: R51 toolchain verifier regression
         run: node --test scripts/p17-toolchain-verify.test.mjs
 
-      - name: Temporary risk audit policy regression
+      - name: Historical temporary risk evaluator regression
         run: node --test scripts/p17-temporary-risk-audit.test.mjs
 
-      - name: Audit complete dependency graph with temporary risk policy
-        run: >-
-          node scripts/p17-temporary-risk-audit.mjs
-          --scope P17_DEVELOPMENT_CI_PRE_PRODUCTION
-          --app-env test
+      - name: P18 maintained patch remediation regression
+        run: node --test scripts/p18-braces-remediation.test.mjs
+
+      - name: Audit complete dependency graph and maintained patch integrity
+        run: npm run security:p18:braces-remediation
 
   ci-build:
     name: CI verification build (no deploy authority)

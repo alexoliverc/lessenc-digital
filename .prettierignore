@@ -9,3 +9,5 @@ docs
 memory
 .vscode
 *.md
+tmp
+vendor

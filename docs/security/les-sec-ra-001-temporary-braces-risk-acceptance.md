@@ -1,5 +1,9 @@
 # LES-SEC-RA-001 — Temporary braces risk acceptance
 
+> **Estado histórico encerrado em 18/10/2026.** A condição foi substituída pela
+> [remediação mantida de `braces`](les-sec-ra-001-braces-remediation.md). Este documento permanece
+> imutável como registro da aceitação temporária; não é mais a política operacional vigente.
+
 ## Decision
 
 The owner of L'Essenc Digital expressly accepts, temporarily and only for the pre-production
@@ -174,3 +178,11 @@ Ratified by the L'Essenc Digital owner on 14/10/2026:
 This ratification changes only the governance metadata from `PENDING_OWNER_RATIFICATION` to
 `OWNER_RATIFIED`. The accepted advisory, package, versions, scope, expiration, fail-closed behavior
 and production prohibition are unchanged.
+
+## Closure record — 18/10/2026
+
+The temporary acceptance was closed after the repository adopted the maintained, hash-pinned
+`braces@3.0.4-lessenc.1` patch, a clean full dependency audit and fail-closed regression controls.
+See `les-sec-ra-001-braces-remediation.md` and
+`les-sec-ra-001-remediation-policy.json`. Closure removes only this risk-specific hard stop; it does
+not authorize Gate D, Gate E, a production release or production operations.
