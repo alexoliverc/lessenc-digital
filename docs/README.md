@@ -440,6 +440,10 @@ Production remains unauthorized.
 - [P18-01 Readiness Inventory](operations/p18-readiness-inventory-r01.md)
 - [P18-01 Risk and Blocker Register](operations/p18-risk-and-blocker-register-r01.md)
 - [P18-01 Validation Report](operations/p18-01-validation-report-r01.md)
+- [P18-02 Architecture & Security Readiness Review](architecture/p18-02-architecture-security-readiness-review-r01.md)
+- [P18-02 Security Controls & Gap Matrix](security/p18-02-security-controls-gap-matrix-r01.md)
+- [P18-02 Dependency & Remediation Map](operations/p18-02-dependency-and-remediation-map-r01.md)
+- [P18-02 Validation Report](operations/p18-02-validation-report-r01.md)
 
 P18 is authorized only for preparatory review and documentary readiness inventory. Formal P18 GO,
 Gate E GO, protected implementation, P19 execution and production remain separately gated and are
