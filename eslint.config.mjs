@@ -87,6 +87,8 @@ export default defineConfig([
     "test-results/**",
     "out/**",
     "build/**",
+    "tmp/**",
+    "vendor/**",
     "next-env.d.ts",
     "src/generated/prisma/**",
   ]),
