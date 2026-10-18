@@ -121,6 +121,20 @@ matrix remains the canonical inventory of preserved evidence and unresolved auth
   futuras P19-A/P19-B, dependências, critérios de fechamento e stop gates, sem iniciar execução.
 - [P18-02 Validation Report](./p18-02-validation-report-r01.md) — fontes e código examinados,
   contagens reconciliadas, verificações, limitações e classificação preparatória.
+- [P18-04 Consolidated Readiness Assessment](./p18-04-consolidated-readiness-assessment-r01.md) —
+  matriz atual 57/15/31 com classificação e autoridade de evidência.
+- [P18-05 Security, Privacy & Compliance Readiness](./p18-05-security-privacy-compliance-readiness-r01.md)
+  — revisão integral e fechamento técnico de `LES-SEC-RA-001`, sem certificação legal ou produção.
+- [P18-06 Data & Recovery Readiness](./p18-06-data-recovery-readiness-r01.md) — schema/migration
+  hashes, compatibilidade e gaps de backup/recovery da release candidata.
+- [P18-07 Commerce & Operations Validation](./p18-07-commerce-operations-validation-r01.md) —
+  regressões locais e reconciliação das 15 pendências Gate D.
+- [P18-08 Release Go/No-Go Package](./p18-08-release-go-no-go-package-r01.md) — release candidate,
+  configuração, checklist, STOP criteria, rollback e preparação P19.
+- [P18-09 Final Decision Dossier](./p18-09-final-decision-dossier-r01.md) — parecer NO-GO,
+  31 riscos, Gate D/Gate E e handoff de auditoria independente.
+- [P18 Final Audit Manifest](./p18-final-audit-manifest-r01.json) — identidades, contagens, hashes
+  SHA-256 e links de CI para reprodução independente.
 
 ## P18-03 — Operational Resilience & Launch Readiness (preparatory candidate)
 

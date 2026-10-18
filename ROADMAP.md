@@ -1448,7 +1448,7 @@ The 17/10/2026 owner exception permits only P18 preparatory review while this re
 
 ## P18 — Production Readiness Review
 
-**Status:** PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION
+**Status:** PREPARATORY REVIEW COMPLETE / FORMAL READINESS PENDING / NO-GO RECOMMENDED
 
 **Authorities:** `LES-OWNER-DEC-20261017-P17-P18-R01` and the later
 `LES-OWNER-AUTH-P18-COMPLETION-20261018-R01`
@@ -1493,9 +1493,11 @@ Preparatory execution must additionally:
 - prepare P19-A non-activating procedures and the P19-B remediation backlog without executing them;
 - leave Gate D, Gate E and production authorization unchanged.
 
-The normalized remaining execution is P18-04 consolidated assessment, P18-05 security/privacy,
-P18-06 data/recovery, P18-07 commerce/delivery/operations, P18-08 release engineering and P18-09
-final dossier. Each result remains bound to its evidence layer and independent review is reserved.
+P18-04 through P18-09 have produced an independently reviewable candidate package. The 57 controls,
+15 deferred P17 items and 31 risks/blockers are reconciled. `LES-SEC-RA-001` is remediated by a
+maintained, hash-pinned patch with zero audit findings and hosted CI/CodeQL; this closes only that
+risk-specific hard stop. Gate D remains `NOT_READY`, the remaining external/recovery/release gaps
+remain open, and independent review is reserved. Gate E and production remain unauthorized.
 
 ### Possible results
 

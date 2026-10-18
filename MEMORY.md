@@ -3,7 +3,7 @@
 **Última atualização:** 18/10/2026
 **Projeto:** LES-DIG — L'Essenc Digital
 **Estado documental:** P00–P15 permanecem nas respectivas baselines canônicas integradas/checkpointed. P16 — Staging Deployment concluiu a validação técnica e hosted na release técnica congelada `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 está `COMPLETE / PASS / HOSTED VALIDATED`. O closeout documental foi integrado em `main` por fast-forward no commit `6c60441e00e4520b8c689f8c4944c36c73d80d12`. O checkpoint permanente P16 `checkpoint/p16-staging-deployment-complete` foi criado e publicado como tag anotada, dereferencia exatamente a release técnica `22fad0f690618c27cabcfa58528a76ce0a580ad3` e não deve ser movido por documentação posterior. A release operacional histórica da P16-08 permanece `976a0472382abc0597996366db63c981b5733d6e` e não é reescrita como se tivesse sido a release técnica final.
-**Estado atual:** P16 permanece `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED` sob sua baseline congelada. Por decisão expressa do owner em 17/10/2026, P17 está `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`, sem PASS técnico e sem Gate D; P17-E05 está `BLOCKED / DEFERRED`. Gate D permanece `NOT_READY`. P18 está `PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION`; o mandato posterior `LES-OWNER-AUTH-P18-COMPLETION-20261018-R01` autoriza execução técnica controlada, remediação reversível, testes e ciclo Git de P18-04 a P18-09 na branch P17, sem alterar `main`. Gate E está `GO NOT AUTHORIZED`; aceite independente, P19, produção, dinheiro real e operações irreversíveis continuam fora do mandato. A release técnica final validada da P16 continua `22fad0f690618c27cabcfa58528a76ce0a580ad3`. O scheduler real da Hostinger executou essa release em 04/10/2026 01:17 UTC; o backup `p16-hosted-auto-20261004T011702683Z-9fc2be680257402a94a041ef40e2ae4f` foi correlacionado independentemente e o evaluator hardened retornou RPO autoritativo `PASS / WITHIN_TARGET` em 888 ms contra o objetivo <= 24 h. A compatibilidade de rollback para `976a0472382abc0597996366db63c981b5733d6e` foi revalidada sem deploy: Prisma schema e migration tree são byte-identical e não existe delta de runtime de aplicação não-teste em `src/`; esse target é break-glass e reverteria também o patch Next.js 16.3.8. Retenção 7/4/3 continua `PLAN_ONLY`; não há prova de cópia final independente off-R2; DB/R2 permanecem sequenciais e não atômicos; quatro HIGH de development tooling permanecem dívida explícita.
+**Estado atual:** P16 permanece `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED` sob sua baseline congelada. P17 está `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`, sem PASS técnico e sem Gate D; P17-E05 está `BLOCKED / DEFERRED`. Gate D permanece `NOT_READY`. P18-04–P18-09 produziram o pacote `PREPARATORY REVIEW COMPLETE / FORMAL READINESS PENDING / NO-GO RECOMMENDED`, ainda sujeito à revisão independente. A release candidata técnica integrada é `a780faa6d9275b1f9abfae2ad812aa0a2d78402a`; `LES-SEC-RA-001` foi remediado por patch mantido, audit zero e CI/CodeQL, sem conceder produção. Gate E está `GO NOT AUTHORIZED`; P19, produção, dinheiro real e operações irreversíveis continuam fora do mandato. A release técnica final validada da P16 continua `22fad0f690618c27cabcfa58528a76ce0a580ad3`; seu backup/RPO e rollback permanecem evidência histórica P16. Retenção 7/4/3 continua `PLAN_ONLY`; não há prova de cópia final independente off-R2; DB/R2 permanecem sequenciais e não atômicos; o capsule offline P17 deve ser resealado para o novo lockfile.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -2746,3 +2746,23 @@ It does not authorize `main`, permanent P18 tags, production deploy/traffic, Mer
 real-money transactions, destructive shared-data operations, Gate D PASS without complete evidence,
 Gate E GO or independent acceptance. The 57 controls, 15 P17 deferred items, 31 risk/blocker records
 and all historical evidence boundaries remain mandatory inputs.
+
+## P18-04–P18-09 completion candidate — 18/10/2026
+
+The integrated technical release candidate is
+`a780faa6d9275b1f9abfae2ad812aa0a2d78402a` on
+`phase/p17-end-to-end-business-validation`, produced by PR #64. `LES-SEC-RA-001` is
+`REMEDIATED_WITH_MAINTAINED_PATCH`: `braces@3.0.4-lessenc.1` is pinned to upstream candidate commit
+`28d440b5dd449dbf1fe6f3506cf94ecca4d02660`, its source/tarball hashes are enforced, the full audit
+has zero findings and runtime omits the package. The risk-specific hard stop is cleared without
+granting production authority.
+
+The P18-04–P18-09 dossier reconciles all 57 controls, 15 deferred P17 items and 31 risks/blockers.
+Only P18-RSK-001 is remediated; 30 records remain open or conditioned. Schema and the nine-migration
+tree are unchanged from the pre-remediation baseline. Local quality is 106 files / 1,132 tests and
+the synthetic CI build passes. The previous P17 offline capsule is invalid for the new lockfile and
+must be resealed; it is not evidence for the candidate.
+
+Current recommendation is `PREPARATORY REVIEW COMPLETE / FORMAL READINESS PENDING / NO-GO
+RECOMMENDED`. P17-E05 remains blocked, Gate D remains NOT_READY, Gate E GO is not authorized,
+production is not authorized and P19 is future preparation only.
