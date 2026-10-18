@@ -113,3 +113,7 @@ matrix remains the canonical inventory of preserved evidence and unresolved auth
   blockers, production hard stops, deadlines and missing evidence without fabricated ownership.
 - [P18-01 Validation Report](./p18-01-validation-report-r01.md) — documentary execution baseline,
   audited sources, integrity checks, limitations and handoff state.
+- [P18-02 Dependency & Remediation Map](./p18-02-dependency-and-remediation-map-r01.md) — propostas
+  futuras P19-A/P19-B, dependências, critérios de fechamento e stop gates, sem iniciar execução.
+- [P18-02 Validation Report](./p18-02-validation-report-r01.md) — fontes e código examinados,
+  contagens reconciliadas, verificações, limitações e classificação preparatória.
