@@ -63,6 +63,23 @@ deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`; independent release-bi
 attestation remains pending. The last independently attested Hostinger release recorded in the
 canonical evidence is `0f6534fcf1d5b87588f21f6dd64005309a50c786`.
 
+### 3.1 Post-merge Git identity addendum — 18/10/2026
+
+The preceding paragraph preserves the original 17/10/2026 temporal baseline. After PR #59 merged,
+the reconciled identities are:
+
+- `96b3fda29775b2db7d364b292b46b8bc3aefd364` — `P17 DOCUMENTARY INTEGRATION HEAD / GIT ONLY` and
+  initial P18-01 baseline;
+- `202a43bffd30ed2b85c22c83825da7697139e3a8` —
+  `PRE-PR59 TECHNICAL HEAD / R04 INTEGRATED`, with deployment reported by the owner but no
+  independent release-binding, build, publish, current-version switch or restart attestation;
+- `0f6534fcf1d5b87588f21f6dd64005309a50c786` — last independently attested Hostinger release, with
+  historical P17-L04 authority limited to that release;
+- `22fad0f690618c27cabcfa58528a76ce0a580ad3` — immutable P16 technical-release authority.
+
+This addendum changes neither this brief's authorization nor its scope. It does not promote
+historical evidence to either later commit.
+
 ## 4. Preparatory scope
 
 ### 4.1 Readiness inventory

@@ -265,7 +265,15 @@ GATE D = NOT READY. PRODUCTION = UNAUTHORIZED.
 - immutable P16 checkpoint -> `22fad0f690618c27cabcfa58528a76ce0a580ad3`;
 - production remains unauthorized;
 - P17-L04 independently attests the historical deployed commit `0f6534fcf1d5b87588f21f6dd64005309a50c786`: `STAGING_RELEASE_COMMIT` matched HEAD, `P16_RELEASE_COMMIT` matched the phase-neutral binding as compatibility alias, the fail-closed staging preflight passed, and Hostinger build, publish and Node restart completed successfully.
-- GitHub and the owner confirm canonical P17 HEAD `202a43bffd30ed2b85c22c83825da7697139e3a8`, merging R04 commit `f01a683c4f90d38b704906552406cb9833960866`; no further R04 integration PR is required. The owner reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, while independent release-binding and deployment attestation remains pending. Neither the historical P17-L04 PASS nor the historical application-code-equivalence statement is propagated to that release.
+- Post-merge reconciliation dated 18/10/2026: P17 documentary integration HEAD after PR #59 ->
+  `96b3fda29775b2db7d364b292b46b8bc3aefd364`, classified as
+  `P17 DOCUMENTARY INTEGRATION HEAD / GIT ONLY`; pre-PR #59 technical HEAD ->
+  `202a43bffd30ed2b85c22c83825da7697139e3a8`, classified as
+  `PRE-PR59 TECHNICAL HEAD / R04 INTEGRATED`. No further R04 integration PR is required. The
+  owner reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, while
+  independent release-binding, build, publish, current-version switch and restart attestation remains
+  pending. Neither the historical P17-L04 PASS nor the historical application-code-equivalence
+  statement is propagated to either later commit.
 
 ## Gate D rule
 

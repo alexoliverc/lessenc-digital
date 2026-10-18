@@ -107,3 +107,9 @@ matrix remains the canonical inventory of preserved evidence and unresolved auth
 - [P18 Preparatory Phase Execution Brief](../architecture/p18-production-readiness-preparatory-phase-execution-brief.md)
   — readiness inventory, inherited blockers, risk/deadline preservation, P19-A/P19-B preparation
   boundaries and explicit production stop gates.
+- [P18-01 Readiness Inventory](./p18-readiness-inventory-r01.md) — traceable control/evidence matrix
+  across architecture, security, data, commerce, delivery, recovery and operations.
+- [P18-01 Risk and Blocker Register](./p18-risk-and-blocker-register-r01.md) — inherited Gate D
+  blockers, production hard stops, deadlines and missing evidence without fabricated ownership.
+- [P18-01 Validation Report](./p18-01-validation-report-r01.md) — documentary execution baseline,
+  audited sources, integrity checks, limitations and handoff state.
