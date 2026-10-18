@@ -448,7 +448,16 @@ The phase-neutral `STAGING_RELEASE_COMMIT` implementation is present in the P17 
 
 The Hostinger release-binding environment was owner-observed during the R13/R14 hosted reconciliation. `STAGING_RELEASE_COMMIT` and the `P16_RELEASE_COMMIT` compatibility alias matched deployed HEAD `0f6534fcf1d5b87588f21f6dd64005309a50c786`; the fail-closed staging preflight passed before the successful Hostinger build, publish, current-version switch and Node restart. P17-L04 is therefore `PASS / HOSTED PROVEN` for that historical release.
 
-GitHub and the owner confirm the canonical P17 branch HEAD as `202a43bffd30ed2b85c22c83825da7697139e3a8`, which merges R04 commit `f01a683c4f90d38b704906552406cb9833960866`; no further R04 integration PR is required. The owner reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, but independent release-binding, build, publish, current-version switch and restart attestation is pending. No application-code-equivalence or P17-L04 PASS is inferred for that release from the historical `0f6534fcf1d5b87588f21f6dd64005309a50c786` evidence.
+Post-merge Git identity reconciliation — 18/10/2026: the P17 documentary integration HEAD after PR
+#59 is `96b3fda29775b2db7d364b292b46b8bc3aefd364`, classified as
+`P17 DOCUMENTARY INTEGRATION HEAD / GIT ONLY`. Its first parent,
+`202a43bffd30ed2b85c22c83825da7697139e3a8`, is classified as
+`PRE-PR59 TECHNICAL HEAD / R04 INTEGRATED` and already includes R04 commit
+`f01a683c4f90d38b704906552406cb9833960866`; no further R04 integration PR is required. The owner
+reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, but independent
+release-binding, build, publish, current-version switch and restart attestation is pending. No
+application-code-equivalence or P17-L04 PASS is inferred for either later commit from the historical
+`0f6534fcf1d5b87588f21f6dd64005309a50c786` evidence.
 
 ### Hosted public, provider, release-binding and responsive reconciliation — 06/10/2026
 

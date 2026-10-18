@@ -437,6 +437,9 @@ Production remains unauthorized.
 
 - [ADR-0012 — P17 administrative closeout and P18 preparatory exception](decisions/ADR-0012-p17-administrative-close-p18-preparatory-exception.md)
 - [P18 Preparatory Phase Execution Brief](architecture/p18-production-readiness-preparatory-phase-execution-brief.md)
+- [P18-01 Readiness Inventory](operations/p18-readiness-inventory-r01.md)
+- [P18-01 Risk and Blocker Register](operations/p18-risk-and-blocker-register-r01.md)
+- [P18-01 Validation Report](operations/p18-01-validation-report-r01.md)
 
 P18 is authorized only for preparatory review and documentary readiness inventory. Formal P18 GO,
 Gate E GO, protected implementation, P19 execution and production remain separately gated and are

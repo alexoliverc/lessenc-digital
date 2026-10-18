@@ -1306,7 +1306,21 @@ resolve any mandatory validation row and did not create a P17 Final Quality Gate
 Unresolved items are carried forward explicitly into the P18 readiness inventory and later P19-B
 consolidated remediation.
 
-GitHub and the owner confirm that the canonical P17 branch HEAD is `202a43bffd30ed2b85c22c83825da7697139e3a8`, which merged R04 commit `f01a683c4f90d38b704906552406cb9833960866`; no further R04 integration PR is required. The owner reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, but independent release-binding, build, publish, current-version switch and restart attestation remains pending. The last independently attested Hostinger deployed Git release recorded in this documentation is `0f6534fcf1d5b87588f21f6dd64005309a50c786`. The original hosted G5/F3/P9 application-evidence execution release is `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`; the zero application-code delta is established only for that historical comparison through `0f6534fcf1d5b87588f21f6dd64005309a50c786`, not through `202a43bffd30ed2b85c22c83825da7697139e3a8`.
+The current P17 Git/documentary integration HEAD after PR #59 is
+`96b3fda29775b2db7d364b292b46b8bc3aefd364`, classified as
+`P17 DOCUMENTARY INTEGRATION HEAD / GIT ONLY`. Its first parent,
+`202a43bffd30ed2b85c22c83825da7697139e3a8`, is classified as
+`PRE-PR59 TECHNICAL HEAD / R04 INTEGRATED` and already includes R04 commit
+`f01a683c4f90d38b704906552406cb9833960866`; no further R04 integration PR is required. The owner
+reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, but independent
+release-binding, build, publish, current-version switch and restart attestation remains pending. The
+last independently attested Hostinger deployed Git release recorded in this documentation is
+`0f6534fcf1d5b87588f21f6dd64005309a50c786`. The original hosted G5/F3/P9 application-evidence
+execution release is `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`; the zero application-code
+delta is established only for that historical comparison through
+`0f6534fcf1d5b87588f21f6dd64005309a50c786`, not through either later commit. The integrated
+`96b3fda29775b2db7d364b292b46b8bc3aefd364` identity is Git/documentary authority only and does not
+create hosted, runtime or P17-L04 authority.
 
 Current hosted authority includes:
 

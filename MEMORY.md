@@ -2714,3 +2714,23 @@ application-code delta apply to the historical comparison from
 `9e2ef25f4667b19f727c6ba1e277a79f55e3086f` to the last independently attested Hostinger release
 `0f6534fcf1d5b87588f21f6dd64005309a50c786` only. They do not establish code equivalence or hosted
 PASS for `202a43bffd30ed2b85c22c83825da7697139e3a8`.
+
+## P17/P18 canonical precedence reconciliation R04 — 18/10/2026
+
+The post-PR #59 Git identity supersedes only the earlier current-HEAD wording above; it does not
+rewrite the preserved technical or hosted evidence:
+
+- `96b3fda29775b2db7d364b292b46b8bc3aefd364` is the P17 documentary integration HEAD after PR #59
+  and the initial Git/documentary baseline for P18-01;
+- `202a43bffd30ed2b85c22c83825da7697139e3a8` is the pre-PR #59 technical HEAD with R04 integrated,
+  not the branch HEAD after the documentary merge;
+- the owner-reported Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`
+  remains without independent attestation of release binding, build, publish, current-version switch
+  and restart;
+- `0f6534fcf1d5b87588f21f6dd64005309a50c786` remains the last independently attested Hostinger
+  release, and historical P17-L04 PASS remains limited to that release;
+- the immutable P16 technical-release authority remains
+  `22fad0f690618c27cabcfa58528a76ce0a580ad3`.
+
+No historical PASS, code-equivalence statement or hosted authority is promoted to a later commit by
+this Git/documentary reconciliation.
