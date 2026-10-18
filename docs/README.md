@@ -433,10 +433,12 @@ open.
 
 Production remains unauthorized.
 
-## P18 — Production Readiness Review — preparatory execution
+## P18 — Production Readiness Review — controlled completion execution
 
 - [ADR-0012 — P17 administrative closeout and P18 preparatory exception](decisions/ADR-0012-p17-administrative-close-p18-preparatory-exception.md)
+- [ADR-0013 — P18 completion execution mandate](decisions/ADR-0013-p18-completion-execution-mandate.md)
 - [P18 Preparatory Phase Execution Brief](architecture/p18-production-readiness-preparatory-phase-execution-brief.md)
+- [P18-04–P18-09 Completion Phase Execution Brief](architecture/p18-completion-phase-execution-brief.md)
 - [P18-01 Readiness Inventory](operations/p18-readiness-inventory-r01.md)
 - [P18-01 Risk and Blocker Register](operations/p18-risk-and-blocker-register-r01.md)
 - [P18-01 Validation Report](operations/p18-01-validation-report-r01.md)
@@ -445,9 +447,9 @@ Production remains unauthorized.
 - [P18-02 Dependency & Remediation Map](operations/p18-02-dependency-and-remediation-map-r01.md)
 - [P18-02 Validation Report](operations/p18-02-validation-report-r01.md)
 
-P18 is authorized only for preparatory review and documentary readiness inventory. Formal P18 GO,
-Gate E GO, protected implementation, P19 execution and production remain separately gated and are
-not authorized by the current brief.
+The later owner mandate `LES-OWNER-AUTH-P18-COMPLETION-20261018-R01` authorizes controlled technical
+execution, remediation and Git integration for P18-04 through P18-09 on the P17 integration branch.
+Formal acceptance, Gate E GO, P19 execution and production remain separately gated and unauthorized.
 
 ## P18-03 — Operational Resilience & Launch Readiness (preparatory candidate)
 
