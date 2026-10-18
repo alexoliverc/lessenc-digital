@@ -448,3 +448,10 @@ Production remains unauthorized.
 P18 is authorized only for preparatory review and documentary readiness inventory. Formal P18 GO,
 Gate E GO, protected implementation, P19 execution and production remain separately gated and are
 not authorized by the current brief.
+
+## P18-03 — Operational Resilience & Launch Readiness (preparatory candidate)
+
+- [Operational Resilience Readiness Review](operations/p18-03-operational-resilience-review-r01.md)
+- [Incident, Rollback & Launch Readiness Plan](operations/p18-03-incident-rollback-readiness-plan-r01.md)
+- [Operational Risk & Ownership Matrix](operations/p18-03-risk-ownership-matrix-r01.md)
+- [P18-03 Validation Report](operations/p18-03-validation-report-r01.md)
