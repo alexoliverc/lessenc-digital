@@ -1450,12 +1450,14 @@ The 17/10/2026 owner exception permits only P18 preparatory review while this re
 
 **Status:** PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION
 
-**Authority:** `LES-OWNER-DEC-20261017-P17-P18-R01`
+**Authorities:** `LES-OWNER-DEC-20261017-P17-P18-R01` and the later
+`LES-OWNER-AUTH-P18-COMPLETION-20261018-R01`
 
-The owner exception authorizes P18 preparatory review before Gate D PASS so that proven controls,
-unresolved evidence, risks and production blockers can be inventoried without stalling the program.
-It does not authorize a formal GO decision while Gate D remains NOT READY and does not authorize
-protected implementation, provider access, infrastructure mutation or production activation.
+The first owner exception authorized documentary preparation before Gate D PASS. The later completion
+mandate authorizes controlled technical execution and Git integration for P18-04 through P18-09,
+including reversible, tested remediation and safe TEST/STAGING validation. Neither decision grants a
+formal GO while Gate D remains NOT READY, Gate E authority, production activation, real-money work,
+irreversible provider/data operations or changes to `main`.
 
 ### Objective
 
@@ -1491,6 +1493,10 @@ Preparatory execution must additionally:
 - prepare P19-A non-activating procedures and the P19-B remediation backlog without executing them;
 - leave Gate D, Gate E and production authorization unchanged.
 
+The normalized remaining execution is P18-04 consolidated assessment, P18-05 security/privacy,
+P18-06 data/recovery, P18-07 commerce/delivery/operations, P18-08 release engineering and P18-09
+final dossier. Each result remains bound to its evidence layer and independent review is reserved.
+
 ### Possible results
 
 - GO;
@@ -1511,9 +1517,9 @@ authorized preparatory review.
 
 ### Approval gates
 
-Production remains an owner-controlled decision. The current exception authorizes documentary
-preparation only. Any protected inspection or mutation, production-readiness implementation, Gate E
-decision, deploy or real transaction requires a revised brief and specific owner authorization.
+Production remains an owner-controlled decision. ADR-0013 and the P18 completion brief govern the
+now-authorized reversible technical scope. Gate E decision, production deploy, real transaction,
+`main` integration and destructive/irreversible provider or data operations remain outside it.
 
 ### Exit criteria
 

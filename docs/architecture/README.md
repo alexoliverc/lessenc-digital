@@ -7,4 +7,6 @@ Consulte o [índice completo](../README.md). Documentos atuais: arquitetura do [
 ## P18 — revisão preparatória
 
 - [P18 Preparatory Phase Execution Brief](p18-production-readiness-preparatory-phase-execution-brief.md)
+- [P18-04–P18-09 Completion Phase Execution Brief](p18-completion-phase-execution-brief.md) —
+  autoridade posterior para execução técnica controlada, sem produção nem aceite independente.
 - [P18-02 Architecture & Security Readiness Review](p18-02-architecture-security-readiness-review-r01.md) — avaliação estática por domínio, limites de confiança e reconciliação dos 57 controles P18-01; não concede PASS técnico, Gate E ou produção.

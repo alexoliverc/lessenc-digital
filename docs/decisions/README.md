@@ -26,3 +26,4 @@ O owner declarou `ADR-0001` a `ADR-0010` como **ACCEPTED** na missão de consoli
 | ADR | Decision | Status |
 | --- | --- | --- |
 | [0012](ADR-0012-p17-administrative-close-p18-preparatory-exception.md) | P17 administrative closeout with deferred items and P18 preparatory owner exception | ACCEPTED — `LES-OWNER-DEC-20261017-P17-P18-R01` |
+| [0013](ADR-0013-p18-completion-execution-mandate.md) | Controlled technical completion of P18-04 through P18-09 while production and independent acceptance remain reserved | ACCEPTED — `LES-OWNER-AUTH-P18-COMPLETION-20261018-R01` |
