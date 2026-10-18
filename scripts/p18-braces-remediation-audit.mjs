@@ -92,7 +92,10 @@ function collectHashes(policy) {
   return Object.fromEntries(
     Object.keys(policy.fileHashesSha256).map((relativePath) => {
       const contents = readFileSync(resolve(repositoryRoot, relativePath));
-      return [relativePath, createHash("sha256").update(contents).digest("hex")];
+      const canonicalBytes = relativePath.endsWith(".tgz")
+        ? contents
+        : Buffer.from(contents.toString("utf8").replace(/\r\n/gu, "\n"), "utf8");
+      return [relativePath, createHash("sha256").update(canonicalBytes).digest("hex")];
     }),
   );
 }

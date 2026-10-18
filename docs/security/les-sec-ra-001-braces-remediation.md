@@ -45,7 +45,9 @@ dependências do pacote.
 
 ## Proveniência e integridade
 
-O manifesto machine-readable contém todos os hashes SHA-256. Identificadores principais:
+O manifesto machine-readable contém todos os hashes SHA-256. Fontes textuais são normalizados para
+LF antes do cálculo, tornando a evidência independente do checkout Windows/Linux; o tarball é
+verificado sobre seus bytes exatos, sem normalização. Identificadores principais:
 
 | Artefato | Identificador |
 | --- | --- |
