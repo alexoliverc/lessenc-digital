@@ -1,9 +1,9 @@
 # MEMORY.md — Estado consolidado da L'Essenc Digital
 
-**Última atualização:** 14/10/2026
+**Última atualização:** 18/10/2026
 **Projeto:** LES-DIG — L'Essenc Digital
 **Estado documental:** P00–P15 permanecem nas respectivas baselines canônicas integradas/checkpointed. P16 — Staging Deployment concluiu a validação técnica e hosted na release técnica congelada `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 está `COMPLETE / PASS / HOSTED VALIDATED`. O closeout documental foi integrado em `main` por fast-forward no commit `6c60441e00e4520b8c689f8c4944c36c73d80d12`. O checkpoint permanente P16 `checkpoint/p16-staging-deployment-complete` foi criado e publicado como tag anotada, dereferencia exatamente a release técnica `22fad0f690618c27cabcfa58528a76ce0a580ad3` e não deve ser movido por documentação posterior. A release operacional histórica da P16-08 permanece `976a0472382abc0597996366db63c981b5733d6e` e não é reescrita como se tivesse sido a release técnica final.
-**Estado atual:** P16 está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`. A release técnica final validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`. O scheduler real da Hostinger executou essa release em 04/10/2026 01:17 UTC; o backup `p16-hosted-auto-20261004T011702683Z-9fc2be680257402a94a041ef40e2ae4f` foi correlacionado independentemente e o evaluator hardened retornou RPO autoritativo `PASS / WITHIN_TARGET` em 888 ms contra o objetivo <= 24 h. A compatibilidade de rollback para `976a0472382abc0597996366db63c981b5733d6e` foi revalidada sem deploy: Prisma schema e migration tree são byte-identical e não existe delta de runtime de aplicação não-teste em `src/`; esse target é break-glass e reverteria também o patch Next.js 16.3.8. Retenção 7/4/3 continua `PLAN_ONLY`; não há prova de cópia final independente off-R2; DB/R2 permanecem sequenciais e não atômicos; quatro HIGH de development tooling permanecem dívida explícita. Produção continua fora do escopo e não autorizada.
+**Estado atual:** P16 permanece `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED` sob sua baseline congelada. Por decisão expressa do owner em 17/10/2026, P17 está `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`, sem PASS técnico e sem Gate D; P17-E05 está `BLOCKED / DEFERRED`. Gate D permanece `NOT_READY`. P18 está `PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION`, limitada a revisão e preparação documental até novo brief revisado e autorização específica para qualquer operação protegida. Gate E está `GO NOT AUTHORIZED`; P19 permanece preparação futura e produção está `NOT AUTHORIZED`. A release técnica final validada da P16 continua `22fad0f690618c27cabcfa58528a76ce0a580ad3`. O scheduler real da Hostinger executou essa release em 04/10/2026 01:17 UTC; o backup `p16-hosted-auto-20261004T011702683Z-9fc2be680257402a94a041ef40e2ae4f` foi correlacionado independentemente e o evaluator hardened retornou RPO autoritativo `PASS / WITHIN_TARGET` em 888 ms contra o objetivo <= 24 h. A compatibilidade de rollback para `976a0472382abc0597996366db63c981b5733d6e` foi revalidada sem deploy: Prisma schema e migration tree são byte-identical e não existe delta de runtime de aplicação não-teste em `src/`; esse target é break-glass e reverteria também o patch Next.js 16.3.8. Retenção 7/4/3 continua `PLAN_ONLY`; não há prova de cópia final independente off-R2; DB/R2 permanecem sequenciais e não atômicos; quatro HIGH de development tooling permanecem dívida explícita.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -2471,7 +2471,7 @@ Gate D remains NOT READY. Real Mercado Pago TEST webhook delivery, the unresolve
 
 ## P17 R13/R14 hosted public/provider/release/responsive reconciliation — 06/10/2026
 
-Current Hostinger deployed Git release:
+Last independently attested Hostinger deployed Git release recorded in this documentation:
 
 `0f6534fcf1d5b87588f21f6dd64005309a50c786`
 
@@ -2507,7 +2507,7 @@ Local MySQL `lessenc_test` migration `20261007_p17_f06_expired_order` applied us
 
 Admin test-hygiene corrections prevent Better Auth base64url challenge and null-actor audit fixture residue. No production-code modification was part of those two hygiene changes.
 
-Current Failure Matrix: F01 PENDING_EXTERNAL; F02-F08 PASS / TEST PROVEN locally; F06 additionally REGRESSION PROVEN / PUBLISHED. No hosted F06 deployment or migration was executed. Current Hostinger deployed release remains `0f6534fcf1d5b87588f21f6dd64005309a50c786`.
+Current Failure Matrix: F01 PENDING_EXTERNAL; F02-F08 PASS / TEST PROVEN locally; F06 additionally REGRESSION PROVEN / PUBLISHED. No hosted F06 deployment or migration was executed. The last independently attested Hostinger deployed release recorded in this documentation remains `0f6534fcf1d5b87588f21f6dd64005309a50c786`.
 
 E05 real Mercado Pago TEST webhook NOT PROVEN. B01/B03-B07, R01-R03 and PR01-PR04 remain independently unresolved. G5 and P9 remain closed. Gate D NOT READY. Production UNAUTHORIZED. Main and P16 checkpoint unchanged.
 
@@ -2669,3 +2669,48 @@ acceptance of any other vulnerability. Production remains hard-blocked while the
 and definitive remediation is mandatory before production. This acceptance does not declare the
 vulnerability fixed, does not close P17, does not make Gate D ready and does not authorize P18,
 production, deploy or provider/database operations.
+
+## P17 administrative closeout and P18 preparatory exception — 17/10/2026
+
+Owner decision `LES-OWNER-DEC-20261017-P17-P18-R01` administratively closes active P17 execution
+without granting technical PASS, Gate D or production authority. The mandatory current state is:
+
+- `P17 = ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`;
+- `P17-E05 = BLOCKED / DEFERRED`;
+- `GATE D = NOT_READY`;
+- `P18 = PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION`;
+- `GATE E = GO NOT AUTHORIZED`;
+- `P19 = FUTURE PREPARATION / PRODUCTION ACTIVATION CONDITIONED`;
+- `PRODUCTION = NOT AUTHORIZED`.
+
+The owner exception supersedes only the prior sequencing statement that P18 could not begin before
+Gate D PASS. It does not rewrite historical evidence, convert unresolved P17 rows into PASS, create a
+P17 quality checkpoint or waive any production gate.
+
+Deferred items carried into the canonical readiness inventory include P17-E05 real Mercado Pago TEST
+webhook authentication (`HMAC_MISMATCH / NEITHER_MATCH`), P17-F01 real declined payment,
+P17-B01/B03-B07 buyer-access/failure/recovery evidence, P17-R01-R03 real Payment Brick responsive
+evidence and definitive P17-PR01-PR04 acceptance. Existing security, infrastructure and operational
+findings retain their own risk levels, deadlines and evidence boundaries, including
+`LES-SEC-RA-001` expiry at 13/11/2026 23:59:59 America/Sao_Paulo and its production hard stop.
+
+The approved future sequence is P18 preparatory review, P19-A non-activating launch preparation,
+P19-B consolidated remediation of inherited items and P19-C production deployment only after Gate D
+PASS, formal P18 decision, Gate E GO and a new specific owner authorization. P20 remains post-launch
+stabilization. Current authority covers only documentary preparation; application code,
+authentication, payments, webhooks, database, hosted infrastructure, credentials, deployment and Git
+publication remain outside scope.
+
+## P17/P18 Git and hosted-release reconciliation — 18/10/2026
+
+The owner and GitHub confirmed the canonical P17 branch HEAD as
+`202a43bffd30ed2b85c22c83825da7697139e3a8`. This merge includes the R04 commit
+`f01a683c4f90d38b704906552406cb9833960866`; no additional R04 integration PR is required.
+
+The owner reports that Hostinger is deployed on `202a43bffd30ed2b85c22c83825da7697139e3a8`, but
+independent release-binding, build, publish, current-version switch and restart attestation for that
+release remains pending. The `PASS / HOSTED PROVEN` P17-L04 evidence and the documentation-only
+application-code delta apply to the historical comparison from
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f` to the last independently attested Hostinger release
+`0f6534fcf1d5b87588f21f6dd64005309a50c786` only. They do not establish code equivalence or hosted
+PASS for `202a43bffd30ed2b85c22c83825da7697139e3a8`.

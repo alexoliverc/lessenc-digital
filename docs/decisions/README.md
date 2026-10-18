@@ -1,4 +1,4 @@
-# Decisões aceitas LES-DIG P00–P12
+# Decisões aceitas LES-DIG P00–P18
 
 O owner declarou `ADR-0001` a `ADR-0010` como **ACCEPTED** na missão de consolidação e congelou a `ADR-0011` como a decisão arquitetural P12-A. Essas decisões descrevem a baseline documental atual; a implementação física correspondente deve ser comprovada pelos checkpoints e Final Gates de cada fase. A arquitetura extensa anterior `LES-*-R01` é preservada como histórico; em divergências, a decisão mais recente e a precedência de [AGENTS.md](../../AGENTS.md) prevalecem.
 
@@ -20,3 +20,9 @@ O owner declarou `ADR-0001` a `ADR-0010` como **ACCEPTED** na missão de consoli
 | ADR | Decision | Status |
 | --- | --- | --- |
 | [0011](ADR-0011-better-auth-admin-identity.md) | Better Auth for isolated administrative identity | ACCEPTED / FROZEN — P12-A owner-approved baseline |
+
+## P17/P18 owner sequencing decision
+
+| ADR | Decision | Status |
+| --- | --- | --- |
+| [0012](ADR-0012-p17-administrative-close-p18-preparatory-exception.md) | P17 administrative closeout with deferred items and P18 preparatory owner exception | ACCEPTED — `LES-OWNER-DEC-20261017-P17-P18-R01` |
