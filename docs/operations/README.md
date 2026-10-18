@@ -117,3 +117,10 @@ matrix remains the canonical inventory of preserved evidence and unresolved auth
   futuras P19-A/P19-B, dependências, critérios de fechamento e stop gates, sem iniciar execução.
 - [P18-02 Validation Report](./p18-02-validation-report-r01.md) — fontes e código examinados,
   contagens reconciliadas, verificações, limitações e classificação preparatória.
+
+## P18-03 — Operational Resilience & Launch Readiness (preparatory candidate)
+
+- [Operational Resilience Readiness Review](p18-03-operational-resilience-review-r01.md)
+- [Incident, Rollback & Launch Readiness Plan](p18-03-incident-rollback-readiness-plan-r01.md)
+- [Operational Risk & Ownership Matrix](p18-03-risk-ownership-matrix-r01.md)
+- [P18-03 Validation Report](p18-03-validation-report-r01.md)
