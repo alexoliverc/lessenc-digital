@@ -95,3 +95,15 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
 - [LES-P17-CODEX-EXEC-R14-A pre-publication report](./les-p17-codex-exec-r14-a-pre-publication-validation-report.md)
   — owner ratification, complete R13 diff audit, regression evidence and controlled-publication
   readiness without performing Git publication.
+
+P17 is administratively closed with deferred items under
+`LES-OWNER-DEC-20261017-P17-P18-R01`; this does not grant technical PASS or Gate D. The Gate D
+matrix remains the canonical inventory of preserved evidence and unresolved authority.
+
+## P18 preparatory review
+
+- [ADR-0012](../decisions/ADR-0012-p17-administrative-close-p18-preparatory-exception.md) — owner
+  decision separating P17 administrative sequencing from technical acceptance.
+- [P18 Preparatory Phase Execution Brief](../architecture/p18-production-readiness-preparatory-phase-execution-brief.md)
+  — readiness inventory, inherited blockers, risk/deadline preservation, P19-A/P19-B preparation
+  boundaries and explicit production stop gates.

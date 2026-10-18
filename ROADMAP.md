@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment is COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED and its permanent checkpoint remains immutable at `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P17 — End-to-End & Business Validation is IN PROGRESS on branch `phase/p17-end-to-end-business-validation`. Current Hostinger deployed Git release is `0f6534fcf1d5b87588f21f6dd64005309a50c786`. Hosted G5 and P9 are COMPLETE / PASS / HOSTED PROVEN. P17-E01 and P17-L04 are PASS / HOSTED PROVEN. P17-P05 GTM and P17-P06 Meta browser provider are NOT_APPLICABLE. P17-R01–R03 remain PENDING_EXTERNAL because real Payment Brick multi-viewport proof is NOT PROVEN. Real Mercado Pago TEST webhook delivery remains NOT PROVEN. R49 F01/F02/F03 remediation is locally PASS on implementation commit `7ddfbf668d1648cf968eb3243748c89f288539cc`, source digest `8f961f5bbb2e54e8a95ffc13005581d4ad2c3db5b0a89b805e761d24443a2bea` and commit-bound OCI image `sha256:22c54f0c643615677bd0e6921b5c4f92ac609748ece66ea92ab6d600fd0c8ece`, including positive/negative TLS preflight and 199 isolated MySQL integration tests on the same source bytes. The same final image subsequently completed a new full local performance matrix with 15/15 cohorts, 45 excluded warmups and 600 valid samples; all governing percentile values were within the approved numeric limits. The reporter authority is deliberately limited to `PROVISIONAL_LOCAL_NUMERIC_REVIEW_ONLY` because source bytes are hash-verified but in-image commit identity is declared rather than independently verified, and no hosted/provider proof is created. Gate D remains NOT READY. Production remains unauthorized.
+**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment remains COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED and its permanent checkpoint remains immutable at `22fad0f690618c27cabcfa58528a76ce0a580ad3`. Under owner decision `LES-OWNER-DEC-20261017-P17-P18-R01`, P17 — End-to-End & Business Validation is `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`; this is not a technical PASS and creates no quality checkpoint. P17-E05 is `BLOCKED / DEFERRED`; the remaining unresolved P17 items are preserved in the Gate D matrix. Gate D remains `NOT_READY`. P18 is `PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION`, restricted to independent review and documentary preparation until a revised brief and specific authorization cover protected operations. Gate E is `GO NOT AUTHORIZED`; P19 remains future preparation with production activation conditioned; production remains `NOT AUTHORIZED`. Existing P17 hosted/local evidence, release identities, security findings, checkpoints and historical classifications remain preserved under their original authority boundaries.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1298,9 +1298,15 @@ liveness.
 
 ## P17 — End-to-End & Business Validation
 
-**Status:** IN PROGRESS / GATE D NOT READY
+**Status:** ADMINISTRATIVELY CLOSED / DEFERRED ITEMS / GATE D NOT READY
 
-Hosted Gate D validation has progressed beyond the original local candidate. The current Hostinger deployed Git release is `0f6534fcf1d5b87588f21f6dd64005309a50c786`. The original hosted G5/F3/P9 application-evidence execution release is `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`, with zero application-code delta between those releases.
+Owner decision `LES-OWNER-DEC-20261017-P17-P18-R01`, dated 17/10/2026, ended active P17
+execution for administrative sequencing purposes only. It did not grant technical PASS, did not
+resolve any mandatory validation row and did not create a P17 Final Quality Gate or checkpoint.
+Unresolved items are carried forward explicitly into the P18 readiness inventory and later P19-B
+consolidated remediation.
+
+GitHub and the owner confirm that the canonical P17 branch HEAD is `202a43bffd30ed2b85c22c83825da7697139e3a8`, which merged R04 commit `f01a683c4f90d38b704906552406cb9833960866`; no further R04 integration PR is required. The owner reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, but independent release-binding, build, publish, current-version switch and restart attestation remains pending. The last independently attested Hostinger deployed Git release recorded in this documentation is `0f6534fcf1d5b87588f21f6dd64005309a50c786`. The original hosted G5/F3/P9 application-evidence execution release is `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`; the zero application-code delta is established only for that historical comparison through `0f6534fcf1d5b87588f21f6dd64005309a50c786`, not through `202a43bffd30ed2b85c22c83825da7697139e3a8`.
 
 Current hosted authority includes:
 
@@ -1311,7 +1317,7 @@ Current hosted authority includes:
 - P17-P05 GTM = `NOT_APPLICABLE`;
 - P17-P06 Meta browser provider = `NOT_APPLICABLE`.
 
-Gate D remains fail-closed. Real Mercado Pago TEST webhook delivery P17-E05 remains `NOT PROVEN`; P17-F01 remains PENDING_EXTERNAL; P17-F02–F08 are PASS / TEST PROVEN only in isolated local validation, with F06 also REGRESSION PROVEN / PUBLISHED on P17; P17-B01 and P17-B03–B07 retain unresolved validation authority; P17-R01–R03 remain `PENDING_EXTERNAL` because the real interactive Payment Brick has not been proven across mobile, tablet and desktop; and P17-PR01–PR04 remain pending execution and evaluation against the numeric budget approved by the owner on 10/10/2026.
+Gate D remains fail-closed. Real Mercado Pago TEST webhook delivery P17-E05 is `BLOCKED / DEFERRED`; P17-F01 remains `PENDING_EXTERNAL / DEFERRED`; P17-F02–F08 are PASS / TEST PROVEN only in isolated local validation, with F06 also REGRESSION PROVEN / PUBLISHED on P17; P17-B01 and P17-B03–B07 retain unresolved validation authority and are deferred; P17-R01–R03 remain `PENDING_EXTERNAL / DEFERRED` because the real interactive Payment Brick has not been proven across mobile, tablet and desktop; and definitive P17-PR01–PR04 acceptance remains deferred under the approved numeric budget.
 
 Production remains unauthorized.
 
@@ -1421,13 +1427,21 @@ Does the complete customer and operational journey function correctly in staging
 
 ### Required result
 
-PASS before formal production readiness review.
+PASS before a conclusive production-readiness GO decision and before P19-C production execution.
+The 17/10/2026 owner exception permits only P18 preparatory review while this result remains pending.
 
 ---
 
 ## P18 — Production Readiness Review
 
-**Status:** PENDENTE
+**Status:** PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION
+
+**Authority:** `LES-OWNER-DEC-20261017-P17-P18-R01`
+
+The owner exception authorizes P18 preparatory review before Gate D PASS so that proven controls,
+unresolved evidence, risks and production blockers can be inventoried without stalling the program.
+It does not authorize a formal GO decision while Gate D remains NOT READY and does not authorize
+protected implementation, provider access, infrastructure mutation or production activation.
 
 ### Objective
 
@@ -1454,6 +1468,15 @@ Review:
 - rollback;
 - operational documentation.
 
+Preparatory execution must additionally:
+
+- preserve the distinction between proven controls, local-only evidence, hosted/provider evidence
+  and unresolved production authority;
+- carry every deferred P17 item into a traceable readiness/blocker inventory;
+- preserve applicable risk levels, owners, deadlines and hard stops;
+- prepare P19-A non-activating procedures and the P19-B remediation backlog without executing them;
+- leave Gate D, Gate E and production authorization unchanged.
+
 ### Possible results
 
 - GO;
@@ -1466,15 +1489,25 @@ Formal Production Readiness decision.
 
 ### Dependencies
 
-P17.
+P16 closed baseline, preserved P17 evidence package, the P17 deferred-items matrix and owner decision
+`LES-OWNER-DEC-20261017-P17-P18-R01`.
+
+Gate D PASS remains a dependency for a conclusive P18 production decision, but no longer blocks the
+authorized preparatory review.
 
 ### Approval gates
 
-Production remains an owner-controlled decision.
+Production remains an owner-controlled decision. The current exception authorizes documentary
+preparation only. Any protected inspection or mutation, production-readiness implementation, Gate E
+decision, deploy or real transaction requires a revised brief and specific owner authorization.
 
 ### Exit criteria
 
-Explicit authorized outcome permitting or blocking production.
+Preparatory exit: an independently reviewable inventory of proven controls, deferred requirements,
+risks, dependencies, blockers and proposed P19-A/P19-B work, with no false PASS or GO.
+
+Formal P18 exit remains a separately authorized GO / GO WITH CONDITIONS / NO-GO decision after the
+applicable blockers and Gate D authority are reconciled.
 
 ---
 
@@ -1482,17 +1515,20 @@ Explicit authorized outcome permitting or blocking production.
 
 **Position:** P18.
 
+**Status:** GO NOT AUTHORIZED
+
 ### Question
 
 Is the platform technically ready and explicitly authorized to process real transactions?
 
-Only an authorized GO outcome may lead to P19.
+Only an authorized GO outcome may lead to P19-C production execution. P19-A/P19-B preparatory and
+remediation work remains separately gated and creates no production authority.
 
 ---
 
 ## P19 — Production Launch
 
-**Status:** PENDENTE
+**Status:** FUTURE PREPARATION / PRODUCTION ACTIVATION CONDITIONED
 
 ### Objective
 
@@ -1522,13 +1558,37 @@ Production Launch requires, when applicable:
 - administrative record;
 - audit record.
 
+### Approved sequencing
+
+#### P19-A — Non-activating launch preparation
+
+Prepare original launch components, procedures, checklists and rollback material that do not require
+production activation. P19-A is future work and is not authorized by the current P18 documentary
+brief.
+
+#### P19-B — Consolidated inherited-item remediation
+
+After P19-A preparation, resolve the P17/P18 deferred items through separately authorized briefs,
+preserving each technical, provider, hosted, database and security authority boundary.
+
+#### P19-C — Controlled production execution
+
+Production deploy and controlled real transactions may occur only after all of the following:
+
+1. Gate D PASS;
+2. formal P18 decision;
+3. Gate E GO;
+4. specific owner authorization for deploy and real transactions.
+
 ### Main deliverables
 
 Operational production release.
 
 ### Dependencies
 
-Authorized P18 GO.
+P19-A depends on a separately reviewed preparatory brief. P19-B depends on the applicable remediation
+briefs and authorities. P19-C depends on Gate D PASS, formal P18 decision, Gate E GO and specific
+owner authorization.
 
 ### Approval gates
 
@@ -1669,9 +1729,12 @@ P04
 → P14
 → P15
 → P16
-→ P17
-→ P18
-→ P19
+→ P17 administrative closeout with deferred items
+→ P18 preparatory review under owner exception
+→ P19-A non-activating preparation
+→ P19-B consolidated remediation
+→ Gate D PASS + formal P18 decision + Gate E GO + specific owner authorization
+→ P19-C controlled production execution
 → P20
 
 This representation does not authorize skipping intermediate phases or gates.
@@ -1723,9 +1786,14 @@ After P17.
 
 The complete staging journey has not yet satisfied every mandatory Gate D acceptance criterion. Existing hosted evidence remains valid, but unresolved Mercado Pago TEST webhook delivery, the failure matrix, Buyer Access residual scenarios, real Payment Brick multi-viewport responsive proof and performance acceptance prevent Gate D PASS.
 
+The administrative closeout of P17 does not alter this result. Gate D remains independently
+fail-closed while the deferred items are carried into P18 preparation and later remediation.
+
 ## GATE E — PRODUCTION GO / NO-GO
 
 P18.
+
+**Status:** GO NOT AUTHORIZED.
 
 The system receives formal authorization or denial for real production transactions.
 
@@ -1733,19 +1801,24 @@ The system receives formal authorization or denial for real production transacti
 
 # 10. Current transition
 
-The current active phase is:
+The current authorized activity is:
 
-**P17 — End-to-End & Business Validation**
+**P18 — Production Readiness Review / PREPARATORY EXECUTION UNDER OWNER EXCEPTION**
 
 Current execution state:
 
-**IN PROGRESS / HOSTED VALIDATION PARTIALLY PROVEN / GATE D NOT READY**
+**P17 ADMINISTRATIVELY CLOSED / DEFERRED ITEMS / P18 PREPARATORY / GATE D NOT READY**
 
 P13, P14, P15 and P16 are closed under their respective canonical baselines.
 
-P17 currently has hosted proof for the public experience, protected delivery, administrative browser flow and release binding. Remaining Gate D authority includes real Mercado Pago TEST webhook delivery, the unresolved failure matrix, Buyer Access residual scenarios, real Payment Brick multi-viewport responsive proof and owner-approved performance acceptance.
+P17 retains hosted proof for the public experience, protected delivery, administrative browser flow
+and release binding. It is not technically closed as PASS. Remaining Gate D authority includes real
+Mercado Pago TEST webhook delivery, the unresolved failure matrix, Buyer Access residual scenarios,
+real Payment Brick multi-viewport responsive proof and definitive performance acceptance.
 
-P18 remains pending until Gate D reaches PASS.
+Owner decision `LES-OWNER-DEC-20261017-P17-P18-R01` permits P18 preparatory execution before Gate D
+PASS, solely to inventory readiness, risks, dependencies and blockers. Formal P18 GO, Gate E GO,
+P19-C and production remain unauthorized.
 
 Current status:
 

@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P16
+# Índice oficial da baseline documental LES-DIG P00–P18
 
-**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED e Gate C — OPERATIONS READY permanece PASS. P16 — Staging Deployment concluiu P16-01–P16-09 e está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`. A release técnica final hospedada/validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`; o checkpoint permanente `checkpoint/p16-staging-deployment-complete` é uma tag anotada que dereferencia exatamente essa release e não deve ser movida por documentação posterior; a release `976a0472382abc0597996366db63c981b5733d6e` permanece evidência histórica da P16-08 e target break-glass compatível. Produção permanece fora do escopo e não autorizada.
+**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED e Gate C — OPERATIONS READY permanece PASS. P16 — Staging Deployment concluiu P16-01–P16-09 e está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`. A release técnica final hospedada/validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`; o checkpoint permanente `checkpoint/p16-staging-deployment-complete` é uma tag anotada que dereferencia exatamente essa release e não deve ser movida por documentação posterior; a release `976a0472382abc0597996366db63c981b5733d6e` permanece evidência histórica da P16-08 e target break-glass compatível. Por decisão do owner em 17/10/2026, P17 está `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`, P17-E05 está `BLOCKED / DEFERRED`, Gate D permanece `NOT_READY` e P18 está `PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION`. Gate E está `GO NOT AUTHORIZED`; produção permanece `NOT AUTHORIZED`.
 
 ## Precedência e classificação das fontes
 
@@ -409,7 +409,9 @@ Production remains out of scope and unauthorized.
 
 ## P17 — End-to-End & Business Validation
 
-P17 is the active validation phase after the completed P16 staging lifecycle.
+P17 is `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS` under
+`LES-OWNER-DEC-20261017-P17-P18-R01`. This is not a technical PASS; Gate D remains `NOT_READY`,
+and all unresolved validation authority remains preserved.
 
 Canonical P17 validation documents:
 
@@ -430,3 +432,12 @@ regressions and diagnostic public-navigation measurements only; external Gate D 
 open.
 
 Production remains unauthorized.
+
+## P18 — Production Readiness Review — preparatory execution
+
+- [ADR-0012 — P17 administrative closeout and P18 preparatory exception](decisions/ADR-0012-p17-administrative-close-p18-preparatory-exception.md)
+- [P18 Preparatory Phase Execution Brief](architecture/p18-production-readiness-preparatory-phase-execution-brief.md)
+
+P18 is authorized only for preparatory review and documentary readiness inventory. Formal P18 GO,
+Gate E GO, protected implementation, P19 execution and production remain separately gated and are
+not authorized by the current brief.

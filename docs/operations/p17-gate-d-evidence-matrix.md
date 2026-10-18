@@ -8,6 +8,21 @@ This matrix records the current reconciled P17 Gate D state. PASS is assigned on
 
 Rows not yet executed or reconciled retain `NOT_EXECUTED` unless another outcome is explicitly supported by current P17 evidence.
 
+## Administrative disposition — 17/10/2026
+
+Owner decision `LES-OWNER-DEC-20261017-P17-P18-R01` sets:
+
+- `P17 = ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`;
+- `P17-E05 = BLOCKED / DEFERRED`;
+- `GATE D = NOT_READY`;
+- `P18 = PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION`;
+- `GATE E = GO NOT AUTHORIZED`;
+- `PRODUCTION = NOT AUTHORIZED`.
+
+This disposition does not alter historical evidence, convert an unresolved row into PASS or create a
+P17 quality checkpoint. `DEFERRED` identifies future remediation sequencing; the underlying
+technical evidence classification remains visible in each row and in its historical sections.
+
 ## Outcome vocabulary
 
 - NOT_EXECUTED
@@ -29,7 +44,7 @@ real-provider or complete-journey evidence.
 | P17-E02 | Checkout | CRITICAL | PASS / HOSTED PROVEN |
 | P17-E03 | Order | CRITICAL | PASS / HOSTED PROVEN |
 | P17-E04 | Mercado Pago TEST | CRITICAL | PASS / HOSTED PROVEN |
-| P17-E05 | Webhook | CRITICAL | PENDING_EXTERNAL |
+| P17-E05 | Webhook | CRITICAL | BLOCKED / DEFERRED — authenticated real TEST delivery NOT PROVEN; latest diagnostic classification HMAC_MISMATCH / NEITHER_MATCH |
 | P17-E06 | Payment | CRITICAL | PASS / HOSTED PROVEN |
 | P17-E07 | Entitlement | CRITICAL | PASS / HOSTED PROVEN |
 | P17-E08 | Buyer Access | CRITICAL | PASS / HOSTED PROVEN |
@@ -42,7 +57,7 @@ real-provider or complete-journey evidence.
 
 | ID | Scenario | Gate D criticality | Current state |
 | --- | --- | --- | --- |
-| P17-F01 | Declined payment | CRITICAL | PENDING_EXTERNAL |
+| P17-F01 | Declined payment | CRITICAL | PENDING_EXTERNAL / DEFERRED |
 | P17-F02 | Timeout | CRITICAL | PASS / TEST PROVEN |
 | P17-F03 | Duplicate webhook | CRITICAL | PASS / TEST PROVEN |
 | P17-F04 | Out-of-order webhook | CRITICAL | PASS / TEST PROVEN |
@@ -72,13 +87,13 @@ Authority boundaries: F06 is TEST PROVEN / REGRESSION PROVEN / PUBLISHED ON P17,
 
 | ID | Scenario | Gate D criticality | Current state |
 | --- | --- | --- | --- |
-| P17-B01 | Invalid buyer credential | CRITICAL | PENDING_EXTERNAL |
+| P17-B01 | Invalid buyer credential | CRITICAL | PENDING_EXTERNAL / DEFERRED |
 | P17-B02 | Unauthorized resource | CRITICAL | PASS / HOSTED PROVEN |
-| P17-B03 | Buyer rate limit | HIGH | NOT_EXECUTED |
-| P17-B04 | Storage unavailable | CRITICAL | NOT_EXECUTED |
-| P17-B05 | Stream failure | HIGH | NOT_EXECUTED |
-| P17-B06 | Delivery audit failure | CRITICAL | NOT_EXECUTED |
-| P17-B07 | Recovery | CRITICAL | NOT_EXECUTED |
+| P17-B03 | Buyer rate limit | HIGH | NOT_EXECUTED / DEFERRED |
+| P17-B04 | Storage unavailable | CRITICAL | NOT_EXECUTED / DEFERRED |
+| P17-B05 | Stream failure | HIGH | NOT_EXECUTED / DEFERRED |
+| P17-B06 | Delivery audit failure | CRITICAL | NOT_EXECUTED / DEFERRED |
+| P17-B07 | Recovery | CRITICAL | NOT_EXECUTED / DEFERRED |
 
 ### Hosted byte-range reconciliation evidence
 
@@ -155,9 +170,9 @@ Real Mercado Pago TEST webhook delivery remains `NOT PROVEN`.
 
 | ID | Viewport | Criticality | Current state |
 | --- | --- | --- | --- |
-| P17-R01 | Mobile | HIGH | PENDING_EXTERNAL |
-| P17-R02 | Tablet | HIGH | PENDING_EXTERNAL |
-| P17-R03 | Desktop | HIGH | PENDING_EXTERNAL |
+| P17-R01 | Mobile | HIGH | PENDING_EXTERNAL / DEFERRED |
+| P17-R02 | Tablet | HIGH | PENDING_EXTERNAL / DEFERRED |
+| P17-R03 | Desktop | HIGH | PENDING_EXTERNAL / DEFERRED |
 
 ## Administrative matrix
 
@@ -204,10 +219,10 @@ Real Mercado Pago TEST webhook delivery remains `NOT PROVEN`.
 
 | ID | Surface | Gate D requirement | Budget authority | Current state |
 | --- | --- | --- | --- | --- |
-| P17-PR01 | Public navigation | REQUIRED | OWNER APPROVED | DIAGNOSTIC_ONLY / ACCEPTANCE NOT PROVEN |
-| P17-PR02 | Checkout interaction | REQUIRED | OWNER APPROVED | NOT_EXECUTED |
-| P17-PR03 | Payment initiation | REQUIRED | OWNER APPROVED | NOT_EXECUTED |
-| P17-PR04 | Buyer delivery start | REQUIRED | OWNER APPROVED | NOT_EXECUTED |
+| P17-PR01 | Public navigation | REQUIRED | OWNER APPROVED | PROVISIONAL LOCAL NUMERIC EVIDENCE / DEFINITIVE ACCEPTANCE DEFERRED |
+| P17-PR02 | Checkout interaction | REQUIRED | OWNER APPROVED | PROVISIONAL LOCAL NUMERIC EVIDENCE / DEFINITIVE ACCEPTANCE DEFERRED |
+| P17-PR03 | Payment initiation | REQUIRED | OWNER APPROVED | PROVISIONAL LOCAL NUMERIC EVIDENCE / DEFINITIVE ACCEPTANCE DEFERRED |
+| P17-PR04 | Buyer delivery start | REQUIRED | OWNER APPROVED | PROVISIONAL LOCAL NUMERIC EVIDENCE / DEFINITIVE ACCEPTANCE DEFERRED |
 
 REQUIRED denotes a mandatory Gate D acceptance requirement, not a CRITICAL/HIGH severity assignment. The owner approved LES-P17-PERFORMANCE-BUDGET-R01 on 10/10/2026. This resolves the budget-approval dependency only. No performance item can become PASS without authorized execution and valid measurements against the approved acceptance criteria.
 
@@ -243,13 +258,14 @@ GATE D = NOT READY. PRODUCTION = UNAUTHORIZED.
 ### Current P17 release identity evidence
 
 - hosted G5/F3/P9 application-evidence execution release -> `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`;
-- current Hostinger deployed Git release -> `0f6534fcf1d5b87588f21f6dd64005309a50c786`;
-- Git delta from the evidence release to the current hosted release -> canonical documentation only; application code changes = `0`;
+- last independently attested Hostinger deployed Git release recorded in this documentation -> `0f6534fcf1d5b87588f21f6dd64005309a50c786`;
+- Git delta from the evidence release to that historical hosted release -> canonical documentation only; application code changes = `0`;
 - documentation reconciliation parent HEAD -> `1430d68db27e7535470a3746ee418fbb2582f4db`;
 - post-hosted delta to that reconciliation parent -> documentation only;
 - immutable P16 checkpoint -> `22fad0f690618c27cabcfa58528a76ce0a580ad3`;
 - production remains unauthorized;
-- exact current Hostinger release-binding environment attestation is proven under P17-L04 for deployed commit `0f6534fcf1d5b87588f21f6dd64005309a50c786`: `STAGING_RELEASE_COMMIT` matched HEAD, `P16_RELEASE_COMMIT` matched the phase-neutral binding as compatibility alias, the fail-closed staging preflight passed, and Hostinger build, publish and Node restart completed successfully.
+- P17-L04 independently attests the historical deployed commit `0f6534fcf1d5b87588f21f6dd64005309a50c786`: `STAGING_RELEASE_COMMIT` matched HEAD, `P16_RELEASE_COMMIT` matched the phase-neutral binding as compatibility alias, the fail-closed staging preflight passed, and Hostinger build, publish and Node restart completed successfully.
+- GitHub and the owner confirm canonical P17 HEAD `202a43bffd30ed2b85c22c83825da7697139e3a8`, merging R04 commit `f01a683c4f90d38b704906552406cb9833960866`; no further R04 integration PR is required. The owner reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, while independent release-binding and deployment attestation remains pending. Neither the historical P17-L04 PASS nor the historical application-code-equivalence statement is propagated to that release.
 
 ## Gate D rule
 
@@ -416,7 +432,7 @@ GATE D remains `NOT READY`.
 
 ### Hosted public/provider/release/responsive reconciliation — 06/10/2026
 
-Current Hostinger deployed Git release:
+Last independently attested Hostinger deployed Git release:
 
 `0f6534fcf1d5b87588f21f6dd64005309a50c786`
 
@@ -424,7 +440,7 @@ Application-code equivalence:
 
 - the hosted G5/F3/P9 application evidence was originally exercised on `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`;
 - `git diff --name-only 9e2ef25f4667b19f727c6ba1e277a79f55e3086f..0f6534fcf1d5b87588f21f6dd64005309a50c786` contains only `MEMORY.md`, `docs/architecture/p17-validation-architecture.md` and `docs/operations/p17-gate-d-evidence-matrix.md`;
-- therefore there are zero application-code changes between the evidence execution release and the current Hostinger deployment.
+- therefore there are zero application-code changes between the evidence execution release and that historical Hostinger deployment.
 
 New hosted authority established without a new payment or commercial-state mutation:
 

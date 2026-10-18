@@ -11,6 +11,17 @@ This document defines the validation architecture for P17.
 It does not authorize deployment, production activation, provider mutation, payment production
 credentials, database mutation, destructive cleanup or movement of any previous checkpoint.
 
+### Administrative disposition — 17/10/2026
+
+Owner decision `LES-OWNER-DEC-20261017-P17-P18-R01` ended active P17 execution as
+`ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`. This does not change the frozen validation architecture,
+does not grant technical PASS and does not satisfy Gate D. P17-E05 is `BLOCKED / DEFERRED`; the
+remaining unresolved requirements are preserved in the Gate D evidence matrix and transferred to
+the P18 preparatory readiness inventory and later separately authorized remediation.
+
+P18 preparatory execution is allowed under an owner exception while Gate D remains `NOT_READY`.
+Gate E remains `GO NOT AUTHORIZED`, and production remains `NOT AUTHORIZED`.
+
 ## Canonical baseline
 
 Repository baseline:
@@ -417,7 +428,7 @@ The immutable P16 checkpoint remains:
 
 It is historical checkpoint authority and is no longer the current hosted application release.
 
-Current P17 Hostinger deployed Git release authority:
+Last independently attested P17 Hostinger deployed Git release authority:
 
 `0f6534fcf1d5b87588f21f6dd64005309a50c786`
 
@@ -429,17 +440,19 @@ Documentation reconciliation parent HEAD before this update:
 
 `1430d68db27e7535470a3746ee418fbb2582f4db`
 
-The delta from the hosted G5/F3/P9 evidence release `9e2ef25f4667b19f727c6ba1e277a79f55e3086f` through the current Hostinger deployed Git release `0f6534fcf1d5b87588f21f6dd64005309a50c786` is documentation only: `MEMORY.md`, `docs/architecture/p17-validation-architecture.md` and `docs/operations/p17-gate-d-evidence-matrix.md`.
+The delta from the hosted G5/F3/P9 evidence release `9e2ef25f4667b19f727c6ba1e277a79f55e3086f` through the last independently attested Hostinger deployed Git release `0f6534fcf1d5b87588f21f6dd64005309a50c786` is documentation only: `MEMORY.md`, `docs/architecture/p17-validation-architecture.md` and `docs/operations/p17-gate-d-evidence-matrix.md`.
 
-The hosted G5, F3 and P9 evidence was executed on technical release `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`. The current Hostinger deployed Git release is `0f6534fcf1d5b87588f21f6dd64005309a50c786`. The Git delta from `9e2ef25f4667b19f727c6ba1e277a79f55e3086f` to `0f6534fcf1d5b87588f21f6dd64005309a50c786` contains only canonical documentation, therefore the deployed application code remains code-equivalent to the application source exercised by G5, F3 and P9.
+The hosted G5, F3 and P9 evidence was executed on technical release `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`. The Git delta from that release to the last independently attested Hostinger deployed Git release `0f6534fcf1d5b87588f21f6dd64005309a50c786` contains only canonical documentation, therefore that historical deployed application code remains code-equivalent to the application source exercised by G5, F3 and P9.
 
 The phase-neutral `STAGING_RELEASE_COMMIT` implementation is present in the P17 source lineage and preserves the frozen `P16_RELEASE_COMMIT` compatibility alias with fail-closed conflict and mismatch handling.
 
-The current Hostinger release-binding environment was subsequently owner-observed during the R13/R14 hosted reconciliation. `STAGING_RELEASE_COMMIT` and the `P16_RELEASE_COMMIT` compatibility alias matched deployed HEAD `0f6534fcf1d5b87588f21f6dd64005309a50c786`; the fail-closed staging preflight passed before the successful Hostinger build, publish, current-version switch and Node restart. P17-L04 is therefore `PASS / HOSTED PROVEN`.
+The Hostinger release-binding environment was owner-observed during the R13/R14 hosted reconciliation. `STAGING_RELEASE_COMMIT` and the `P16_RELEASE_COMMIT` compatibility alias matched deployed HEAD `0f6534fcf1d5b87588f21f6dd64005309a50c786`; the fail-closed staging preflight passed before the successful Hostinger build, publish, current-version switch and Node restart. P17-L04 is therefore `PASS / HOSTED PROVEN` for that historical release.
+
+GitHub and the owner confirm the canonical P17 branch HEAD as `202a43bffd30ed2b85c22c83825da7697139e3a8`, which merges R04 commit `f01a683c4f90d38b704906552406cb9833960866`; no further R04 integration PR is required. The owner reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, but independent release-binding, build, publish, current-version switch and restart attestation is pending. No application-code-equivalence or P17-L04 PASS is inferred for that release from the historical `0f6534fcf1d5b87588f21f6dd64005309a50c786` evidence.
 
 ### Hosted public, provider, release-binding and responsive reconciliation — 06/10/2026
 
-Hosted validation against current Hostinger deployed Git release `0f6534fcf1d5b87588f21f6dd64005309a50c786` established:
+Hosted validation against the historical independently attested Hostinger deployed Git release `0f6534fcf1d5b87588f21f6dd64005309a50c786` established:
 
 - public experience E01 is `PASS / HOSTED PROVEN`;
 - GTM is `NOT_APPLICABLE` because `GTM_CONTAINER_ID` is absent and no GTM/GA browser provider script, global or network request was observed;
@@ -454,9 +467,9 @@ Responsive Gate D rows remain unresolved rather than synthetically passing. The 
 
 No second payment, Order, Payment, Entitlement, R2 object, Buyer Access/G5 state or administrative business object was created or mutated for this responsive reconciliation. Normal OWNER authentication and administrative session activity occurred only as required to access the protected hosted presentation.
 
-P17 APPLICATION DEPLOYMENT = HOSTED / CURRENT GIT RELEASE 0f6534fcf1d5b87588f21f6dd64005309a50c786 / BUILD + PUBLISH + RESTART PASS
+P17 APPLICATION DEPLOYMENT = HOSTED / HISTORICALLY ATTESTED GIT RELEASE 0f6534fcf1d5b87588f21f6dd64005309a50c786 / BUILD + PUBLISH + RESTART PASS
 
-P17 SOURCE/RELEASE IDENTITY = CURRENT HOSTINGER GIT RELEASE 0f6534fcf1d5b87588f21f6dd64005309a50c786 / APPLICATION CODE EQUIVALENT TO 9e2ef25f4667b19f727c6ba1e277a79f55e3086f
+P17 SOURCE/RELEASE IDENTITY = HISTORICALLY ATTESTED HOSTINGER GIT RELEASE 0f6534fcf1d5b87588f21f6dd64005309a50c786 / APPLICATION CODE EQUIVALENT TO 9e2ef25f4667b19f727c6ba1e277a79f55e3086f
 
 P17 RELEASE-BINDING ENVIRONMENT ATTESTATION = PASS / HOSTED PROVEN / 0f6534fcf1d5b87588f21f6dd64005309a50c786
 
@@ -475,6 +488,10 @@ PASS requires all critical mandatory scenarios to be resolved as PASS.
 
 Critical FAIL or unresolved mandatory BLOCKED prevents progression.
 
+The administrative closeout does not waive this rule. It changes work sequencing only: P18 may
+prepare the readiness inventory, but a conclusive production-readiness GO and P19-C execution still
+require Gate D PASS plus their separate approvals.
+
 ## P17-01 architecture decision
 
 DISCOVERY: COMPLETE
@@ -483,9 +500,9 @@ PLAYWRIGHT: AVAILABLE / HOSTED R13 BROWSER VALIDATION EXECUTED
 REAL BROWSER E2E: REQUIRED
 MERCADO PAGO: TEST ONLY
 P16 CHECKPOINT: IMMUTABLE
-P16_RELEASE_COMMIT: HOSTED 0f6534fcf1d5b87588f21f6dd64005309a50c786 / COMPATIBILITY ALIAS / MATCHES STAGING_RELEASE_COMMIT
-STAGING_RELEASE_COMMIT: HOSTED 0f6534fcf1d5b87588f21f6dd64005309a50c786 / MATCHES HEAD / FAIL-CLOSED PREFLIGHT PASS
-P17 DEPLOYMENT: HOSTED / 0f6534fcf1d5b87588f21f6dd64005309a50c786 / CERTIFIED BUILD + PUBLISH + RESTART
+P16_RELEASE_COMMIT: HISTORICALLY ATTESTED HOSTED 0f6534fcf1d5b87588f21f6dd64005309a50c786 / COMPATIBILITY ALIAS / MATCHES STAGING_RELEASE_COMMIT
+STAGING_RELEASE_COMMIT: HISTORICALLY ATTESTED HOSTED 0f6534fcf1d5b87588f21f6dd64005309a50c786 / MATCHES HEAD / FAIL-CLOSED PREFLIGHT PASS
+P17 DEPLOYMENT: HISTORICALLY ATTESTED HOSTED / 0f6534fcf1d5b87588f21f6dd64005309a50c786 / CERTIFIED BUILD + PUBLISH + RESTART
 PRODUCTION: NOT AUTHORIZED
 
 ## Local performance acceptance implementation addendum — 11/10/2026
