@@ -102,6 +102,7 @@ matrix remains the canonical inventory of preserved evidence and unresolved auth
 
 ## P18 preparatory review
 
+- [P18 Final Owner Acceptance](./p18-final-owner-acceptance-r01.md) — owner approval after independent audit R02; Gate D/E and production remain restricted.
 - [ADR-0012](../decisions/ADR-0012-p17-administrative-close-p18-preparatory-exception.md) — owner
   decision separating P17 administrative sequencing from technical acceptance.
 - [P18 Preparatory Phase Execution Brief](../architecture/p18-production-readiness-preparatory-phase-execution-brief.md)

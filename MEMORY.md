@@ -3,7 +3,7 @@
 **Última atualização:** 18/10/2026
 **Projeto:** LES-DIG — L'Essenc Digital
 **Estado documental:** P00–P15 permanecem nas respectivas baselines canônicas integradas/checkpointed. P16 — Staging Deployment concluiu a validação técnica e hosted na release técnica congelada `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 está `COMPLETE / PASS / HOSTED VALIDATED`. O closeout documental foi integrado em `main` por fast-forward no commit `6c60441e00e4520b8c689f8c4944c36c73d80d12`. O checkpoint permanente P16 `checkpoint/p16-staging-deployment-complete` foi criado e publicado como tag anotada, dereferencia exatamente a release técnica `22fad0f690618c27cabcfa58528a76ce0a580ad3` e não deve ser movido por documentação posterior. A release operacional histórica da P16-08 permanece `976a0472382abc0597996366db63c981b5733d6e` e não é reescrita como se tivesse sido a release técnica final.
-**Estado atual:** P16 permanece `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED` sob sua baseline congelada. P17 está `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`, sem PASS técnico e sem Gate D; P17-E05 está `BLOCKED / DEFERRED`. Gate D permanece `NOT_READY`. P18-04–P18-09 produziram o pacote `PREPARATORY REVIEW COMPLETE / FORMAL READINESS PENDING / NO-GO RECOMMENDED`, ainda sujeito à revisão independente. A release candidata técnica integrada é `a780faa6d9275b1f9abfae2ad812aa0a2d78402a`; `LES-SEC-RA-001` foi remediado por patch mantido, audit zero e CI/CodeQL, sem conceder produção. Gate E está `GO NOT AUTHORIZED`; P19, produção, dinheiro real e operações irreversíveis continuam fora do mandato. A release técnica final validada da P16 continua `22fad0f690618c27cabcfa58528a76ce0a580ad3`; seu backup/RPO e rollback permanecem evidência histórica P16. Retenção 7/4/3 continua `PLAN_ONLY`; não há prova de cópia final independente off-R2; DB/R2 permanecem sequenciais e não atômicos; o capsule offline P17 deve ser resealado para o novo lockfile.
+**Estado atual:** P16 permanece `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED` sob sua baseline congelada. P17 está `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`, sem PASS técnico e sem Gate D; P17-E05 está `BLOCKED / DEFERRED`. Gate D permanece `NOT_READY`. P18-04–P18-09 produziram o pacote `PREPARATORY REVIEW COMPLETE / OWNER ACCEPTED / FORMAL READINESS PENDING / NO-GO RECOMMENDED`, com auditoria independente R02 PASS e aceite do proprietário para o escopo preparatório. A release candidata técnica integrada é `a780faa6d9275b1f9abfae2ad812aa0a2d78402a`; `LES-SEC-RA-001` foi remediado por patch mantido, audit zero e CI/CodeQL, sem conceder produção. Gate E está `GO NOT AUTHORIZED`; P19, produção, dinheiro real e operações irreversíveis continuam fora do mandato. A release técnica final validada da P16 continua `22fad0f690618c27cabcfa58528a76ce0a580ad3`; seu backup/RPO e rollback permanecem evidência histórica P16. Retenção 7/4/3 continua `PLAN_ONLY`; não há prova de cópia final independente off-R2; DB/R2 permanecem sequenciais e não atômicos; o capsule offline P17 deve ser resealado para o novo lockfile.
 **Checkpoint anterior à P04 física:** `71488f1`, tag `checkpoint/p04-baseline-reconciled`, com `pnpm` e sem Prisma.
 
 ## Decisões vigentes
@@ -2766,3 +2766,23 @@ must be resealed; it is not evidence for the candidate.
 Current recommendation is `PREPARATORY REVIEW COMPLETE / FORMAL READINESS PENDING / NO-GO
 RECOMMENDED`. P17-E05 remains blocked, Gate D remains NOT_READY, Gate E GO is not authorized,
 production is not authorized and P19 is future preparation only.
+
+## P18 preparatory owner acceptance — 18/10/2026
+
+Owner decision `LES-OWNER-DEC-P18-PREPARATORY-ACCEPTANCE-20261018-R01`
+approves only the P18 preparatory closeout after independent audit
+`LES-P18-FINAL-INDEPENDENT-AUDIT-R02 = PASS`.
+
+PR #66 merged into the P17 branch at
+`9379414e626ceed5483bfde61c96c793ca450a92`.
+The final audit reconciled 57 controls, 15 inherited P17 items,
+31 risks, and 10/10 SHA-256 manifest entries. P18-AUD-F01
+and P18-AUD-F02 are integrated.
+
+`P18 = PREPARATORY REVIEW COMPLETE / OWNER ACCEPTED`.
+
+Formal readiness remains pending. Gate D is NOT_READY,
+Gate E GO is NOT AUTHORIZED, production is NOT AUTHORIZED,
+and the current recommendation is NO-GO. P19 is NOT STARTED.
+No main merge, production activation, tag or checkpoint is
+authorized or implied by this acceptance.

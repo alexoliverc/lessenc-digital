@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment remains COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED and its permanent checkpoint remains immutable at `22fad0f690618c27cabcfa58528a76ce0a580ad3`. Under owner decision `LES-OWNER-DEC-20261017-P17-P18-R01`, P17 — End-to-End & Business Validation is `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`; this is not a technical PASS and creates no quality checkpoint. P17-E05 is `BLOCKED / DEFERRED`; the remaining unresolved P17 items are preserved in the Gate D matrix. Gate D remains `NOT_READY`. P18 is `PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION`, restricted to independent review and documentary preparation until a revised brief and specific authorization cover protected operations. Gate E is `GO NOT AUTHORIZED`; P19 remains future preparation with production activation conditioned; production remains `NOT AUTHORIZED`. Existing P17 hosted/local evidence, release identities, security findings, checkpoints and historical classifications remain preserved under their original authority boundaries.
+**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment remains COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED and its permanent checkpoint remains immutable at `22fad0f690618c27cabcfa58528a76ce0a580ad3`. Under owner decision `LES-OWNER-DEC-20261017-P17-P18-R01`, P17 — End-to-End & Business Validation is `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`; this is not a technical PASS and creates no quality checkpoint. P17-E05 is `BLOCKED / DEFERRED`; the remaining unresolved P17 items are preserved in the Gate D matrix. Gate D remains `NOT_READY`. P18 preparatory scope is `PREPARATORY REVIEW COMPLETE / OWNER ACCEPTED`; independent audit R02 passed. Gate D, Gate E, P19 and production remain separately gated. Gate E is `GO NOT AUTHORIZED`; P19 remains future preparation with production activation conditioned; production remains `NOT AUTHORIZED`. Existing P17 hosted/local evidence, release identities, security findings, checkpoints and historical classifications remain preserved under their original authority boundaries.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -1448,7 +1448,7 @@ The 17/10/2026 owner exception permits only P18 preparatory review while this re
 
 ## P18 — Production Readiness Review
 
-**Status:** PREPARATORY REVIEW COMPLETE / FORMAL READINESS PENDING / NO-GO RECOMMENDED
+**Status:** PREPARATORY REVIEW COMPLETE / OWNER ACCEPTED / FORMAL READINESS PENDING / NO-GO RECOMMENDED
 
 **Authorities:** `LES-OWNER-DEC-20261017-P17-P18-R01` and the later
 `LES-OWNER-AUTH-P18-COMPLETION-20261018-R01`
@@ -1497,7 +1497,7 @@ P18-04 through P18-09 have produced an independently reviewable candidate packag
 15 deferred P17 items and 31 risks/blockers are reconciled. `LES-SEC-RA-001` is remediated by a
 maintained, hash-pinned patch with zero audit findings and hosted CI/CodeQL; this closes only that
 risk-specific hard stop. Gate D remains `NOT_READY`, the remaining external/recovery/release gaps
-remain open, and independent review is reserved. Gate E and production remain unauthorized.
+remain open. Independent audit R02 passed and the owner accepted the preparatory scope; Gate E and production remain unauthorized.
 
 ### Possible results
 
