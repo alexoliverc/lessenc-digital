@@ -61,6 +61,8 @@ jobs:
       - name: P18 maintained patch remediation regression
         run: node --test scripts/p18-braces-remediation.test.mjs
 
+      - name: P18 production promotion gate regression
+        run: node --test scripts/p18-production-promotion-gate.test.mjs
       - name: Audit complete dependency graph and maintained patch integrity
         run: npm run security:p18:braces-remediation
 
