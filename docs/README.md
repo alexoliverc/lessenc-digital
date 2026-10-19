@@ -435,6 +435,7 @@ Production remains unauthorized.
 
 ## P18 — Production Readiness Review — controlled completion execution
 
+- [P18 Final Owner Acceptance](operations/p18-final-owner-acceptance-r01.md) — preparatory scope accepted; formal readiness pending, NO-GO.
 - [ADR-0012 — P17 administrative closeout and P18 preparatory exception](decisions/ADR-0012-p17-administrative-close-p18-preparatory-exception.md)
 - [ADR-0013 — P18 completion execution mandate](decisions/ADR-0013-p18-completion-execution-mandate.md)
 - [P18 Preparatory Phase Execution Brief](architecture/p18-production-readiness-preparatory-phase-execution-brief.md)
@@ -449,7 +450,7 @@ Production remains unauthorized.
 
 The later owner mandate `LES-OWNER-AUTH-P18-COMPLETION-20261018-R01` authorizes controlled technical
 execution, remediation and Git integration for P18-04 through P18-09 on the P17 integration branch.
-Formal acceptance, Gate E GO, P19 execution and production remain separately gated and unauthorized.
+Preparatory owner acceptance is recorded under `LES-OWNER-DEC-P18-PREPARATORY-ACCEPTANCE-20261018-R01`. Gate E GO, P19 execution and production remain separately gated and unauthorized.
 
 ## P18-03 — Operational Resilience & Launch Readiness (preparatory candidate)
 
