@@ -544,3 +544,81 @@ describe("P10 webhook signature", () => {
     }
   });
 });
+
+describe("R16 E05 order webhook HMAC canonicalization", () => {
+  it("accepts a provider-canonical signed uppercase Order ID", () => {
+    const now = 1_780_000_000_000;
+    const ts = String(now / 1000);
+    const dataId = "ORD01J49MMW3SSBK5PSV3DFR32959";
+    const requestId = "r16-synthetic-request";
+
+    const canonical = `id:${dataId};request-id:${requestId};ts:${ts};`;
+    const digest = createHmac("sha256", secret).update(canonical).digest("hex");
+
+    expect(
+      verifyMercadoPagoWebhook({
+        dataId,
+        requestId,
+        signature: `ts=${ts},v1=${digest}`,
+        secret,
+        now,
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects a mismatched manifest, changed resource and changed request ID", () => {
+    const now = 1_780_000_000_000;
+    const ts = String(now / 1000);
+    const dataId = "ORD01J49MMW3SSBK5PSV3DFR32959";
+    const requestId = "r16-synthetic-request";
+
+    const sign = (resource: string) =>
+      createHmac("sha256", secret)
+        .update(`id:${resource};request-id:${requestId};ts:${ts};`)
+        .digest("hex");
+
+    const canonicalSignature = `ts=${ts},v1=${sign(dataId)}`;
+
+    const lowercasedSignature = `ts=${ts},v1=${sign(dataId.toLowerCase())}`;
+
+    expect(
+      verifyMercadoPagoWebhook({
+        dataId,
+        requestId,
+        signature: lowercasedSignature,
+        secret,
+        now,
+      }),
+    ).toBe(false);
+
+    expect(
+      verifyMercadoPagoWebhook({
+        dataId: "ORD01J49MMW3SSBK5PSV3DFR3295X",
+        requestId,
+        signature: canonicalSignature,
+        secret,
+        now,
+      }),
+    ).toBe(false);
+
+    expect(
+      verifyMercadoPagoWebhook({
+        dataId,
+        requestId: "another-request",
+        signature: canonicalSignature,
+        secret,
+        now,
+      }),
+    ).toBe(false);
+
+    expect(
+      verifyMercadoPagoWebhook({
+        dataId,
+        requestId,
+        signature: canonicalSignature,
+        secret,
+        now: now + 301_000,
+      }),
+    ).toBe(false);
+  });
+});

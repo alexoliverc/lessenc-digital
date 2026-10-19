@@ -26,6 +26,11 @@ Thumbs.db
 tmp/
 output/
 
+# P17 performance capsule: the acquired npm payload is local evidence and must
+# never be staged. Keep only the empty directory marker and reviewed manifests.
+e2e/performance/capsule/offline/npm-cache/**
+!e2e/performance/capsule/offline/npm-cache/.gitkeep
+
 # Local IDE state
 .vscode/*.local.json
 

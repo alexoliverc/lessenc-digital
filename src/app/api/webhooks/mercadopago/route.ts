@@ -1,4 +1,4 @@
-import { verifyMercadoPagoWebhook } from "@/infrastructure/payments/mercado-pago-webhook-verifier";
+import { diagnoseMercadoPagoWebhook } from "@/infrastructure/payments/mercado-pago-webhook-verifier";
 import { readBoundedText } from "@/infrastructure/http/read-bounded-text";
 import {
   resolveRequestCorrelationId,
@@ -84,8 +84,20 @@ export async function POST(request: Request): Promise<Response> {
   const signature = request.headers.get("x-signature");
   const requestId = request.headers.get("x-request-id");
   const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
-  if (!secret || !verifyMercadoPagoWebhook({ dataId, signature, requestId, secret })) {
-    logger.warn("webhook_invalid_signature", { correlationId });
+  const verification = diagnoseMercadoPagoWebhook({
+    dataId,
+    signature,
+    requestId,
+    secret: secret ?? "",
+  });
+  if (!verification.valid) {
+    logger.warn("webhook_invalid_signature", {
+      correlationId,
+      rejectionReason: verification.reason,
+      ...(verification.reason === "HMAC_MISMATCH"
+        ? { hmacDifferential: verification.hmacDifferential }
+        : {}),
+    });
     return finish(new Response(null, { status: 401, headers }), "DENIED", "SIGNATURE_INVALID");
   }
   const length = Number(request.headers.get("content-length"));

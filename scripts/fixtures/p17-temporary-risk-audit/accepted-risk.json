@@ -1,0 +1,167 @@
+{
+  "audit": {
+    "auditReportVersion": 2,
+    "vulnerabilities": {
+      "@next/eslint-plugin-next": {
+        "name": "@next/eslint-plugin-next",
+        "severity": "high",
+        "isDirect": true,
+        "via": ["fast-glob"],
+        "effects": [],
+        "range": ">=14.3.0-canary.0",
+        "nodes": ["node_modules/@next/eslint-plugin-next"],
+        "fixAvailable": {
+          "name": "@next/eslint-plugin-next",
+          "version": "14.2.35",
+          "isSemVerMajor": true
+        }
+      },
+      "braces": {
+        "name": "braces",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1240992,
+            "name": "braces",
+            "dependency": "braces",
+            "title": "synthetic fixture for the approved stack-exhaustion finding",
+            "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+            "severity": "high",
+            "cwe": ["CWE-674"],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=3.0.3"
+          }
+        ],
+        "effects": ["micromatch"],
+        "range": "*",
+        "nodes": ["node_modules/braces"],
+        "fixAvailable": {
+          "name": "@next/eslint-plugin-next",
+          "version": "14.2.35",
+          "isSemVerMajor": true
+        }
+      },
+      "fast-glob": {
+        "name": "fast-glob",
+        "severity": "high",
+        "isDirect": false,
+        "via": ["micromatch"],
+        "effects": ["@next/eslint-plugin-next"],
+        "range": "*",
+        "nodes": ["node_modules/fast-glob"],
+        "fixAvailable": {
+          "name": "@next/eslint-plugin-next",
+          "version": "14.2.35",
+          "isSemVerMajor": true
+        }
+      },
+      "micromatch": {
+        "name": "micromatch",
+        "severity": "high",
+        "isDirect": false,
+        "via": ["braces"],
+        "effects": ["fast-glob"],
+        "range": ">=0.2.0",
+        "nodes": ["node_modules/micromatch"],
+        "fixAvailable": {
+          "name": "@next/eslint-plugin-next",
+          "version": "14.2.35",
+          "isSemVerMajor": true
+        }
+      }
+    },
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 4,
+        "critical": 0,
+        "total": 4
+      },
+      "dependencies": {
+        "prod": 235,
+        "dev": 139,
+        "optional": 65,
+        "peer": 34,
+        "peerOptional": 0,
+        "total": 445
+      }
+    }
+  },
+  "installedTree": {
+    "name": "lessenc-digital",
+    "version": "0.1.0",
+    "dependencies": {
+      "@next/eslint-plugin-next": {
+        "version": "16.3.8",
+        "dependencies": {
+          "fast-glob": {
+            "version": "3.3.1",
+            "dependencies": {
+              "micromatch": {
+                "version": "4.0.8",
+                "dependencies": {
+                  "braces": {
+                    "version": "3.0.3"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "runtimeTree": {
+    "name": "lessenc-digital",
+    "version": "0.1.0"
+  },
+  "manifest": {
+    "name": "lessenc-digital",
+    "version": "0.1.0",
+    "dependencies": {
+      "next": "16.3.8"
+    },
+    "devDependencies": {
+      "@next/eslint-plugin-next": "16.3.8"
+    }
+  },
+  "lockfile": {
+    "packages": {
+      "": {
+        "name": "lessenc-digital",
+        "version": "0.1.0"
+      },
+      "node_modules/@next/eslint-plugin-next": {
+        "version": "16.3.8",
+        "dev": true,
+        "dependencies": {
+          "fast-glob": "3.3.1"
+        }
+      },
+      "node_modules/fast-glob": {
+        "version": "3.3.1",
+        "dev": true,
+        "dependencies": {
+          "micromatch": "^4.0.4"
+        }
+      },
+      "node_modules/micromatch": {
+        "version": "4.0.8",
+        "dev": true,
+        "dependencies": {
+          "braces": "^3.0.3"
+        }
+      },
+      "node_modules/braces": {
+        "version": "3.0.3",
+        "dev": true
+      }
+    }
+  }
+}

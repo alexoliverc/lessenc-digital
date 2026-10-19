@@ -320,7 +320,6 @@ export function createProtectedDownloadHandler(dependencies: ProtectedDownloadDe
         "Content-Type": delivery.mediaType,
         "Content-Length": String(delivery.sizeBytes),
         "Content-Disposition": contentDisposition(delivery.filename),
-        "Accept-Ranges": "none",
       },
     });
   };

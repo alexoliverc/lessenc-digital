@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 import { securityHeaderRules } from "./src/lib/security/http-security-headers";
 
 const nextConfig: NextConfig = {
+  agentRules: false,
   poweredByHeader: false,
   reactStrictMode: true,
   async headers() {

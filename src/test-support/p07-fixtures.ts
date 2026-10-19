@@ -16,6 +16,7 @@ export function catalogFixture(): CatalogOffer {
       status: "ACTIVE",
     },
     offer: { id: "offer", productId: "product", price: Money.of(2990, "BRL"), isActive: true },
+    deliveryReady: true,
   };
 }
 
@@ -35,6 +36,7 @@ export function orderFixture(): Order {
     createdAt: instant,
     updatedAt: instant,
     paidAt: null,
+    expiredAt: null,
   };
 }
 

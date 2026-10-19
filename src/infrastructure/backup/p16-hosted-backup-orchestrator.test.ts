@@ -229,6 +229,9 @@ describe("P16 hosted backup pre-mutation gates", () => {
   ])("rejects %s before database or provider mutation", async (_label, name, rootName) => {
     const harness = await createHarness();
     harness.env[name] = rootName === "work" ? harness.workRoot : harness.repositoryRoot;
+    if (rootName === "repository" && process.platform !== "win32") {
+      await chmod(harness.repositoryRoot, 0o700);
+    }
     const mutation = vi.fn();
 
     await expect(

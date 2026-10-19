@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "phase": "P18",
+  "generatedAt": "2026-10-18T20:30:00-03:00",
+  "authority": "LES-OWNER-AUTH-P18-COMPLETION-20261018-R01",
+  "technicalReleaseCandidate": "a780faa6d9275b1f9abfae2ad812aa0a2d78402a",
+  "integrationBranch": "phase/p17-end-to-end-business-validation",
+  "mainPreservedAt": "6e269e6db928b228babd8ffd44c3f55574cade4c",
+  "classification": "PREPARATORY_REVIEW_COMPLETE_FORMAL_READINESS_PENDING_NO_GO_RECOMMENDED",
+  "gateD": "NOT_READY",
+  "gateE": "GO_NOT_AUTHORIZED",
+  "production": "NOT_AUTHORIZED",
+  "counts": {
+    "controls": 57,
+    "p17DeferredItems": 15,
+    "riskAndBlockerRecords": 31,
+    "remediatedRiskRecords": 1,
+    "openOrConditionedRiskRecords": 30
+  },
+  "sha256": {
+    "docs/operations/p18-04-consolidated-readiness-assessment-r01.md": "7e02bd3a8c59077fdb65821d8f289b66f4b39b129687a7401f5d7b8892d77af5",
+    "docs/operations/p18-05-security-privacy-compliance-readiness-r01.md": "2e3b68bbcfc7ff09a2f4ebb8685b579bc4048e881ddeaa67903fb72dac86dfed",
+    "docs/operations/p18-06-data-recovery-readiness-r01.md": "bb57f695769a0d4f3f9783d670ad0dde4d86a409a8af60e27f5bfdd8ca711bfe",
+    "docs/operations/p18-07-commerce-operations-validation-r01.md": "c180604b32dc3d697f420893d7624b8ca2fabfee769a75dcfc481ccefa063371",
+    "docs/operations/p18-08-release-go-no-go-package-r01.md": "4ca1a23c226fe1b12b78dce529de59387017aaeacaac9b20c935777b7d681441",
+    "docs/operations/p18-09-final-decision-dossier-r01.md": "ee2077e982438249cfe70ca52407663ee65f89cbd83edd128781d43a8bc90fd0",
+    "docs/security/les-sec-ra-001-remediation-policy.json": "861d41b5598374e38a63b1e9e15ba6e23fbba1e07443d893ef79ca595c75bc72",
+    "vendor/braces-3.0.4-lessenc.1.tgz": "2d51d7d5d2c7742e2de93dcba052f14a8ab8295e1969822596b2abe19a83aa25",
+    "package-lock.json": "b833903f225d1f6b1150bf0d77a71f1714a416dd4712f76c62cd075af997558b",
+    "prisma/schema.prisma": "fa84f513a47fd9b6fda88aabbe635ab3f6375f65d12fff4411475467375e0615"
+  },
+  "github": {
+    "governancePullRequest": "https://github.com/alexoliverc/lessenc-digital/pull/63",
+    "governanceMerge": "70430d91644b36b47b747365ad301cc96644071d",
+    "securityPullRequest": "https://github.com/alexoliverc/lessenc-digital/pull/64",
+    "securityMerge": "a780faa6d9275b1f9abfae2ad812aa0a2d78402a",
+    "securityPostMergeQualityRun": "https://github.com/alexoliverc/lessenc-digital/actions/runs/39176335666",
+    "securityPostMergeCodeqlRun": "https://github.com/alexoliverc/lessenc-digital/actions/runs/39176335598"
+  }
+}

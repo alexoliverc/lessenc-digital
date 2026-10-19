@@ -1,0 +1,546 @@
+# P17 — End-to-End & Business Validation Architecture
+
+## Status
+
+P17-01 — VALIDATION ARCHITECTURE & RELEASE CANDIDATE BASELINE
+
+ARCHITECTURE FROZEN / IMPLEMENTATION READY
+
+This document defines the validation architecture for P17.
+
+It does not authorize deployment, production activation, provider mutation, payment production
+credentials, database mutation, destructive cleanup or movement of any previous checkpoint.
+
+### Administrative disposition — 17/10/2026
+
+Owner decision `LES-OWNER-DEC-20261017-P17-P18-R01` ended active P17 execution as
+`ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`. This does not change the frozen validation architecture,
+does not grant technical PASS and does not satisfy Gate D. P17-E05 is `BLOCKED / DEFERRED`; the
+remaining unresolved requirements are preserved in the Gate D evidence matrix and transferred to
+the P18 preparatory readiness inventory and later separately authorized remediation.
+
+P18 preparatory execution is allowed under an owner exception while Gate D remains `NOT_READY`.
+Gate E remains `GO NOT AUTHORIZED`, and production remains `NOT AUTHORIZED`.
+
+## Canonical baseline
+
+Repository baseline:
+
+`6e269e6db928b228babd8ffd44c3f55574cade4c`
+
+Phase branch:
+
+`phase/p17-end-to-end-business-validation`
+
+Previous immutable checkpoint:
+
+`checkpoint/p16-staging-deployment-complete`
+
+Previous hosted technical release:
+
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`
+
+P16 remains closed and its permanent checkpoint must not be moved by P17 work.
+
+## Objective
+
+P17 validates the complete system and business journey in staging.
+
+Canonical journey:
+
+Public Experience
+→ Checkout
+→ Order
+→ Mercado Pago
+→ Webhook
+→ Payment
+→ Entitlement
+→ Delivery
+→ Admin
+→ Audit
+
+P17 is primarily a validation phase.
+
+Existing commerce, payment, entitlement, buyer-access and administrative authority must not be
+silently redesigned merely to make an E2E scenario pass.
+
+A discovered product defect must be classified and remediated explicitly before the affected gate can
+continue.
+
+## Validation layers
+
+### Repository quality
+
+Vitest remains authoritative for current unit, boundary and application/infrastructure tests.
+
+Existing Vitest tests whose names include `browser` remain Node-based contract tests. They are not
+real-browser E2E evidence.
+
+### Database integration
+
+Existing integration suites remain authoritative for bounded integration behavior.
+
+P17 must not relabel database-integration tests as provider/browser E2E evidence.
+
+### Real browser E2E
+
+`@playwright/test` is the approved P17 real-browser runner.
+
+It is not installed by P17-01-B1.
+
+A separate controlled toolchain gate must add it, lock its version and validate the dependency graph.
+
+### Real provider validation
+
+Mercado Pago interactions remain TEST-only.
+
+Production payment credentials and real-money activation are prohibited.
+
+The browser is presentation authority only. Financial truth remains server/provider-side.
+
+### Hosted application validation
+
+The staging target remains:
+
+`https://lessenc.com.br`
+
+Hosted validation must distinguish application source identity, browser evidence, provider evidence,
+persisted business state, administrative/audit projection and infrastructure readiness.
+
+No single signal proves all layers.
+
+## P17 execution identity
+
+Each controlled P17 execution must have an evidence-package run identifier.
+
+Conceptual name:
+
+`P17_RUN_ID`
+
+It is evidence metadata only.
+
+It is not payment, authentication, authorization or business authority.
+
+Secrets and protected provider material must never enter the evidence package.
+
+## Evidence model
+
+Every applicable scenario must record:
+
+- scenario identifier;
+- P17 run identifier;
+- start and finish timestamps;
+- target application release;
+- browser engine and version;
+- viewport;
+- public route result;
+- Order identity;
+- Payment state;
+- provider TEST result;
+- webhook/reconciliation result;
+- Entitlement result;
+- buyer-access/delivery result;
+- administrative projection;
+- audit projection;
+- sanitized failure classification;
+- final outcome.
+
+Allowed outcomes:
+
+- PASS;
+- FAIL;
+- BLOCKED;
+- PENDING_EXTERNAL;
+- NOT_APPLICABLE.
+
+Screenshots and traces support evidence but do not replace authoritative server/provider state.
+
+## Data isolation
+
+P17 test data must remain distinguishable from ordinary application activity through values already
+supported by the application/provider contracts.
+
+P17 must not introduce a schema change solely to tag test data unless independently authorized.
+
+Destructive blanket cleanup is prohibited.
+
+## Mercado Pago boundary
+
+P17 uses Mercado Pago TEST only.
+
+`P16_MERCADOPAGO_CREDENTIAL_SET=test` remains the staging attestation unless a later controlled
+migration replaces the P16-named staging contract.
+
+Credential shape does not independently prove TEST authority.
+
+## Protected buyer delivery
+
+P17 must validate:
+
+Buyer Session
+→ rate limit
+→ entitlement/resource authorization
+→ server-only storage key
+→ PrivateResourceStorage
+→ private R2 object
+→ backend stream
+→ protected HTTP response
+→ delivery audit
+
+The browser must receive neither R2 credentials nor a direct private-storage URL.
+
+### Hosted byte-range transport reconciliation
+
+P17 hosted validation established that the hosting transport may honor an HTTP `Range` request after the application has already completed its protected backend flow.
+
+Byte-range is transport behavior, not buyer authentication or resource-authorization authority.
+
+The required invariant is:
+
+`Buyer Session -> rate limit -> entitlement/resource authorization -> private storage -> protected backend response -> optional hosted 206 transport -> delivery audit`
+
+P17 must prove adversarially that:
+
+- missing Buyer Session plus Range remains denied;
+- invalid Buyer Session plus Range remains denied;
+- a valid Buyer Session cannot use Range to obtain an unauthorized resource;
+- an authorized resource may be materialized as HTTP 200 or HTTP 206 by the hosted transport;
+- no R2 credential, storage key or direct private-storage URL is exposed.
+
+The application does not depend on `Accept-Ranges: none` and does not treat the incoming Range header as an authorization control.
+
+### Hosted G5-D proof — 06/10/2026
+
+The hosted adversarial matrix was executed against release:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+Observed results:
+
+- missing Buyer Session plus Range -> `401 SESSION_INVALID`;
+- invalid Buyer Session plus Range -> `401 SESSION_INVALID`;
+- valid Buyer Session plus unauthorized resource plus Range -> `404 RESOURCE_NOT_AVAILABLE`;
+- the unauthorized case created no delivery audit event;
+- valid Buyer Session plus authorized resource plus Range -> `206 Partial Content`;
+- the authorized case produced exactly one new `DigitalDeliveryEvent / SUCCEEDED`;
+- no direct R2 URL or storage key was exposed;
+- protected response controls remained `private, no-store`, `no-referrer` and `nosniff`;
+- Payment, Order, Outbox and Entitlement remained unchanged.
+
+Result:
+
+`G5-D = COMPLETE / PASS / HOSTED PROVEN`
+
+`G5 = COMPLETE / PASS / HOSTED PROVEN`
+
+This evidence closes the hosted Buyer Access / Protected Delivery validation scope. It does not independently make Gate D ready.
+
+## Administrative validation
+
+P17 must validate:
+
+- login;
+- MFA;
+- session enforcement;
+- RBAC;
+- Orders;
+- Payments;
+- Entitlements;
+- Deliveries;
+- Audit.
+
+Administrative browser validation must not bypass authentication merely to inspect data.
+
+### Hosted administrative proof — 06/10/2026
+
+The administrative browser matrix was executed against hosted technical release:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+The existing OWNER identity completed real primary authentication, MFA and authenticated session establishment before protected administrative resources were inspected.
+
+Observed hosted results:
+
+- `P17-A01` Login -> `PASS / HOSTED PROVEN`;
+- `P17-A02` MFA -> `PASS / HOSTED PROVEN`;
+- `P17-A03` Session -> `PASS / HOSTED PROVEN`;
+- `P17-A04` OWNER RBAC -> `PASS / HOSTED PROVEN`;
+- `P17-A05` Order projection -> F3 Order `PAID`;
+- `P17-A06` Payment projection -> F3 Payment `APPROVED`, Mercado Pago `processed / accredited`, `CREATE_RESPONSE / APPLIED`;
+- `P17-A07` Entitlement projection -> F3 Entitlement `ACTIVE` with active protected resource grant;
+- `P17-A08` Delivery projection -> four F3 delivery events, all `SUCCEEDED`;
+- `P17-A09` Audit projection -> OWNER-authorized administrative audit surface with legitimate empty state.
+
+The administrative audit model remains a separate authority boundary: `AdminAuditEvent` is not a substitute for provider/payment events, outbox processing, entitlement state or delivery audit events.
+
+`AdminAuditEvent.totalCount = 0` was preserved. No synthetic administrative mutation was created merely to populate the audit UI. Therefore the hosted A09 result proves surface access, RBAC, empty-state behavior and absence of exposed sensitive authentication material; it does not prove the administrative audit write path.
+
+No new AdminUser, role change, MFA reset, second payment, commercial-state mutation, manual outbox processing, entitlement mutation, R2 mutation or Buyer Access/G5 change occurred.
+
+Real Mercado Pago TEST webhook delivery remains `NOT PROVEN`.
+
+Administrative hosted result:
+
+`P17-HV-P9 = COMPLETE / PASS / HOSTED PROVEN`
+
+This closes the hosted administrative browser-validation scope only. It does not independently make Gate D ready.
+
+## Browser and provider security validation
+
+Required validation includes:
+
+- Mercado Pago Payment Brick;
+- provider challenge/3DS when TEST produces it;
+- route-specific CSP compatibility;
+- no production dependency on `unsafe-eval`;
+- browser/provider network behavior;
+- GTM when configured;
+- Meta only when active.
+
+Disabled providers are recorded as NOT_APPLICABLE with proof of disabled state.
+
+### Hosted F3 browser/provider proof — 05/10/2026
+
+Hosted technical release:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+The final hosted F3 execution used the real Mercado Pago Card Payment Brick after the P17 CSP, `mlstatic` and mandatory `onReady` fixes were included in the hosted release.
+
+The Brick rendered interactively and exactly one Mercado Pago TEST payment attempt was submitted through the hosted checkout/payment flow.
+
+Authoritative result:
+
+- Order `e56f6f12-a1f2-489e-8f88-5c626aabc402` -> `PAID`;
+- Payment `408c927d-67d6-4e5c-92ff-05cfff704cbf` -> `APPROVED`;
+- provider -> `MERCADO_PAGO`;
+- provider state -> `processed / accredited`;
+- PaymentEvent -> `CREATE_RESPONSE / APPLIED`.
+
+No 3DS/challenge was produced by TEST during this successful execution, therefore P17-P02 is `NOT_APPLICABLE` for F3 rather than a fabricated PASS.
+
+The successful hosted Brick execution occurred without a new CSP or `unsafe-eval` violation after the final compatibility corrections.
+
+Real Mercado Pago TEST webhook delivery remains a separate authority boundary and remains `NOT PROVEN`.
+
+## Responsive validation
+
+P17 E2E must cover deterministic:
+
+- mobile;
+- tablet;
+- desktop.
+
+Responsive PASS requires functional usability, not merely absence of exceptions.
+
+## Performance validation
+
+The roadmap requires performance validation.
+
+The owner explicitly approved the numeric P17 performance budget on 10/10/2026 under LES-P17-PERFORMANCE-BUDGET-R01. This authorizes acceptance criteria only. Implementation, test execution, deployment, external operations and production remain unauthorized.
+
+P17 therefore requires:
+
+1. deterministic timing evidence;
+2. explicit measured stages;
+3. no fabricated PASS threshold;
+4. valid evaluation of every required cohort against the owner-approved numeric budget before Gate D performance PASS.
+
+### Owner-approved performance acceptance policy — 10/10/2026
+
+Authority: `LES-P17-PERFORMANCE-BUDGET-R01 / OWNER APPROVED / ACCEPTANCE NOT PROVEN`.
+
+| Control | Approved measurement | Acceptance limit |
+| --- | --- | --- |
+| P17-PR01 | Public-page Largest Contentful Paint, P75 | <= 2,500 ms |
+| P17-PR02 | Checkout Interaction to Next Paint, P75 | <= 200 ms |
+| P17-PR03 | Browser interaction to HTTP payment POST `requestStart`, P95 | <= 1,000 ms |
+| P17-PR04 | Protected buyer delivery `responseStart - requestStart`, P95 | <= 2,000 ms |
+
+PR03 measures browser-side initiation of `/checkout/payment/start`, not backend or Mercado Pago provider latency. PIX and card are separate cohorts. PR04 measures HTTP response start, not complete file download.
+
+The approved methodology comprises 15 independent cohorts: PR01 (3 viewports), PR02 (3), PR03 PIX (3), PR03 card (3) and PR04 (3). Each cohort requires 3 valid warmups excluded from percentiles and 40 valid measured samples, totaling at least 45 warmups and 600 valid samples. Playwright retries are zero, and percentile calculation uses nearest-rank. Neither viewports nor payment methods may be aggregated to conceal a failing cohort.
+
+Viewport profiles: mobile 390x844, tablet 768x1024 and desktop 1440x900. Network profile: 10 Mbps download, 2 Mbps upload and RTT 80 ms. Network calibration tolerance is +/-10% for each approved dimension. Calibration failure blocks acceptance.
+
+No additional CPU throttling profile is approved. Future measurements must identify the hardware and environment. Laboratory timings cannot be represented as hosted-provider performance or real-user field metrics.
+
+This policy does not retrospectively convert the 240 historical unthrottled and uncalibrated navigation diagnostics into PR01 acceptance measurements. PR01 remains diagnostic-only / acceptance not proven; PR02-PR04 remain not executed.
+
+No performance PASS may be assigned before separately authorized execution, valid measurements and reconciliation with the applicable Gate D evidence authority.
+
+### Isolated local execution capsule — 10/10/2026
+
+The local performance and regression harness is now materialized as a two-container capsule. MySQL
+runs in an isolated network namespace and disposable `tmpfs`; the application shares only that
+namespace and publishes no port. Both services run with fixed non-root identities, dropped
+capabilities, `no-new-privileges`, no persistent volume and only allowlisted writable paths. Runtime
+procfs validation rejects non-loopback interfaces, default routes and external resolvers.
+
+The application image uses digest-pinned Node and Playwright bases. npm 11.19.1, Debian OpenSSL 3
+libraries and the Prisma 7.10.0 Schema Engine are hash-verified local inputs. Dependency installation,
+Prisma generation and the Next production build replay from a lock-bound npm cache under
+`--network=none`; no implicit engine or browser download is allowed.
+
+Implementation commit `7ab1777a3363c969cd882d8bac0ffee25afe1b13` passed the offline build,
+runtime/browser smoke, 199 MySQL integration tests and 14 executable real-Chromium E2E scenarios.
+The capsule also produced 240 unthrottled loopback navigation samples. Those samples are diagnostic
+support only because no owner-approved numeric acceptance budget existed at the time of those measurements. The capsule does not grant
+provider, hosted or Gate D authority.
+
+## Failure scenarios
+
+P17 must validate:
+
+- declined payment;
+- timeout;
+- duplicate webhook;
+- out-of-order webhook;
+- retries;
+- expired order;
+- duplicate attempt;
+- invalid authorization;
+- storage failure;
+- recovery.
+
+Fault injection must be controlled and bounded.
+
+<!-- P17-R15-I8-F06-RECONCILIATION -->
+### R15 — F06-POLICY-R1 implemented expiration boundary
+
+The implemented order domain adds terminal `OrderStatus.EXPIRED`, nullable `Order.expiredAt`, and the provider-confirmation transition from PENDING. EXPIRED-to-EXPIRED is idempotent; EXPIRED cannot reopen as PENDING or PAID.
+
+Expiration authority is restricted to the provider snapshot pairs `expired/expired` and `canceled/expired`. The Payment normalizes to CANCELED, including resolution from UNKNOWN, and the active attempt is released. The same persistence transaction records the terminal Order state. No PAYMENT_APPROVED or ORDER_PAID outbox item and no entitlement grant results from expiration.
+
+A generic `canceled/canceled` provider result remains distinct and may permit a further attempt while the Order is PENDING. Local elapsed time, token expiry, timeout, a missing provider response and UNKNOWN are not independent Order-expiration triggers.
+
+If APPROVED arrives after Order.EXPIRED, payment processing requires REVIEW while the Order remains EXPIRED; there is no automatic fulfillment. The public payment state exposes `expired` for an expired Order.
+
+The schema migration was exercised only against isolated `lessenc_test` with separate DDL migrator and DML runtime identities. R15-I5 and R15-I6 proved transactional behavior and full regression. The P17 branch contains implementation commit `920283ae473a12bbfcbacb1020bb6cb8dd3c7194` and hygiene commit `fbf45f146c7796956ca9263dbc46bec2996c4f27`.
+
+This is local implementation authority, not hosted deployment proof and not real provider webhook evidence. E05 remains PENDING_EXTERNAL; Gate D remains NOT READY; production is unauthorized.
+
+## Release binding
+
+The immutable P16 checkpoint remains:
+
+`22fad0f690618c27cabcfa58528a76ce0a580ad3`
+
+It is historical checkpoint authority and is no longer the current hosted application release.
+
+Last independently attested P17 Hostinger deployed Git release authority:
+
+`0f6534fcf1d5b87588f21f6dd64005309a50c786`
+
+Hosted G5/F3/P9 application-evidence execution release:
+
+`9e2ef25f4667b19f727c6ba1e277a79f55e3086f`
+
+Documentation reconciliation parent HEAD before this update:
+
+`1430d68db27e7535470a3746ee418fbb2582f4db`
+
+The delta from the hosted G5/F3/P9 evidence release `9e2ef25f4667b19f727c6ba1e277a79f55e3086f` through the last independently attested Hostinger deployed Git release `0f6534fcf1d5b87588f21f6dd64005309a50c786` is documentation only: `MEMORY.md`, `docs/architecture/p17-validation-architecture.md` and `docs/operations/p17-gate-d-evidence-matrix.md`.
+
+The hosted G5, F3 and P9 evidence was executed on technical release `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`. The Git delta from that release to the last independently attested Hostinger deployed Git release `0f6534fcf1d5b87588f21f6dd64005309a50c786` contains only canonical documentation, therefore that historical deployed application code remains code-equivalent to the application source exercised by G5, F3 and P9.
+
+The phase-neutral `STAGING_RELEASE_COMMIT` implementation is present in the P17 source lineage and preserves the frozen `P16_RELEASE_COMMIT` compatibility alias with fail-closed conflict and mismatch handling.
+
+The Hostinger release-binding environment was owner-observed during the R13/R14 hosted reconciliation. `STAGING_RELEASE_COMMIT` and the `P16_RELEASE_COMMIT` compatibility alias matched deployed HEAD `0f6534fcf1d5b87588f21f6dd64005309a50c786`; the fail-closed staging preflight passed before the successful Hostinger build, publish, current-version switch and Node restart. P17-L04 is therefore `PASS / HOSTED PROVEN` for that historical release.
+
+Post-merge Git identity reconciliation — 18/10/2026: the P17 documentary integration HEAD after PR
+#59 is `96b3fda29775b2db7d364b292b46b8bc3aefd364`, classified as
+`P17 DOCUMENTARY INTEGRATION HEAD / GIT ONLY`. Its first parent,
+`202a43bffd30ed2b85c22c83825da7697139e3a8`, is classified as
+`PRE-PR59 TECHNICAL HEAD / R04 INTEGRATED` and already includes R04 commit
+`f01a683c4f90d38b704906552406cb9833960866`; no further R04 integration PR is required. The owner
+reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, but independent
+release-binding, build, publish, current-version switch and restart attestation is pending. No
+application-code-equivalence or P17-L04 PASS is inferred for either later commit from the historical
+`0f6534fcf1d5b87588f21f6dd64005309a50c786` evidence.
+
+### Hosted public, provider, release-binding and responsive reconciliation — 06/10/2026
+
+Hosted validation against the historical independently attested Hostinger deployed Git release `0f6534fcf1d5b87588f21f6dd64005309a50c786` established:
+
+- public experience E01 is `PASS / HOSTED PROVEN`;
+- GTM is `NOT_APPLICABLE` because `GTM_CONTAINER_ID` is absent and no GTM/GA browser provider script, global or network request was observed;
+- Meta browser provider is `NOT_APPLICABLE` because `META_PIXEL_ID` is absent and no Meta browser script, `fbq` global or provider network request was observed;
+- release-binding L04 is `PASS / HOSTED PROVEN`: `STAGING_RELEASE_COMMIT` and the `P16_RELEASE_COMMIT` compatibility alias matched the deployed HEAD, the fail-closed preflight passed and Hostinger completed build, publish, current-version switch and application restart.
+
+Responsive hosted execution covers public, checkout guard, payment guard, unauthenticated admin and authenticated OWNER administrative surfaces in the canonical mobile, tablet and desktop viewport classes.
+
+Buyer Access has no separate buyer-facing presentation page in the current MVP; its authority remains API/protected-delivery and was already closed by hosted G5.
+
+Responsive Gate D rows remain unresolved rather than synthetically passing. The hosted F3 execution proves a real interactive Mercado Pago Card Payment Brick, but it does not prove that Brick in mobile, tablet and desktop. `P17-R01`, `P17-R02` and `P17-R03` therefore remain `PENDING_EXTERNAL`.
+
+No second payment, Order, Payment, Entitlement, R2 object, Buyer Access/G5 state or administrative business object was created or mutated for this responsive reconciliation. Normal OWNER authentication and administrative session activity occurred only as required to access the protected hosted presentation.
+
+P17 APPLICATION DEPLOYMENT = HOSTED / HISTORICALLY ATTESTED GIT RELEASE 0f6534fcf1d5b87588f21f6dd64005309a50c786 / BUILD + PUBLISH + RESTART PASS
+
+P17 SOURCE/RELEASE IDENTITY = HISTORICALLY ATTESTED HOSTINGER GIT RELEASE 0f6534fcf1d5b87588f21f6dd64005309a50c786 / APPLICATION CODE EQUIVALENT TO 9e2ef25f4667b19f727c6ba1e277a79f55e3086f
+
+P17 RELEASE-BINDING ENVIRONMENT ATTESTATION = PASS / HOSTED PROVEN / 0f6534fcf1d5b87588f21f6dd64005309a50c786
+
+## Production boundary
+
+P17 does not authorize production.
+
+Production deployment, production payment credentials, real-money activation and production data
+mutation remain future owner-controlled decisions.
+
+## Gate D authority
+
+Gate D asks whether the complete customer and operational journey functions correctly in staging.
+
+PASS requires all critical mandatory scenarios to be resolved as PASS.
+
+Critical FAIL or unresolved mandatory BLOCKED prevents progression.
+
+The administrative closeout does not waive this rule. It changes work sequencing only: P18 may
+prepare the readiness inventory, but a conclusive production-readiness GO and P19-C execution still
+require Gate D PASS plus their separate approvals.
+
+## P17-01 architecture decision
+
+DISCOVERY: COMPLETE
+VALIDATION ARCHITECTURE: FROZEN
+PLAYWRIGHT: AVAILABLE / HOSTED R13 BROWSER VALIDATION EXECUTED
+REAL BROWSER E2E: REQUIRED
+MERCADO PAGO: TEST ONLY
+P16 CHECKPOINT: IMMUTABLE
+P16_RELEASE_COMMIT: HISTORICALLY ATTESTED HOSTED 0f6534fcf1d5b87588f21f6dd64005309a50c786 / COMPATIBILITY ALIAS / MATCHES STAGING_RELEASE_COMMIT
+STAGING_RELEASE_COMMIT: HISTORICALLY ATTESTED HOSTED 0f6534fcf1d5b87588f21f6dd64005309a50c786 / MATCHES HEAD / FAIL-CLOSED PREFLIGHT PASS
+P17 DEPLOYMENT: HISTORICALLY ATTESTED HOSTED / 0f6534fcf1d5b87588f21f6dd64005309a50c786 / CERTIFIED BUILD + PUBLISH + RESTART
+PRODUCTION: NOT AUTHORIZED
+
+## Local performance acceptance implementation addendum — 11/10/2026
+
+The local validation architecture now includes a fail-closed acceptance controller for the owner
+approved `LES-P17-PERFORMANCE-BUDGET-R01` protocol. It orchestrates 15 independent cohorts with
+three excluded warmups and forty valid measurements per cohort, nearest-rank percentiles, zero
+retries and one worker. Mobile, tablet and desktop cohorts remain independent, as do PIX and card
+payment-initiation cohorts.
+
+The controller owns only disposable local state. It rejects provider environment variables,
+publishes no database port and uses a read-only non-root application runtime sharing the isolated
+MySQL network namespace. The browser network guard allows loopback resources only, with the exact
+local consent endpoint admitted for the acquisition-to-checkout setup. Provider, hosted and
+production authority remain outside this architecture.
+
+Calibration measures gross download, upload and RTT values against the approved 10 Mbps, 2 Mbps and
+80 ms profile with 10% tolerance. A loopback baseline may be captured as diagnostic provenance but
+is never subtracted from the approved targets. First-warmup smoke and all later observations stop
+the cohort on invalid calibration, missing browser performance entries, functional mismatch or
+isolation failure.
+
+Browser metrics use native LCP, Performance Event Timing and resource/navigation timing. INP
+correlation permits zero-ID auxiliary events only when the same observation contains a qualifying
+positive interaction ID; a zero-only or missing observation remains invalid. Missing browser
+evidence is never replaced by wall-clock timing.
+
+The 11/10 execution proved the implementation and its fail-closed behavior but did not prove the
+acceptance policy end to end: PR01 completed only the mobile cohort, PR02 stopped on a missing
+Event Timing entry, and PR03/PR04 were not reached. The architectural state is therefore
+`IMPLEMENTED_RUNTIME_VALIDATION_PENDING`; acceptance is `NOT_PROVEN`, Gate D is `NOT_READY` and
+production is `UNAUTHORIZED`.

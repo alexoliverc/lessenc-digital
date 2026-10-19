@@ -80,3 +80,66 @@ Esse documento é operacional e não redefine versões da stack, gerenciador de 
   candidate for encrypted recovery units, guarded database dumps, deterministic 7/4/3 retention,
   integrity verification, isolated local restore, RPO/RTO evidence classification and plan-only
   application rollback. Hosted execution remains pending.
+
+## P17 validation operations
+
+- [P17 Gate D evidence matrix](./p17-gate-d-evidence-matrix.md) — current evidence authority and
+  unresolved Gate D boundaries.
+- [P17 local validation report](./p17-local-validation-report.md) — local browser, integration,
+  performance-capsule and provenance evidence with explicit authority limits.
+- [P17 CI verification build contract](./p17-ci-build-contract.md) — synthetic, non-deployable-by-
+  authority CI build contract and independent job boundary.
+- [LES-P17-CODEX-EXEC-R13 validation report](./les-p17-codex-exec-r13-temporary-risk-acceptance-validation-report.md)
+  — local deterministic audit-policy implementation for `LES-SEC-RA-001`, fail-closed regression
+  evidence and production hard-stop boundary.
+- [LES-P17-CODEX-EXEC-R14-A pre-publication report](./les-p17-codex-exec-r14-a-pre-publication-validation-report.md)
+  — owner ratification, complete R13 diff audit, regression evidence and controlled-publication
+  readiness without performing Git publication.
+
+P17 is administratively closed with deferred items under
+`LES-OWNER-DEC-20261017-P17-P18-R01`; this does not grant technical PASS or Gate D. The Gate D
+matrix remains the canonical inventory of preserved evidence and unresolved authority.
+
+## P18 preparatory review
+
+- [P18 Final Owner Acceptance](./p18-final-owner-acceptance-r01.md) — owner approval after independent audit R02; Gate D/E and production remain restricted.
+- [ADR-0012](../decisions/ADR-0012-p17-administrative-close-p18-preparatory-exception.md) — owner
+  decision separating P17 administrative sequencing from technical acceptance.
+- [P18 Preparatory Phase Execution Brief](../architecture/p18-production-readiness-preparatory-phase-execution-brief.md)
+  — readiness inventory, inherited blockers, risk/deadline preservation, P19-A/P19-B preparation
+  boundaries and explicit production stop gates.
+- [ADR-0013](../decisions/ADR-0013-p18-completion-execution-mandate.md) and
+  [P18-04–P18-09 Completion Phase Execution Brief](../architecture/p18-completion-phase-execution-brief.md)
+  — later authority for controlled technical completion, local/isolated validation and Git
+  integration without production activation or independent acceptance.
+- [P18-01 Readiness Inventory](./p18-readiness-inventory-r01.md) — traceable control/evidence matrix
+  across architecture, security, data, commerce, delivery, recovery and operations.
+- [P18-01 Risk and Blocker Register](./p18-risk-and-blocker-register-r01.md) — inherited Gate D
+  blockers, production hard stops, deadlines and missing evidence without fabricated ownership.
+- [P18-01 Validation Report](./p18-01-validation-report-r01.md) — documentary execution baseline,
+  audited sources, integrity checks, limitations and handoff state.
+- [P18-02 Dependency & Remediation Map](./p18-02-dependency-and-remediation-map-r01.md) — propostas
+  futuras P19-A/P19-B, dependências, critérios de fechamento e stop gates, sem iniciar execução.
+- [P18-02 Validation Report](./p18-02-validation-report-r01.md) — fontes e código examinados,
+  contagens reconciliadas, verificações, limitações e classificação preparatória.
+- [P18-04 Consolidated Readiness Assessment](./p18-04-consolidated-readiness-assessment-r01.md) —
+  matriz atual 57/15/31 com classificação e autoridade de evidência.
+- [P18-05 Security, Privacy & Compliance Readiness](./p18-05-security-privacy-compliance-readiness-r01.md)
+  — revisão integral e fechamento técnico de `LES-SEC-RA-001`, sem certificação legal ou produção.
+- [P18-06 Data & Recovery Readiness](./p18-06-data-recovery-readiness-r01.md) — schema/migration
+  hashes, compatibilidade e gaps de backup/recovery da release candidata.
+- [P18-07 Commerce & Operations Validation](./p18-07-commerce-operations-validation-r01.md) —
+  regressões locais e reconciliação das 15 pendências Gate D.
+- [P18-08 Release Go/No-Go Package](./p18-08-release-go-no-go-package-r01.md) — release candidate,
+  configuração, checklist, STOP criteria, rollback e preparação P19.
+- [P18-09 Final Decision Dossier](./p18-09-final-decision-dossier-r01.md) — parecer NO-GO,
+  31 riscos, Gate D/Gate E e handoff de auditoria independente.
+- [P18 Final Audit Manifest](./p18-final-audit-manifest-r01.json) — identidades, contagens, hashes
+  SHA-256 e links de CI para reprodução independente.
+
+## P18-03 — Operational Resilience & Launch Readiness (preparatory candidate)
+
+- [Operational Resilience Readiness Review](p18-03-operational-resilience-review-r01.md)
+- [Incident, Rollback & Launch Readiness Plan](p18-03-incident-rollback-readiness-plan-r01.md)
+- [Operational Risk & Ownership Matrix](p18-03-risk-ownership-matrix-r01.md)
+- [P18-03 Validation Report](p18-03-validation-report-r01.md)

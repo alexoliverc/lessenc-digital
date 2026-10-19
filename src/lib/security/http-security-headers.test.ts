@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   checkoutPaymentSecurityHeaders,
   globalSecurityHeaders,
+  protectedDigitalDeliverySecurityHeaders,
   securityHeaderRules,
 } from "./http-security-headers";
 
@@ -14,9 +15,36 @@ describe("global HTTP security headers", () => {
   it("applies the baseline to every application route", () => {
     const rules = securityHeaderRules("local");
 
-    expect(rules).toHaveLength(2);
+    expect(rules).toHaveLength(3);
     expect(rules[0]?.source).toBe("/:path*");
     expect(rules[1]?.source).toBe("/checkout/payment");
+    expect(rules[2]?.source).toBe("/api/buyer-access/resources/:path*");
+  });
+
+  it("overrides the global policy at the protected digital delivery boundary", () => {
+    const protectedHeaders = new Map(
+      protectedDigitalDeliverySecurityHeaders().map(({ key, value }) => [key, value]),
+    );
+
+    expect(protectedHeaders.get("Referrer-Policy")).toBe("no-referrer");
+    expect(protectedHeaders.has("Accept-Ranges")).toBe(false);
+    expect(protectedHeaders.get("Cache-Control")).toBe("private, no-store");
+    expect(protectedHeaders.get("X-Content-Type-Options")).toBe("nosniff");
+
+    const rules = securityHeaderRules("staging");
+
+    const effective = new Map<string, string>();
+
+    for (const rule of [rules[0]!, rules[2]!]) {
+      for (const { key, value } of rule.headers) {
+        effective.set(key, value);
+      }
+    }
+
+    expect(effective.get("Referrer-Policy")).toBe("no-referrer");
+    expect(effective.has("Accept-Ranges")).toBe(false);
+    expect(effective.get("Cache-Control")).toBe("private, no-store");
+    expect(effective.get("X-Content-Type-Options")).toBe("nosniff");
   });
 
   it("uses an explicit CSP for the providers represented by the repository", () => {
@@ -34,6 +62,39 @@ describe("global HTTP security headers", () => {
     expect(csp).not.toContain("'unsafe-eval'");
     expect(csp).not.toMatch(/(?:^|; )default-src https:/u);
     expect(csp).not.toMatch(/(?:^|; )frame-src https:(?:;|$)/u);
+  });
+
+  it("allows only the observed Mercado Pago Card Brick origins without weakening CSP", () => {
+    const csp = asMap("staging").get("Content-Security-Policy")!;
+    const checkoutCsp = new Map(
+      checkoutPaymentSecurityHeaders("staging").map(({ key, value }) => [key, value]),
+    ).get("Content-Security-Policy")!;
+    const directive = (policy: string, name: string) =>
+      policy.split("; ").find((value) => value.startsWith(`${name} `));
+    const sources = (policy: string, name: string) =>
+      directive(policy, name)?.split(" ").slice(1) ?? [];
+    const connectSources = sources(csp, "connect-src");
+    const scriptSources = sources(csp, "script-src");
+    const imageSources = sources(csp, "img-src");
+
+    expect(connectSources).toContain("https://http2.mlstatic.com");
+    expect(scriptSources).toContain("https://http2.mlstatic.com");
+    expect(connectSources).toContain("https://api.mercadolibre.com");
+    expect(connectSources).toContain("https://www.mercadolibre.com");
+    expect(imageSources).toContain("https://www.mercadopago.com.br");
+    expect(imageSources).toContain("https://www.mercadolibre.com");
+    expect(scriptSources).toContain("https://sdk.mercadopago.com");
+    expect(csp).not.toContain("*.mlstatic.com");
+    expect(csp).not.toContain("*.mercadolibre.com");
+    expect(csp).not.toContain("'unsafe-eval'");
+    expect(connectSources).not.toContain("https:");
+    expect(scriptSources).not.toContain("https:");
+    expect(directive(csp, "default-src")).toBe("default-src 'self'");
+    expect(sources(csp, "frame-src")).not.toContain("https:");
+    expect(directive(csp, "script-src-attr")).toBe("script-src-attr 'none'");
+    expect(directive(csp, "object-src")).toBe("object-src 'none'");
+    expect(directive(csp, "frame-ancestors")).toBe("frame-ancestors 'none'");
+    expect(directive(checkoutCsp, "frame-src")).toBe("frame-src https:");
   });
 
   it("relaxes only checkout payment frames for provider-originated dynamic 3DS ACS URLs", () => {

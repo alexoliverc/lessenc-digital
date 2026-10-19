@@ -1,6 +1,6 @@
-# Índice oficial da baseline documental LES-DIG P00–P16
+# Índice oficial da baseline documental LES-DIG P00–P18
 
-**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED e Gate C — OPERATIONS READY permanece PASS. P16 — Staging Deployment concluiu P16-01–P16-09 e está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`. A release técnica final hospedada/validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`; o checkpoint permanente `checkpoint/p16-staging-deployment-complete` é uma tag anotada que dereferencia exatamente essa release e não deve ser movida por documentação posterior; a release `976a0472382abc0597996366db63c981b5733d6e` permanece evidência histórica da P16-08 e target break-glass compatível. Produção permanece fora do escopo e não autorizada.
+**Estado:** P00–P15 permanecem encerradas conforme suas baselines canônicas. P15 — Observability & Operational Readiness está COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED e Gate C — OPERATIONS READY permanece PASS. P16 — Staging Deployment concluiu P16-01–P16-09 e está `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`. A release técnica final hospedada/validada é `22fad0f690618c27cabcfa58528a76ce0a580ad3`; o checkpoint permanente `checkpoint/p16-staging-deployment-complete` é uma tag anotada que dereferencia exatamente essa release e não deve ser movida por documentação posterior; a release `976a0472382abc0597996366db63c981b5733d6e` permanece evidência histórica da P16-08 e target break-glass compatível. Por decisão do owner em 17/10/2026, P17 está `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`, P17-E05 está `BLOCKED / DEFERRED`, Gate D permanece `NOT_READY` e P18 está `PREPARATORY EXECUTION AUTHORIZED / OWNER EXCEPTION`. Gate E está `GO NOT AUTHORIZED`; produção permanece `NOT AUTHORIZED`.
 
 ## Precedência e classificação das fontes
 
@@ -404,3 +404,57 @@ P16 classification:
 `COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED`
 
 Production remains out of scope and unauthorized.
+
+<!-- P17-01-VALIDATION-ARCHITECTURE-INDEX -->
+
+## P17 — End-to-End & Business Validation
+
+P17 is `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS` under
+`LES-OWNER-DEC-20261017-P17-P18-R01`. This is not a technical PASS; Gate D remains `NOT_READY`,
+and all unresolved validation authority remains preserved.
+
+Canonical P17 validation documents:
+
+- [P17 validation architecture](architecture/p17-validation-architecture.md)
+- [P17 Gate D evidence matrix](operations/p17-gate-d-evidence-matrix.md)
+- [P17 local validation report](operations/p17-local-validation-report.md)
+- [P17 CI verification build contract](operations/p17-ci-build-contract.md)
+- [LES-SEC-RA-001 temporary braces risk acceptance](security/les-sec-ra-001-temporary-braces-risk-acceptance.md)
+- [LES-P17-CODEX-EXEC-R13 temporary risk acceptance validation report](operations/les-p17-codex-exec-r13-temporary-risk-acceptance-validation-report.md)
+- [LES-P17-CODEX-EXEC-R14-A pre-publication validation report](operations/les-p17-codex-exec-r14-a-pre-publication-validation-report.md)
+
+P17 requires real browser/provider E2E, complete business-journey reconciliation, hosted protected
+buyer-delivery validation, responsive validation and performance evidence before Gate D may pass.
+
+The 10/10/2026 autonomous local closeout is recorded in the local validation report and implementation
+commit `7ab1777a3363c969cd882d8bac0ffee25afe1b13`. It proves the isolated offline capsule, local
+regressions and diagnostic public-navigation measurements only; external Gate D authority remains
+open.
+
+Production remains unauthorized.
+
+## P18 — Production Readiness Review — controlled completion execution
+
+- [P18 Final Owner Acceptance](operations/p18-final-owner-acceptance-r01.md) — preparatory scope accepted; formal readiness pending, NO-GO.
+- [ADR-0012 — P17 administrative closeout and P18 preparatory exception](decisions/ADR-0012-p17-administrative-close-p18-preparatory-exception.md)
+- [ADR-0013 — P18 completion execution mandate](decisions/ADR-0013-p18-completion-execution-mandate.md)
+- [P18 Preparatory Phase Execution Brief](architecture/p18-production-readiness-preparatory-phase-execution-brief.md)
+- [P18-04–P18-09 Completion Phase Execution Brief](architecture/p18-completion-phase-execution-brief.md)
+- [P18-01 Readiness Inventory](operations/p18-readiness-inventory-r01.md)
+- [P18-01 Risk and Blocker Register](operations/p18-risk-and-blocker-register-r01.md)
+- [P18-01 Validation Report](operations/p18-01-validation-report-r01.md)
+- [P18-02 Architecture & Security Readiness Review](architecture/p18-02-architecture-security-readiness-review-r01.md)
+- [P18-02 Security Controls & Gap Matrix](security/p18-02-security-controls-gap-matrix-r01.md)
+- [P18-02 Dependency & Remediation Map](operations/p18-02-dependency-and-remediation-map-r01.md)
+- [P18-02 Validation Report](operations/p18-02-validation-report-r01.md)
+
+The later owner mandate `LES-OWNER-AUTH-P18-COMPLETION-20261018-R01` authorizes controlled technical
+execution, remediation and Git integration for P18-04 through P18-09 on the P17 integration branch.
+Preparatory owner acceptance is recorded under `LES-OWNER-DEC-P18-PREPARATORY-ACCEPTANCE-20261018-R01`. Gate E GO, P19 execution and production remain separately gated and unauthorized.
+
+## P18-03 — Operational Resilience & Launch Readiness (preparatory candidate)
+
+- [Operational Resilience Readiness Review](operations/p18-03-operational-resilience-review-r01.md)
+- [Incident, Rollback & Launch Readiness Plan](operations/p18-03-incident-rollback-readiness-plan-r01.md)
+- [Operational Risk & Ownership Matrix](operations/p18-03-risk-ownership-matrix-r01.md)
+- [P18-03 Validation Report](operations/p18-03-validation-report-r01.md)

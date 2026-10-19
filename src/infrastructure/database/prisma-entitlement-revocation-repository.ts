@@ -187,6 +187,7 @@ export class PrismaEntitlementRevocationRepository implements EntitlementRevocat
           createdAt: order.createdAt.toISOString(),
           updatedAt: order.updatedAt.toISOString(),
           paidAt: order.paidAt.toISOString(),
+          expiredAt: order.expiredAt?.toISOString() ?? null,
         };
 
         const domainPayment: DomainPayment = {

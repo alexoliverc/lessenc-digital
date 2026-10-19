@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "VERIFIED",
+  "identity": {
+    "node": "24.21.0",
+    "npm": "11.19.1",
+    "os": "linux",
+    "architecture": "amd64",
+    "libc": "glibc",
+    "packageLockSha256": "E93A35F25C59CADF6BEA860759B447CC2F86DEC16CA562B0182BB5AC02902720",
+    "imageDigest": "sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20",
+    "registryOrigin": "https://registry.npmjs.org"
+  },
+  "cache": {
+    "rootKey": "npm-11.19.1/node-24.21.0/linux-amd64-glibc/E93A35F25C59CADF6BEA860759B447CC2F86DEC16CA562B0182BB5AC02902720",
+    "fileCount": 786,
+    "totalBytes": 277883978,
+    "inventorySha256": "E44A77D985BEE7299B9A27552274E19D8C2327DBDC1C56926654FFB534E839BC"
+  },
+  "integrity": {
+    "result": "PASS",
+    "lockEntries": 445,
+    "verifiedTargetEntries": 390,
+    "requiredPackages": 13
+  },
+  "offlineReplay": {
+    "result": "PASS",
+    "scripts": "disabled",
+    "browserDownloads": false
+  },
+  "prismaSchemaEngine": {
+    "status": "MATERIALIZED_SEPARATELY",
+    "evidence": "e2e/performance/capsule/supply-chain.json"
+  }
+}

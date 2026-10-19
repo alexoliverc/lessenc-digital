@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "VERIFIED",
+  "identity": {
+    "node": "24.21.0",
+    "npm": "11.19.1",
+    "os": "linux",
+    "architecture": "amd64",
+    "libc": "glibc",
+    "packageLockSha256": "B7026C1577D286A2E5A8C5289463AE71341444079770AEECD382B5B6E2AADAD2",
+    "imageDigest": "sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20",
+    "registryOrigin": "https://registry.npmjs.org"
+  },
+  "cache": {
+    "rootKey": "npm-11.19.1/node-24.21.0/linux-amd64-glibc/B7026C1577D286A2E5A8C5289463AE71341444079770AEECD382B5B6E2AADAD2",
+    "fileCount": 768,
+    "totalBytes": 210423502,
+    "inventorySha256": "16282543D10E1D79A25BB88D26040666942E3A9E6E8ECE36726F7AC7C6FBE2EA"
+  },
+  "integrity": {
+    "result": "PASS",
+    "lockEntries": 445,
+    "verifiedTargetEntries": 390,
+    "requiredPackages": 12
+  },
+  "offlineReplay": {
+    "result": "PASS",
+    "scripts": "disabled",
+    "browserDownloads": false
+  },
+  "prismaSchemaEngine": {
+    "status": "NOT_MATERIALIZED",
+    "requiredPhase": "V03-B3-02C"
+  }
+}

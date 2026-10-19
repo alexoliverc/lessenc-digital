@@ -3,7 +3,7 @@
 **Status:** Current Canonical Roadmap
 **Scope:** MVP P00 → P20
 **Governance:** AGENTS.md
-**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment has completed technical and hosted validation on frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3`. P16-09 is COMPLETE / PASS / HOSTED VALIDATED. The documentation closeout is integrated in `main` at `6c60441e00e4520b8c689f8c4944c36c73d80d12`. The permanent annotated checkpoint `checkpoint/p16-staging-deployment-complete` dereferences to frozen technical release `22fad0f690618c27cabcfa58528a76ce0a580ad3` and must not be moved by later documentation-only work. Final authoritative hosted RPO is 888 ms against the <= 24 hour objective. `976a0472382abc0597996366db63c981b5733d6e` is retained only as a schema-compatible break-glass application rollback target. Residual limits remain explicit: retention 7/4/3 is PLAN_ONLY, no independently proved final off-R2 copy is claimed, DB/R2 capture is sequential rather than atomic and four HIGH development-tooling findings remain deferred. Production is not authorized by P16. P17 remains the next phase after P16 Git lifecycle closeout.
+**Current execution:** P13, P14 and P15 remain COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED under their frozen canonical baselines. Gate C — OPERATIONS READY remains PASS. P16 — Staging Deployment remains COMPLETE / PASS / HOSTED VALIDATED / DOCUMENTED / INTEGRATED / CHECKPOINTED and its permanent checkpoint remains immutable at `22fad0f690618c27cabcfa58528a76ce0a580ad3`. Under owner decision `LES-OWNER-DEC-20261017-P17-P18-R01`, P17 — End-to-End & Business Validation is `ADMINISTRATIVELY CLOSED / DEFERRED ITEMS`; this is not a technical PASS and creates no quality checkpoint. P17-E05 is `BLOCKED / DEFERRED`; the remaining unresolved P17 items are preserved in the Gate D matrix. Gate D remains `NOT_READY`. P18 preparatory scope is `PREPARATORY REVIEW COMPLETE / OWNER ACCEPTED`; independent audit R02 passed. Gate D, Gate E, P19 and production remain separately gated. Gate E is `GO NOT AUTHORIZED`; P19 remains future preparation with production activation conditioned; production remains `NOT AUTHORIZED`. Existing P17 hosted/local evidence, release identities, security findings, checkpoints and historical classifications remain preserved under their original authority boundaries.
 **P04 physical reconciliation:** COMPLETE — validated on 12/09/2026
 
 ---
@@ -723,7 +723,7 @@ The first OWNER bootstrap was not executed and no real administrative account wa
 
 ## P13 — Analytics, Attribution & Growth Infrastructure
 
-**Status:** IN PROGRESS / P13-A COMPLETE / P13-B COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED / P13-C COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
+**Status:** COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED
 ### Objective
 
 Create measurement infrastructure for acquisition and conversion.
@@ -796,8 +796,8 @@ A completed sale can be attributed to its acquisition journey when data is avail
 - P13-D — Internal Measurement Producers & Consent Boundary: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
 - P13-E — Canonical Purchase & Financial Reconciliation: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
 - P13-F — Measurement & Advertising Adapters: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
-- P13-G — Admin Analytics: **NOT STARTED**;
-- P13-H — Technical Gate: **NOT STARTED**.
+- P13-G — Admin Analytics: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**;
+- P13-H — Technical Gate: **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**.
 
 <!-- P13-B-ATTRIBUTION-PERSISTENCE-CLOSEOUT -->
 ### P13-A Git lifecycle and P13-B implementation closeout
@@ -1298,7 +1298,84 @@ liveness.
 
 ## P17 — End-to-End & Business Validation
 
-**Status:** PENDENTE
+**Status:** ADMINISTRATIVELY CLOSED / DEFERRED ITEMS / GATE D NOT READY
+
+Owner decision `LES-OWNER-DEC-20261017-P17-P18-R01`, dated 17/10/2026, ended active P17
+execution for administrative sequencing purposes only. It did not grant technical PASS, did not
+resolve any mandatory validation row and did not create a P17 Final Quality Gate or checkpoint.
+Unresolved items are carried forward explicitly into the P18 readiness inventory and later P19-B
+consolidated remediation.
+
+The current P17 Git/documentary integration HEAD after PR #59 is
+`96b3fda29775b2db7d364b292b46b8bc3aefd364`, classified as
+`P17 DOCUMENTARY INTEGRATION HEAD / GIT ONLY`. Its first parent,
+`202a43bffd30ed2b85c22c83825da7697139e3a8`, is classified as
+`PRE-PR59 TECHNICAL HEAD / R04 INTEGRATED` and already includes R04 commit
+`f01a683c4f90d38b704906552406cb9833960866`; no further R04 integration PR is required. The owner
+reports a Hostinger deployment of `202a43bffd30ed2b85c22c83825da7697139e3a8`, but independent
+release-binding, build, publish, current-version switch and restart attestation remains pending. The
+last independently attested Hostinger deployed Git release recorded in this documentation is
+`0f6534fcf1d5b87588f21f6dd64005309a50c786`. The original hosted G5/F3/P9 application-evidence
+execution release is `9e2ef25f4667b19f727c6ba1e277a79f55e3086f`; the zero application-code
+delta is established only for that historical comparison through
+`0f6534fcf1d5b87588f21f6dd64005309a50c786`, not through either later commit. The integrated
+`96b3fda29775b2db7d364b292b46b8bc3aefd364` identity is Git/documentary authority only and does not
+create hosted, runtime or P17-L04 authority.
+
+Current hosted authority includes:
+
+- P17-E01 Public Experience = `PASS / HOSTED PROVEN`;
+- P17-L04 release binding = `PASS / HOSTED PROVEN`;
+- hosted protected delivery G5 = `COMPLETE / PASS / HOSTED PROVEN`;
+- hosted administrative validation P9 = `COMPLETE / PASS / HOSTED PROVEN`;
+- P17-P05 GTM = `NOT_APPLICABLE`;
+- P17-P06 Meta browser provider = `NOT_APPLICABLE`.
+
+Gate D remains fail-closed. Real Mercado Pago TEST webhook delivery P17-E05 is `BLOCKED / DEFERRED`; P17-F01 remains `PENDING_EXTERNAL / DEFERRED`; P17-F02–F08 are PASS / TEST PROVEN only in isolated local validation, with F06 also REGRESSION PROVEN / PUBLISHED on P17; P17-B01 and P17-B03–B07 retain unresolved validation authority and are deferred; P17-R01–R03 remain `PENDING_EXTERNAL / DEFERRED` because the real interactive Payment Brick has not been proven across mobile, tablet and desktop; and definitive P17-PR01–PR04 acceptance remains deferred under the approved numeric budget.
+
+Production remains unauthorized.
+
+<!-- P17-R15-I8-F06-RECONCILIATION -->
+### R15 — F06 implementation and Failure Matrix reconciliation
+
+F06-POLICY-R1 is implemented on the P17 branch: provider-confirmed Order expiration is terminal and idempotent, blocks a new attempt, records `expiredAt`, and routes late approval to REVIEW without fulfillment. Generic cancellation and timeout do not independently expire the Order.
+
+The F06 migration was applied and verified only on isolated local `lessenc_test`; no hosted database migration or Hostinger deployment was performed.
+
+P17 implementation commits: `920283ae473a12bbfcbacb1020bb6cb8dd3c7194` (F06) and `fbf45f146c7796956ca9263dbc46bec2996c4f27` (test hygiene). Full regression: lint PASS, typecheck PASS, 1,030 unit tests PASS, 199 MySQL integration tests PASS and matching 27-table database snapshots.
+
+Failure Matrix authority: F01 PENDING_EXTERNAL; F02-F08 PASS / TEST PROVEN locally; F06 additionally REGRESSION PROVEN / PUBLISHED. These results do not prove real Mercado Pago TEST webhook delivery (E05), do not establish hosted F06 deployment and do not close the remaining Buyer Access, responsive or performance requirements.
+
+Gate D = NOT READY. Production = UNAUTHORIZED.
+
+### Autonomous local closeout — 10/10/2026
+
+The isolated supply-chain and validation capsule is implemented in commit
+`7ab1777a3363c969cd882d8bac0ffee25afe1b13`. The final lock-bound npm cache replays offline, the
+Prisma 7.10.0 Schema Engine and OpenSSL 3 inputs are hash-verified, the digest-pinned application
+image builds without network access, and non-root runtime isolation is proved for Node and real
+Chromium.
+
+Final local regression: lint and typecheck PASS; 1,032 unit tests PASS; 199 MySQL integration tests
+PASS; 42 performance-infrastructure tests PASS; 14 executable real-Chromium E2E scenarios PASS; and
+runtime dependency audit reports zero vulnerabilities. Four HIGH development-tooling findings remain
+in the lint dependency chain without runtime impact.
+
+P17-PR01 has 240 unthrottled loopback navigation samples and is
+`DIAGNOSTIC_ONLY / BLOCKED_OWNER_BUDGET`. P17-PR02–PR04 are `NOT_EXECUTED`. This local closeout does
+not change the remaining hosted/provider/responsive authority and does not make Gate D ready.
+
+### Owner-approved performance budget — 10/10/2026
+
+The owner expressly approved `LES-P17-PERFORMANCE-BUDGET-R01` as an acceptance policy, without authorizing implementation, tests or deployment.
+
+Numeric acceptance limits: PR01 LCP P75 <= 2,500 ms; PR02 INP P75 <= 200 ms; PR03 browser-side payment initiation P95 <= 1,000 ms; PR04 protected delivery TTFB P95 <= 2,000 ms.
+
+The approved methodology covers 15 independent cohorts, 3 warmups and 40 valid samples per cohort, nearest-rank, zero retries, the three canonical viewports and the calibrated 10 Mbps / 2 Mbps / 80 ms profile with +/-10% tolerance.
+
+The earlier local-closeout statements are historical. PR01 remains diagnostic-only without acceptance proof; PR02-PR04 remain not executed. Provider, buyer, responsive and release evidence authority is unchanged.
+
+Document synchronization does not authorize tests, code edits, payment operations, deploy or production. Gate D remains NOT READY.
 
 ### Objective
 
@@ -1356,19 +1433,31 @@ Release Candidate passes complete staging validation.
 
 **Position:** after P17.
 
+**Status:** NOT READY
+
 ### Question
 
 Does the complete customer and operational journey function correctly in staging?
 
 ### Required result
 
-PASS before formal production readiness review.
+PASS before a conclusive production-readiness GO decision and before P19-C production execution.
+The 17/10/2026 owner exception permits only P18 preparatory review while this result remains pending.
 
 ---
 
 ## P18 — Production Readiness Review
 
-**Status:** PENDENTE
+**Status:** PREPARATORY REVIEW COMPLETE / OWNER ACCEPTED / FORMAL READINESS PENDING / NO-GO RECOMMENDED
+
+**Authorities:** `LES-OWNER-DEC-20261017-P17-P18-R01` and the later
+`LES-OWNER-AUTH-P18-COMPLETION-20261018-R01`
+
+The first owner exception authorized documentary preparation before Gate D PASS. The later completion
+mandate authorizes controlled technical execution and Git integration for P18-04 through P18-09,
+including reversible, tested remediation and safe TEST/STAGING validation. Neither decision grants a
+formal GO while Gate D remains NOT READY, Gate E authority, production activation, real-money work,
+irreversible provider/data operations or changes to `main`.
 
 ### Objective
 
@@ -1395,6 +1484,21 @@ Review:
 - rollback;
 - operational documentation.
 
+Preparatory execution must additionally:
+
+- preserve the distinction between proven controls, local-only evidence, hosted/provider evidence
+  and unresolved production authority;
+- carry every deferred P17 item into a traceable readiness/blocker inventory;
+- preserve applicable risk levels, owners, deadlines and hard stops;
+- prepare P19-A non-activating procedures and the P19-B remediation backlog without executing them;
+- leave Gate D, Gate E and production authorization unchanged.
+
+P18-04 through P18-09 have produced an independently reviewable candidate package. The 57 controls,
+15 deferred P17 items and 31 risks/blockers are reconciled. `LES-SEC-RA-001` is remediated by a
+maintained, hash-pinned patch with zero audit findings and hosted CI/CodeQL; this closes only that
+risk-specific hard stop. Gate D remains `NOT_READY`, the remaining external/recovery/release gaps
+remain open. Independent audit R02 passed and the owner accepted the preparatory scope; Gate E and production remain unauthorized.
+
 ### Possible results
 
 - GO;
@@ -1407,15 +1511,25 @@ Formal Production Readiness decision.
 
 ### Dependencies
 
-P17.
+P16 closed baseline, preserved P17 evidence package, the P17 deferred-items matrix and owner decision
+`LES-OWNER-DEC-20261017-P17-P18-R01`.
+
+Gate D PASS remains a dependency for a conclusive P18 production decision, but no longer blocks the
+authorized preparatory review.
 
 ### Approval gates
 
-Production remains an owner-controlled decision.
+Production remains an owner-controlled decision. ADR-0013 and the P18 completion brief govern the
+now-authorized reversible technical scope. Gate E decision, production deploy, real transaction,
+`main` integration and destructive/irreversible provider or data operations remain outside it.
 
 ### Exit criteria
 
-Explicit authorized outcome permitting or blocking production.
+Preparatory exit: an independently reviewable inventory of proven controls, deferred requirements,
+risks, dependencies, blockers and proposed P19-A/P19-B work, with no false PASS or GO.
+
+Formal P18 exit remains a separately authorized GO / GO WITH CONDITIONS / NO-GO decision after the
+applicable blockers and Gate D authority are reconciled.
 
 ---
 
@@ -1423,17 +1537,20 @@ Explicit authorized outcome permitting or blocking production.
 
 **Position:** P18.
 
+**Status:** GO NOT AUTHORIZED
+
 ### Question
 
 Is the platform technically ready and explicitly authorized to process real transactions?
 
-Only an authorized GO outcome may lead to P19.
+Only an authorized GO outcome may lead to P19-C production execution. P19-A/P19-B preparatory and
+remediation work remains separately gated and creates no production authority.
 
 ---
 
 ## P19 — Production Launch
 
-**Status:** PENDENTE
+**Status:** FUTURE PREPARATION / PRODUCTION ACTIVATION CONDITIONED
 
 ### Objective
 
@@ -1463,13 +1580,37 @@ Production Launch requires, when applicable:
 - administrative record;
 - audit record.
 
+### Approved sequencing
+
+#### P19-A — Non-activating launch preparation
+
+Prepare original launch components, procedures, checklists and rollback material that do not require
+production activation. P19-A is future work and is not authorized by the current P18 documentary
+brief.
+
+#### P19-B — Consolidated inherited-item remediation
+
+After P19-A preparation, resolve the P17/P18 deferred items through separately authorized briefs,
+preserving each technical, provider, hosted, database and security authority boundary.
+
+#### P19-C — Controlled production execution
+
+Production deploy and controlled real transactions may occur only after all of the following:
+
+1. Gate D PASS;
+2. formal P18 decision;
+3. Gate E GO;
+4. specific owner authorization for deploy and real transactions.
+
 ### Main deliverables
 
 Operational production release.
 
 ### Dependencies
 
-Authorized P18 GO.
+P19-A depends on a separately reviewed preparatory brief. P19-B depends on the applicable remediation
+briefs and authorities. P19-C depends on Gate D PASS, formal P18 decision, Gate E GO and specific
+owner authorization.
 
 ### Approval gates
 
@@ -1610,9 +1751,12 @@ P04
 → P14
 → P15
 → P16
-→ P17
-→ P18
-→ P19
+→ P17 administrative closeout with deferred items
+→ P18 preparatory review under owner exception
+→ P19-A non-activating preparation
+→ P19-B consolidated remediation
+→ Gate D PASS + formal P18 decision + Gate E GO + specific owner authorization
+→ P19-C controlled production execution
 → P20
 
 This representation does not authorize skipping intermediate phases or gates.
@@ -1660,11 +1804,18 @@ The platform can be operated, monitored, diagnosed and recovered.
 
 After P17.
 
-The complete staging journey has passed end-to-end validation.
+**Status:** NOT READY
+
+The complete staging journey has not yet satisfied every mandatory Gate D acceptance criterion. Existing hosted evidence remains valid, but unresolved Mercado Pago TEST webhook delivery, the failure matrix, Buyer Access residual scenarios, real Payment Brick multi-viewport responsive proof and performance acceptance prevent Gate D PASS.
+
+The administrative closeout of P17 does not alter this result. Gate D remains independently
+fail-closed while the deferred items are carried into P18 preparation and later remediation.
 
 ## GATE E — PRODUCTION GO / NO-GO
 
 P18.
+
+**Status:** GO NOT AUTHORIZED.
 
 The system receives formal authorization or denial for real production transactions.
 
@@ -1672,13 +1823,24 @@ The system receives formal authorization or denial for real production transacti
 
 # 10. Current transition
 
-The next phase after P12 integration closeout is:
+The current authorized activity is:
 
-**P13 — Analytics, Attribution & Growth Infrastructure**
+**P18 — Production Readiness Review / PREPARATORY EXECUTION UNDER OWNER EXCEPTION**
 
 Current execution state:
 
-**IN PROGRESS / P13-A COMPLETE / P13-B COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED / P13-C COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**
+**P17 ADMINISTRATIVELY CLOSED / DEFERRED ITEMS / P18 PREPARATORY / GATE D NOT READY**
+
+P13, P14, P15 and P16 are closed under their respective canonical baselines.
+
+P17 retains hosted proof for the public experience, protected delivery, administrative browser flow
+and release binding. It is not technically closed as PASS. Remaining Gate D authority includes real
+Mercado Pago TEST webhook delivery, the unresolved failure matrix, Buyer Access residual scenarios,
+real Payment Brick multi-viewport responsive proof and definitive performance acceptance.
+
+Owner decision `LES-OWNER-DEC-20261017-P17-P18-R01` permits P18 preparatory execution before Gate D
+PASS, solely to inventory readiness, risks, dependencies and blockers. Formal P18 GO, Gate E GO,
+P19-C and production remain unauthorized.
 
 Current status:
 
@@ -1704,7 +1866,7 @@ P09 was checkpointed at `62e70eb` with tag `checkpoint/p09-checkout-order-creati
 
 P09 post-audit remediation A01–A06 was checkpointed at `53bdaafc0f740241807a498b0a64378bab25c683`, tagged `checkpoint/p09-post-audit-remediation-complete`, merged through PR #12 and integrated into `main` as `c78ae181be209ff8c91e996e785b42fb77f6edb2`.
 
-P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED**: final implementation checkpoint `ea3295cf1703466763c9cd333d98e59fe6535f8e`, implementation PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`, and documentation closeout PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P13 is **IN PROGRESS / P13-A COMPLETE / P13-B COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED / P13-C COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. Production deployment remains outside the completed P12 scope.
+P10 — Mercado Pago Integration is **COMPLETE** and integrated in `main` through PR #14. P11 — Entitlement & Secure Digital Delivery is **COMPLETE / PASS / DOCUMENTED / FROZEN / INTEGRATED** in `main` through PR #16 and merge commit `3b7de40442e5ed7a0652c9e28cf6110bf5f5dd01`. The frozen P11 checkpoint `d27e05961ab601b6d6b889549ef8962892d111f2` remains preserved by annotated tag `checkpoint/p11-entitlement-digital-delivery-complete`. Gate B — Commerce Core Ready is **PASS / COMMERCE CORE READY / DOCUMENTED / FROZEN**. P12 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED**: final implementation checkpoint `ea3295cf1703466763c9cd333d98e59fe6535f8e`, implementation PR #18 / merge `482e095e9c515c163dd4b057f07baf06f3450f95`, and documentation closeout PR #19 / merge `f29487c67621eb3151fa45f1337c0a9e6dd19ca5`. P13 is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED**. Production deployment remains outside the completed P12 scope.
 
 <!-- P11-POST-MERGE-CLOSEOUT -->
 ### P11 — Git Integration Closeout
@@ -1801,7 +1963,7 @@ Meta CAPI is technically complete but intentionally policy-blocked under `MATCHI
 
 The checkpoint remains fixed at the implementation merge and must not be moved by later documentation-only work.
 
-P13-G — Admin Analytics is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED** through PR #32, implementation merge `7da548d922046f1c90ee71e13012f3374527146b` and permanent checkpoint `checkpoint/p13-g-admin-analytics-complete`. P13-H is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED; P13 is complete and P14 remains pending.
+P13-G — Admin Analytics is **COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED** through PR #32, implementation merge `7da548d922046f1c90ee71e13012f3374527146b` and permanent checkpoint `checkpoint/p13-g-admin-analytics-complete`. P13-H is COMPLETE / PASS / DOCUMENTED / INTEGRATED / CHECKPOINTED. At that P13 closeout checkpoint, P13 was complete and P14 remained pending; this sequencing statement is historical and is superseded by the later completed P14, P15 and P16 canonical baselines.
 
 <!-- P16-09-LOCAL-FINAL-GATE -->
 
