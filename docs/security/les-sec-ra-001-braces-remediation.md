@@ -80,6 +80,25 @@ candidato não possui `package-lock.json`, portanto o harness não foi instalado
 com `npm install --ignore-scripts` e então concluiu com 904 casos aprovados. Os findings legados do
 harness upstream não pertencem ao grafo da aplicação L'Essenc.
 
+## Auditoria independente P18 — fortalecimento do hard stop
+
+O controle `scripts/p17-production-risk-hard-stop.mjs` não aceita
+mais a declaração isolada do arquivo JSON como prova suficiente.
+Sua execução exige `P18_RELEASE_COMMIT` explicitamente definido,
+correspondente ao HEAD Git do checkout, e executa o auditor completo
+`scripts/p18-braces-remediation-audit.mjs`.
+
+O auditor completo verifica o artefato mantido, hashes, manifest,
+lockfile, árvore instalada, ausência de `braces` no runtime e
+`npm audit` completo. Uma falha de identidade, processo, resultado
+ou contrato retorna erro fail-closed.
+
+As regressões do novo contrato são verificadas em CI. A identidade
+Git local não substitui a atestação de publicação e implantação;
+essas provas permanecem obrigatórias para uma futura release.
+
+A liberação vale exclusivamente para `LES-SEC-RA-001`.
+Não aprova Gate D, Gate E, deploy, produção ou transação real.
 ## Estado residual e manutenção
 
 - Não existe, nesta data, release oficial corrigida de `braces` para substituir o patch.
